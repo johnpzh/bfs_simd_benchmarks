@@ -136,9 +136,12 @@ void BFSGraph( int argc, char** argv)
 		{
 			if (h_graph_mask[tid] == true) {
 				h_graph_mask[tid]=false;
+				int next_starting = h_graph_nodes[tid].starting + h_graph_nodes[tid].no_of_edges;
+#ifdef OPEN
 #pragma vector always
-				for(int i=h_graph_nodes[tid].starting; \
-						i<(h_graph_nodes[tid].no_of_edges + h_graph_nodes[tid].starting); \
+#endif
+				for(int i = h_graph_nodes[tid].starting; \
+						i < next_starting; \
 						i++)
 				{
 					int id = h_graph_edges[i];

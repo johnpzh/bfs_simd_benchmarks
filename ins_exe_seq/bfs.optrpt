@@ -33,7 +33,7 @@ Begin optimization report for: main(int, char **)
     Report from: Interprocedural optimizations [ipo]
 
 INLINE REPORT: (main(int, char **)) [1/71=1.4%] bfs.cpp(35,1)
-  -> INLINE: (36,2) BFSGraph(int, char **) (isz = 1084) (sz = 1092)
+  -> INLINE: (36,2) BFSGraph(int, char **) (isz = 1071) (sz = 1079)
     -> INLINE (MANUAL): (45,1) std::vector<int, std::allocator<int>>::~vector(std::vector<int, std::allocator<int>> *) (isz = 22) (sz = 27)
       -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) __cxa_call_unexpected
       -> /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) std::_Vector_base<int, std::allocator<int>>::~_Vector_base(std::_Vector_base<int, std::allocator<int>> *const) (isz = 0) (sz = 5)
@@ -140,7 +140,7 @@ INLINE REPORT: (main(int, char **)) [1/71=1.4%] bfs.cpp(35,1)
         -> DELETED: (1352,2) std::_Destroy<std::_Vector_base<int, std::allocator<int>>::pointer, int>(std::_Vector_base<int, std::allocator<int>>::pointer, std::_Vector_base<int, std::allocator<int>>::pointer, std::allocator<int> &) (isz = 0) (sz = 8)
         -> INLINE (MANUAL): (1352,48) std::_Vector_base<int, std::allocator<int>>::_M_get_Tp_allocator(std::_Vector_base<int, std::allocator<int>> *) (isz = 1) (sz = 8)
     -> EXTERN: (141,3) omp_set_num_threads(int)
-    -> INLINE (MANUAL): (160,17) std::vector<int, std::allocator<int>>::push_back(std::vector<int, std::allocator<int>> *, const std::vector<int, std::allocator<int>>::value_type &) (isz = 339) (sz = 346)
+    -> INLINE (MANUAL): (161,17) std::vector<int, std::allocator<int>>::push_back(std::vector<int, std::allocator<int>> *, const std::vector<int, std::allocator<int>>::value_type &) (isz = 339) (sz = 346)
       -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(905,6) std::allocator_traits<std::allocator<int>>::construct<int, const std::vector<int, std::allocator<int>>::value_type &>(std::allocator<int> &, int *, const std::vector<int, std::allocator<int>>::value_type &)->std::enable_if<true, void>::type (isz = 21) (sz = 30)
         -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,4) std::allocator_traits<std::allocator<int>>::_S_construct<int, const std::vector<int, std::allocator<int>>::value_type &>(std::allocator<int> &, int *, const std::vector<int, std::allocator<int>>::value_type &) (isz = 18) (sz = 27)
           -> INLINE (MANUAL): (254,8) __gnu_cxx::new_allocator<int>::construct<int, const int &>(__gnu_cxx::new_allocator<int> *, int *, const int &) (isz = 15) (sz = 24)
@@ -224,28 +224,28 @@ INLINE REPORT: (main(int, char **)) [1/71=1.4%] bfs.cpp(35,1)
         -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/vector.tcc:(430,2) std::_Vector_base<int, std::allocator<int>>::_M_deallocate(std::_Vector_base<int, std::allocator<int>> *, std::_Vector_base<int, std::allocator<int>>::pointer, std::size_t) (isz = 4) (sz = 13)
           -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(174,12) __gnu_cxx::new_allocator<int>::deallocate(__gnu_cxx::new_allocator<int> *, __gnu_cxx::new_allocator<int>::pointer, __gnu_cxx::new_allocator<int>::size_type) (isz = 0) (sz = 7)
             -> EXTERN: /usr/include/c++/4.8.5/ext/new_allocator.h:(110,9) operator delete(void *)
-    -> INLINE (MANUAL): (161,17) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
-    -> INLINE (MANUAL): (169,28) std::vector<int, std::allocator<int>>::size(const std::vector<int, std::allocator<int>> *) const (isz = 5) (sz = 12)
-    -> INLINE (MANUAL): (172,22) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
-    -> INLINE (MANUAL): (173,24) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
-    -> EXTERN: (193,27) omp_get_wtime()
-    -> EXTERN: (196,3) printf(const char *, ...)
-    -> EXTERN: (199,14) fopen(const char *, const char *)
-    -> EXTERN: (201,3) fprintf(FILE *, const char *, ...)
-    -> EXTERN: (202,2) fclose(FILE *)
-    -> EXTERN: (206,2) free(void *)
-    -> EXTERN: (207,2) free(void *)
-    -> EXTERN: (208,2) free(void *)
+    -> INLINE (MANUAL): (162,17) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
+    -> INLINE (MANUAL): (167,45) std::vector<int, std::allocator<int>>::size(const std::vector<int, std::allocator<int>> *) const (isz = 5) (sz = 12)
+    -> INLINE (MANUAL): (175,22) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
+    -> INLINE (MANUAL): (176,24) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
+    -> EXTERN: (196,27) omp_get_wtime()
+    -> EXTERN: (199,3) printf(const char *, ...)
+    -> EXTERN: (202,14) fopen(const char *, const char *)
+    -> EXTERN: (204,3) fprintf(FILE *, const char *, ...)
+    -> EXTERN: (205,2) fclose(FILE *)
     -> EXTERN: (209,2) free(void *)
     -> EXTERN: (210,2) free(void *)
     -> EXTERN: (211,2) free(void *)
+    -> EXTERN: (212,2) free(void *)
+    -> EXTERN: (213,2) free(void *)
+    -> EXTERN: (214,2) free(void *)
 
 
     Report from: OpenMP optimizations [openmp]
 
-bfs.cpp(180:3-180:3):OMP:main:  OpenMP multithreaded code generation for SINGLE was successful
-bfs.cpp(167:1-167:1):OMP:main:  OpenMP DEFINED REGION WAS PARALLELIZED
-bfs.cpp(178:1-178:1):OMP:main:  OpenMP DEFINED LOOP WAS PARALLELIZED
+bfs.cpp(142:1-142:1):OMP:main:  OpenMP DEFINED LOOP WAS PARALLELIZED
+bfs.cpp(169:1-169:1):OMP:main:  OpenMP DEFINED LOOP WAS PARALLELIZED
+bfs.cpp(181:1-181:1):OMP:main:  OpenMP DEFINED LOOP WAS PARALLELIZED
 
     Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
 
@@ -301,37 +301,37 @@ LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algobase.h(749,7) inlined into bfs
 LOOP END
 
 LOOP BEGIN at bfs.cpp(131,29) inlined into bfs.cpp(36,2)
-   remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
 
-   LOOP BEGIN at bfs.cpp(144,3) inlined into bfs.cpp(36,2)
-      remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
+LOOP BEGIN at bfs.cpp(203,2) inlined into bfs.cpp(36,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(204,3) ]
+LOOP END
 
-      LOOP BEGIN at bfs.cpp(151,5) inlined into bfs.cpp(36,2)
-         remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
-      LOOP END
+LOOP BEGIN at bfs.cpp(144,3) inlined into bfs.cpp(36,2)
+   remark #15520: loop was not vectorized: loop with multiple exits cannot be vectorized unless it meets search loop idiom criteria   [ /usr/include/c++/4.8.5/bits/stl_vector.h(1339,4) ]
+
+   LOOP BEGIN at bfs.cpp(152,5) inlined into bfs.cpp(36,2)
+      remark #15520: loop was not vectorized: loop with multiple exits cannot be vectorized unless it meets search loop idiom criteria   [ /usr/include/c++/4.8.5/bits/stl_vector.h(1339,4) ]
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(200,2) inlined into bfs.cpp(36,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(201,3) ]
-LOOP END
-
-LOOP BEGIN at bfs.cpp(167,1) inlined into bfs.cpp(36,2)
+LOOP BEGIN at bfs.cpp(169,1) inlined into bfs.cpp(36,2)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between h_cost (174:4) and h_cost (174:4)
-   remark #15346: vector dependence: assumed ANTI dependence between h_cost (174:4) and h_cost (174:4)
+   remark #15346: vector dependence: assumed FLOW dependence between h_cost (177:4) and h_cost (177:4)
+   remark #15346: vector dependence: assumed ANTI dependence between h_cost (177:4) and h_cost (177:4)
    remark #25439: unrolled with remainder by 2  
 LOOP END
 
-LOOP BEGIN at bfs.cpp(167,1) inlined into bfs.cpp(36,2)
+LOOP BEGIN at bfs.cpp(169,1) inlined into bfs.cpp(36,2)
 <Remainder>
 LOOP END
 
-LOOP BEGIN at bfs.cpp(178,1) inlined into bfs.cpp(36,2)
-   remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(183,5) ]
-   remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(184,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(186,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(186,5) ]
+LOOP BEGIN at bfs.cpp(181,1) inlined into bfs.cpp(36,2)
+   remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(186,5) ]
+   remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(187,5) ]
+   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(189,5) ]
+   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(189,5) ]
    remark #15381: vectorization support: unaligned access used inside loop body
    remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
    remark #15305: vectorization support: vector length 4
@@ -347,7 +347,7 @@ LOOP BEGIN at bfs.cpp(178,1) inlined into bfs.cpp(36,2)
    remark #25439: unrolled with remainder by 2  
 LOOP END
 
-LOOP BEGIN at bfs.cpp(178,1) inlined into bfs.cpp(36,2)
+LOOP BEGIN at bfs.cpp(181,1) inlined into bfs.cpp(36,2)
 <Remainder>
 LOOP END
 
@@ -371,19 +371,19 @@ bfs.cpp(35,1):remark #34051: REGISTER ALLOCATION : [main] bfs.cpp:35
         Assigned     :   15[ rax rdx rcx rbx rsi rdi r8-r15 zmm0]
         
     Routine temporaries
-        Total         :     485
-            Global    :     142
-            Local     :     343
-        Regenerable   :     182
-        Spilled       :       8
+        Total         :     557
+            Global    :     155
+            Local     :     402
+        Regenerable   :     215
+        Spilled       :       9
         
     Routine stack
-        Variables     :     188 bytes*
-            Reads     :      46 [1.36e+02 ~ 4.8%]
-            Writes    :      44 [1.92e+02 ~ 6.8%]
-        Spills        :     104 bytes*
-            Reads     :      35 [6.17e+01 ~ 2.2%]
-            Writes    :      31 [8.27e+01 ~ 2.9%]
+        Variables     :     212 bytes*
+            Reads     :      45 [8.18e+01 ~ 2.1%]
+            Writes    :      47 [3.46e+02 ~ 8.9%]
+        Spills        :     112 bytes*
+            Reads     :      35 [2.82e+01 ~ 0.7%]
+            Writes    :      35 [1.02e+02 ~ 2.6%]
     
     Notes
     
@@ -719,7 +719,7 @@ INLINE REPORT: (BFSGraph(int, char **)) [12/71=16.9%] bfs.cpp(45,1)
       -> DELETED: (1352,2) std::_Destroy<std::_Vector_base<int, std::allocator<int>>::pointer, int>(std::_Vector_base<int, std::allocator<int>>::pointer, std::_Vector_base<int, std::allocator<int>>::pointer, std::allocator<int> &) (isz = 0) (sz = 8)
       -> INLINE (MANUAL): (1352,48) std::_Vector_base<int, std::allocator<int>>::_M_get_Tp_allocator(std::_Vector_base<int, std::allocator<int>> *) (isz = 1) (sz = 8)
   -> EXTERN: (141,3) omp_set_num_threads(int)
-  -> INLINE (MANUAL): (160,17) std::vector<int, std::allocator<int>>::push_back(std::vector<int, std::allocator<int>> *, const std::vector<int, std::allocator<int>>::value_type &) (isz = 339) (sz = 346)
+  -> INLINE (MANUAL): (161,17) std::vector<int, std::allocator<int>>::push_back(std::vector<int, std::allocator<int>> *, const std::vector<int, std::allocator<int>>::value_type &) (isz = 339) (sz = 346)
     -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(905,6) std::allocator_traits<std::allocator<int>>::construct<int, const std::vector<int, std::allocator<int>>::value_type &>(std::allocator<int> &, int *, const std::vector<int, std::allocator<int>>::value_type &)->std::enable_if<true, void>::type (isz = 21) (sz = 30)
       -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,4) std::allocator_traits<std::allocator<int>>::_S_construct<int, const std::vector<int, std::allocator<int>>::value_type &>(std::allocator<int> &, int *, const std::vector<int, std::allocator<int>>::value_type &) (isz = 18) (sz = 27)
         -> INLINE (MANUAL): (254,8) __gnu_cxx::new_allocator<int>::construct<int, const int &>(__gnu_cxx::new_allocator<int> *, int *, const int &) (isz = 15) (sz = 24)
@@ -803,28 +803,28 @@ INLINE REPORT: (BFSGraph(int, char **)) [12/71=16.9%] bfs.cpp(45,1)
       -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/vector.tcc:(430,2) std::_Vector_base<int, std::allocator<int>>::_M_deallocate(std::_Vector_base<int, std::allocator<int>> *, std::_Vector_base<int, std::allocator<int>>::pointer, std::size_t) (isz = 4) (sz = 13)
         -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(174,12) __gnu_cxx::new_allocator<int>::deallocate(__gnu_cxx::new_allocator<int> *, __gnu_cxx::new_allocator<int>::pointer, __gnu_cxx::new_allocator<int>::size_type) (isz = 0) (sz = 7)
           -> EXTERN: /usr/include/c++/4.8.5/ext/new_allocator.h:(110,9) operator delete(void *)
-  -> INLINE (MANUAL): (161,17) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
-  -> INLINE (MANUAL): (169,28) std::vector<int, std::allocator<int>>::size(const std::vector<int, std::allocator<int>> *) const (isz = 5) (sz = 12)
-  -> INLINE (MANUAL): (172,22) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
-  -> INLINE (MANUAL): (173,24) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
-  -> EXTERN: (193,27) omp_get_wtime()
-  -> EXTERN: (196,3) printf(const char *, ...)
-  -> EXTERN: (199,14) fopen(const char *, const char *)
-  -> EXTERN: (201,3) fprintf(FILE *, const char *, ...)
-  -> EXTERN: (202,2) fclose(FILE *)
-  -> EXTERN: (206,2) free(void *)
-  -> EXTERN: (207,2) free(void *)
-  -> EXTERN: (208,2) free(void *)
+  -> INLINE (MANUAL): (162,17) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
+  -> INLINE (MANUAL): (167,45) std::vector<int, std::allocator<int>>::size(const std::vector<int, std::allocator<int>> *) const (isz = 5) (sz = 12)
+  -> INLINE (MANUAL): (175,22) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
+  -> INLINE (MANUAL): (176,24) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
+  -> EXTERN: (196,27) omp_get_wtime()
+  -> EXTERN: (199,3) printf(const char *, ...)
+  -> EXTERN: (202,14) fopen(const char *, const char *)
+  -> EXTERN: (204,3) fprintf(FILE *, const char *, ...)
+  -> EXTERN: (205,2) fclose(FILE *)
   -> EXTERN: (209,2) free(void *)
   -> EXTERN: (210,2) free(void *)
   -> EXTERN: (211,2) free(void *)
+  -> EXTERN: (212,2) free(void *)
+  -> EXTERN: (213,2) free(void *)
+  -> EXTERN: (214,2) free(void *)
 
 
     Report from: OpenMP optimizations [openmp]
 
-bfs.cpp(180:3-180:3):OMP:_Z8BFSGraphiPPc:  OpenMP multithreaded code generation for SINGLE was successful
-bfs.cpp(167:1-167:1):OMP:_Z8BFSGraphiPPc:  OpenMP DEFINED REGION WAS PARALLELIZED
-bfs.cpp(178:1-178:1):OMP:_Z8BFSGraphiPPc:  OpenMP DEFINED LOOP WAS PARALLELIZED
+bfs.cpp(142:1-142:1):OMP:_Z8BFSGraphiPPc:  OpenMP DEFINED LOOP WAS PARALLELIZED
+bfs.cpp(169:1-169:1):OMP:_Z8BFSGraphiPPc:  OpenMP DEFINED LOOP WAS PARALLELIZED
+bfs.cpp(181:1-181:1):OMP:_Z8BFSGraphiPPc:  OpenMP DEFINED LOOP WAS PARALLELIZED
 
     Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
 
@@ -880,37 +880,37 @@ LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algobase.h(749,7) inlined into bfs
 LOOP END
 
 LOOP BEGIN at bfs.cpp(131,29)
-   remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
 
-   LOOP BEGIN at bfs.cpp(144,3)
-      remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
+LOOP BEGIN at bfs.cpp(203,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(204,3) ]
+LOOP END
 
-      LOOP BEGIN at bfs.cpp(151,5)
-         remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
-      LOOP END
+LOOP BEGIN at bfs.cpp(144,3)
+   remark #15520: loop was not vectorized: loop with multiple exits cannot be vectorized unless it meets search loop idiom criteria   [ /usr/include/c++/4.8.5/bits/stl_vector.h(1339,4) ]
+
+   LOOP BEGIN at bfs.cpp(152,5)
+      remark #15520: loop was not vectorized: loop with multiple exits cannot be vectorized unless it meets search loop idiom criteria   [ /usr/include/c++/4.8.5/bits/stl_vector.h(1339,4) ]
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(200,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(201,3) ]
-LOOP END
-
-LOOP BEGIN at bfs.cpp(167,1)
+LOOP BEGIN at bfs.cpp(169,1)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between h_cost (174:4) and h_cost (174:4)
-   remark #15346: vector dependence: assumed ANTI dependence between h_cost (174:4) and h_cost (174:4)
+   remark #15346: vector dependence: assumed FLOW dependence between h_cost (177:4) and h_cost (177:4)
+   remark #15346: vector dependence: assumed ANTI dependence between h_cost (177:4) and h_cost (177:4)
    remark #25439: unrolled with remainder by 2  
 LOOP END
 
-LOOP BEGIN at bfs.cpp(167,1)
+LOOP BEGIN at bfs.cpp(169,1)
 <Remainder>
 LOOP END
 
-LOOP BEGIN at bfs.cpp(178,1)
-   remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(183,5) ]
-   remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(184,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(186,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(186,5) ]
+LOOP BEGIN at bfs.cpp(181,1)
+   remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(186,5) ]
+   remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(187,5) ]
+   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(189,5) ]
+   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(189,5) ]
    remark #15381: vectorization support: unaligned access used inside loop body
    remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
    remark #15305: vectorization support: vector length 4
@@ -926,7 +926,7 @@ LOOP BEGIN at bfs.cpp(178,1)
    remark #25439: unrolled with remainder by 2  
 LOOP END
 
-LOOP BEGIN at bfs.cpp(178,1)
+LOOP BEGIN at bfs.cpp(181,1)
 <Remainder>
 LOOP END
 
@@ -950,19 +950,19 @@ bfs.cpp(45,1):remark #34051: REGISTER ALLOCATION : [_Z8BFSGraphiPPc] bfs.cpp:45
         Assigned     :   16[ rax rdx rcx rbx rbp rsi rdi r8-r15 zmm0]
         
     Routine temporaries
-        Total         :     477
-            Global    :     142
-            Local     :     335
-        Regenerable   :     170
-        Spilled       :       6
+        Total         :     548
+            Global    :     155
+            Local     :     393
+        Regenerable   :     202
+        Spilled       :       8
         
     Routine stack
-        Variables     :     184 bytes*
-            Reads     :      44 [1.36e+02 ~ 4.9%]
-            Writes    :      42 [1.92e+02 ~ 6.8%]
-        Spills        :      96 bytes*
-            Reads     :      37 [4.79e+01 ~ 1.7%]
-            Writes    :      27 [7.64e+01 ~ 2.7%]
+        Variables     :     208 bytes*
+            Reads     :      43 [8.18e+01 ~ 2.1%]
+            Writes    :      45 [3.46e+02 ~ 8.9%]
+        Spills        :     112 bytes*
+            Reads     :      42 [2.73e+01 ~ 0.7%]
+            Writes    :      36 [1.22e+02 ~ 3.1%]
     
     Notes
     

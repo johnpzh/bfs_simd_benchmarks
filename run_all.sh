@@ -20,7 +20,7 @@ touch $result_file
 # Rodinia Original
 version="rodinia"
 bin_addr="/home/zpeng/benchmarks/rodinia_3.1/openmp/bfs"
-echo "Threads Rodinia_Origin" >> $result_file
+echo -e "Threads\tRodinia_Origin" >> $result_file
 echo -n "$version running"
 tno=1
 while [ $tno -le $no_core ]
@@ -34,7 +34,7 @@ echo done.
 # Rodinia with SIMD
 version="rodinia-vec"
 bin_addr="/home/zpeng/benchmarks/rodinia_v"
-echo "Threads Rodinia_SIMD" >> $result_file
+echo -e "Threads\tRodinia_SIMD" >> $result_file
 echo -n "$version running"
 tno=1
 while [ $tno -le $no_core ]
@@ -48,7 +48,7 @@ echo done.
 # Inspector/Executor Sequential Version
 version="ins-exe-seq"
 bin_addr="/home/zpeng/benchmarks/ins_exe_seq"
-echo "Threads ins_exe_seq" >> $result_file
+echo -e "Threads\tInspector-Executor_Sequential" >> $result_file
 echo -n "$version running"
 tno=1
 while [ $tno -le $no_core ]

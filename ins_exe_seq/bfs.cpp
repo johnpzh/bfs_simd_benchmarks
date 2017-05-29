@@ -139,17 +139,18 @@ void BFSGraph( int argc, char** argv)
 
 #ifdef OPEN
 		omp_set_num_threads(num_omp_threads);
-//#pragma omp parallel for 
+#pragma omp parallel for 
 #endif 
 		for(unsigned int tid = 0; tid < no_of_nodes; tid++ )
 		{
 			if (h_graph_mask[tid] == 1) {
 				h_graph_mask[tid]=0;
 #ifdef OPEN
-#pragma vector always
+//#pragma vector always
 #endif
-				for(int i=h_graph_nodes[tid].starting; \
-						i<(h_graph_nodes[tid].no_of_edges + h_graph_nodes[tid].starting); \
+				int next_starting = h_graph_nodes[tid].starting + h_graph_nodes[tid].no_of_edges;
+				for(int i = h_graph_nodes[tid].starting; \
+						i < next_starting; \
 						i++)
 				{
 					int id = h_graph_edges[i];
@@ -163,11 +164,13 @@ void BFSGraph( int argc, char** argv)
 				}
 			}
 		}
+		unsigned long int buffer_size = id_buffer.size();
 #ifdef OPEN
 #pragma omp parallel for
+#pragma vector always
 #endif
 		for (unsigned long int i = 0; \
-			 i < id_buffer.size(); \
+			 i < buffer_size; \
 			 i++) {
 			int id = id_buffer[i];
 			int tid = tid_buffer[id];

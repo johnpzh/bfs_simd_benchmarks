@@ -56,33 +56,33 @@ INLINE REPORT: (main(int, char **)) [1/4=25.0%] bfs.cpp(36,1)
     -> EXTERN: (135,25) _mm512_set1_epi32(int)
     -> EXTERN: (137,29) omp_get_wtime()
     -> EXTERN: (146,3) omp_set_num_threads(int)
-    -> EXTERN: (171,25) _mm512_set_epi32(int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int)
-    -> EXTERN: (174,22) _mm512_set1_epi32(int)
-    -> EXTERN: (175,26) _mm512_cmp_epi32_mask(__m512i, __m512i, unsigned int)
-    -> EXTERN: (176,21) _mm512_mask_loadu_epi32(__m512i, unsigned short, const void *)
-    -> EXTERN: (177,26) _mm512_mask_i32extgather_epi32(__m512i, unsigned short, __m512i, const void *, unsigned int, int, int)
-    -> EXTERN: (181,33) _mm512_cmp_epi32_mask(__m512i, __m512i, unsigned int)
-    -> EXTERN: (182,6) _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int)
-    -> EXTERN: (185,30) _mm512_set1_epi32(int)
-    -> EXTERN: (186,23) _mm512_mask_add_epi32(__m512i, unsigned short, __m512i, __m512i)
-    -> EXTERN: (187,6) _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int)
-    -> EXTERN: (207,27) omp_get_wtime()
-    -> EXTERN: (210,3) printf(const char *, ...)
-    -> EXTERN: (213,14) fopen(const char *, const char *)
-    -> EXTERN: (215,3) fprintf(FILE *, const char *, ...)
-    -> EXTERN: (216,2) fclose(FILE *)
-    -> EXTERN: (226,2) free(void *)
-    -> EXTERN: (227,2) _mm_free(void *)
-    -> EXTERN: (228,2) _mm_free(void *)
+    -> EXTERN: (173,25) _mm512_set_epi32(int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int)
+    -> EXTERN: (176,22) _mm512_set1_epi32(int)
+    -> EXTERN: (177,26) _mm512_cmp_epi32_mask(__m512i, __m512i, unsigned int)
+    -> EXTERN: (178,21) _mm512_mask_loadu_epi32(__m512i, unsigned short, const void *)
+    -> EXTERN: (179,26) _mm512_mask_i32extgather_epi32(__m512i, unsigned short, __m512i, const void *, unsigned int, int, int)
+    -> EXTERN: (183,33) _mm512_cmp_epi32_mask(__m512i, __m512i, unsigned int)
+    -> EXTERN: (184,6) _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int)
+    -> EXTERN: (187,30) _mm512_set1_epi32(int)
+    -> EXTERN: (188,23) _mm512_mask_add_epi32(__m512i, unsigned short, __m512i, __m512i)
+    -> EXTERN: (189,6) _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int)
+    -> EXTERN: (209,27) omp_get_wtime()
+    -> EXTERN: (212,3) printf(const char *, ...)
+    -> EXTERN: (215,14) fopen(const char *, const char *)
+    -> EXTERN: (217,3) fprintf(FILE *, const char *, ...)
+    -> EXTERN: (218,2) fclose(FILE *)
+    -> EXTERN: (228,2) free(void *)
     -> EXTERN: (229,2) _mm_free(void *)
     -> EXTERN: (230,2) _mm_free(void *)
     -> EXTERN: (231,2) _mm_free(void *)
+    -> EXTERN: (232,2) _mm_free(void *)
+    -> EXTERN: (233,2) _mm_free(void *)
 
 
     Report from: OpenMP optimizations [openmp]
 
 bfs.cpp(147:1-147:1):OMP:main:  OpenMP DEFINED LOOP WAS PARALLELIZED
-bfs.cpp(192:1-192:1):OMP:main:  OpenMP DEFINED LOOP WAS PARALLELIZED
+bfs.cpp(194:1-194:1):OMP:main:  OpenMP DEFINED LOOP WAS PARALLELIZED
 
     Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
 
@@ -124,31 +124,31 @@ LOOP BEGIN at bfs.cpp(139,2) inlined into bfs.cpp(37,2)
    remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
 LOOP END
 
-LOOP BEGIN at bfs.cpp(214,2) inlined into bfs.cpp(37,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(215,3) ]
+LOOP BEGIN at bfs.cpp(216,2) inlined into bfs.cpp(37,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(217,3) ]
 LOOP END
 
 LOOP BEGIN at bfs.cpp(149,3) inlined into bfs.cpp(37,2)
-   remark #15382: vectorization support: call to function _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(182,6) ]
-   remark #15382: vectorization support: call to function _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(187,6) ]
+   remark #15382: vectorization support: call to function _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(184,6) ]
+   remark #15382: vectorization support: call to function _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(189,6) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_mask_loadu_epi32(__m512i, unsigned short, const void (176:21) and call:_mm512_mask_i32extscatter_epi32(void *, unsigned short, __m (187:6)
-   remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_mask_i32extscatter_epi32(void *, unsigned short, __m (187:6) and call:_mm512_mask_loadu_epi32(__m512i, unsigned short, const void (176:21)
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_mask_loadu_epi32(__m512i, unsigned short, const void (178:21) and call:_mm512_mask_i32extscatter_epi32(void *, unsigned short, __m (189:6)
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_mask_i32extscatter_epi32(void *, unsigned short, __m (189:6) and call:_mm512_mask_loadu_epi32(__m512i, unsigned short, const void (178:21)
 
-   LOOP BEGIN at bfs.cpp(167,5) inlined into bfs.cpp(37,2)
-      remark #15382: vectorization support: call to function _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(182,6) ]
-      remark #15382: vectorization support: call to function _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(187,6) ]
+   LOOP BEGIN at bfs.cpp(169,5) inlined into bfs.cpp(37,2)
+      remark #15382: vectorization support: call to function _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(184,6) ]
+      remark #15382: vectorization support: call to function _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(189,6) ]
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_mask_loadu_epi32(__m512i, unsigned short, const void (176:21) and call:_mm512_mask_i32extscatter_epi32(void *, unsigned short, __m (187:6)
-      remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_mask_i32extscatter_epi32(void *, unsigned short, __m (187:6) and call:_mm512_mask_loadu_epi32(__m512i, unsigned short, const void (176:21)
+      remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_mask_loadu_epi32(__m512i, unsigned short, const void (178:21) and call:_mm512_mask_i32extscatter_epi32(void *, unsigned short, __m (189:6)
+      remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_mask_i32extscatter_epi32(void *, unsigned short, __m (189:6) and call:_mm512_mask_loadu_epi32(__m512i, unsigned short, const void (178:21)
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(192,1) inlined into bfs.cpp(37,2)
-   remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(197,5) ]
-   remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(198,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(200,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(200,5) ]
+LOOP BEGIN at bfs.cpp(194,1) inlined into bfs.cpp(37,2)
+   remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(199,5) ]
+   remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(200,5) ]
+   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(202,5) ]
+   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(202,5) ]
    remark #15381: vectorization support: unaligned access used inside loop body
    remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
    remark #15305: vectorization support: vector length 4
@@ -164,7 +164,7 @@ LOOP BEGIN at bfs.cpp(192,1) inlined into bfs.cpp(37,2)
    remark #25439: unrolled with remainder by 2  
 LOOP END
 
-LOOP BEGIN at bfs.cpp(192,1) inlined into bfs.cpp(37,2)
+LOOP BEGIN at bfs.cpp(194,1) inlined into bfs.cpp(37,2)
 <Remainder>
 LOOP END
 
@@ -271,33 +271,33 @@ INLINE REPORT: (BFSGraph(int, char **)) [4/4=100.0%] bfs.cpp(46,1)
   -> EXTERN: (135,25) _mm512_set1_epi32(int)
   -> EXTERN: (137,29) omp_get_wtime()
   -> EXTERN: (146,3) omp_set_num_threads(int)
-  -> EXTERN: (171,25) _mm512_set_epi32(int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int)
-  -> EXTERN: (174,22) _mm512_set1_epi32(int)
-  -> EXTERN: (175,26) _mm512_cmp_epi32_mask(__m512i, __m512i, unsigned int)
-  -> EXTERN: (176,21) _mm512_mask_loadu_epi32(__m512i, unsigned short, const void *)
-  -> EXTERN: (177,26) _mm512_mask_i32extgather_epi32(__m512i, unsigned short, __m512i, const void *, unsigned int, int, int)
-  -> EXTERN: (181,33) _mm512_cmp_epi32_mask(__m512i, __m512i, unsigned int)
-  -> EXTERN: (182,6) _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int)
-  -> EXTERN: (185,30) _mm512_set1_epi32(int)
-  -> EXTERN: (186,23) _mm512_mask_add_epi32(__m512i, unsigned short, __m512i, __m512i)
-  -> EXTERN: (187,6) _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int)
-  -> EXTERN: (207,27) omp_get_wtime()
-  -> EXTERN: (210,3) printf(const char *, ...)
-  -> EXTERN: (213,14) fopen(const char *, const char *)
-  -> EXTERN: (215,3) fprintf(FILE *, const char *, ...)
-  -> EXTERN: (216,2) fclose(FILE *)
-  -> EXTERN: (226,2) free(void *)
-  -> EXTERN: (227,2) _mm_free(void *)
-  -> EXTERN: (228,2) _mm_free(void *)
+  -> EXTERN: (173,25) _mm512_set_epi32(int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int)
+  -> EXTERN: (176,22) _mm512_set1_epi32(int)
+  -> EXTERN: (177,26) _mm512_cmp_epi32_mask(__m512i, __m512i, unsigned int)
+  -> EXTERN: (178,21) _mm512_mask_loadu_epi32(__m512i, unsigned short, const void *)
+  -> EXTERN: (179,26) _mm512_mask_i32extgather_epi32(__m512i, unsigned short, __m512i, const void *, unsigned int, int, int)
+  -> EXTERN: (183,33) _mm512_cmp_epi32_mask(__m512i, __m512i, unsigned int)
+  -> EXTERN: (184,6) _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int)
+  -> EXTERN: (187,30) _mm512_set1_epi32(int)
+  -> EXTERN: (188,23) _mm512_mask_add_epi32(__m512i, unsigned short, __m512i, __m512i)
+  -> EXTERN: (189,6) _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int)
+  -> EXTERN: (209,27) omp_get_wtime()
+  -> EXTERN: (212,3) printf(const char *, ...)
+  -> EXTERN: (215,14) fopen(const char *, const char *)
+  -> EXTERN: (217,3) fprintf(FILE *, const char *, ...)
+  -> EXTERN: (218,2) fclose(FILE *)
+  -> EXTERN: (228,2) free(void *)
   -> EXTERN: (229,2) _mm_free(void *)
   -> EXTERN: (230,2) _mm_free(void *)
   -> EXTERN: (231,2) _mm_free(void *)
+  -> EXTERN: (232,2) _mm_free(void *)
+  -> EXTERN: (233,2) _mm_free(void *)
 
 
     Report from: OpenMP optimizations [openmp]
 
 bfs.cpp(147:1-147:1):OMP:_Z8BFSGraphiPPc:  OpenMP DEFINED LOOP WAS PARALLELIZED
-bfs.cpp(192:1-192:1):OMP:_Z8BFSGraphiPPc:  OpenMP DEFINED LOOP WAS PARALLELIZED
+bfs.cpp(194:1-194:1):OMP:_Z8BFSGraphiPPc:  OpenMP DEFINED LOOP WAS PARALLELIZED
 
     Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
 
@@ -339,31 +339,31 @@ LOOP BEGIN at bfs.cpp(139,2)
    remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
 LOOP END
 
-LOOP BEGIN at bfs.cpp(214,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(215,3) ]
+LOOP BEGIN at bfs.cpp(216,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(217,3) ]
 LOOP END
 
 LOOP BEGIN at bfs.cpp(149,3)
-   remark #15382: vectorization support: call to function _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(182,6) ]
-   remark #15382: vectorization support: call to function _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(187,6) ]
+   remark #15382: vectorization support: call to function _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(184,6) ]
+   remark #15382: vectorization support: call to function _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(189,6) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_mask_loadu_epi32(__m512i, unsigned short, const void (176:21) and call:_mm512_mask_i32extscatter_epi32(void *, unsigned short, __m (187:6)
-   remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_mask_i32extscatter_epi32(void *, unsigned short, __m (187:6) and call:_mm512_mask_loadu_epi32(__m512i, unsigned short, const void (176:21)
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_mask_loadu_epi32(__m512i, unsigned short, const void (178:21) and call:_mm512_mask_i32extscatter_epi32(void *, unsigned short, __m (189:6)
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_mask_i32extscatter_epi32(void *, unsigned short, __m (189:6) and call:_mm512_mask_loadu_epi32(__m512i, unsigned short, const void (178:21)
 
-   LOOP BEGIN at bfs.cpp(167,5)
-      remark #15382: vectorization support: call to function _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(182,6) ]
-      remark #15382: vectorization support: call to function _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(187,6) ]
+   LOOP BEGIN at bfs.cpp(169,5)
+      remark #15382: vectorization support: call to function _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(184,6) ]
+      remark #15382: vectorization support: call to function _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(189,6) ]
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_mask_loadu_epi32(__m512i, unsigned short, const void (176:21) and call:_mm512_mask_i32extscatter_epi32(void *, unsigned short, __m (187:6)
-      remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_mask_i32extscatter_epi32(void *, unsigned short, __m (187:6) and call:_mm512_mask_loadu_epi32(__m512i, unsigned short, const void (176:21)
+      remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_mask_loadu_epi32(__m512i, unsigned short, const void (178:21) and call:_mm512_mask_i32extscatter_epi32(void *, unsigned short, __m (189:6)
+      remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_mask_i32extscatter_epi32(void *, unsigned short, __m (189:6) and call:_mm512_mask_loadu_epi32(__m512i, unsigned short, const void (178:21)
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(192,1)
-   remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(197,5) ]
-   remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(198,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(200,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(200,5) ]
+LOOP BEGIN at bfs.cpp(194,1)
+   remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(199,5) ]
+   remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(200,5) ]
+   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(202,5) ]
+   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(202,5) ]
    remark #15381: vectorization support: unaligned access used inside loop body
    remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
    remark #15305: vectorization support: vector length 4
@@ -379,7 +379,7 @@ LOOP BEGIN at bfs.cpp(192,1)
    remark #25439: unrolled with remainder by 2  
 LOOP END
 
-LOOP BEGIN at bfs.cpp(192,1)
+LOOP BEGIN at bfs.cpp(194,1)
 <Remainder>
 LOOP END
 
