@@ -1,3 +1,0 @@
-Threads	Rodinia_Origin
-1	8.367761
-2	4.347504

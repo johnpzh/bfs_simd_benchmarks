@@ -59,5 +59,19 @@ do
 done
 echo done.
 
+# Inspector/Executor Vectorization Version
+version="ins-exe-vec"
+bin_addr="/home/zpeng/benchmarks/ins_exe_vec"
+echo -e "Threads\tInspector-Executor_Vectorization" >> $result_file
+echo -n "$version running"
+tno=1
+while [ $tno -le $no_core ]
+do
+	${bin_addr}/bfs ${tno} ${data_addr}/${data_file}.txt >> $result_file
+	echo -n .
+	tno=$((tno*2))
+done
+echo done.
+
 # Clean up
 rm path.txt
