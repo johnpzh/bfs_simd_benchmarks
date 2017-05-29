@@ -5,6 +5,10 @@ graph1M.txt
 graph1MW_6.txt
 graph65536.txt
 
+# Ignore those useless result files
+path.txt
+result.txt
+
 # Compiled source #
 ###################
 *.com
