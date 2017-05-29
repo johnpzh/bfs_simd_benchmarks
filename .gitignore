@@ -1,0 +1,3 @@
+# Ignore those large data files
+./rodinia_3.1/data/bfs/graph1*
+./rodinia_3.1/data/bfs/graph6*
