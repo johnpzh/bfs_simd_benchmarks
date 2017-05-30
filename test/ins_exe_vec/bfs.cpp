@@ -153,7 +153,8 @@ void BFSGraph( int argc, char** argv)
 
 #ifdef OPEN
 		omp_set_num_threads(num_omp_threads);
-#pragma omp parallel for 
+//#pragma omp parallel for 
+//#pragma omp parallel for ordered
 #endif 
 		for(unsigned int tid = 0; tid < no_of_nodes; tid++ )
 		{
@@ -183,7 +184,6 @@ void BFSGraph( int argc, char** argv)
 		}
 		//unsigned long int buffer_size = id_buffer.size();
 		unsigned long int buffer_size = top;
-		unsigned long int i;
 #ifdef OPEN
 #pragma omp parallel for
 #endif
@@ -195,25 +195,28 @@ void BFSGraph( int argc, char** argv)
 		//	h_cost[id] = h_cost[tid] + 1;
 		//	h_updating_graph_mask[id] = 1;
 		//}
-		for (i = 0; \
+		for (unsigned long int i = 0; \
 			 i < buffer_size; \
 			 i += NO_P_INT) {
-			/* Vectoried */
-			__m512i id_v = _mm512_load_epi32(&id_buffer[i]);
-			__m512i tid_v = _mm512_i32gather_epi32(id_v, &tid_buffer[0], sizeof(int));
-			__m512i cost_source_v = _mm512_i32gather_epi32(tid_v, h_cost, sizeof(int));
-			__m512i cost_v = _mm512_add_epi32(cost_source_v, one_v);
-			_mm512_i32scatter_epi32(h_cost, id_v, cost_v, sizeof(int));
-			_mm512_i32scatter_epi32(h_updating_graph_mask, id_v, one_v, sizeof(int));
-		}
-		/* Serialized */
-		for (unsigned long int j = i; \
-				j < buffer_size; \
-				j++) {
-			int id = id_buffer[j];
-			int tid = tid_buffer[id];
-			h_cost[id] = h_cost[tid] + 1;
-			h_updating_graph_mask[id] = 1;
+			if (i + NO_P_INT < buffer_size) {
+				/* Vectoried */
+				__m512i id_v = _mm512_load_epi32(&id_buffer[i]);
+				__m512i tid_v = _mm512_i32gather_epi32(id_v, &tid_buffer[0], sizeof(int));
+				__m512i cost_source_v = _mm512_i32gather_epi32(tid_v, h_cost, sizeof(int));
+				__m512i cost_v = _mm512_add_epi32(cost_source_v, one_v);
+				_mm512_i32scatter_epi32(h_cost, id_v, cost_v, sizeof(int));
+				_mm512_i32scatter_epi32(h_updating_graph_mask, id_v, one_v, sizeof(int));
+			} else {
+				/* Serialized */
+				for (unsigned long int j = i; \
+						j < buffer_size; \
+						j++) {
+					int id = id_buffer[j];
+					int tid = tid_buffer[id];
+					h_cost[id] = h_cost[tid] + 1;
+					h_updating_graph_mask[id] = 1;
+				}
+			}
 		}
 #ifdef OPEN
 #pragma omp parallel for

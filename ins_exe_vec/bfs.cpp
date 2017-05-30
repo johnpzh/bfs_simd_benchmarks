@@ -137,7 +137,6 @@ void BFSGraph( int argc, char** argv)
 	const __m512i zero_v = _mm512_set1_epi32(0);
 	
 	__attribute((aligned(ALIGNED_BYTES))) vector<int> id_buffer(BUFFER_SIZE_MAX);
-	//int tid_buffer[BUFFER_SIZE_MAX];
 	__attribute((aligned(ALIGNED_BYTES))) vector<int> tid_buffer(BUFFER_SIZE_MAX);
 #ifdef OPEN
         double start_time = omp_get_wtime();
@@ -151,7 +150,7 @@ void BFSGraph( int argc, char** argv)
 
 #ifdef OPEN
 		omp_set_num_threads(num_omp_threads);
-#pragma omp parallel for 
+//#pragma omp parallel for 
 #endif 
 		for(unsigned int tid = 0; tid < no_of_nodes; tid++ )
 		{

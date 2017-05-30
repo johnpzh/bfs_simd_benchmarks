@@ -33,7 +33,7 @@ Begin optimization report for: main(int, char **)
     Report from: Interprocedural optimizations [ipo]
 
 INLINE REPORT: (main(int, char **)) [1/71=1.4%] bfs.cpp(39,1)
-  -> INLINE: (40,2) BFSGraph(int, char **) (isz = 1157) (sz = 1165)
+  -> INLINE: (40,2) BFSGraph(int, char **) (isz = 1152) (sz = 1160)
     -> INLINE (MANUAL): (49,1) std::vector<int, std::allocator<int>>::~vector(std::vector<int, std::allocator<int>> *) (isz = 22) (sz = 27)
       -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) __cxa_call_unexpected
       -> /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) std::_Vector_base<int, std::allocator<int>>::~_Vector_base(std::_Vector_base<int, std::allocator<int>> *const) (isz = 0) (sz = 5)
@@ -104,11 +104,11 @@ INLINE REPORT: (main(int, char **)) [1/71=1.4%] bfs.cpp(39,1)
     -> DELETED: (139,62) std::allocator<int>::~allocator(std::allocator<int> *) (isz = 0) (sz = 3)
     -> (139,62) std::vector<int, std::allocator<int>>::~vector(std::vector<int, std::allocator<int>> *) (isz = 22) (sz = 27)
        [[ Callee not marked with inlining pragma  <1>]]
-    -> DELETED: (141,52) std::allocator<int>::~allocator(std::allocator<int> *) (isz = 0) (sz = 3)
-    -> INLINE (MANUAL): (141,63) std::allocator<int>::allocator(std::allocator<int> *) (isz = 5) (sz = 10)
+    -> DELETED: (140,52) std::allocator<int>::~allocator(std::allocator<int> *) (isz = 0) (sz = 3)
+    -> INLINE (MANUAL): (140,63) std::allocator<int>::allocator(std::allocator<int> *) (isz = 5) (sz = 10)
       -> DELETED: /usr/include/c++/4.8.5/bits/allocator.h:(113,7) __gnu_cxx::new_allocator<int>::new_allocator(__gnu_cxx::new_allocator<int> *const) (isz = 0) (sz = 5)
       -> EXTERN: /usr/include/c++/4.8.5/bits/allocator.h:(113,27) __cxa_call_unexpected
-    -> INLINE (MANUAL): (141,63) std::vector<int, std::allocator<int>>::vector(std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type, const std::vector<int, std::allocator<int>>::allocator_type &) (isz = 85) (sz = 94)
+    -> INLINE (MANUAL): (140,63) std::vector<int, std::allocator<int>>::vector(std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type, const std::vector<int, std::allocator<int>>::allocator_type &) (isz = 85) (sz = 94)
       -> /usr/include/c++/4.8.5/bits/stl_vector.h:(270,20) std::_Vector_base<int, std::allocator<int>>::~_Vector_base(std::_Vector_base<int, std::allocator<int>> *const) (isz = 0) (sz = 5)
          [[ Callee not marked with inlining pragma  <1>]]
       -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(270,20) std::_Vector_base<int, std::allocator<int>>::_Vector_base(std::_Vector_base<int, std::allocator<int>> *const, std::size_t, const std::_Vector_base<int, std::allocator<int>>::allocator_type &) (isz = 41) (sz = 50)
@@ -133,17 +133,17 @@ INLINE REPORT: (main(int, char **)) [1/71=1.4%] bfs.cpp(39,1)
                 -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_algobase.h:(786,34) std::__niter_base<std::_Vector_base<int, std::allocator<int>>::pointer>(std::_Vector_base<int, std::allocator<int>>::pointer) (isz = 1) (sz = 8)
                   -> INLINE (MANUAL): (278,14) std::_Iter_base<std::_Vector_base<int, std::allocator<int>>::pointer, false>::_S_base(std::_Vector_base<int, std::allocator<int>>::pointer) (isz = 0) (sz = 5)
         -> INLINE (MANUAL): (1225,7) std::_Vector_base<int, std::allocator<int>>::_M_get_Tp_allocator(std::_Vector_base<int, std::allocator<int>> *) (isz = 1) (sz = 8)
-    -> DELETED: (141,63) std::allocator<int>::~allocator(std::allocator<int> *) (isz = 0) (sz = 3)
-    -> (141,63) std::vector<int, std::allocator<int>>::~vector(std::vector<int, std::allocator<int>> *) (isz = 22) (sz = 27)
+    -> DELETED: (140,63) std::allocator<int>::~allocator(std::allocator<int> *) (isz = 0) (sz = 3)
+    -> (140,63) std::vector<int, std::allocator<int>>::~vector(std::vector<int, std::allocator<int>> *) (isz = 22) (sz = 27)
        [[ Callee not marked with inlining pragma  <1>]]
-    -> EXTERN: (143,29) omp_get_wtime()
-    -> INLINE (MANUAL): (150,13) std::vector<int, std::allocator<int>>::clear(std::vector<int, std::allocator<int>> *) (isz = 15) (sz = 20)
+    -> EXTERN: (142,29) omp_get_wtime()
+    -> INLINE (MANUAL): (149,13) std::vector<int, std::allocator<int>>::clear(std::vector<int, std::allocator<int>> *) (isz = 15) (sz = 20)
       -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(1126,7) __cxa_call_unexpected
       -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(1126,9) std::vector<int, std::allocator<int>>::_M_erase_at_end(std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::pointer) (isz = 8) (sz = 15)
         -> DELETED: (1352,2) std::_Destroy<std::_Vector_base<int, std::allocator<int>>::pointer, int>(std::_Vector_base<int, std::allocator<int>>::pointer, std::_Vector_base<int, std::allocator<int>>::pointer, std::allocator<int> &) (isz = 0) (sz = 8)
         -> INLINE (MANUAL): (1352,48) std::_Vector_base<int, std::allocator<int>>::_M_get_Tp_allocator(std::_Vector_base<int, std::allocator<int>> *) (isz = 1) (sz = 8)
-    -> EXTERN: (153,3) omp_set_num_threads(int)
-    -> INLINE (MANUAL): (173,17) std::vector<int, std::allocator<int>>::push_back(std::vector<int, std::allocator<int>> *, const std::vector<int, std::allocator<int>>::value_type &) (isz = 339) (sz = 346)
+    -> EXTERN: (152,3) omp_set_num_threads(int)
+    -> INLINE (MANUAL): (172,17) std::vector<int, std::allocator<int>>::push_back(std::vector<int, std::allocator<int>> *, const std::vector<int, std::allocator<int>>::value_type &) (isz = 339) (sz = 346)
       -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(905,6) std::allocator_traits<std::allocator<int>>::construct<int, const std::vector<int, std::allocator<int>>::value_type &>(std::allocator<int> &, int *, const std::vector<int, std::allocator<int>>::value_type &)->std::enable_if<true, void>::type (isz = 21) (sz = 30)
         -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,4) std::allocator_traits<std::allocator<int>>::_S_construct<int, const std::vector<int, std::allocator<int>>::value_type &>(std::allocator<int> &, int *, const std::vector<int, std::allocator<int>>::value_type &) (isz = 18) (sz = 27)
           -> INLINE (MANUAL): (254,8) __gnu_cxx::new_allocator<int>::construct<int, const int &>(__gnu_cxx::new_allocator<int> *, int *, const int &) (isz = 15) (sz = 24)
@@ -227,35 +227,34 @@ INLINE REPORT: (main(int, char **)) [1/71=1.4%] bfs.cpp(39,1)
         -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/vector.tcc:(430,2) std::_Vector_base<int, std::allocator<int>>::_M_deallocate(std::_Vector_base<int, std::allocator<int>> *, std::_Vector_base<int, std::allocator<int>>::pointer, std::size_t) (isz = 4) (sz = 13)
           -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(174,12) __gnu_cxx::new_allocator<int>::deallocate(__gnu_cxx::new_allocator<int> *, __gnu_cxx::new_allocator<int>::pointer, __gnu_cxx::new_allocator<int>::size_type) (isz = 0) (sz = 7)
             -> EXTERN: /usr/include/c++/4.8.5/ext/new_allocator.h:(110,9) operator delete(void *)
-    -> INLINE (MANUAL): (174,17) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
-    -> INLINE (MANUAL): (179,45) std::vector<int, std::allocator<int>>::size(const std::vector<int, std::allocator<int>> *) const (isz = 5) (sz = 12)
-    -> INLINE (MANUAL): (196,48) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
-    -> EXTERN: (197,21) _mm512_i32extgather_epi32(__m512i, const void *, unsigned int, int, int)
-    -> INLINE (MANUAL): (197,21) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
-    -> EXTERN: (198,29) _mm512_i32extgather_epi32(__m512i, const void *, unsigned int, int, int)
-    -> EXTERN: (199,22) _mm512_add_epi32(__m512i, __m512i)
+    -> INLINE (MANUAL): (173,17) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
+    -> INLINE (MANUAL): (178,45) std::vector<int, std::allocator<int>>::size(const std::vector<int, std::allocator<int>> *) const (isz = 5) (sz = 12)
+    -> INLINE (MANUAL): (195,48) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
+    -> EXTERN: (196,21) _mm512_i32extgather_epi32(__m512i, const void *, unsigned int, int, int)
+    -> INLINE (MANUAL): (196,21) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
+    -> EXTERN: (197,29) _mm512_i32extgather_epi32(__m512i, const void *, unsigned int, int, int)
+    -> EXTERN: (198,22) _mm512_add_epi32(__m512i, __m512i)
+    -> EXTERN: (199,5) _mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsigned int, int, int)
     -> EXTERN: (200,5) _mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsigned int, int, int)
-    -> EXTERN: (201,5) _mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsigned int, int, int)
-    -> INLINE (MANUAL): (207,24) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
-    -> INLINE (MANUAL): (208,26) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
-    -> EXTERN: (230,27) omp_get_wtime()
-    -> EXTERN: (233,3) printf(const char *, ...)
-    -> EXTERN: (236,14) fopen(const char *, const char *)
-    -> EXTERN: (238,3) fprintf(FILE *, const char *, ...)
-    -> EXTERN: (239,2) fclose(FILE *)
-    -> EXTERN: (249,2) free(void *)
+    -> INLINE (MANUAL): (206,24) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
+    -> INLINE (MANUAL): (207,26) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
+    -> EXTERN: (229,27) omp_get_wtime()
+    -> EXTERN: (232,3) printf(const char *, ...)
+    -> EXTERN: (235,14) fopen(const char *, const char *)
+    -> EXTERN: (237,3) fprintf(FILE *, const char *, ...)
+    -> EXTERN: (238,2) fclose(FILE *)
+    -> EXTERN: (248,2) free(void *)
+    -> EXTERN: (249,2) _mm_free(void *)
     -> EXTERN: (250,2) _mm_free(void *)
     -> EXTERN: (251,2) _mm_free(void *)
     -> EXTERN: (252,2) _mm_free(void *)
     -> EXTERN: (253,2) _mm_free(void *)
-    -> EXTERN: (254,2) _mm_free(void *)
 
 
     Report from: OpenMP optimizations [openmp]
 
-bfs.cpp(154:1-154:1):OMP:main:  OpenMP DEFINED LOOP WAS PARALLELIZED
-bfs.cpp(181:1-181:1):OMP:main:  OpenMP DEFINED LOOP WAS PARALLELIZED
-bfs.cpp(215:1-215:1):OMP:main:  OpenMP DEFINED LOOP WAS PARALLELIZED
+bfs.cpp(180:1-180:1):OMP:main:  OpenMP DEFINED LOOP WAS PARALLELIZED
+bfs.cpp(214:1-214:1):OMP:main:  OpenMP DEFINED LOOP WAS PARALLELIZED
 
     Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
 
@@ -303,46 +302,46 @@ LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algobase.h(749,7) inlined into bfs
    remark #15398: loop was not vectorized: loop was transformed to memset or memcpy
 LOOP END
 
-LOOP BEGIN at bfs.cpp(143,29) inlined into bfs.cpp(40,2)
-   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
-LOOP END
+LOOP BEGIN at bfs.cpp(142,29) inlined into bfs.cpp(40,2)
+   remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-LOOP BEGIN at bfs.cpp(237,2) inlined into bfs.cpp(40,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(238,3) ]
-LOOP END
+   LOOP BEGIN at bfs.cpp(155,3) inlined into bfs.cpp(40,2)
+      remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-LOOP BEGIN at bfs.cpp(156,3) inlined into bfs.cpp(40,2)
-   remark #15520: loop was not vectorized: loop with multiple exits cannot be vectorized unless it meets search loop idiom criteria   [ /usr/include/c++/4.8.5/bits/stl_vector.h(1339,4) ]
-
-   LOOP BEGIN at bfs.cpp(164,5) inlined into bfs.cpp(40,2)
-      remark #15520: loop was not vectorized: loop with multiple exits cannot be vectorized unless it meets search loop idiom criteria   [ /usr/include/c++/4.8.5/bits/stl_vector.h(1339,4) ]
+      LOOP BEGIN at bfs.cpp(163,5) inlined into bfs.cpp(40,2)
+         remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ /usr/include/c++/4.8.5/ext/new_allocator.h(104,27) ]
+      LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(191,3) inlined into bfs.cpp(40,2)
-   remark #15382: vectorization support: call to function _mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(200,5) ]
-   remark #15382: vectorization support: call to function _mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(201,5) ]
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_i32extgather_epi32(__m512i, const void *, unsigned i (197:21) and call:_mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsign (201:5)
-   remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsign (201:5) and call:_mm512_i32extgather_epi32(__m512i, const void *, unsigned i (197:21)
+LOOP BEGIN at bfs.cpp(236,2) inlined into bfs.cpp(40,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(237,3) ]
+LOOP END
 
-   LOOP BEGIN at bfs.cpp(204,5) inlined into bfs.cpp(40,2)
+LOOP BEGIN at bfs.cpp(190,3) inlined into bfs.cpp(40,2)
+   remark #15382: vectorization support: call to function _mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(199,5) ]
+   remark #15382: vectorization support: call to function _mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(200,5) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_i32extgather_epi32(__m512i, const void *, unsigned i (196:21) and call:_mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsign (200:5)
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsign (200:5) and call:_mm512_i32extgather_epi32(__m512i, const void *, unsigned i (196:21)
+
+   LOOP BEGIN at bfs.cpp(203,5) inlined into bfs.cpp(40,2)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed FLOW dependence between h_cost (209:6) and h_cost (209:6)
-      remark #15346: vector dependence: assumed ANTI dependence between h_cost (209:6) and h_cost (209:6)
+      remark #15346: vector dependence: assumed FLOW dependence between h_cost (208:6) and h_cost (208:6)
+      remark #15346: vector dependence: assumed ANTI dependence between h_cost (208:6) and h_cost (208:6)
       remark #25439: unrolled with remainder by 2  
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(204,5) inlined into bfs.cpp(40,2)
+   LOOP BEGIN at bfs.cpp(203,5) inlined into bfs.cpp(40,2)
    <Remainder>
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(215,1) inlined into bfs.cpp(40,2)
-   remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(220,5) ]
-   remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(221,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(223,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(223,5) ]
+LOOP BEGIN at bfs.cpp(214,1) inlined into bfs.cpp(40,2)
+   remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(219,5) ]
+   remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(220,5) ]
+   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(222,5) ]
+   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(222,5) ]
    remark #15381: vectorization support: unaligned access used inside loop body
    remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
    remark #15305: vectorization support: vector length 4
@@ -358,7 +357,7 @@ LOOP BEGIN at bfs.cpp(215,1) inlined into bfs.cpp(40,2)
    remark #25439: unrolled with remainder by 2  
 LOOP END
 
-LOOP BEGIN at bfs.cpp(215,1) inlined into bfs.cpp(40,2)
+LOOP BEGIN at bfs.cpp(214,1) inlined into bfs.cpp(40,2)
 <Remainder>
 LOOP END
 
@@ -382,19 +381,19 @@ bfs.cpp(39,1):remark #34051: REGISTER ALLOCATION : [main] bfs.cpp:39
         Assigned     :   23[ rax rdx rcx rbx rsi rdi r8-r15 zmm0-zmm4 k1-k4]
         
     Routine temporaries
-        Total         :     588
-            Global    :     154
-            Local     :     434
-        Regenerable   :     230
-        Spilled       :      19
+        Total         :     496
+            Global    :     136
+            Local     :     360
+        Regenerable   :     184
+        Spilled       :      17
         
     Routine stack
-        Variables     :     276 bytes*
-            Reads     :      50 [8.66e+01 ~ 1.6%]
-            Writes    :      48 [3.47e+02 ~ 6.2%]
-        Spills        :     248 bytes*
-            Reads     :      48 [2.41e+02 ~ 4.3%]
-            Writes    :      45 [1.92e+02 ~ 3.4%]
+        Variables     :     244 bytes*
+            Reads     :      51 [1.47e+02 ~ 3.0%]
+            Writes    :      46 [2.51e+02 ~ 5.1%]
+        Spills        :     232 bytes*
+            Reads     :      41 [2.81e+02 ~ 5.7%]
+            Writes    :      35 [1.55e+02 ~ 3.1%]
     
     Notes
     
@@ -694,11 +693,11 @@ INLINE REPORT: (BFSGraph(int, char **)) [12/71=16.9%] bfs.cpp(49,1)
   -> INLINE (MANUAL): (139,62) std::allocator<int>::allocator(std::allocator<int> *) (isz = 5) (sz = 10)
     -> DELETED: /usr/include/c++/4.8.5/bits/allocator.h:(113,7) __gnu_cxx::new_allocator<int>::new_allocator(__gnu_cxx::new_allocator<int> *const) (isz = 0) (sz = 5)
     -> EXTERN: /usr/include/c++/4.8.5/bits/allocator.h:(113,27) __cxa_call_unexpected
-  -> DELETED: (141,52) std::allocator<int>::~allocator(std::allocator<int> *) (isz = 0) (sz = 3)
-  -> (141,63) std::vector<int, std::allocator<int>>::~vector(std::vector<int, std::allocator<int>> *) (isz = 22) (sz = 27)
+  -> DELETED: (140,52) std::allocator<int>::~allocator(std::allocator<int> *) (isz = 0) (sz = 3)
+  -> (140,63) std::vector<int, std::allocator<int>>::~vector(std::vector<int, std::allocator<int>> *) (isz = 22) (sz = 27)
      [[ Callee not marked with inlining pragma  <1>]]
-  -> DELETED: (141,63) std::allocator<int>::~allocator(std::allocator<int> *) (isz = 0) (sz = 3)
-  -> INLINE (MANUAL): (141,63) std::vector<int, std::allocator<int>>::vector(std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type, const std::vector<int, std::allocator<int>>::allocator_type &) (isz = 85) (sz = 94)
+  -> DELETED: (140,63) std::allocator<int>::~allocator(std::allocator<int> *) (isz = 0) (sz = 3)
+  -> INLINE (MANUAL): (140,63) std::vector<int, std::allocator<int>>::vector(std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type, const std::vector<int, std::allocator<int>>::allocator_type &) (isz = 85) (sz = 94)
     -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(270,20) std::_Vector_base<int, std::allocator<int>>::_Vector_base(std::_Vector_base<int, std::allocator<int>> *const, std::size_t, const std::_Vector_base<int, std::allocator<int>>::allocator_type &) (isz = 41) (sz = 50)
       -> INLINE (MANUAL): (134,7) std::_Vector_base<int, std::allocator<int>>::_Vector_base(std::_Vector_base<int, std::allocator<int>> *, std::size_t, const std::_Vector_base<int, std::allocator<int>>::allocator_type &) (isz = 41) (sz = 50)
         -> INLINE (MANUAL): (135,17) std::_Vector_base<int, std::allocator<int>>::_Vector_impl::_Vector_impl(std::_Vector_base<int, std::allocator<int>>::_Vector_impl *, const std::_Vector_base<int, std::allocator<int>>::_Tp_alloc_type &) (isz = 11) (sz = 18)
@@ -723,17 +722,17 @@ INLINE REPORT: (BFSGraph(int, char **)) [12/71=16.9%] bfs.cpp(49,1)
               -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_algobase.h:(786,34) std::__niter_base<std::_Vector_base<int, std::allocator<int>>::pointer>(std::_Vector_base<int, std::allocator<int>>::pointer) (isz = 1) (sz = 8)
                 -> INLINE (MANUAL): (278,14) std::_Iter_base<std::_Vector_base<int, std::allocator<int>>::pointer, false>::_S_base(std::_Vector_base<int, std::allocator<int>>::pointer) (isz = 0) (sz = 5)
       -> INLINE (MANUAL): (1225,7) std::_Vector_base<int, std::allocator<int>>::_M_get_Tp_allocator(std::_Vector_base<int, std::allocator<int>> *) (isz = 1) (sz = 8)
-  -> INLINE (MANUAL): (141,63) std::allocator<int>::allocator(std::allocator<int> *) (isz = 5) (sz = 10)
+  -> INLINE (MANUAL): (140,63) std::allocator<int>::allocator(std::allocator<int> *) (isz = 5) (sz = 10)
     -> DELETED: /usr/include/c++/4.8.5/bits/allocator.h:(113,7) __gnu_cxx::new_allocator<int>::new_allocator(__gnu_cxx::new_allocator<int> *const) (isz = 0) (sz = 5)
     -> EXTERN: /usr/include/c++/4.8.5/bits/allocator.h:(113,27) __cxa_call_unexpected
-  -> EXTERN: (143,29) omp_get_wtime()
-  -> INLINE (MANUAL): (150,13) std::vector<int, std::allocator<int>>::clear(std::vector<int, std::allocator<int>> *) (isz = 15) (sz = 20)
+  -> EXTERN: (142,29) omp_get_wtime()
+  -> INLINE (MANUAL): (149,13) std::vector<int, std::allocator<int>>::clear(std::vector<int, std::allocator<int>> *) (isz = 15) (sz = 20)
     -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(1126,7) __cxa_call_unexpected
     -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(1126,9) std::vector<int, std::allocator<int>>::_M_erase_at_end(std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::pointer) (isz = 8) (sz = 15)
       -> DELETED: (1352,2) std::_Destroy<std::_Vector_base<int, std::allocator<int>>::pointer, int>(std::_Vector_base<int, std::allocator<int>>::pointer, std::_Vector_base<int, std::allocator<int>>::pointer, std::allocator<int> &) (isz = 0) (sz = 8)
       -> INLINE (MANUAL): (1352,48) std::_Vector_base<int, std::allocator<int>>::_M_get_Tp_allocator(std::_Vector_base<int, std::allocator<int>> *) (isz = 1) (sz = 8)
-  -> EXTERN: (153,3) omp_set_num_threads(int)
-  -> INLINE (MANUAL): (173,17) std::vector<int, std::allocator<int>>::push_back(std::vector<int, std::allocator<int>> *, const std::vector<int, std::allocator<int>>::value_type &) (isz = 339) (sz = 346)
+  -> EXTERN: (152,3) omp_set_num_threads(int)
+  -> INLINE (MANUAL): (172,17) std::vector<int, std::allocator<int>>::push_back(std::vector<int, std::allocator<int>> *, const std::vector<int, std::allocator<int>>::value_type &) (isz = 339) (sz = 346)
     -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(905,6) std::allocator_traits<std::allocator<int>>::construct<int, const std::vector<int, std::allocator<int>>::value_type &>(std::allocator<int> &, int *, const std::vector<int, std::allocator<int>>::value_type &)->std::enable_if<true, void>::type (isz = 21) (sz = 30)
       -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,4) std::allocator_traits<std::allocator<int>>::_S_construct<int, const std::vector<int, std::allocator<int>>::value_type &>(std::allocator<int> &, int *, const std::vector<int, std::allocator<int>>::value_type &) (isz = 18) (sz = 27)
         -> INLINE (MANUAL): (254,8) __gnu_cxx::new_allocator<int>::construct<int, const int &>(__gnu_cxx::new_allocator<int> *, int *, const int &) (isz = 15) (sz = 24)
@@ -817,35 +816,34 @@ INLINE REPORT: (BFSGraph(int, char **)) [12/71=16.9%] bfs.cpp(49,1)
       -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/vector.tcc:(430,2) std::_Vector_base<int, std::allocator<int>>::_M_deallocate(std::_Vector_base<int, std::allocator<int>> *, std::_Vector_base<int, std::allocator<int>>::pointer, std::size_t) (isz = 4) (sz = 13)
         -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(174,12) __gnu_cxx::new_allocator<int>::deallocate(__gnu_cxx::new_allocator<int> *, __gnu_cxx::new_allocator<int>::pointer, __gnu_cxx::new_allocator<int>::size_type) (isz = 0) (sz = 7)
           -> EXTERN: /usr/include/c++/4.8.5/ext/new_allocator.h:(110,9) operator delete(void *)
-  -> INLINE (MANUAL): (174,17) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
-  -> INLINE (MANUAL): (179,45) std::vector<int, std::allocator<int>>::size(const std::vector<int, std::allocator<int>> *) const (isz = 5) (sz = 12)
-  -> INLINE (MANUAL): (196,48) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
-  -> INLINE (MANUAL): (197,21) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
-  -> EXTERN: (197,21) _mm512_i32extgather_epi32(__m512i, const void *, unsigned int, int, int)
-  -> EXTERN: (198,29) _mm512_i32extgather_epi32(__m512i, const void *, unsigned int, int, int)
-  -> EXTERN: (199,22) _mm512_add_epi32(__m512i, __m512i)
+  -> INLINE (MANUAL): (173,17) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
+  -> INLINE (MANUAL): (178,45) std::vector<int, std::allocator<int>>::size(const std::vector<int, std::allocator<int>> *) const (isz = 5) (sz = 12)
+  -> INLINE (MANUAL): (195,48) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
+  -> INLINE (MANUAL): (196,21) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
+  -> EXTERN: (196,21) _mm512_i32extgather_epi32(__m512i, const void *, unsigned int, int, int)
+  -> EXTERN: (197,29) _mm512_i32extgather_epi32(__m512i, const void *, unsigned int, int, int)
+  -> EXTERN: (198,22) _mm512_add_epi32(__m512i, __m512i)
+  -> EXTERN: (199,5) _mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsigned int, int, int)
   -> EXTERN: (200,5) _mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsigned int, int, int)
-  -> EXTERN: (201,5) _mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsigned int, int, int)
-  -> INLINE (MANUAL): (207,24) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
-  -> INLINE (MANUAL): (208,26) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
-  -> EXTERN: (230,27) omp_get_wtime()
-  -> EXTERN: (233,3) printf(const char *, ...)
-  -> EXTERN: (236,14) fopen(const char *, const char *)
-  -> EXTERN: (238,3) fprintf(FILE *, const char *, ...)
-  -> EXTERN: (239,2) fclose(FILE *)
-  -> EXTERN: (249,2) free(void *)
+  -> INLINE (MANUAL): (206,24) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
+  -> INLINE (MANUAL): (207,26) std::vector<int, std::allocator<int>>::operator[](std::vector<int, std::allocator<int>> *, std::vector<int, std::allocator<int>>::size_type) (isz = 1) (sz = 9)
+  -> EXTERN: (229,27) omp_get_wtime()
+  -> EXTERN: (232,3) printf(const char *, ...)
+  -> EXTERN: (235,14) fopen(const char *, const char *)
+  -> EXTERN: (237,3) fprintf(FILE *, const char *, ...)
+  -> EXTERN: (238,2) fclose(FILE *)
+  -> EXTERN: (248,2) free(void *)
+  -> EXTERN: (249,2) _mm_free(void *)
   -> EXTERN: (250,2) _mm_free(void *)
   -> EXTERN: (251,2) _mm_free(void *)
   -> EXTERN: (252,2) _mm_free(void *)
   -> EXTERN: (253,2) _mm_free(void *)
-  -> EXTERN: (254,2) _mm_free(void *)
 
 
     Report from: OpenMP optimizations [openmp]
 
-bfs.cpp(154:1-154:1):OMP:_Z8BFSGraphiPPc:  OpenMP DEFINED LOOP WAS PARALLELIZED
-bfs.cpp(181:1-181:1):OMP:_Z8BFSGraphiPPc:  OpenMP DEFINED LOOP WAS PARALLELIZED
-bfs.cpp(215:1-215:1):OMP:_Z8BFSGraphiPPc:  OpenMP DEFINED LOOP WAS PARALLELIZED
+bfs.cpp(180:1-180:1):OMP:_Z8BFSGraphiPPc:  OpenMP DEFINED LOOP WAS PARALLELIZED
+bfs.cpp(214:1-214:1):OMP:_Z8BFSGraphiPPc:  OpenMP DEFINED LOOP WAS PARALLELIZED
 
     Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
 
@@ -888,51 +886,51 @@ LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algobase.h(749,7) inlined into bfs
    remark #15398: loop was not vectorized: loop was transformed to memset or memcpy
 LOOP END
 
-LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algobase.h(749,7) inlined into bfs.cpp(141,63)
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algobase.h(749,7) inlined into bfs.cpp(140,63)
    remark #25408: memset generated
    remark #15398: loop was not vectorized: loop was transformed to memset or memcpy
 LOOP END
 
-LOOP BEGIN at bfs.cpp(143,29)
-   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
-LOOP END
+LOOP BEGIN at bfs.cpp(142,29)
+   remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-LOOP BEGIN at bfs.cpp(237,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(238,3) ]
-LOOP END
+   LOOP BEGIN at bfs.cpp(155,3)
+      remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-LOOP BEGIN at bfs.cpp(156,3)
-   remark #15520: loop was not vectorized: loop with multiple exits cannot be vectorized unless it meets search loop idiom criteria   [ /usr/include/c++/4.8.5/bits/stl_vector.h(1339,4) ]
-
-   LOOP BEGIN at bfs.cpp(164,5)
-      remark #15520: loop was not vectorized: loop with multiple exits cannot be vectorized unless it meets search loop idiom criteria   [ /usr/include/c++/4.8.5/bits/stl_vector.h(1339,4) ]
+      LOOP BEGIN at bfs.cpp(163,5)
+         remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ /usr/include/c++/4.8.5/ext/new_allocator.h(104,27) ]
+      LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(191,3)
-   remark #15382: vectorization support: call to function _mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(200,5) ]
-   remark #15382: vectorization support: call to function _mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(201,5) ]
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_i32extgather_epi32(__m512i, const void *, unsigned i (197:21) and call:_mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsign (201:5)
-   remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsign (201:5) and call:_mm512_i32extgather_epi32(__m512i, const void *, unsigned i (197:21)
+LOOP BEGIN at bfs.cpp(236,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(237,3) ]
+LOOP END
 
-   LOOP BEGIN at bfs.cpp(204,5)
+LOOP BEGIN at bfs.cpp(190,3)
+   remark #15382: vectorization support: call to function _mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(199,5) ]
+   remark #15382: vectorization support: call to function _mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(200,5) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_i32extgather_epi32(__m512i, const void *, unsigned i (196:21) and call:_mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsign (200:5)
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsign (200:5) and call:_mm512_i32extgather_epi32(__m512i, const void *, unsigned i (196:21)
+
+   LOOP BEGIN at bfs.cpp(203,5)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed FLOW dependence between h_cost (209:6) and h_cost (209:6)
-      remark #15346: vector dependence: assumed ANTI dependence between h_cost (209:6) and h_cost (209:6)
+      remark #15346: vector dependence: assumed FLOW dependence between h_cost (208:6) and h_cost (208:6)
+      remark #15346: vector dependence: assumed ANTI dependence between h_cost (208:6) and h_cost (208:6)
       remark #25439: unrolled with remainder by 2  
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(204,5)
+   LOOP BEGIN at bfs.cpp(203,5)
    <Remainder>
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(215,1)
-   remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(220,5) ]
-   remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(221,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(223,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(223,5) ]
+LOOP BEGIN at bfs.cpp(214,1)
+   remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(219,5) ]
+   remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(220,5) ]
+   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(222,5) ]
+   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(222,5) ]
    remark #15381: vectorization support: unaligned access used inside loop body
    remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
    remark #15305: vectorization support: vector length 4
@@ -948,7 +946,7 @@ LOOP BEGIN at bfs.cpp(215,1)
    remark #25439: unrolled with remainder by 2  
 LOOP END
 
-LOOP BEGIN at bfs.cpp(215,1)
+LOOP BEGIN at bfs.cpp(214,1)
 <Remainder>
 LOOP END
 
@@ -972,19 +970,19 @@ bfs.cpp(49,1):remark #34051: REGISTER ALLOCATION : [_Z8BFSGraphiPPc] bfs.cpp:49
         Assigned     :   23[ rax rdx rcx rbx rsi rdi r8-r15 zmm0-zmm4 k1-k4]
         
     Routine temporaries
-        Total         :     579
-            Global    :     154
-            Local     :     425
-        Regenerable   :     217
-        Spilled       :      19
+        Total         :     488
+            Global    :     136
+            Local     :     352
+        Regenerable   :     172
+        Spilled       :      17
         
     Routine stack
-        Variables     :     272 bytes*
-            Reads     :      48 [8.66e+01 ~ 1.5%]
-            Writes    :      46 [3.47e+02 ~ 6.2%]
-        Spills        :     248 bytes*
-            Reads     :      53 [2.41e+02 ~ 4.3%]
-            Writes    :      45 [1.97e+02 ~ 3.5%]
+        Variables     :     240 bytes*
+            Reads     :      49 [1.47e+02 ~ 3.0%]
+            Writes    :      44 [2.51e+02 ~ 5.1%]
+        Spills        :     232 bytes*
+            Reads     :      46 [2.81e+02 ~ 5.7%]
+            Writes    :      35 [1.60e+02 ~ 3.2%]
     
     Notes
     
