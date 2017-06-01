@@ -136,8 +136,8 @@ void BFSGraph( int argc, char** argv)
 	const __m512i minusone_v = _mm512_set1_epi32(-1);
 	const __m512i zero_v = _mm512_set1_epi32(0);
 	
-	__attribute((aligned(ALIGNED_BYTES))) vector<int> id_buffer(BUFFER_SIZE_MAX);
-	__attribute((aligned(ALIGNED_BYTES))) vector<int> tid_buffer(BUFFER_SIZE_MAX);
+	int *id_buffer = (int *) _mm_malloc(sizeof(int) * BUFFER_SIZE_MAX, ALIGNED_BYTES);
+	int *cost_buffer = (int *) _mm_malloc(sizeof(int) * BUFFER_SIZE_MAX, ALIGNED_BYTES);
 #ifdef OPEN
         double start_time = omp_get_wtime();
 #endif
@@ -146,11 +146,12 @@ void BFSGraph( int argc, char** argv)
 	{
 		//if no thread changes this value then the loop stops
 		stop = 1;
-		id_buffer.clear();
+		unsigned long int top = 0;
 
 #ifdef OPEN
 		omp_set_num_threads(num_omp_threads);
 //#pragma omp parallel for 
+//#pragma omp parallel for ordered
 #endif 
 		for(unsigned int tid = 0; tid < no_of_nodes; tid++ )
 		{
@@ -169,15 +170,15 @@ void BFSGraph( int argc, char** argv)
 					{
 						//h_cost[id]=h_cost[tid]+1;
 						//h_updating_graph_mask[id]=1;
-						id_buffer.push_back(id);
-						tid_buffer[id] = tid;
+						id_buffer[top] = id;
+						cost_buffer[top] = h_cost[tid];
+						top++;
 					}
 				}
 			}
 		}
-		unsigned long int buffer_size = id_buffer.size();
 #ifdef OPEN
-#pragma omp parallel for
+//#pragma omp parallel for
 #endif
 		//for (unsigned long int i = 0; \
 		//	 i < buffer_size; \
@@ -188,30 +189,28 @@ void BFSGraph( int argc, char** argv)
 		//	h_updating_graph_mask[id] = 1;
 		//}
 		for (unsigned long int i = 0; \
-			 i < buffer_size; \
+			 i < top; \
 			 i += NO_P_INT) {
-			if ( i + NO_P_INT < buffer_size) {
+			if (i + NO_P_INT < top) {
 				/* Vectoried */
-				__m512i id_v = _mm512_load_epi32(&id_buffer[i]);
-				__m512i tid_v = _mm512_i32gather_epi32(id_v, &tid_buffer[0], sizeof(int));
-				__m512i cost_source_v = _mm512_i32gather_epi32(tid_v, h_cost, sizeof(int));
+				__m512i id_v = _mm512_load_epi32(id_buffer + i);
+				_mm512_i32scatter_epi32(h_updating_graph_mask, id_v, one_v, sizeof(int));
+				__m512i cost_source_v = _mm512_load_epi32(cost_buffer + i);
 				__m512i cost_v = _mm512_add_epi32(cost_source_v, one_v);
 				_mm512_i32scatter_epi32(h_cost, id_v, cost_v, sizeof(int));
-				_mm512_i32scatter_epi32(h_updating_graph_mask, id_v, one_v, sizeof(int));
 			} else {
 				/* Serialized */
 				for (unsigned long int j = i; \
-					 j < buffer_size; \
-					 j++) {
+						j < top; \
+						j++) {
 					int id = id_buffer[j];
-					int tid = tid_buffer[id];
-					h_cost[id] = h_cost[tid] + 1;
+					h_cost[id] = cost_buffer[j] + 1;
 					h_updating_graph_mask[id] = 1;
 				}
 			}
 		}
 #ifdef OPEN
-#pragma omp parallel for
+//#pragma omp parallel for
 #endif
 		for(unsigned int tid=0; tid< no_of_nodes ; tid++ )
 		{
@@ -251,5 +250,8 @@ void BFSGraph( int argc, char** argv)
 	_mm_free( h_updating_graph_mask);
 	_mm_free( h_graph_visited);
 	_mm_free( h_cost);
+	_mm_free( id_buffer);
+	//_mm_free( tid_buffer);
+	_mm_free( cost_buffer);
 }
 

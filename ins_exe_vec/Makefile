@@ -1,8 +1,5 @@
 # C compiler
-CC = g++
 ICPC = icpc
-#ICPC = icc
-#CC_FLAGS = -Wall -Wextra -g -std=c++11 -qopenmp -O3 -qopt-report=5 -vec-threshold0
 CC_FLAGS = -Wall -Wextra -g -std=c++11 -qopenmp -O3 -qopt-report=5
 #CC_FLAGS = -Wall -Wextra -g -std=c++11
 

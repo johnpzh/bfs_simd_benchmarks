@@ -136,10 +136,8 @@ void BFSGraph( int argc, char** argv)
 	const __m512i minusone_v = _mm512_set1_epi32(-1);
 	const __m512i zero_v = _mm512_set1_epi32(0);
 	
-	//__attribute((aligned(ALIGNED_BYTES))) vector<int> id_buffer(BUFFER_SIZE_MAX);
-	//__attribute((aligned(ALIGNED_BYTES))) vector<int> tid_buffer(BUFFER_SIZE_MAX);
-	int *id_buffer = (int *) _mm_malloc(sizeof(int) * BUFFER_SIZE_MAX, ALIGNED_BYTES);
-	int *tid_buffer =(int *) _mm_malloc(sizeof(int) * BUFFER_SIZE_MAX, ALIGNED_BYTES);
+	__attribute((aligned(ALIGNED_BYTES))) vector<int> id_buffer(BUFFER_SIZE_MAX);
+	__attribute((aligned(ALIGNED_BYTES))) vector<int> tid_buffer(BUFFER_SIZE_MAX);
 #ifdef OPEN
         double start_time = omp_get_wtime();
 #endif
@@ -148,13 +146,11 @@ void BFSGraph( int argc, char** argv)
 	{
 		//if no thread changes this value then the loop stops
 		stop = 1;
-		//id_buffer.clear();
-		unsigned long int top = 0;
+		id_buffer.clear();
 
 #ifdef OPEN
 		omp_set_num_threads(num_omp_threads);
 //#pragma omp parallel for 
-//#pragma omp parallel for ordered
 #endif 
 		for(unsigned int tid = 0; tid < no_of_nodes; tid++ )
 		{
@@ -173,17 +169,13 @@ void BFSGraph( int argc, char** argv)
 					{
 						//h_cost[id]=h_cost[tid]+1;
 						//h_updating_graph_mask[id]=1;
-						//id_buffer.push_back(id);
-						//tid_buffer[id] = tid;
-						id_buffer[top] = id;
+						id_buffer.push_back(id);
 						tid_buffer[id] = tid;
-						top++;
 					}
 				}
 			}
 		}
-		//unsigned long int buffer_size = id_buffer.size();
-		unsigned long int buffer_size = top;
+		unsigned long int buffer_size = id_buffer.size();
 #ifdef OPEN
 #pragma omp parallel for
 #endif
@@ -198,7 +190,7 @@ void BFSGraph( int argc, char** argv)
 		for (unsigned long int i = 0; \
 			 i < buffer_size; \
 			 i += NO_P_INT) {
-			if (i + NO_P_INT < buffer_size) {
+			if ( i + NO_P_INT < buffer_size) {
 				/* Vectoried */
 				__m512i id_v = _mm512_load_epi32(&id_buffer[i]);
 				__m512i tid_v = _mm512_i32gather_epi32(id_v, &tid_buffer[0], sizeof(int));
@@ -209,8 +201,8 @@ void BFSGraph( int argc, char** argv)
 			} else {
 				/* Serialized */
 				for (unsigned long int j = i; \
-						j < buffer_size; \
-						j++) {
+					 j < buffer_size; \
+					 j++) {
 					int id = id_buffer[j];
 					int tid = tid_buffer[id];
 					h_cost[id] = h_cost[tid] + 1;
@@ -259,7 +251,5 @@ void BFSGraph( int argc, char** argv)
 	_mm_free( h_updating_graph_mask);
 	_mm_free( h_graph_visited);
 	_mm_free( h_cost);
-	_mm_free( id_buffer);
-	_mm_free( tid_buffer);
 }
 
