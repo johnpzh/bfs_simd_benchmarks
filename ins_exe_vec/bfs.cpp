@@ -182,9 +182,6 @@ void BFSGraph( int argc, char** argv)
 								/* Update those flags */
 								__m512i id_v = _mm512_load_epi32(id_buffer + i);
 								_mm512_i32scatter_epi32(h_updating_graph_mask, id_v, one_v, SIZE_INT);
-								//_mm512_i32scatter_epi32(h_graph_mask, id_v, one_v, SIZE_INT);
-								//_mm512_i32scatter_epi32(h_graph_visited, id_v, one_v, SIZE_INT);
-								//stop = 0;
 							
 								/* Update the h_cost */
 								__m512i cost_source_v = _mm512_load_epi32(cost_buffer + i);
@@ -217,9 +214,6 @@ void BFSGraph( int argc, char** argv)
 				/* Update those flags */
 				__m512i id_v = _mm512_load_epi32(id_buffer + i);
 				_mm512_i32scatter_epi32(h_updating_graph_mask, id_v, one_v, SIZE_INT);
-				//_mm512_i32scatter_epi32(h_graph_mask, id_v, one_v, SIZE_INT);
-				//_mm512_i32scatter_epi32(h_graph_visited, id_v, one_v, SIZE_INT);
-				//stop = 0;
 
 				/* Update the h_cost */
 				__m512i cost_source_v = _mm512_load_epi32(cost_buffer + i);
@@ -232,9 +226,6 @@ void BFSGraph( int argc, char** argv)
 						j++) {
 					int id = id_buffer[j];
 					h_updating_graph_mask[id] = 1;
-					//h_graph_mask[id] = 1;
-					//h_graph_visited[id] = 1;
-					//stop = 0;
 					h_cost[id] = cost_buffer[j] + 1;
 				}
 			}
