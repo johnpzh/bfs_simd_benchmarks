@@ -84,7 +84,7 @@ void BFSGraph( int argc, char** argv)
 	//bool *h_updating_graph_mask = (bool*) malloc(sizeof(bool)*no_of_nodes);
 	//bool *h_graph_visited = (bool*) malloc(sizeof(bool)*no_of_nodes);
 	int *h_graph_mask = (int*) _mm_malloc(SIZE_INT*no_of_nodes, ALIGNED_BYTES);
-	//int *h_updating_graph_mask = (int*) _mm_malloc(SIZE_INT*no_of_nodes, ALIGNED_BYTES);
+	int *h_updating_graph_mask = (int*) _mm_malloc(SIZE_INT*no_of_nodes, ALIGNED_BYTES);
 	int *h_graph_visited = (int*) _mm_malloc(SIZE_INT*no_of_nodes, ALIGNED_BYTES);
 
 	int start, edgeno;   
@@ -181,8 +181,8 @@ void BFSGraph( int argc, char** argv)
 									i += NO_P_INT) {
 								/* Update those flags */
 								__m512i id_v = _mm512_load_epi32(id_buffer + i);
-								//_mm512_i32scatter_epi32(h_updating_graph_mask, id_v, one_v, SIZE_INT);
-								_mm512_i32scatter_epi32(h_graph_mask, id_v, one_v, SIZE_INT);
+								_mm512_i32scatter_epi32(h_updating_graph_mask, id_v, one_v, SIZE_INT);
+								//_mm512_i32scatter_epi32(h_graph_mask, id_v, one_v, SIZE_INT);
 								_mm512_i32scatter_epi32(h_graph_visited, id_v, one_v, SIZE_INT);
 								stop = 0;
 							
@@ -216,8 +216,8 @@ void BFSGraph( int argc, char** argv)
 				/* Vectoried */
 				/* Update those flags */
 				__m512i id_v = _mm512_load_epi32(id_buffer + i);
-				//_mm512_i32scatter_epi32(h_updating_graph_mask, id_v, one_v, SIZE_INT);
-				_mm512_i32scatter_epi32(h_graph_mask, id_v, one_v, SIZE_INT);
+				_mm512_i32scatter_epi32(h_updating_graph_mask, id_v, one_v, SIZE_INT);
+				//_mm512_i32scatter_epi32(h_graph_mask, id_v, one_v, SIZE_INT);
 				_mm512_i32scatter_epi32(h_graph_visited, id_v, one_v, SIZE_INT);
 				stop = 0;
 
@@ -231,11 +231,11 @@ void BFSGraph( int argc, char** argv)
 						j < top; \
 						j++) {
 					int id = id_buffer[j];
-					h_graph_mask[id] = 1;
+					h_updating_graph_mask[id] = 1;
+					//h_graph_mask[id] = 1;
 					h_graph_visited[id] = 1;
 					stop = 0;
 					h_cost[id] = cost_buffer[j] + 1;
-					//h_updating_graph_mask[id] = 1;
 				}
 			}
 		}
@@ -252,6 +252,13 @@ void BFSGraph( int argc, char** argv)
 		//	}
 		//}
 		//k++;
+		if (!stop) {
+			for (unsigned long i = 0; i < no_of_nodes; i += NO_P_INT) {
+				__m512i id_v = _mm512_load_epi32(h_updating_graph_mask + i);
+				_mm512_store_epi32(h_graph_mask + i, id_v);
+				_mm512_store_epi32(h_updating_graph_mask + i, zero_v);
+			}
+		}
 	}
 	while(!stop);
 #ifdef OPEN
@@ -259,7 +266,7 @@ void BFSGraph( int argc, char** argv)
 		//printf("No. of Threads: %d\n", num_omp_threads);
         //printf("Compute time: %lf\n", (end_time - start_time));
 		//printf("%d\t%lf\n", num_omp_threads, (end_time - start_time));
-		printf("%lu\t%lf\n", BUFFER_SIZE_MAX, (end_time - start_time));
+		printf("%lu %lf\n", BUFFER_SIZE_MAX, (end_time - start_time));
 #endif
 	//Store the result into a file
 	FILE *fpo = fopen("path.txt","w");
@@ -278,7 +285,7 @@ void BFSGraph( int argc, char** argv)
 	free( h_graph_nodes);
 	_mm_free( h_graph_edges);
 	_mm_free( h_graph_mask);
-	//_mm_free( h_updating_graph_mask);
+	_mm_free( h_updating_graph_mask);
 	_mm_free( h_graph_visited);
 	_mm_free( h_cost);
 	_mm_free( id_buffer);
