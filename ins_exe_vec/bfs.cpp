@@ -259,7 +259,7 @@ void BFSGraph( int argc, char** argv)
 		//printf("No. of Threads: %d\n", num_omp_threads);
         //printf("Compute time: %lf\n", (end_time - start_time));
 		//printf("%d\t%lf\n", num_omp_threads, (end_time - start_time));
-		printf("%lu\t%lf\n", BUFFER_SIZE_MAX, (end_time - start_time));
+		printf("%lu %lf\n", BUFFER_SIZE_MAX, (end_time - start_time));
 #endif
 	//Store the result into a file
 	FILE *fpo = fopen("path.txt","w");
