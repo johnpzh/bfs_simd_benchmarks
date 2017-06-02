@@ -3,8 +3,8 @@
 version="ins-exe-vec"
 bin_addr="/home/zpeng/benchmarks/ins_exe_vec"
 data_addr="/home/zpeng/benchmarks/rodinia_3.1/data/bfs"
-#data_file="graph4096"
-data_file="graph16M"
+data_file="graph4096"
+#data_file="graph16M"
 #data_file="graph128M"
 #no_core=64
 buffer_max=24
