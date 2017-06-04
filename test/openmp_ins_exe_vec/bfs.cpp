@@ -121,7 +121,6 @@ void BFSGraph( int argc, char** argv)
 	int id,cost;
 	int* h_graph_edges = (int*) _mm_malloc(SIZE_INT*edge_list_size, ALIGNED_BYTES);
 	//int* h_graph_edges = (int*) _mm_malloc(sizeof(int)*edge_list_size, ALIGNED_BYTES);
-	//printf("sizeof(int) = %lu\n", sizeof(int));//test
 	if (!h_graph_edges) {
 		fprintf(stderr, "@123: cannot malloc h_graph_edges.\n");
 		exit(1);
@@ -168,7 +167,7 @@ void BFSGraph( int argc, char** argv)
 
 #ifdef OPEN
 		omp_set_num_threads(num_omp_threads);
-#pragma omp parallel for 
+//#pragma omp parallel for 
 #endif 
 		for(unsigned int tid = 0; tid < no_of_nodes; tid++ )
 		{
@@ -178,44 +177,15 @@ void BFSGraph( int argc, char** argv)
 #ifdef OPEN
 //#pragma vector always
 #endif
-				//for(int i = h_graph_nodes[tid].starting; \
-				//		i < next_starting; \
-				//		i++)
-				//{
-				//	int id = h_graph_edges[i];
-				//	if(!h_graph_visited[id])
-				//	{
-				//		//h_cost[id]=h_cost[tid]+1;
-				//		//h_updating_graph_mask[id]=1;
-				//		id_buffer[top] = id;
-				//		cost_buffer[top] = h_cost[tid];
-				//		top++;
-
-				//		if (top == BUFFER_SIZE_MAX) {
-				//			for (unsigned int i = 0; \
-				//					i < BUFFER_SIZE_MAX; \
-				//					i += NO_P_INT) {
-				//				/* Update those flags */
-				//				__m512i id_v = _mm512_load_epi32(id_buffer + i);
-				//				_mm512_i32scatter_epi32(h_updating_graph_mask, id_v, one_v, SIZE_INT);
-				//				_mm512_i32scatter_epi32(h_graph_visited, id_v, one_v, SIZE_INT);
-				//				stop = 0;
-				//			
-				//				/* Update the h_cost */
-				//				__m512i cost_source_v = _mm512_load_epi32(cost_buffer + i);
-				//				__m512i cost_v = _mm512_add_epi32(cost_source_v, one_v);
-				//				_mm512_i32scatter_epi32(h_cost, id_v, cost_v, SIZE_INT);
-				//			}
-				//			top = 0;
-				//		}
-				//	}
-				//}
 				for (int i = h_graph_nodes[tid].starting; \
 						 i < next_starting; \
 						 i += NO_P_INT) {
 					/* Check buffer's size */
 					if (top + NO_P_INT > BUFFER_SIZE_MAX) {
 						/* If Buffer would be full, then operate */
+#ifdef OPEN
+#pragma omp parallel for
+#endif
 						for (unsigned int k = 0; \
 								k < top; \
 								k += NO_P_INT) {
@@ -331,10 +301,8 @@ void BFSGraph( int argc, char** argv)
 	while(!stop);
 #ifdef OPEN
         double end_time = omp_get_wtime();
-		//printf("No. of Threads: %d\n", num_omp_threads);
-        //printf("Compute time: %lf\n", (end_time - start_time));
-		//printf("%d\t%lf\n", num_omp_threads, (end_time - start_time));
-		printf("%u %lf\n", BUFFER_SIZE_MAX, (end_time - start_time));
+		printf("%d\t%lf\n", num_omp_threads, (end_time - start_time));
+		//printf("%u %lf\n", BUFFER_SIZE_MAX, (end_time - start_time));
 #endif
 	//Store the result into a file
 	FILE *fpo = fopen("path.txt","w");
