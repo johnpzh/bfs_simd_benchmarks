@@ -193,35 +193,38 @@ void BFSGraph( int argc, char** argv)
 #ifdef OPEN
 #pragma omp parallel for
 #endif
-		for(unsigned int tid=0; tid< no_of_nodes ; tid++ )
-		{
-			if (h_updating_graph_mask[tid] == 1) {
-				h_graph_mask[tid]=1;
-				h_graph_visited[tid]=1;
-				stop = 0;
-				h_updating_graph_mask[tid]=0;
-			}
-		}
-		//for (unsigned tid = 0; tid < no_of_nodes; tid += NO_P_INT) {
-		//	if (tid + NO_P_INT <= no_of_nodes) {
-		//		__m512i updating_mask_v = _mm512_load_epi32(h_updating_graph_mask + tid);
-		//		__mmask16 true_updating_mask_mask = _mm512_cmpeq_epi32_mask(updating_mask_v, one_v);
-		//		_mm512_mask_store_epi32(h_graph_mask + tid, true_updating_mask_mask, one_v);
-		//		_mm512_mask_store_epi32(h_graph_visited + tid, true_updating_mask_mask, one_v);
+		//for(unsigned int tid=0; tid< no_of_nodes ; tid++ )
+		//{
+		//	if (h_updating_graph_mask[tid] == 1) {
+		//		h_graph_mask[tid]=1;
+		//		h_graph_visited[tid]=1;
 		//		stop = 0;
-		//		//_mm512_store_epi32(h_updating_graph_mask + tid, zero_v);
-		//		_mm512_mask_store_epi32(h_updating_graph_mask + tid, true_updating_mask_mask, zero_v);
-		//	} else {
-		//		for (unsigned i = tid; i < no_of_nodes; i++) {
-		//			if (h_updating_graph_mask[i] == 1) {
-		//				h_graph_mask[i]=1;
-		//				h_graph_visited[i]=1;
-		//				stop = 0;
-		//				h_updating_graph_mask[i]=0;
-		//			}
-		//		}
+		//		h_updating_graph_mask[tid]=0;
 		//	}
 		//}
+		for (unsigned tid = 0; tid < no_of_nodes; tid += NO_P_INT) {
+			if (tid + NO_P_INT <= no_of_nodes) {
+				__m512i updating_mask_v = _mm512_load_epi32(h_updating_graph_mask + tid);
+				__mmask16 true_updating_mask_mask = _mm512_cmpeq_epi32_mask(updating_mask_v, one_v);
+				_mm512_mask_store_epi32(h_graph_mask + tid, true_updating_mask_mask, one_v);
+				_mm512_mask_store_epi32(h_graph_visited + tid, true_updating_mask_mask, one_v);
+				short *updating_flag = (short *) (&true_updating_mask_mask);
+				if (*updating_flag) {
+					stop = 0;
+				}
+				//_mm512_store_epi32(h_updating_graph_mask + tid, zero_v);
+				_mm512_mask_store_epi32(h_updating_graph_mask + tid, true_updating_mask_mask, zero_v);
+			} else {
+				for (unsigned i = tid; i < no_of_nodes; i++) {
+					if (h_updating_graph_mask[i] == 1) {
+						h_graph_mask[i]=1;
+						h_graph_visited[i]=1;
+						stop = 0;
+						h_updating_graph_mask[i]=0;
+					}
+				}
+			}
+		}
 		//printf("@225\n");//test
 		//k++;
 	}

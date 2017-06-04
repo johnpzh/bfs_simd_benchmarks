@@ -33,7 +33,7 @@ Begin optimization report for: main(int, char **)
     Report from: Interprocedural optimizations [ipo]
 
 INLINE REPORT: (main(int, char **)) [1/4=25.0%] bfs.cpp(36,1)
-  -> INLINE: (37,2) BFSGraph(int, char **) (isz = 460) (sz = 468)
+  -> INLINE: (37,2) BFSGraph(int, char **) (isz = 512) (sz = 520)
     -> INLINE (MANUAL): (61,20) atoi(const char *) (isz = 7) (sz = 14)
       -> EXTERN: /usr/include/stdlib.h:(280,16) strtol(const char *, char **, int)
     -> EXTERN: (67,7) fopen(const char *, const char *)
@@ -66,17 +66,21 @@ INLINE REPORT: (main(int, char **)) [1/4=25.0%] bfs.cpp(36,1)
     -> EXTERN: (187,30) _mm512_set1_epi32(int)
     -> EXTERN: (188,23) _mm512_mask_add_epi32(__m512i, unsigned short, __m512i, __m512i)
     -> EXTERN: (189,6) _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int)
-    -> EXTERN: (230,27) omp_get_wtime()
-    -> EXTERN: (233,3) printf(const char *, ...)
-    -> EXTERN: (236,14) fopen(const char *, const char *)
-    -> EXTERN: (238,3) fprintf(FILE *, const char *, ...)
-    -> EXTERN: (239,2) fclose(FILE *)
-    -> EXTERN: (249,2) free(void *)
-    -> EXTERN: (250,2) _mm_free(void *)
-    -> EXTERN: (251,2) _mm_free(void *)
-    -> EXTERN: (252,2) _mm_free(void *)
+    -> EXTERN: (208,41) _mm512_cmp_epi32_mask(__m512i, __m512i, unsigned int)
+    -> EXTERN: (209,5) _mm512_mask_store_epi32(void *, unsigned short, __m512i)
+    -> EXTERN: (210,5) _mm512_mask_store_epi32(void *, unsigned short, __m512i)
+    -> EXTERN: (216,5) _mm512_mask_store_epi32(void *, unsigned short, __m512i)
+    -> EXTERN: (233,27) omp_get_wtime()
+    -> EXTERN: (236,3) printf(const char *, ...)
+    -> EXTERN: (239,14) fopen(const char *, const char *)
+    -> EXTERN: (241,3) fprintf(FILE *, const char *, ...)
+    -> EXTERN: (242,2) fclose(FILE *)
+    -> EXTERN: (252,2) free(void *)
     -> EXTERN: (253,2) _mm_free(void *)
     -> EXTERN: (254,2) _mm_free(void *)
+    -> EXTERN: (255,2) _mm_free(void *)
+    -> EXTERN: (256,2) _mm_free(void *)
+    -> EXTERN: (257,2) _mm_free(void *)
 
 
     Report from: OpenMP optimizations [openmp]
@@ -124,8 +128,8 @@ LOOP BEGIN at bfs.cpp(139,2) inlined into bfs.cpp(37,2)
    remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
 LOOP END
 
-LOOP BEGIN at bfs.cpp(237,2) inlined into bfs.cpp(37,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(238,3) ]
+LOOP BEGIN at bfs.cpp(240,2) inlined into bfs.cpp(37,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(241,3) ]
 LOOP END
 
 LOOP BEGIN at bfs.cpp(149,3) inlined into bfs.cpp(37,2)
@@ -144,28 +148,37 @@ LOOP BEGIN at bfs.cpp(149,3) inlined into bfs.cpp(37,2)
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(194,1) inlined into bfs.cpp(37,2)
-   remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(199,5) ]
-   remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(200,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(202,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(202,5) ]
-   remark #15381: vectorization support: unaligned access used inside loop body
-   remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
-   remark #15305: vectorization support: vector length 4
-   remark #15309: vectorization support: normalized vectorization overhead 0.072
-   remark #15450: unmasked unaligned unit stride loads: 1 
-   remark #15451: unmasked unaligned unit stride stores: 1 
-   remark #15457: masked unaligned unit stride stores: 2 
-   remark #15475: --- begin vector cost summary ---
-   remark #15476: scalar cost: 20 
-   remark #15477: vector cost: 34.750 
-   remark #15478: estimated potential speedup: 0.570 
-   remark #15488: --- end vector cost summary ---
-   remark #25439: unrolled with remainder by 2  
-LOOP END
+LOOP BEGIN at bfs.cpp(205,3) inlined into bfs.cpp(37,2)
+   remark #15382: vectorization support: call to function _mm512_mask_store_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ bfs.cpp(209,5) ]
+   remark #15382: vectorization support: call to function _mm512_mask_store_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ bfs.cpp(210,5) ]
+   remark #15382: vectorization support: call to function _mm512_mask_store_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ bfs.cpp(216,5) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed ANTI dependence between h_updating_graph_mask (208:41) and h_updating_graph_mask (223:7)
+   remark #15346: vector dependence: assumed FLOW dependence between h_updating_graph_mask (223:7) and h_updating_graph_mask (208:41)
 
-LOOP BEGIN at bfs.cpp(194,1) inlined into bfs.cpp(37,2)
-<Remainder>
+   LOOP BEGIN at bfs.cpp(218,5) inlined into bfs.cpp(37,2)
+      remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(220,7) ]
+      remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(221,7) ]
+      remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(223,7) ]
+      remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(223,7) ]
+      remark #15381: vectorization support: unaligned access used inside loop body
+      remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
+      remark #15305: vectorization support: vector length 4
+      remark #15309: vectorization support: normalized vectorization overhead 0.072
+      remark #15450: unmasked unaligned unit stride loads: 1 
+      remark #15451: unmasked unaligned unit stride stores: 1 
+      remark #15457: masked unaligned unit stride stores: 2 
+      remark #15475: --- begin vector cost summary ---
+      remark #15476: scalar cost: 20 
+      remark #15477: vector cost: 34.750 
+      remark #15478: estimated potential speedup: 0.570 
+      remark #15488: --- end vector cost summary ---
+      remark #25439: unrolled with remainder by 2  
+   LOOP END
+
+   LOOP BEGIN at bfs.cpp(218,5) inlined into bfs.cpp(37,2)
+   <Remainder>
+   LOOP END
 LOOP END
 
     Report from: Code generation optimizations [cg]
@@ -181,19 +194,19 @@ bfs.cpp(36,1):remark #34051: REGISTER ALLOCATION : [main] bfs.cpp:36
         Assigned     :   24[ rax rdx rcx rbx rsi rdi r8-r15 zmm0-zmm6 k1-k3]
         
     Routine temporaries
-        Total         :     408
-            Global    :     112
-            Local     :     296
-        Regenerable   :     160
-        Spilled       :       4
+        Total         :     433
+            Global    :     124
+            Local     :     309
+        Regenerable   :     163
+        Spilled       :      13
         
     Routine stack
         Variables     :     376 bytes*
-            Reads     :      42 [9.28e+01 ~ 2.6%]
-            Writes    :      40 [5.66e+02 ~ 15.8%]
-        Spills        :     240 bytes*
-            Reads     :      19 [1.73e+01 ~ 0.5%]
-            Writes    :      19 [6.95e+01 ~ 1.9%]
+            Reads     :      42 [9.28e+01 ~ 2.0%]
+            Writes    :      40 [5.66e+02 ~ 12.0%]
+        Spills        :     424 bytes*
+            Reads     :      28 [1.14e+02 ~ 2.4%]
+            Writes    :      28 [1.41e+02 ~ 3.0%]
     
     Notes
     
@@ -281,17 +294,21 @@ INLINE REPORT: (BFSGraph(int, char **)) [4/4=100.0%] bfs.cpp(46,1)
   -> EXTERN: (187,30) _mm512_set1_epi32(int)
   -> EXTERN: (188,23) _mm512_mask_add_epi32(__m512i, unsigned short, __m512i, __m512i)
   -> EXTERN: (189,6) _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int)
-  -> EXTERN: (230,27) omp_get_wtime()
-  -> EXTERN: (233,3) printf(const char *, ...)
-  -> EXTERN: (236,14) fopen(const char *, const char *)
-  -> EXTERN: (238,3) fprintf(FILE *, const char *, ...)
-  -> EXTERN: (239,2) fclose(FILE *)
-  -> EXTERN: (249,2) free(void *)
-  -> EXTERN: (250,2) _mm_free(void *)
-  -> EXTERN: (251,2) _mm_free(void *)
-  -> EXTERN: (252,2) _mm_free(void *)
+  -> EXTERN: (208,41) _mm512_cmp_epi32_mask(__m512i, __m512i, unsigned int)
+  -> EXTERN: (209,5) _mm512_mask_store_epi32(void *, unsigned short, __m512i)
+  -> EXTERN: (210,5) _mm512_mask_store_epi32(void *, unsigned short, __m512i)
+  -> EXTERN: (216,5) _mm512_mask_store_epi32(void *, unsigned short, __m512i)
+  -> EXTERN: (233,27) omp_get_wtime()
+  -> EXTERN: (236,3) printf(const char *, ...)
+  -> EXTERN: (239,14) fopen(const char *, const char *)
+  -> EXTERN: (241,3) fprintf(FILE *, const char *, ...)
+  -> EXTERN: (242,2) fclose(FILE *)
+  -> EXTERN: (252,2) free(void *)
   -> EXTERN: (253,2) _mm_free(void *)
   -> EXTERN: (254,2) _mm_free(void *)
+  -> EXTERN: (255,2) _mm_free(void *)
+  -> EXTERN: (256,2) _mm_free(void *)
+  -> EXTERN: (257,2) _mm_free(void *)
 
 
     Report from: OpenMP optimizations [openmp]
@@ -339,8 +356,8 @@ LOOP BEGIN at bfs.cpp(139,2)
    remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
 LOOP END
 
-LOOP BEGIN at bfs.cpp(237,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(238,3) ]
+LOOP BEGIN at bfs.cpp(240,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(241,3) ]
 LOOP END
 
 LOOP BEGIN at bfs.cpp(149,3)
@@ -359,28 +376,37 @@ LOOP BEGIN at bfs.cpp(149,3)
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(194,1)
-   remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(199,5) ]
-   remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(200,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(202,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(202,5) ]
-   remark #15381: vectorization support: unaligned access used inside loop body
-   remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
-   remark #15305: vectorization support: vector length 4
-   remark #15309: vectorization support: normalized vectorization overhead 0.072
-   remark #15450: unmasked unaligned unit stride loads: 1 
-   remark #15451: unmasked unaligned unit stride stores: 1 
-   remark #15457: masked unaligned unit stride stores: 2 
-   remark #15475: --- begin vector cost summary ---
-   remark #15476: scalar cost: 20 
-   remark #15477: vector cost: 34.750 
-   remark #15478: estimated potential speedup: 0.570 
-   remark #15488: --- end vector cost summary ---
-   remark #25439: unrolled with remainder by 2  
-LOOP END
+LOOP BEGIN at bfs.cpp(205,3)
+   remark #15382: vectorization support: call to function _mm512_mask_store_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ bfs.cpp(209,5) ]
+   remark #15382: vectorization support: call to function _mm512_mask_store_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ bfs.cpp(210,5) ]
+   remark #15382: vectorization support: call to function _mm512_mask_store_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ bfs.cpp(216,5) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed ANTI dependence between h_updating_graph_mask (208:41) and h_updating_graph_mask (223:7)
+   remark #15346: vector dependence: assumed FLOW dependence between h_updating_graph_mask (223:7) and h_updating_graph_mask (208:41)
 
-LOOP BEGIN at bfs.cpp(194,1)
-<Remainder>
+   LOOP BEGIN at bfs.cpp(218,5)
+      remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(220,7) ]
+      remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(221,7) ]
+      remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(223,7) ]
+      remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(223,7) ]
+      remark #15381: vectorization support: unaligned access used inside loop body
+      remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
+      remark #15305: vectorization support: vector length 4
+      remark #15309: vectorization support: normalized vectorization overhead 0.072
+      remark #15450: unmasked unaligned unit stride loads: 1 
+      remark #15451: unmasked unaligned unit stride stores: 1 
+      remark #15457: masked unaligned unit stride stores: 2 
+      remark #15475: --- begin vector cost summary ---
+      remark #15476: scalar cost: 20 
+      remark #15477: vector cost: 34.750 
+      remark #15478: estimated potential speedup: 0.570 
+      remark #15488: --- end vector cost summary ---
+      remark #25439: unrolled with remainder by 2  
+   LOOP END
+
+   LOOP BEGIN at bfs.cpp(218,5)
+   <Remainder>
+   LOOP END
 LOOP END
 
     Report from: Code generation optimizations [cg]
@@ -396,19 +422,19 @@ bfs.cpp(46,1):remark #34051: REGISTER ALLOCATION : [_Z8BFSGraphiPPc] bfs.cpp:46
         Assigned     :   24[ rax rdx rcx rbx rsi rdi r8-r15 zmm0-zmm6 k1-k3]
         
     Routine temporaries
-        Total         :     400
-            Global    :     112
-            Local     :     288
-        Regenerable   :     148
-        Spilled       :       4
+        Total         :     425
+            Global    :     124
+            Local     :     301
+        Regenerable   :     151
+        Spilled       :      13
         
     Routine stack
         Variables     :     372 bytes*
-            Reads     :      40 [9.28e+01 ~ 2.6%]
-            Writes    :      38 [5.66e+02 ~ 15.7%]
-        Spills        :     240 bytes*
-            Reads     :      24 [1.73e+01 ~ 0.5%]
-            Writes    :      19 [7.45e+01 ~ 2.1%]
+            Reads     :      40 [9.28e+01 ~ 2.0%]
+            Writes    :      38 [5.66e+02 ~ 12.0%]
+        Spills        :     424 bytes*
+            Reads     :      33 [1.14e+02 ~ 2.4%]
+            Writes    :      28 [1.46e+02 ~ 3.1%]
     
     Notes
     
