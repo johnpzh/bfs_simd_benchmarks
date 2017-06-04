@@ -1,11 +1,19 @@
 #!/usr/bin/bash
-
+# Determine the data file
+case $1 in
+4096)
+	data_file="graph4096"
+	;;
+128M)
+	data_file="graph128M"
+	;;
+*)
+	data_file="graph16M"
+	;;
+esac
 version="ins-exe-vec"
 bin_addr="/home/zpeng/benchmarks/test/ins_exe_vec_like_queue_but_wrong"
 data_addr="/home/zpeng/benchmarks/rodinia_3.1/data/bfs"
-#data_file="graph4096"
-data_file="graph16M"
-#data_file="graph128M"
 #no_core=64
 power_max=16
 result_file="result_${version}_${data_file}_$(date +%Y%m%d-%H%M%S).txt"
