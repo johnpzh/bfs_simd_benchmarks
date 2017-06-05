@@ -71,16 +71,16 @@ INLINE REPORT: (main(int, char **)) [1/4=25.0%] bfs.cpp(36,1)
     -> EXTERN: (210,5) _mm512_mask_store_epi32(void *, unsigned short, __m512i)
     -> EXTERN: (216,5) _mm512_mask_store_epi32(void *, unsigned short, __m512i)
     -> EXTERN: (233,27) omp_get_wtime()
-    -> EXTERN: (236,3) printf(const char *, ...)
-    -> EXTERN: (239,14) fopen(const char *, const char *)
-    -> EXTERN: (241,3) fprintf(FILE *, const char *, ...)
-    -> EXTERN: (242,2) fclose(FILE *)
-    -> EXTERN: (252,2) free(void *)
+    -> EXTERN: (234,3) printf(const char *, ...)
+    -> EXTERN: (237,14) fopen(const char *, const char *)
+    -> EXTERN: (239,3) fprintf(FILE *, const char *, ...)
+    -> EXTERN: (240,2) fclose(FILE *)
+    -> EXTERN: (250,2) free(void *)
+    -> EXTERN: (251,2) _mm_free(void *)
+    -> EXTERN: (252,2) _mm_free(void *)
     -> EXTERN: (253,2) _mm_free(void *)
     -> EXTERN: (254,2) _mm_free(void *)
     -> EXTERN: (255,2) _mm_free(void *)
-    -> EXTERN: (256,2) _mm_free(void *)
-    -> EXTERN: (257,2) _mm_free(void *)
 
 
     Report from: OpenMP optimizations [openmp]
@@ -128,8 +128,8 @@ LOOP BEGIN at bfs.cpp(139,2) inlined into bfs.cpp(37,2)
    remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
 LOOP END
 
-LOOP BEGIN at bfs.cpp(240,2) inlined into bfs.cpp(37,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(241,3) ]
+LOOP BEGIN at bfs.cpp(238,2) inlined into bfs.cpp(37,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(239,3) ]
 LOOP END
 
 LOOP BEGIN at bfs.cpp(149,3) inlined into bfs.cpp(37,2)
@@ -299,16 +299,16 @@ INLINE REPORT: (BFSGraph(int, char **)) [4/4=100.0%] bfs.cpp(46,1)
   -> EXTERN: (210,5) _mm512_mask_store_epi32(void *, unsigned short, __m512i)
   -> EXTERN: (216,5) _mm512_mask_store_epi32(void *, unsigned short, __m512i)
   -> EXTERN: (233,27) omp_get_wtime()
-  -> EXTERN: (236,3) printf(const char *, ...)
-  -> EXTERN: (239,14) fopen(const char *, const char *)
-  -> EXTERN: (241,3) fprintf(FILE *, const char *, ...)
-  -> EXTERN: (242,2) fclose(FILE *)
-  -> EXTERN: (252,2) free(void *)
+  -> EXTERN: (234,3) printf(const char *, ...)
+  -> EXTERN: (237,14) fopen(const char *, const char *)
+  -> EXTERN: (239,3) fprintf(FILE *, const char *, ...)
+  -> EXTERN: (240,2) fclose(FILE *)
+  -> EXTERN: (250,2) free(void *)
+  -> EXTERN: (251,2) _mm_free(void *)
+  -> EXTERN: (252,2) _mm_free(void *)
   -> EXTERN: (253,2) _mm_free(void *)
   -> EXTERN: (254,2) _mm_free(void *)
   -> EXTERN: (255,2) _mm_free(void *)
-  -> EXTERN: (256,2) _mm_free(void *)
-  -> EXTERN: (257,2) _mm_free(void *)
 
 
     Report from: OpenMP optimizations [openmp]
@@ -356,8 +356,8 @@ LOOP BEGIN at bfs.cpp(139,2)
    remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
 LOOP END
 
-LOOP BEGIN at bfs.cpp(240,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(241,3) ]
+LOOP BEGIN at bfs.cpp(238,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(239,3) ]
 LOOP END
 
 LOOP BEGIN at bfs.cpp(149,3)

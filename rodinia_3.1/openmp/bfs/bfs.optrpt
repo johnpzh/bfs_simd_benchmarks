@@ -54,16 +54,16 @@ INLINE REPORT: (main(int, char **)) [1/4=25.0%] bfs.cpp(31,1)
     -> EXTERN: (123,29) omp_get_wtime()
     -> EXTERN: (132,3) omp_set_num_threads(int)
     -> EXTERN: (172,27) omp_get_wtime()
-    -> EXTERN: (175,3) printf(const char *, ...)
-    -> EXTERN: (178,14) fopen(const char *, const char *)
-    -> EXTERN: (180,3) fprintf(FILE *, const char *, ...)
-    -> EXTERN: (181,2) fclose(FILE *)
+    -> EXTERN: (173,3) printf(const char *, ...)
+    -> EXTERN: (176,14) fopen(const char *, const char *)
+    -> EXTERN: (178,3) fprintf(FILE *, const char *, ...)
+    -> EXTERN: (179,2) fclose(FILE *)
+    -> EXTERN: (183,2) free(void *)
+    -> EXTERN: (184,2) free(void *)
     -> EXTERN: (185,2) free(void *)
     -> EXTERN: (186,2) free(void *)
     -> EXTERN: (187,2) free(void *)
     -> EXTERN: (188,2) free(void *)
-    -> EXTERN: (189,2) free(void *)
-    -> EXTERN: (190,2) free(void *)
 
 
     Report from: OpenMP optimizations [openmp]
@@ -118,8 +118,8 @@ LOOP BEGIN at bfs.cpp(125,2) inlined into bfs.cpp(32,2)
    remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
 LOOP END
 
-LOOP BEGIN at bfs.cpp(179,2) inlined into bfs.cpp(32,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(180,3) ]
+LOOP BEGIN at bfs.cpp(177,2) inlined into bfs.cpp(32,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(178,3) ]
 LOOP END
 
 LOOP BEGIN at bfs.cpp(135,3) inlined into bfs.cpp(32,2)
@@ -265,16 +265,16 @@ INLINE REPORT: (BFSGraph(int, char **)) [4/4=100.0%] bfs.cpp(41,1)
   -> EXTERN: (123,29) omp_get_wtime()
   -> EXTERN: (132,3) omp_set_num_threads(int)
   -> EXTERN: (172,27) omp_get_wtime()
-  -> EXTERN: (175,3) printf(const char *, ...)
-  -> EXTERN: (178,14) fopen(const char *, const char *)
-  -> EXTERN: (180,3) fprintf(FILE *, const char *, ...)
-  -> EXTERN: (181,2) fclose(FILE *)
+  -> EXTERN: (173,3) printf(const char *, ...)
+  -> EXTERN: (176,14) fopen(const char *, const char *)
+  -> EXTERN: (178,3) fprintf(FILE *, const char *, ...)
+  -> EXTERN: (179,2) fclose(FILE *)
+  -> EXTERN: (183,2) free(void *)
+  -> EXTERN: (184,2) free(void *)
   -> EXTERN: (185,2) free(void *)
   -> EXTERN: (186,2) free(void *)
   -> EXTERN: (187,2) free(void *)
   -> EXTERN: (188,2) free(void *)
-  -> EXTERN: (189,2) free(void *)
-  -> EXTERN: (190,2) free(void *)
 
 
     Report from: OpenMP optimizations [openmp]
@@ -329,8 +329,8 @@ LOOP BEGIN at bfs.cpp(125,2)
    remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
 LOOP END
 
-LOOP BEGIN at bfs.cpp(179,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(180,3) ]
+LOOP BEGIN at bfs.cpp(177,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(178,3) ]
 LOOP END
 
 LOOP BEGIN at bfs.cpp(135,3)

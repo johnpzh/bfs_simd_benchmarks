@@ -170,9 +170,7 @@ void BFSGraph( int argc, char** argv)
 	while(!stop);
 #ifdef OPEN
         double end_time = omp_get_wtime();
-		//printf("No. of Threads: %d\n", num_omp_threads);
-        //printf("Compute time: %lf\n", (end_time - start_time));
-		printf("%d\t%lf\n", num_omp_threads, (end_time - start_time));
+		printf("%d %lf\n", num_omp_threads, (end_time - start_time));
 #endif
 	//Store the result into a file
 	FILE *fpo = fopen("path.txt","w");

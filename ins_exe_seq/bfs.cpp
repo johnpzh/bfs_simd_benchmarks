@@ -3,13 +3,13 @@
 #include <math.h>
 #include <stdlib.h>
 #include <omp.h>
-#include <vector>
 //#define NUM_THREAD 4
 #define OPEN
+#define SIZE_INT sizeof(int)
 
-#define BUFFER_SIZE_MAX 134217728 // 2^27
+//#define BUFFER_SIZE_MAX 134217728 // 2^27
 //#define BUFFER_SIZE_MAX 4096 //
-using std::vector;
+unsigned BUFFER_SIZE_MAX;
 
 FILE *fp;
 
@@ -48,16 +48,18 @@ void BFSGraph( int argc, char** argv)
 	char *input_f;
 	int	 num_omp_threads;
 	
-	if(argc!=3){
+	if(argc!=4){
 	//Usage(argc, argv);
 	//Usage( argv);
 	//exit(0);
 	num_omp_threads = 1;
 	static char add[] = "/home/zpeng/benchmarks/rodinia_3.1/data/bfs/graph4096.txt";
 	input_f = add;
+	BUFFER_SIZE_MAX = 4096;
 	} else {
 	num_omp_threads = atoi(argv[1]);
 	input_f = argv[2];
+	BUFFER_SIZE_MAX = atoi(argv[3]);
 	}
 	
 	//printf("Reading File\n");
@@ -124,9 +126,11 @@ void BFSGraph( int argc, char** argv)
 	
 	//int k=0;
 	
-	vector<int> id_buffer(BUFFER_SIZE_MAX);
+	//vector<int> id_buffer(BUFFER_SIZE_MAX);
 	//int tid_buffer[BUFFER_SIZE_MAX];
-	vector<int> tid_buffer(BUFFER_SIZE_MAX);
+	//vector<int> tid_buffer(BUFFER_SIZE_MAX);
+	int *id_buffer = (int *) malloc(SIZE_INT * BUFFER_SIZE_MAX);
+	int *cost_buffer = (int *) malloc(SIZE_INT * BUFFER_SIZE_MAX);
 #ifdef OPEN
         double start_time = omp_get_wtime();
 #endif
@@ -135,11 +139,11 @@ void BFSGraph( int argc, char** argv)
 	{
 		//if no thread changes this value then the loop stops
 		stop = 1;
-		id_buffer.clear();
+		unsigned top = 0;
 
 #ifdef OPEN
 		omp_set_num_threads(num_omp_threads);
-#pragma omp parallel for 
+//#pragma omp parallel for 
 #endif 
 		for(unsigned int tid = 0; tid < no_of_nodes; tid++ )
 		{
@@ -151,30 +155,50 @@ void BFSGraph( int argc, char** argv)
 #endif
 				for(int i = h_graph_nodes[tid].starting; \
 						i < next_starting; \
-						i++)
-				{
-					int id = h_graph_edges[i];
-					if(!h_graph_visited[id])
-					{
-						//h_cost[id]=h_cost[tid]+1;
-						//h_updating_graph_mask[id]=1;
-						id_buffer.push_back(id);
-						tid_buffer[id] = tid;
+						i++) {
+				//	int id = h_graph_edges[i];
+				//	if(!h_graph_visited[id])
+				//	{
+				//		h_cost[id]=h_cost[tid]+1;
+				//		h_updating_graph_mask[id]=1;
+				//	}
+					/* Check buffer's size */
+					if (top + 1 > BUFFER_SIZE_MAX) {
+						/* If Buffer would be full, then operate */
+#ifdef OPEN
+#pragma omp parallel for
+#endif
+						for (unsigned k = 0; k < top; ++k) {
+							int id = id_buffer[k];
+							if (!h_graph_visited[id]) {
+								h_updating_graph_mask[id] = 1;
+								h_graph_visited[id] = 1;
+								stop = 0;
+								h_cost[id] = cost_buffer[k] + 1;
+							}
+						}
+						top = 0;
 					}
+					/* Load to buffer */
+					id_buffer[top] = h_graph_edges[i];
+					cost_buffer[top] = h_cost[tid];
+					top++;
 				}
 			}
 		}
-		unsigned long int buffer_size = id_buffer.size();
 #ifdef OPEN
 #pragma omp parallel for
 #endif
 		for (unsigned long int i = 0; \
-			 i < buffer_size; \
+			 i < top; \
 			 i++) {
 			int id = id_buffer[i];
-			int tid = tid_buffer[id];
-			h_cost[id] = h_cost[tid] + 1;
-			h_updating_graph_mask[id] = 1;
+			if (!h_graph_visited[id]) {
+				h_updating_graph_mask[id] = 1;
+				h_graph_visited[id] = 1;
+				stop = 0;
+				h_cost[id] = cost_buffer[i] + 1;
+			}
 		}
 #ifdef OPEN
 #pragma omp parallel for
@@ -183,8 +207,6 @@ void BFSGraph( int argc, char** argv)
 		{
 			if (h_updating_graph_mask[tid] == 1) {
 				h_graph_mask[tid]=1;
-				h_graph_visited[tid]=1;
-				stop = 0;
 				h_updating_graph_mask[tid]=0;
 			}
 		}
@@ -193,9 +215,8 @@ void BFSGraph( int argc, char** argv)
 	while(!stop);
 #ifdef OPEN
         double end_time = omp_get_wtime();
-		//printf("No. of Threads: %d\n", num_omp_threads);
-        //printf("Compute time: %lf\n", (end_time - start_time));
-		printf("%d\t%lf\n", num_omp_threads, (end_time - start_time));
+		//printf("%d %lf\n", num_omp_threads, (end_time - start_time));
+		printf("%u %lf\n", BUFFER_SIZE_MAX, (end_time - start_time));
 #endif
 	//Store the result into a file
 	FILE *fpo = fopen("path.txt","w");
@@ -211,5 +232,7 @@ void BFSGraph( int argc, char** argv)
 	free( h_updating_graph_mask);
 	free( h_graph_visited);
 	free( h_cost);
+	free( id_buffer);
+	free( cost_buffer);
 }
 
