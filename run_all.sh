@@ -54,7 +54,7 @@ echo -n "$version running"
 tno=1
 while [ $tno -le $no_core ]
 do
-	${bin_addr}/bfs ${tno} ${data_addr}/${data_file}.txt >> $result_file
+	${bin_addr}/bfs ${tno} ${data_addr}/${data_file}.txt 4096 >> $result_file
 	echo -n .
 	tno=$((tno*2))
 done

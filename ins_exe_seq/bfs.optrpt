@@ -58,7 +58,7 @@ INLINE REPORT: (main(int, char **)) [1/4=25.0%] bfs.cpp(35,1)
     -> EXTERN: (135,29) omp_get_wtime()
     -> EXTERN: (145,3) omp_set_num_threads(int)
     -> EXTERN: (217,27) omp_get_wtime()
-    -> EXTERN: (219,3) printf(const char *, ...)
+    -> EXTERN: (218,3) printf(const char *, ...)
     -> EXTERN: (222,14) fopen(const char *, const char *)
     -> EXTERN: (224,3) fprintf(FILE *, const char *, ...)
     -> EXTERN: (225,2) fclose(FILE *)
@@ -205,19 +205,19 @@ bfs.cpp(35,1):remark #34051: REGISTER ALLOCATION : [main] bfs.cpp:35
         Assigned     :   20[ rax rdx rcx rbx rsi rdi r8-r15 zmm0-zmm5]
         
     Routine temporaries
-        Total         :     535
+        Total         :     534
             Global    :     172
-            Local     :     363
+            Local     :     362
         Regenerable   :     188
-        Spilled       :       6
+        Spilled       :       7
         
     Routine stack
         Variables     :     152 bytes*
             Reads     :      45 [1.61e+02 ~ 2.6%]
             Writes    :      27 [4.63e+02 ~ 7.4%]
-        Spills        :      88 bytes*
-            Reads     :      28 [3.34e+01 ~ 0.5%]
-            Writes    :      28 [1.30e+02 ~ 2.1%]
+        Spills        :      96 bytes*
+            Reads     :      28 [3.35e+01 ~ 0.5%]
+            Writes    :      29 [1.35e+02 ~ 2.2%]
     
     Notes
     
@@ -297,7 +297,7 @@ INLINE REPORT: (BFSGraph(int, char **)) [4/4=100.0%] bfs.cpp(45,1)
   -> EXTERN: (135,29) omp_get_wtime()
   -> EXTERN: (145,3) omp_set_num_threads(int)
   -> EXTERN: (217,27) omp_get_wtime()
-  -> EXTERN: (219,3) printf(const char *, ...)
+  -> EXTERN: (218,3) printf(const char *, ...)
   -> EXTERN: (222,14) fopen(const char *, const char *)
   -> EXTERN: (224,3) fprintf(FILE *, const char *, ...)
   -> EXTERN: (225,2) fclose(FILE *)
@@ -444,9 +444,9 @@ bfs.cpp(45,1):remark #34051: REGISTER ALLOCATION : [_Z8BFSGraphiPPc] bfs.cpp:45
         Assigned     :   21[ rax rdx rcx rbx rbp rsi rdi r8-r15 zmm0-zmm5]
         
     Routine temporaries
-        Total         :     526
+        Total         :     525
             Global    :     172
-            Local     :     354
+            Local     :     353
         Regenerable   :     175
         Spilled       :       4
         
