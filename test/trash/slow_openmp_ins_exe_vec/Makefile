@@ -1,7 +1,7 @@
 # C compiler
 ICPC = icpc
 CC_FLAGS = -Wall -Wextra -g -std=c++11 -qopenmp -O3 -qopt-report=5
-#CC_FLAGS = -Wall -Wextra -g -std=c++11 -qopenmp
+#CC_FLAGS = -Wall -Wextra -g -std=c++11
 
 .PHONY: clean
 

@@ -159,8 +159,7 @@ void BFSGraph( int argc, char** argv)
 	{
 		thrd = omp_get_thread_num();
 		tops[thrd] = 0;
-//#pragma omp for schedule(dynamic, 128) 
-#pragma omp for schedule(static)
+#pragma omp for schedule(dynamic)
 #endif 
 		for(unsigned int tid = 0; tid < no_of_nodes; tid++ )
 		{
@@ -224,72 +223,40 @@ void BFSGraph( int argc, char** argv)
 		}
 #ifdef OPEN
 //#pragma omp parallel for
-//#pragma omp for schedule(dynamic) collapse(2)
 //#pragma omp for schedule(dynamic)
-#pragma omp for schedule(static)
 #endif
-		//for (unsigned i = 0; i < tops[thrd]; i += NO_P_INT) {
-		//	if (i + NO_P_INT <= tops[thrd]) {
-		//		/* Vectoried */
-		//		/* Update those flags */
-		//		__m512i id_v = _mm512_load_epi32(id_buffer[thrd] + i);
-		//		__m512i visited_v = _mm512_i32gather_epi32(id_v, h_graph_visited, SIZE_INT);
-		//		__mmask16 novisited_mask = _mm512_cmpeq_epi32_mask(visited_v, zero_v);
-		//		_mm512_mask_i32scatter_epi32(h_updating_graph_mask, novisited_mask, id_v, one_v, SIZE_INT);
-		//		_mm512_mask_i32scatter_epi32(h_graph_visited, novisited_mask, id_v, one_v, SIZE_INT);
-		//		//stop = 0;
+		for (unsigned i = 0; i < tops[thrd]; i += NO_P_INT) {
+			if (i + NO_P_INT <= tops[thrd]) {
+				/* Vectoried */
+				/* Update those flags */
+				__m512i id_v = _mm512_load_epi32(id_buffer[thrd] + i);
+				__m512i visited_v = _mm512_i32gather_epi32(id_v, h_graph_visited, SIZE_INT);
+				__mmask16 novisited_mask = _mm512_cmpeq_epi32_mask(visited_v, zero_v);
+				_mm512_mask_i32scatter_epi32(h_updating_graph_mask, novisited_mask, id_v, one_v, SIZE_INT);
+				_mm512_mask_i32scatter_epi32(h_graph_visited, novisited_mask, id_v, one_v, SIZE_INT);
+				//stop = 0;
 
-		//		/* Update the h_cost */
-		//		__m512i cost_source_v = _mm512_load_epi32(cost_buffer[thrd] + i);
-		//		__m512i cost_v = _mm512_add_epi32(cost_source_v, one_v);
-		//		_mm512_mask_i32scatter_epi32(h_cost, novisited_mask, id_v, cost_v, SIZE_INT);
-		//	} else {
-		//		/* Serialized */
-		//		for (unsigned j = i; j < tops[thrd]; ++j) {
-		//			int id = id_buffer[thrd][j];
-		//			if (!h_graph_visited[id]) {
-		//				h_updating_graph_mask[id] = 1;
-		//				h_graph_visited[id] = 1;
-		//				//stop = 0;
-		//				h_cost[id] = cost_buffer[thrd][j] + 1;
-		//			}
-		//		}
-		//	}
-		//}
-		for (unsigned t = 0; t < num_omp_threads; ++t) {
-			for (unsigned i = 0; i < tops[t]; i += NO_P_INT) {
-				if (i + NO_P_INT <= tops[t]) {
-					/* Vectoried */
-					/* Update those flags */
-					__m512i id_v = _mm512_load_epi32(id_buffer[t] + i);
-					__m512i visited_v = _mm512_i32gather_epi32(id_v, h_graph_visited, SIZE_INT);
-					__mmask16 novisited_mask = _mm512_cmpeq_epi32_mask(visited_v, zero_v);
-					_mm512_mask_i32scatter_epi32(h_updating_graph_mask, novisited_mask, id_v, one_v, SIZE_INT);
-					_mm512_mask_i32scatter_epi32(h_graph_visited, novisited_mask, id_v, one_v, SIZE_INT);
-					//stop = 0;
-
-					/* Update the h_cost */
-					__m512i cost_source_v = _mm512_load_epi32(cost_buffer[t] + i);
-					__m512i cost_v = _mm512_add_epi32(cost_source_v, one_v);
-					_mm512_mask_i32scatter_epi32(h_cost, novisited_mask, id_v, cost_v, SIZE_INT);
-				} else {
-					/* Serialized */
-					for (unsigned j = i; j < tops[t]; ++j) {
-						int id = id_buffer[t][j];
-						if (!h_graph_visited[id]) {
-							h_updating_graph_mask[id] = 1;
-							h_graph_visited[id] = 1;
-							//stop = 0;
-							h_cost[id] = cost_buffer[t][j] + 1;
-						}
+				/* Update the h_cost */
+				__m512i cost_source_v = _mm512_load_epi32(cost_buffer[thrd] + i);
+				__m512i cost_v = _mm512_add_epi32(cost_source_v, one_v);
+				_mm512_mask_i32scatter_epi32(h_cost, novisited_mask, id_v, cost_v, SIZE_INT);
+			} else {
+				/* Serialized */
+				for (unsigned j = i; j < tops[thrd]; ++j) {
+					int id = id_buffer[thrd][j];
+					if (!h_graph_visited[id]) {
+						h_updating_graph_mask[id] = 1;
+						h_graph_visited[id] = 1;
+						//stop = 0;
+						h_cost[id] = cost_buffer[thrd][j] + 1;
 					}
 				}
 			}
 		}
 #ifdef OPEN
 //#pragma omp parallel for
-//#pragma omp for schedule(dynamic, 128)
-#pragma omp for schedule(static)
+#pragma omp for schedule(dynamic)
+//#pragma omp for
 #endif
 		for (unsigned i = 0; i < no_of_nodes; i += NO_P_INT) {
 			__m512i id_v = _mm512_load_epi32(h_updating_graph_mask + i);
