@@ -80,7 +80,7 @@ INLINE REPORT: (main(int, char **)) [1/4=25.0%] bfs.cpp(38,1)
     -> EXTERN: (258,5) _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int)
     -> EXTERN: (281,26) _mm512_cmp_epi32_mask(__m512i, __m512i, unsigned int)
     -> EXTERN: (297,27) omp_get_wtime()
-    -> EXTERN: (300,3) printf(const char *, ...)
+    -> EXTERN: (298,3) printf(const char *, ...)
     -> EXTERN: (303,14) fopen(const char *, const char *)
     -> EXTERN: (305,3) fprintf(FILE *, const char *, ...)
     -> EXTERN: (306,2) fclose(FILE *)
@@ -236,15 +236,15 @@ bfs.cpp(38,1):remark #34051: REGISTER ALLOCATION : [main] bfs.cpp:38
         Assigned     :   26[ rax rdx rcx rbx rsi rdi r8-r15 zmm0-zmm6 k0-k4]
         
     Routine temporaries
-        Total         :     591
+        Total         :     590
             Global    :     212
-            Local     :     379
+            Local     :     378
         Regenerable   :     184
         Spilled       :      27
         
     Routine stack
         Variables     :     756 bytes*
-            Reads     :      47 [7.92e+01 ~ 0.8%]
+            Reads     :      46 [7.82e+01 ~ 0.8%]
             Writes    :      31 [2.26e+01 ~ 0.2%]
         Spills        :     368 bytes*
             Reads     :      59 [4.58e+02 ~ 4.7%]
@@ -350,7 +350,7 @@ INLINE REPORT: (BFSGraph(int, char **)) [4/4=100.0%] bfs.cpp(48,1)
   -> EXTERN: (258,5) _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int)
   -> EXTERN: (281,26) _mm512_cmp_epi32_mask(__m512i, __m512i, unsigned int)
   -> EXTERN: (297,27) omp_get_wtime()
-  -> EXTERN: (300,3) printf(const char *, ...)
+  -> EXTERN: (298,3) printf(const char *, ...)
   -> EXTERN: (303,14) fopen(const char *, const char *)
   -> EXTERN: (305,3) fprintf(FILE *, const char *, ...)
   -> EXTERN: (306,2) fclose(FILE *)
@@ -506,15 +506,15 @@ bfs.cpp(48,1):remark #34051: REGISTER ALLOCATION : [_Z8BFSGraphiPPc] bfs.cpp:48
         Assigned     :   26[ rax rdx rcx rbx rsi rdi r8-r15 zmm0-zmm6 k0-k4]
         
     Routine temporaries
-        Total         :     584
+        Total         :     583
             Global    :     212
-            Local     :     372
+            Local     :     371
         Regenerable   :     173
         Spilled       :      27
         
     Routine stack
         Variables     :     752 bytes*
-            Reads     :      45 [7.92e+01 ~ 0.8%]
+            Reads     :      44 [7.82e+01 ~ 0.8%]
             Writes    :      29 [2.26e+01 ~ 0.2%]
         Spills        :     368 bytes*
             Reads     :      64 [4.58e+02 ~ 4.7%]
