@@ -62,8 +62,8 @@ void BFSGraph( int argc, char** argv)
 	static char add[] = "/home/zpeng/benchmarks/rodinia_3.1/data/bfs/graph4096.txt";
 	input_f = add;
 	//BUFFER_SIZE_MAX = 4096;
-	BUFFER_SIZE_MAX = 65536;
-	CHUNK_SIZE = 128;
+	BUFFER_SIZE_MAX = 16384;
+	CHUNK_SIZE = 8192;
 	} else {
 	num_omp_threads = atoi(argv[1]);
 	input_f = argv[2];
@@ -296,8 +296,8 @@ void BFSGraph( int argc, char** argv)
 #ifdef OPEN
         double end_time = omp_get_wtime();
 		//printf("%d %lf\n", num_omp_threads, (end_time - start_time));
-		printf("%u %lf\n", BUFFER_SIZE_MAX, (end_time - start_time));
-		//printf("%u %lf\n", CHUNK_SIZE, (end_time - start_time));
+		//printf("%u %lf\n", BUFFER_SIZE_MAX, (end_time - start_time));
+		printf("%u %lf\n", CHUNK_SIZE, (end_time - start_time));
 #endif
 	//Store the result into a file
 	FILE *fpo = fopen("path.txt","w");
