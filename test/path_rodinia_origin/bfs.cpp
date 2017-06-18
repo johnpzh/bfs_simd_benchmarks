@@ -3,8 +3,13 @@
 #include <math.h>
 #include <stdlib.h>
 #include <omp.h>
+#include <algorithm>
+#include <vector>
 //#define NUM_THREAD 4
 #define OPEN
+
+using std::vector;
+using std::sort;
 
 
 FILE *fp;
@@ -118,7 +123,7 @@ void BFSGraph( int argc, char** argv)
 	
 	//printf("Start traversing the tree\n");
 	
-	//int k=0;
+	int k=0;
 #ifdef OPEN
         double start_time = omp_get_wtime();
 #endif
@@ -128,6 +133,8 @@ void BFSGraph( int argc, char** argv)
 		//if no thread changes this value then the loop stops
 		stop = true;
 
+		//vector<unsigned> nodes;
+
 #ifdef OPEN
 		omp_set_num_threads(num_omp_threads);
 #pragma omp parallel for 
@@ -135,8 +142,10 @@ void BFSGraph( int argc, char** argv)
 		for(unsigned int tid = 0; tid < no_of_nodes; tid++ )
 		{
 			if (h_graph_mask[tid] == true) {
+				//nodes.push_back(tid);
 				h_graph_mask[tid]=false;
 				int next_starting = h_graph_nodes[tid].starting + h_graph_nodes[tid].no_of_edges;
+				//printf("From: %d\t\t", tid);//test
 #ifdef OPEN
 #pragma vector always
 #endif
@@ -149,10 +158,17 @@ void BFSGraph( int argc, char** argv)
 					{
 						h_cost[id]=h_cost[tid]+1;
 						h_updating_graph_mask[id]=true;
+						//printf("To: %d\n", id);//test
 					}
 				}
 			}
 		}
+		//printf("======= %d =======\n", k);//test
+		//sort(nodes.begin(), nodes.end());
+		//for (unsigned i = 0; i < nodes.size(); ++i) {
+		//	printf("%u ", nodes[i]);
+		//}
+		//printf("\n");//test
 #ifdef OPEN
 #pragma omp parallel for
 #endif
@@ -165,12 +181,12 @@ void BFSGraph( int argc, char** argv)
 				h_updating_graph_mask[tid]=false;
 			}
 		}
-		//k++;
+		k++;
 	}
 	while(!stop);
 #ifdef OPEN
         double end_time = omp_get_wtime();
-		printf("%d %lf\n", num_omp_threads, (end_time - start_time));
+		//printf("%d %lf\n", num_omp_threads, (end_time - start_time));
 #endif
 	//Store the result into a file
 	FILE *fpo = fopen("path.txt","w");

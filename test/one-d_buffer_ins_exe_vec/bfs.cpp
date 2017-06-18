@@ -58,7 +58,7 @@ void BFSGraph( int argc, char** argv)
 	//Usage( argv);
 	//exit(0);
 	//num_omp_threads = 1;
-	num_omp_threads = 2;
+	num_omp_threads = 64;
 	static char add[] = "/home/zpeng/benchmarks/rodinia_3.1/data/bfs/graph4096.txt";
 	input_f = add;
 	//BUFFER_SIZE_MAX = 4096;
@@ -272,6 +272,7 @@ void BFSGraph( int argc, char** argv)
 			}
 		}
 #ifdef OPEN
+#pragma omp barrier
 //#pragma omp parallel for
 #pragma omp for schedule(dynamic, CHUNK_SIZE)
 //#pragma omp for schedule(static)

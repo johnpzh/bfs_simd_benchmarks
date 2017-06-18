@@ -3,8 +3,13 @@
 #include <math.h>
 #include <stdlib.h>
 #include <omp.h>
+#include <vector>
+#include <algorithm>
 //#define NUM_THREAD 4
 #define OPEN
+
+using std::vector;
+using std::sort;
 
 //#define BUFFER_SIZE_MAX 16
 unsigned BUFFER_SIZE_MAX;
@@ -51,8 +56,8 @@ void BFSGraph( int argc, char** argv)
 	//Usage(argc, argv);
 	//Usage( argv);
 	//exit(0);
+	num_omp_threads = 64;
 	//num_omp_threads = 1;
-	num_omp_threads = 2;
 	static char add[] = "/home/zpeng/benchmarks/rodinia_3.1/data/bfs/graph4096.txt";
 	input_f = add;
 	BUFFER_SIZE_MAX = 64;
@@ -124,7 +129,9 @@ void BFSGraph( int argc, char** argv)
 	
 	//printf("Start traversing the tree\n");
 	
-	//int k=0;
+	//vector<unsigned> nodes;
+	//nodes.resize(4096);
+	int k=0;
 	int **id_buffer = (int **) malloc(sizeof(int *) * num_omp_threads);
 	int **cost_buffer = (int **) malloc(sizeof(int *) * num_omp_threads);
 	for (unsigned i = 0; i < num_omp_threads; ++i) {
@@ -140,6 +147,8 @@ void BFSGraph( int argc, char** argv)
 	{
 		//if no thread changes this value then the loop stops
 		stop = true;
+		//nodes.clear();
+		//printf("\n*******\n");//test
 
 #ifdef OPEN
 		omp_set_num_threads(num_omp_threads);
@@ -153,6 +162,7 @@ void BFSGraph( int argc, char** argv)
 		for(unsigned int tid = 0; tid < no_of_nodes; tid++ )
 		{
 			if (h_graph_mask[tid] == true) {
+				//nodes.push_back(tid);
 				h_graph_mask[tid]=false;
 				int next_starting = h_graph_nodes[tid].starting + h_graph_nodes[tid].no_of_edges;
 
@@ -169,10 +179,10 @@ void BFSGraph( int argc, char** argv)
 								h_graph_visited[id] = true;
 								//stop = false;
 								h_cost[id] = cost_buffer[thrd][j] + 1;
+								//printf("@182:%d, ", id);//test
 							}
-							//printf("@171\n");//test
-							//fflush(stdout);
 						}
+						//printf("\n");//test
 						top = 0;
 					}
 
@@ -180,23 +190,9 @@ void BFSGraph( int argc, char** argv)
 					id_buffer[thrd][top] = h_graph_edges[i];
 					cost_buffer[thrd][top] = h_cost[tid];
 					top++;
-
-					//int id = h_graph_edges[i];
-					//if(!h_graph_visited[id])
-					//{
-					//	h_cost[id]=h_cost[tid]+1;
-					//	h_updating_graph_mask[id]=true;
-					//	h_graph_visited[id] = true;
-					//	stop = false;
-					//}
-					//printf("@188\n");//test
-					//fflush(stdout);
 				}
 			}
-			//printf("@190\n");//test
-			//fflush(stdout);
 		}
-
 #ifdef OPEN
 //#pragma omp parallel for firstprivate(top)
 //#pragma omp for schedule(dynamic)
@@ -210,14 +206,21 @@ void BFSGraph( int argc, char** argv)
 				h_graph_visited[id] = true;
 				//stop = false;
 				h_cost[id] = cost_buffer[thrd][i] + 1;
-				//printf("h_cost[%d]: %d\n", id, h_cost[id]);//test
-				//getchar();
+				//printf("@209:%d, ", id);//test
 			}
-			//printf("@203\n");//test
-			//fflush(stdout);
 		}
-		//printf("@212 Stone\n");//test
-		//fflush(stdout);
+		//printf("\n");//test
+#pragma omp barrier
+
+//#pragma omp master
+//		{
+//		printf("\n======= %d ======= nodes.size:%lu \n", k, nodes.size());//test
+//		sort(nodes.begin(), nodes.end());
+//		for (unsigned i = 0; i < nodes.size(); ++i) {
+//			printf("'%u' ", nodes[i]);
+//		}
+//		printf("\n");//test
+//		}
 
 #ifdef OPEN
 #pragma omp for schedule(dynamic)
@@ -225,10 +228,8 @@ void BFSGraph( int argc, char** argv)
 #endif
 		for(unsigned int tid=0; tid< no_of_nodes ; tid++ )
 		{
-			//printf("@221 Stone\n");//test
-			//fflush(stdout);
-
 			if (h_updating_graph_mask[tid] == true) {
+				//printf("!%u ", tid);//test
 				h_graph_mask[tid]=true;
 				//h_graph_visited[tid]=true;
 				//stop = false;
@@ -237,22 +238,17 @@ void BFSGraph( int argc, char** argv)
 				}
 				h_updating_graph_mask[tid]=false;
 			}
-			//printf("@220\n");//test
-			//fflush(stdout);
 		}
-		//k++;
+#pragma omp master
+		k++;
 #ifdef OPEN
 		}
 #endif
-		//printf("@225 END\n");//test
-		//fflush(stdout);
 	}
 	while(!stop);
-	//printf("@229 I'm out.\n");//test
-	//fflush(stdout);
 #ifdef OPEN
         double end_time = omp_get_wtime();
-		printf("%d %lf\n", num_omp_threads, (end_time - start_time));
+		//printf("%d %lf\n", num_omp_threads, (end_time - start_time));
 #endif
 	//Store the result into a file
 	FILE *fpo = fopen("path.txt","w");
