@@ -8,6 +8,7 @@ graph65536.txt
 # Ignore those useless result files
 path.txt
 result.txt
+1path.txt
 
 # Compiled source #
 ###################
