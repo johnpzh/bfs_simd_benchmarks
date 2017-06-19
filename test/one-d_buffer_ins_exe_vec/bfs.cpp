@@ -296,9 +296,9 @@ void BFSGraph( int argc, char** argv)
 	while(!stop);
 #ifdef OPEN
         double end_time = omp_get_wtime();
-		printf("%d %lf\n", num_omp_threads, (end_time - start_time));
+		//printf("%d %lf\n", num_omp_threads, (end_time - start_time));
 		//printf("%u %lf\n", BUFFER_SIZE_MAX, (end_time - start_time));
-		//printf("%u %lf\n", CHUNK_SIZE, (end_time - start_time));
+		printf("%u %lf\n", CHUNK_SIZE, (end_time - start_time));
 #endif
 	//Store the result into a file
 	FILE *fpo = fopen("path.txt","w");

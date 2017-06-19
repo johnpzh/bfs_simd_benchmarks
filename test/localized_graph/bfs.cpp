@@ -206,9 +206,21 @@ void BFSGraph( int argc, char** argv)
 		ordered_edges[i] = ordered_indices[h_graph_edges[i]];
 	}
 
-	FILE *fout = fopen("ordered_edges.txt", "w");
+	//FILE *fout = fopen("ordered_edges.txt", "w");
+	//for (unsigned i = 0; i < edge_list_size; ++i) {
+	//	fprintf(fout, "%u\n", ordered_edges[i]);
+	//}
+	//fclose(fout);
+	
+	FILE *fout = fopen("local_graph4096.txt", "w");
+	fprintf(fout, "%u\n", no_of_nodes);
+	for (unsigned i = 0; i < no_of_nodes; ++i) {
+		fprintf(fout, "%d %d\n", h_graph_nodes[i].starting, h_graph_nodes[i].no_of_edges);
+	}
+	fprintf(fout, "%d\n", source);
+	fprintf(fout, "%d\n", edge_list_size);
 	for (unsigned i = 0; i < edge_list_size; ++i) {
-		fprintf(fout, "%u\n", ordered_edges[i]);
+		fprintf(fout, "%u %d\n", ordered_edges[i], 1);
 	}
 	fclose(fout);
 

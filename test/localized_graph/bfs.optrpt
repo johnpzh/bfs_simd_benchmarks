@@ -33,7 +33,7 @@ Begin optimization report for: main(int, char **)
     Report from: Interprocedural optimizations [ipo]
 
 INLINE REPORT: (main(int, char **)) [1/107=0.9%] bfs.cpp(36,1)
-  -> INLINE: (37,2) BFSGraph(int, char **) (isz = 1604) (sz = 1612)
+  -> INLINE: (37,2) BFSGraph(int, char **) (isz = 1649) (sz = 1657)
     -> INLINE (MANUAL): (46,1) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
       -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) __cxa_call_unexpected
       -> /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
@@ -300,16 +300,20 @@ INLINE REPORT: (main(int, char **)) [1/107=0.9%] bfs.cpp(36,1)
         -> INLINE (MANUAL): (1352,48) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
     -> INLINE (MANUAL): (206,16) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
     -> INLINE (MANUAL): (206,37) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
-    -> EXTERN: (209,15) fopen(const char *, const char *)
-    -> EXTERN: (211,3) fprintf(FILE *, const char *, ...)
-    -> INLINE (MANUAL): (211,38) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
-    -> EXTERN: (213,2) fclose(FILE *)
-    -> EXTERN: (216,2) free(void *)
-    -> EXTERN: (217,2) free(void *)
-    -> EXTERN: (218,2) free(void *)
-    -> EXTERN: (219,2) free(void *)
-    -> EXTERN: (220,2) free(void *)
-    -> EXTERN: (221,2) free(void *)
+    -> EXTERN: (215,15) fopen(const char *, const char *)
+    -> EXTERN: (216,2) fprintf(FILE *, const char *, ...)
+    -> EXTERN: (218,3) fprintf(FILE *, const char *, ...)
+    -> EXTERN: (220,2) fprintf(FILE *, const char *, ...)
+    -> EXTERN: (221,2) fprintf(FILE *, const char *, ...)
+    -> EXTERN: (223,3) fprintf(FILE *, const char *, ...)
+    -> INLINE (MANUAL): (223,41) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
+    -> EXTERN: (225,2) fclose(FILE *)
+    -> EXTERN: (228,2) free(void *)
+    -> EXTERN: (229,2) free(void *)
+    -> EXTERN: (230,2) free(void *)
+    -> EXTERN: (231,2) free(void *)
+    -> EXTERN: (232,2) free(void *)
+    -> EXTERN: (233,2) free(void *)
 
 
     Report from: OpenMP optimizations [openmp]
@@ -454,8 +458,12 @@ LOOP BEGIN at bfs.cpp(205,2) inlined into bfs.cpp(37,2)
 <Remainder>
 LOOP END
 
-LOOP BEGIN at bfs.cpp(210,2) inlined into bfs.cpp(37,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(211,3) ]
+LOOP BEGIN at bfs.cpp(217,2) inlined into bfs.cpp(37,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(218,3) ]
+LOOP END
+
+LOOP BEGIN at bfs.cpp(222,2) inlined into bfs.cpp(37,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(223,3) ]
 LOOP END
 
 LOOP BEGIN at bfs.cpp(143,3) inlined into bfs.cpp(37,2)
@@ -523,19 +531,19 @@ bfs.cpp(36,1):remark #34051: REGISTER ALLOCATION : [main] bfs.cpp:36
         Assigned     :   15[ rax rdx rcx rbx rsi rdi r8-r15 zmm0]
         
     Routine temporaries
-        Total         :     616
-            Global    :     177
-            Local     :     439
-        Regenerable   :     189
+        Total         :     644
+            Global    :     183
+            Local     :     461
+        Regenerable   :     201
         Spilled       :       9
         
     Routine stack
         Variables     :     257 bytes*
-            Reads     :      77 [2.00e+02 ~ 4.6%]
-            Writes    :      41 [2.83e+02 ~ 6.5%]
+            Reads     :      80 [2.02e+02 ~ 4.6%]
+            Writes    :      41 [2.83e+02 ~ 6.4%]
         Spills        :     112 bytes*
             Reads     :      28 [2.18e+01 ~ 0.5%]
-            Writes    :      27 [8.13e+01 ~ 1.9%]
+            Writes    :      27 [8.13e+01 ~ 1.8%]
     
     Notes
     
@@ -921,16 +929,20 @@ INLINE REPORT: (BFSGraph(int, char **)) [7/107=6.5%] bfs.cpp(46,1)
       -> INLINE (MANUAL): (1352,48) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
   -> INLINE (MANUAL): (206,16) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
   -> INLINE (MANUAL): (206,37) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
-  -> EXTERN: (209,15) fopen(const char *, const char *)
-  -> EXTERN: (211,3) fprintf(FILE *, const char *, ...)
-  -> INLINE (MANUAL): (211,38) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
-  -> EXTERN: (213,2) fclose(FILE *)
-  -> EXTERN: (216,2) free(void *)
-  -> EXTERN: (217,2) free(void *)
-  -> EXTERN: (218,2) free(void *)
-  -> EXTERN: (219,2) free(void *)
-  -> EXTERN: (220,2) free(void *)
-  -> EXTERN: (221,2) free(void *)
+  -> EXTERN: (215,15) fopen(const char *, const char *)
+  -> EXTERN: (216,2) fprintf(FILE *, const char *, ...)
+  -> EXTERN: (218,3) fprintf(FILE *, const char *, ...)
+  -> EXTERN: (220,2) fprintf(FILE *, const char *, ...)
+  -> EXTERN: (221,2) fprintf(FILE *, const char *, ...)
+  -> EXTERN: (223,3) fprintf(FILE *, const char *, ...)
+  -> INLINE (MANUAL): (223,41) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
+  -> EXTERN: (225,2) fclose(FILE *)
+  -> EXTERN: (228,2) free(void *)
+  -> EXTERN: (229,2) free(void *)
+  -> EXTERN: (230,2) free(void *)
+  -> EXTERN: (231,2) free(void *)
+  -> EXTERN: (232,2) free(void *)
+  -> EXTERN: (233,2) free(void *)
 
 
     Report from: OpenMP optimizations [openmp]
@@ -1075,8 +1087,12 @@ LOOP BEGIN at bfs.cpp(205,2)
 <Remainder>
 LOOP END
 
-LOOP BEGIN at bfs.cpp(210,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(211,3) ]
+LOOP BEGIN at bfs.cpp(217,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(218,3) ]
+LOOP END
+
+LOOP BEGIN at bfs.cpp(222,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(223,3) ]
 LOOP END
 
 LOOP BEGIN at bfs.cpp(143,3)
@@ -1144,19 +1160,19 @@ bfs.cpp(46,1):remark #34051: REGISTER ALLOCATION : [_Z8BFSGraphiPPc] bfs.cpp:46
         Assigned     :   16[ rax rdx rcx rbx rbp rsi rdi r8-r15 zmm0]
         
     Routine temporaries
-        Total         :     608
-            Global    :     177
-            Local     :     431
-        Regenerable   :     177
+        Total         :     636
+            Global    :     183
+            Local     :     453
+        Regenerable   :     189
         Spilled       :       7
         
     Routine stack
         Variables     :     253 bytes*
-            Reads     :      75 [2.00e+02 ~ 4.5%]
-            Writes    :      39 [2.83e+02 ~ 6.4%]
+            Reads     :      78 [2.02e+02 ~ 4.5%]
+            Writes    :      39 [2.83e+02 ~ 6.3%]
         Spills        :     104 bytes*
             Reads     :      34 [1.91e+01 ~ 0.4%]
-            Writes    :      27 [9.07e+01 ~ 2.1%]
+            Writes    :      27 [9.07e+01 ~ 2.0%]
     
     Notes
     
