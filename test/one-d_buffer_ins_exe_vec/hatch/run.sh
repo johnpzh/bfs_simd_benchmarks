@@ -29,8 +29,8 @@ size=$((2 ** power))
 while [ $power -le $power_max ]
 do
 #${bin_addr}/bfs ${tno} ${data_addr}/${data_file}.txt 16384 8192 >> $result_file
-	${bin_addr}/bfs 32 ${data_addr}/${data_file}.txt ${size} 8192 >> $result_file
-#${bin_addr}/bfs 64 ${data_addr}/${data_file}.txt 65536 ${size} >> $result_file
+#${bin_addr}/bfs 32 ${data_addr}/${data_file}.txt ${size} 8192 >> $result_file
+	${bin_addr}/bfs 64 ${data_addr}/${data_file}.txt 8192 ${size} >> $result_file
 #${bin_addr}/bfs 64 ${data_addr}/${data_file}.txt 16384 ${size} >> $result_file
 	echo -n .
 #tno=$((tno*2))
