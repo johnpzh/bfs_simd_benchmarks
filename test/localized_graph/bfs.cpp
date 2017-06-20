@@ -54,7 +54,8 @@ void BFSGraph( int argc, char** argv)
 	//Usage( argv);
 	//exit(0);
 	num_omp_threads = 1;
-	static char add[] = "/home/zpeng/benchmarks/rodinia_3.1/data/bfs/graph4096.txt";
+	//static char add[] = "/home/zpeng/benchmarks/rodinia_3.1/data/bfs/graph4096.txt";
+	static char add[] = "/home/zpeng/benchmarks/rodinia_3.1/data/bfs/graph128M.txt";
 	input_f = add;
 	} else {
 	num_omp_threads = atoi(argv[1]);
@@ -124,7 +125,7 @@ void BFSGraph( int argc, char** argv)
 	//printf("Start traversing the tree\n");
 	
 	int k=0;
-	vector<unsigned> ordered_nodes;
+	vector<unsigned> ordered_nodes_id;
 #ifdef OPEN
         double start_time = omp_get_wtime();
 #endif
@@ -167,7 +168,7 @@ void BFSGraph( int argc, char** argv)
 		sort(nodes.begin(), nodes.end());
 		for (unsigned i = 0; i < nodes.size(); ++i) {
 			//printf("%u\n", nodes[i]);
-			ordered_nodes.push_back(nodes[i]);
+			ordered_nodes_id.push_back(nodes[i]);
 		}
 #ifdef OPEN
 #pragma omp parallel for
@@ -197,14 +198,22 @@ void BFSGraph( int argc, char** argv)
 	
 	vector<unsigned> ordered_indices;
 	ordered_indices.resize(no_of_nodes);
-	for (unsigned i = 0; i < ordered_nodes.size(); ++i) {
-		ordered_indices[ordered_nodes[i]] = i;
+	for (unsigned i = 0; i < ordered_nodes_id.size(); ++i) {
+		ordered_indices[ordered_nodes_id[i]] = i;
 	}
 	vector<unsigned> ordered_edges;
 	ordered_edges.resize(edge_list_size);
 	for (unsigned i = 0; i < edge_list_size; ++i) {
 		ordered_edges[i] = ordered_indices[h_graph_edges[i]];
 	}
+	vector<Node> ordered_nodes;
+	ordered_nodes.resize(no_of_nodes);
+	for (unsigned i = 0; i < no_of_nodes; ++i) {
+		unsigned id = ordered_nodes_id[i];
+		ordered_nodes[i].starting = h_graph_nodes[id].starting;
+		ordered_nodes[i].no_of_edges = h_graph_nodes[id].no_of_edges;
+	}
+	unsigned ordered_source = ordered_indices[source];
 
 	//FILE *fout = fopen("ordered_edges.txt", "w");
 	//for (unsigned i = 0; i < edge_list_size; ++i) {
@@ -212,12 +221,12 @@ void BFSGraph( int argc, char** argv)
 	//}
 	//fclose(fout);
 	
-	FILE *fout = fopen("local_graph4096.txt", "w");
+	FILE *fout = fopen("local_graph128M.txt", "w");
 	fprintf(fout, "%u\n", no_of_nodes);
 	for (unsigned i = 0; i < no_of_nodes; ++i) {
-		fprintf(fout, "%d %d\n", h_graph_nodes[i].starting, h_graph_nodes[i].no_of_edges);
+		fprintf(fout, "%d %d\n", ordered_nodes[i].starting, ordered_nodes[i].no_of_edges);
 	}
-	fprintf(fout, "%d\n", source);
+	fprintf(fout, "%d\n", ordered_source);
 	fprintf(fout, "%d\n", edge_list_size);
 	for (unsigned i = 0; i < edge_list_size; ++i) {
 		fprintf(fout, "%u %d\n", ordered_edges[i], 1);

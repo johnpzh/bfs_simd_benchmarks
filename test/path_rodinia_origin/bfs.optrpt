@@ -32,8 +32,8 @@ Begin optimization report for: main(int, char **)
 
     Report from: Interprocedural optimizations [ipo]
 
-INLINE REPORT: (main(int, char **)) [1/4=25.0%] bfs.cpp(36,1)
-  -> INLINE: (37,2) BFSGraph(int, char **) (isz = 351) (sz = 359)
+INLINE REPORT: (main(int, char **)) [1/58=1.7%] bfs.cpp(36,1)
+  -> INLINE: (37,2) BFSGraph(int, char **) (isz = 776) (sz = 784)
     -> INLINE (MANUAL): (60,20) atoi(const char *) (isz = 7) (sz = 14)
       -> EXTERN: /usr/include/stdlib.h:(280,16) strtol(const char *, char **, int)
     -> EXTERN: (66,7) fopen(const char *, const char *)
@@ -52,7 +52,108 @@ INLINE REPORT: (main(int, char **)) [1/4=25.0%] bfs.cpp(36,1)
     -> EXTERN: (115,3) fclose(FILE *)
     -> EXTERN: (119,23) malloc(size_t)
     -> EXTERN: (128,29) omp_get_wtime()
+    -> (136,20) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 13) (sz = 18)
+       [[ Called routine is noinline  <1>]]
+    -> (136,20) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
+       [[ Callee not marked with inlining pragma  <2>]]
     -> EXTERN: (139,3) omp_set_num_threads(int)
+    -> INLINE (MANUAL): (145,11) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::push_back(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 339) (sz = 346)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(905,6) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &)->std::enable_if<true, void>::type (isz = 21) (sz = 30)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,4) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::_S_construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 18) (sz = 27)
+          -> INLINE (MANUAL): (254,8) __gnu_cxx::new_allocator<std::seed_seq::result_type>::construct<unsigned int, const unsigned int &>(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, unsigned int *, const unsigned int &) (isz = 15) (sz = 24)
+            -> INLINE (MANUAL): /usr/include/c++/4.8.5/ext/new_allocator.h:(120,18) operator new(std::size_t, void *) (isz = 0) (sz = 7)
+            -> INLINE (MANUAL): /usr/include/c++/4.8.5/ext/new_allocator.h:(120,27) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
+          -> INLINE (MANUAL): (254,23) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,27) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(911,4) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_emplace_back_aux<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 303) (sz = 310)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/vector.tcc:(403,4) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_check_len(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type, const char *) const (isz = 100) (sz = 111)
+          -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(1338,6) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::max_size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 12) (sz = 19)
+            -> EXTERN: (651,7) __cxa_call_unexpected
+            -> DELETED: (651,16) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::max_size(const std::allocator<std::seed_seq::result_type> &) (isz = 1) (sz = 8)
+            -> INLINE (MANUAL): (651,40) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(const std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 1) (sz = 8)
+          -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(1338,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+          -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(1339,4) std::__throw_length_error(const char *)
+          -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(1341,26) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+          -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(1341,35) std::max<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type>(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type &, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type &) (isz = 2) (sz = 12)
+          -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(1341,44) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+          -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(1342,18) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+          -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(1342,36) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::max_size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 12) (sz = 19)
+            -> EXTERN: (651,7) __cxa_call_unexpected
+            -> DELETED: (651,16) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::max_size(const std::allocator<std::seed_seq::result_type> &) (isz = 1) (sz = 8)
+            -> INLINE (MANUAL): (651,40) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(const std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 1) (sz = 8)
+          -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(1342,50) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::max_size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 12) (sz = 19)
+            -> EXTERN: (651,7) __cxa_call_unexpected
+            -> DELETED: (651,16) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::max_size(const std::allocator<std::seed_seq::result_type> &) (isz = 1) (sz = 8)
+            -> INLINE (MANUAL): (651,40) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(const std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 1) (sz = 8)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/vector.tcc:(404,28) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_allocate(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::size_t) (isz = 15) (sz = 24)
+          -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(168,35) __gnu_cxx::new_allocator<std::seed_seq::result_type>::allocate(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, __gnu_cxx::new_allocator<std::seed_seq::result_type>::size_type, const void *) (isz = 7) (sz = 18)
+            -> DELETED: /usr/include/c++/4.8.5/ext/new_allocator.h:(101,18) __gnu_cxx::new_allocator<std::seed_seq::result_type>::max_size(const __gnu_cxx::new_allocator<std::seed_seq::result_type> *) const (isz = 0) (sz = 5)
+            -> EXTERN: /usr/include/c++/4.8.5/ext/new_allocator.h:(102,4) std::__throw_bad_alloc()
+            -> EXTERN: /usr/include/c++/4.8.5/ext/new_allocator.h:(104,27) operator new(std::size_t)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/vector.tcc:(408,6) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &)->std::enable_if<true, void>::type (isz = 21) (sz = 30)
+          -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,4) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::_S_construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 18) (sz = 27)
+            -> INLINE (MANUAL): (254,8) __gnu_cxx::new_allocator<std::seed_seq::result_type>::construct<unsigned int, const unsigned int &>(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, unsigned int *, const unsigned int &) (isz = 15) (sz = 24)
+              -> INLINE (MANUAL): /usr/include/c++/4.8.5/ext/new_allocator.h:(120,18) operator new(std::size_t, void *) (isz = 0) (sz = 7)
+              -> INLINE (MANUAL): /usr/include/c++/4.8.5/ext/new_allocator.h:(120,27) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
+            -> INLINE (MANUAL): (254,23) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
+          -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,27) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/vector.tcc:(408,60) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/vector.tcc:(409,10) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/vector.tcc:(413,10) std::__uninitialized_move_if_noexcept_a<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_Tp_alloc_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_Tp_alloc_type &) (isz = 53) (sz = 66)
+          -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_uninitialized.h:(279,14) std::__uninitialized_copy_a<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 42) (sz = 55)
+            -> INLINE (MANUAL): (258,14) std::uninitialized_copy<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer) (isz = 42) (sz = 53)
+              -> INLINE (MANUAL): (115,14) std::__uninitialized_copy<true>::__uninit_copy<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer) (isz = 41) (sz = 52)
+                -> INLINE (MANUAL): (93,18) std::copy<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer) (isz = 40) (sz = 51)
+                  -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_algobase.h:(458,15) std::__copy_move_a2<true, std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>(std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer) (isz = 27) (sz = 38)
+                    -> INLINE (MANUAL): (426,18) std::__copy_move_a<true, std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::iterator_type, std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::iterator_type>(std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::iterator_type, std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::iterator_type, std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::iterator_type) (isz = 14) (sz = 25)
+                      -> INLINE (MANUAL): (389,14) std::__copy_move<true, true, std::iterator_traits<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>::iterator_category>::__copy_m<std::seed_seq::result_type>(const std::seed_seq::result_type *, const std::seed_seq::result_type *, std::seed_seq::result_type *) (isz = 12) (sz = 23)
+                        -> EXTERN: (372,6) __builtin_memmove(void *, const void *, unsigned long)
+                    -> INLINE (MANUAL): (426,46) std::__niter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type>(std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type) (isz = 1) (sz = 8)
+                      -> INLINE (MANUAL): (278,14) std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::_S_base(std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type) (isz = 0) (sz = 5)
+                    -> INLINE (MANUAL): (427,11) std::__niter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type>(std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type) (isz = 1) (sz = 8)
+                      -> INLINE (MANUAL): (278,14) std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::_S_base(std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type) (isz = 0) (sz = 5)
+                    -> INLINE (MANUAL): (428,11) std::__niter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type>(std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type) (isz = 1) (sz = 8)
+                      -> INLINE (MANUAL): (278,14) std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::_S_base(std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type) (isz = 0) (sz = 5)
+                  -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_algobase.h:(459,9) std::__miter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>>(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>) (isz = 3) (sz = 10)
+                    -> INLINE (MANUAL): (289,14) std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::_S_base(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>) (isz = 2) (sz = 9)
+                      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_iterator_base_types.h:(221,21) std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>::base(const std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer> *) const (isz = 0) (sz = 6)
+                  -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_algobase.h:(459,37) std::__miter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>>(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>) (isz = 3) (sz = 10)
+                    -> INLINE (MANUAL): (289,14) std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::_S_base(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>) (isz = 2) (sz = 9)
+                      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_iterator_base_types.h:(221,21) std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>::base(const std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer> *) const (isz = 0) (sz = 6)
+          -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_uninitialized.h:(280,3) std::__make_move_if_noexcept_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer) (isz = 2) (sz = 9)
+            -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_iterator.h:(1133,26) std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>::move_iterator(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer> *, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>::iterator_type) (isz = 0) (sz = 6)
+          -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_uninitialized.h:(281,3) std::__make_move_if_noexcept_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer) (isz = 2) (sz = 9)
+            -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_iterator.h:(1133,26) std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>::move_iterator(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer> *, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>::iterator_type) (isz = 0) (sz = 6)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/vector.tcc:(415,22) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
+        -> EXTERN: /usr/include/c++/4.8.5/bits/vector.tcc:(419,2) __cxa_begin_catch
+        -> EXTERN: /usr/include/c++/4.8.5/bits/vector.tcc:(420,4) __cxa_end_catch
+        -> DELETED: /usr/include/c++/4.8.5/bits/vector.tcc:(422,8) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::destroy<std::seed_seq::result_type>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *) (isz = 0) (sz = 7)
+        -> /usr/include/c++/4.8.5/bits/vector.tcc:(422,60) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+           [[ Callee not marked with inlining pragma  <2>]]
+        -> DELETED: /usr/include/c++/4.8.5/bits/vector.tcc:(424,8) std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 0) (sz = 8)
+        -> /usr/include/c++/4.8.5/bits/vector.tcc:(424,49) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
+           [[ Callee not marked with inlining pragma  <2>]]
+        -> /usr/include/c++/4.8.5/bits/vector.tcc:(425,6) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_deallocate(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::size_t) (isz = 4) (sz = 13)
+           [[ Callee not marked with inlining pragma  <2>]]
+        -> EXTERN: /usr/include/c++/4.8.5/bits/vector.tcc:(426,6) __cxa_rethrow
+        -> DELETED: /usr/include/c++/4.8.5/bits/vector.tcc:(428,2) std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 0) (sz = 8)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/vector.tcc:(429,9) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/vector.tcc:(430,2) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_deallocate(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::size_t) (isz = 4) (sz = 13)
+          -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(174,12) __gnu_cxx::new_allocator<std::seed_seq::result_type>::deallocate(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, __gnu_cxx::new_allocator<std::seed_seq::result_type>::pointer, __gnu_cxx::new_allocator<std::seed_seq::result_type>::size_type) (isz = 0) (sz = 7)
+            -> EXTERN: /usr/include/c++/4.8.5/ext/new_allocator.h:(110,9) operator delete(void *)
+    -> INLINE (MANUAL): (168,34) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+    -> INLINE (MANUAL): (168,34) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+    -> EXTERN: (169,4) printf(const char *, ...)
+    -> INLINE (MANUAL): (169,24) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
+    -> INLINE (MANUAL): (185,2) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
+      -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) __cxa_call_unexpected
+      -> /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
+         [[ Callee not marked with inlining pragma  <2>]]
+      -> DELETED: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,9) std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 0) (sz = 8)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,9) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,33) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
+        -> (159,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 18) (sz = 23)
+           [[ Unable to inline callsite  <3>]]
     -> EXTERN: (188,27) omp_get_wtime()
     -> EXTERN: (192,14) fopen(const char *, const char *)
     -> EXTERN: (194,3) fprintf(FILE *, const char *, ...)
@@ -113,8 +214,12 @@ LOOP BEGIN at bfs.cpp(120,2) inlined into bfs.cpp(37,2)
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(130,2) inlined into bfs.cpp(37,2)
+LOOP BEGIN at bfs.cpp(128,29) inlined into bfs.cpp(37,2)
    remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+
+   LOOP BEGIN at bfs.cpp(168,34) inlined into bfs.cpp(37,2)
+      remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ bfs.cpp(169,4) ]
+   LOOP END
 LOOP END
 
 LOOP BEGIN at bfs.cpp(193,2) inlined into bfs.cpp(37,2)
@@ -122,9 +227,7 @@ LOOP BEGIN at bfs.cpp(193,2) inlined into bfs.cpp(37,2)
 LOOP END
 
 LOOP BEGIN at bfs.cpp(142,3) inlined into bfs.cpp(37,2)
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between h_cost (159:7) and h_cost (159:7)
-   remark #15346: vector dependence: assumed OUTPUT dependence between h_cost (159:7) and h_cost (159:7)
+   remark #15520: loop was not vectorized: loop with multiple exits cannot be vectorized unless it meets search loop idiom criteria   [ /usr/include/c++/4.8.5/bits/stl_vector.h(1339,4) ]
 
    LOOP BEGIN at bfs.cpp(152,5) inlined into bfs.cpp(37,2)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
@@ -167,6 +270,9 @@ LOOP END
 
 bfs.cpp(121,3):remark #34014: optimization advice for memset: increase the destination's alignment to 16 (and use __assume_aligned) to speed up library implementation
 bfs.cpp(121,3):remark #34026: call to memset implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34014: optimization advice for memmove: increase the destination's alignment to 16 (and use __assume_aligned) to speed up library implementation
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34014: optimization advice for memmove: increase the source's alignment to 16 (and use __assume_aligned) to speed up library implementation
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
 bfs.cpp(36,1):remark #34051: REGISTER ALLOCATION : [main] bfs.cpp:36
 
     Hardware registers
@@ -176,19 +282,19 @@ bfs.cpp(36,1):remark #34051: REGISTER ALLOCATION : [main] bfs.cpp:36
         Assigned     :   15[ rax rdx rcx rbx rsi rdi r8-r15 zmm0]
         
     Routine temporaries
-        Total         :     388
-            Global    :     118
-            Local     :     270
-        Regenerable   :     145
-        Spilled       :       6
+        Total         :     447
+            Global    :     130
+            Local     :     317
+        Regenerable   :     166
+        Spilled       :      12
         
     Routine stack
-        Variables     :     117 bytes*
-            Reads     :      36 [6.69e+01 ~ 2.4%]
-            Writes    :      21 [2.26e+02 ~ 8.1%]
-        Spills        :      88 bytes*
-            Reads     :      22 [3.06e+01 ~ 1.1%]
-            Writes    :      22 [8.12e+01 ~ 2.9%]
+        Variables     :     149 bytes*
+            Reads     :      39 [7.75e+01 ~ 2.6%]
+            Writes    :      23 [2.26e+02 ~ 7.6%]
+        Spills        :     136 bytes*
+            Reads     :      40 [2.46e+01 ~ 0.8%]
+            Writes    :      40 [8.75e+01 ~ 2.9%]
     
     Notes
     
@@ -198,11 +304,75 @@ bfs.cpp(36,1):remark #34051: REGISTER ALLOCATION : [main] bfs.cpp:36
 
 ===========================================================================
 
+Begin optimization report for: std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *)) [2/58=3.4%] /usr/include/c++/4.8.5/bits/stl_vector.h(415,7)
+  -> EXTERN: (415,7) __cxa_call_unexpected
+  -> (415,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
+     [[ Callee not marked with inlining pragma  <2>]]
+  -> DELETED: (415,9) std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 0) (sz = 8)
+  -> INLINE (MANUAL): (416,9) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
+  -> INLINE (MANUAL): (416,33) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
+    -> (159,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 18) (sz = 23)
+       [[ Unable to inline callsite  <3>]]
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(415,7):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIjSaIjEED1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:415
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: operator new(std::size_t, void *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (operator new(std::size_t, void *)) /usr/include/c++/4.8.5/new(110,1)
+
+===========================================================================
+
+Begin optimization report for: operator delete(void *, void *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (operator delete(void *, void *)) /usr/include/c++/4.8.5/new(115,67)
+
+===========================================================================
+
 Begin optimization report for: Usage(char **)
 
     Report from: Interprocedural optimizations [ipo]
 
-INLINE REPORT: (Usage(char **)) [3/4=75.0%] bfs.cpp(27,24)
+INLINE REPORT: (Usage(char **)) [6/58=10.3%] bfs.cpp(27,24)
   -> EXTERN: (29,1) fprintf(FILE *, const char *, ...)
 
 
@@ -243,7 +413,7 @@ Begin optimization report for: BFSGraph(int, char **)
 
     Report from: Interprocedural optimizations [ipo]
 
-INLINE REPORT: (BFSGraph(int, char **)) [4/4=100.0%] bfs.cpp(46,1)
+INLINE REPORT: (BFSGraph(int, char **)) [7/58=12.1%] bfs.cpp(46,1)
   -> INLINE (MANUAL): (60,20) atoi(const char *) (isz = 7) (sz = 14)
     -> EXTERN: /usr/include/stdlib.h:(280,16) strtol(const char *, char **, int)
   -> EXTERN: (66,7) fopen(const char *, const char *)
@@ -262,7 +432,108 @@ INLINE REPORT: (BFSGraph(int, char **)) [4/4=100.0%] bfs.cpp(46,1)
   -> EXTERN: (115,3) fclose(FILE *)
   -> EXTERN: (119,23) malloc(size_t)
   -> EXTERN: (128,29) omp_get_wtime()
+  -> (136,20) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
+     [[ Callee not marked with inlining pragma  <2>]]
+  -> (136,20) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 13) (sz = 18)
+     [[ Called routine is noinline  <1>]]
   -> EXTERN: (139,3) omp_set_num_threads(int)
+  -> INLINE (MANUAL): (145,11) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::push_back(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 339) (sz = 346)
+    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(905,6) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &)->std::enable_if<true, void>::type (isz = 21) (sz = 30)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,4) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::_S_construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 18) (sz = 27)
+        -> INLINE (MANUAL): (254,8) __gnu_cxx::new_allocator<std::seed_seq::result_type>::construct<unsigned int, const unsigned int &>(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, unsigned int *, const unsigned int &) (isz = 15) (sz = 24)
+          -> INLINE (MANUAL): /usr/include/c++/4.8.5/ext/new_allocator.h:(120,18) operator new(std::size_t, void *) (isz = 0) (sz = 7)
+          -> INLINE (MANUAL): /usr/include/c++/4.8.5/ext/new_allocator.h:(120,27) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
+        -> INLINE (MANUAL): (254,23) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,27) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
+    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(911,4) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_emplace_back_aux<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 303) (sz = 310)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/vector.tcc:(403,4) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_check_len(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type, const char *) const (isz = 100) (sz = 111)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(1338,6) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::max_size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 12) (sz = 19)
+          -> EXTERN: (651,7) __cxa_call_unexpected
+          -> DELETED: (651,16) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::max_size(const std::allocator<std::seed_seq::result_type> &) (isz = 1) (sz = 8)
+          -> INLINE (MANUAL): (651,40) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(const std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 1) (sz = 8)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(1338,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+        -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(1339,4) std::__throw_length_error(const char *)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(1341,26) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(1341,35) std::max<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type>(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type &, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type &) (isz = 2) (sz = 12)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(1341,44) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(1342,18) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(1342,36) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::max_size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 12) (sz = 19)
+          -> EXTERN: (651,7) __cxa_call_unexpected
+          -> DELETED: (651,16) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::max_size(const std::allocator<std::seed_seq::result_type> &) (isz = 1) (sz = 8)
+          -> INLINE (MANUAL): (651,40) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(const std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 1) (sz = 8)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(1342,50) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::max_size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 12) (sz = 19)
+          -> EXTERN: (651,7) __cxa_call_unexpected
+          -> DELETED: (651,16) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::max_size(const std::allocator<std::seed_seq::result_type> &) (isz = 1) (sz = 8)
+          -> INLINE (MANUAL): (651,40) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(const std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 1) (sz = 8)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/vector.tcc:(404,28) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_allocate(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::size_t) (isz = 15) (sz = 24)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(168,35) __gnu_cxx::new_allocator<std::seed_seq::result_type>::allocate(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, __gnu_cxx::new_allocator<std::seed_seq::result_type>::size_type, const void *) (isz = 7) (sz = 18)
+          -> DELETED: /usr/include/c++/4.8.5/ext/new_allocator.h:(101,18) __gnu_cxx::new_allocator<std::seed_seq::result_type>::max_size(const __gnu_cxx::new_allocator<std::seed_seq::result_type> *) const (isz = 0) (sz = 5)
+          -> EXTERN: /usr/include/c++/4.8.5/ext/new_allocator.h:(102,4) std::__throw_bad_alloc()
+          -> EXTERN: /usr/include/c++/4.8.5/ext/new_allocator.h:(104,27) operator new(std::size_t)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/vector.tcc:(408,6) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &)->std::enable_if<true, void>::type (isz = 21) (sz = 30)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,4) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::_S_construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 18) (sz = 27)
+          -> INLINE (MANUAL): (254,8) __gnu_cxx::new_allocator<std::seed_seq::result_type>::construct<unsigned int, const unsigned int &>(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, unsigned int *, const unsigned int &) (isz = 15) (sz = 24)
+            -> INLINE (MANUAL): /usr/include/c++/4.8.5/ext/new_allocator.h:(120,18) operator new(std::size_t, void *) (isz = 0) (sz = 7)
+            -> INLINE (MANUAL): /usr/include/c++/4.8.5/ext/new_allocator.h:(120,27) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
+          -> INLINE (MANUAL): (254,23) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,27) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/vector.tcc:(408,60) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/vector.tcc:(409,10) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/vector.tcc:(413,10) std::__uninitialized_move_if_noexcept_a<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_Tp_alloc_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_Tp_alloc_type &) (isz = 53) (sz = 66)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_uninitialized.h:(279,14) std::__uninitialized_copy_a<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 42) (sz = 55)
+          -> INLINE (MANUAL): (258,14) std::uninitialized_copy<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer) (isz = 42) (sz = 53)
+            -> INLINE (MANUAL): (115,14) std::__uninitialized_copy<true>::__uninit_copy<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer) (isz = 41) (sz = 52)
+              -> INLINE (MANUAL): (93,18) std::copy<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer) (isz = 40) (sz = 51)
+                -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_algobase.h:(458,15) std::__copy_move_a2<true, std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>(std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer) (isz = 27) (sz = 38)
+                  -> INLINE (MANUAL): (426,18) std::__copy_move_a<true, std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::iterator_type, std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::iterator_type>(std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::iterator_type, std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::iterator_type, std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::iterator_type) (isz = 14) (sz = 25)
+                    -> INLINE (MANUAL): (389,14) std::__copy_move<true, true, std::iterator_traits<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>::iterator_category>::__copy_m<std::seed_seq::result_type>(const std::seed_seq::result_type *, const std::seed_seq::result_type *, std::seed_seq::result_type *) (isz = 12) (sz = 23)
+                      -> EXTERN: (372,6) __builtin_memmove(void *, const void *, unsigned long)
+                  -> INLINE (MANUAL): (426,46) std::__niter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type>(std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type) (isz = 1) (sz = 8)
+                    -> INLINE (MANUAL): (278,14) std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::_S_base(std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type) (isz = 0) (sz = 5)
+                  -> INLINE (MANUAL): (427,11) std::__niter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type>(std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type) (isz = 1) (sz = 8)
+                    -> INLINE (MANUAL): (278,14) std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::_S_base(std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type) (isz = 0) (sz = 5)
+                  -> INLINE (MANUAL): (428,11) std::__niter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type>(std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type) (isz = 1) (sz = 8)
+                    -> INLINE (MANUAL): (278,14) std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::_S_base(std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type) (isz = 0) (sz = 5)
+                -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_algobase.h:(459,9) std::__miter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>>(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>) (isz = 3) (sz = 10)
+                  -> INLINE (MANUAL): (289,14) std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::_S_base(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>) (isz = 2) (sz = 9)
+                    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_iterator_base_types.h:(221,21) std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>::base(const std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer> *) const (isz = 0) (sz = 6)
+                -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_algobase.h:(459,37) std::__miter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>>(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>) (isz = 3) (sz = 10)
+                  -> INLINE (MANUAL): (289,14) std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::_S_base(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>) (isz = 2) (sz = 9)
+                    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_iterator_base_types.h:(221,21) std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>::base(const std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer> *) const (isz = 0) (sz = 6)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_uninitialized.h:(280,3) std::__make_move_if_noexcept_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer) (isz = 2) (sz = 9)
+          -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_iterator.h:(1133,26) std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>::move_iterator(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer> *, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>::iterator_type) (isz = 0) (sz = 6)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_uninitialized.h:(281,3) std::__make_move_if_noexcept_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer) (isz = 2) (sz = 9)
+          -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_iterator.h:(1133,26) std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>::move_iterator(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer> *, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>::iterator_type) (isz = 0) (sz = 6)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/vector.tcc:(415,22) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
+      -> EXTERN: /usr/include/c++/4.8.5/bits/vector.tcc:(419,2) __cxa_begin_catch
+      -> EXTERN: /usr/include/c++/4.8.5/bits/vector.tcc:(420,4) __cxa_end_catch
+      -> DELETED: /usr/include/c++/4.8.5/bits/vector.tcc:(422,8) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::destroy<std::seed_seq::result_type>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *) (isz = 0) (sz = 7)
+      -> /usr/include/c++/4.8.5/bits/vector.tcc:(422,60) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+         [[ Callee not marked with inlining pragma  <2>]]
+      -> DELETED: /usr/include/c++/4.8.5/bits/vector.tcc:(424,8) std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 0) (sz = 8)
+      -> /usr/include/c++/4.8.5/bits/vector.tcc:(424,49) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
+         [[ Callee not marked with inlining pragma  <2>]]
+      -> /usr/include/c++/4.8.5/bits/vector.tcc:(425,6) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_deallocate(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::size_t) (isz = 4) (sz = 13)
+         [[ Callee not marked with inlining pragma  <2>]]
+      -> EXTERN: /usr/include/c++/4.8.5/bits/vector.tcc:(426,6) __cxa_rethrow
+      -> DELETED: /usr/include/c++/4.8.5/bits/vector.tcc:(428,2) std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 0) (sz = 8)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/vector.tcc:(429,9) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/vector.tcc:(430,2) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_deallocate(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::size_t) (isz = 4) (sz = 13)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(174,12) __gnu_cxx::new_allocator<std::seed_seq::result_type>::deallocate(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, __gnu_cxx::new_allocator<std::seed_seq::result_type>::pointer, __gnu_cxx::new_allocator<std::seed_seq::result_type>::size_type) (isz = 0) (sz = 7)
+          -> EXTERN: /usr/include/c++/4.8.5/ext/new_allocator.h:(110,9) operator delete(void *)
+  -> INLINE (MANUAL): (168,34) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+  -> INLINE (MANUAL): (168,34) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+  -> EXTERN: (169,4) printf(const char *, ...)
+  -> INLINE (MANUAL): (169,24) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
+  -> INLINE (MANUAL): (185,2) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
+    -> /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
+       [[ Callee not marked with inlining pragma  <2>]]
+    -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) __cxa_call_unexpected
+    -> DELETED: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,9) std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 0) (sz = 8)
+    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,9) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
+    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,33) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
+      -> (159,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 18) (sz = 23)
+         [[ Unable to inline callsite  <3>]]
   -> EXTERN: (188,27) omp_get_wtime()
   -> EXTERN: (192,14) fopen(const char *, const char *)
   -> EXTERN: (194,3) fprintf(FILE *, const char *, ...)
@@ -323,8 +594,12 @@ LOOP BEGIN at bfs.cpp(120,2)
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(130,2)
+LOOP BEGIN at bfs.cpp(128,29)
    remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+
+   LOOP BEGIN at bfs.cpp(168,34)
+      remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ bfs.cpp(169,4) ]
+   LOOP END
 LOOP END
 
 LOOP BEGIN at bfs.cpp(193,2)
@@ -332,9 +607,7 @@ LOOP BEGIN at bfs.cpp(193,2)
 LOOP END
 
 LOOP BEGIN at bfs.cpp(142,3)
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between h_cost (159:7) and h_cost (159:7)
-   remark #15346: vector dependence: assumed OUTPUT dependence between h_cost (159:7) and h_cost (159:7)
+   remark #15520: loop was not vectorized: loop with multiple exits cannot be vectorized unless it meets search loop idiom criteria   [ /usr/include/c++/4.8.5/bits/stl_vector.h(1339,4) ]
 
    LOOP BEGIN at bfs.cpp(152,5)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
@@ -377,6 +650,9 @@ LOOP END
 
 bfs.cpp(121,3):remark #34014: optimization advice for memset: increase the destination's alignment to 16 (and use __assume_aligned) to speed up library implementation
 bfs.cpp(121,3):remark #34026: call to memset implemented as a call to optimized library version
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34014: optimization advice for memmove: increase the destination's alignment to 16 (and use __assume_aligned) to speed up library implementation
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34014: optimization advice for memmove: increase the source's alignment to 16 (and use __assume_aligned) to speed up library implementation
+/usr/include/c++/4.8.5/bits/stl_algobase.h(372,6):remark #34026: call to memmove implemented as a call to optimized library version
 bfs.cpp(46,1):remark #34051: REGISTER ALLOCATION : [_Z8BFSGraphiPPc] bfs.cpp:46
 
     Hardware registers
@@ -386,19 +662,19 @@ bfs.cpp(46,1):remark #34051: REGISTER ALLOCATION : [_Z8BFSGraphiPPc] bfs.cpp:46
         Assigned     :   16[ rax rdx rcx rbx rbp rsi rdi r8-r15 zmm0]
         
     Routine temporaries
-        Total         :     380
-            Global    :     118
-            Local     :     262
-        Regenerable   :     133
-        Spilled       :       4
+        Total         :     439
+            Global    :     130
+            Local     :     309
+        Regenerable   :     154
+        Spilled       :      12
         
     Routine stack
-        Variables     :     113 bytes*
-            Reads     :      34 [6.69e+01 ~ 2.4%]
-            Writes    :      19 [2.26e+02 ~ 8.0%]
-        Spills        :      80 bytes*
-            Reads     :      28 [2.21e+01 ~ 0.8%]
-            Writes    :      22 [8.55e+01 ~ 3.0%]
+        Variables     :     145 bytes*
+            Reads     :      37 [7.75e+01 ~ 2.6%]
+            Writes    :      21 [2.26e+02 ~ 7.5%]
+        Spills        :     144 bytes*
+            Reads     :      45 [2.38e+01 ~ 0.8%]
+            Writes    :      39 [1.02e+02 ~ 3.4%]
     
     Notes
     
@@ -407,3 +683,633 @@ bfs.cpp(46,1):remark #34051: REGISTER ALLOCATION : [_Z8BFSGraphiPPc] bfs.cpp:46
     
 
 ===========================================================================
+
+Begin optimization report for: std::allocator_traits<std::allocator<std::seed_seq::result_type>>::max_size(const std::allocator<std::seed_seq::result_type> &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::allocator_traits<std::allocator<std::seed_seq::result_type>>::max_size(const std::allocator<std::seed_seq::result_type> &)) /usr/include/c++/4.8.5/bits/alloc_traits.h(416,7)
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const)) [9/58=15.5%] /usr/include/c++/4.8.5/bits/stl_vector.h(159,7)
+  -> (159,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 18) (sz = 23)
+     [[ Unable to inline callsite  <3>]]
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(159,7):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Vector_baseIjSaIjEED2Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:159
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *)) [10/58=17.2%] /usr/include/c++/4.8.5/bits/stl_vector.h(160,7)
+  -> EXTERN: (160,7) __cxa_call_unexpected
+  -> INLINE (MANUAL): (160,9) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_deallocate(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::size_t) (isz = 4) (sz = 13)
+    -> INLINE (MANUAL): (174,12) __gnu_cxx::new_allocator<std::seed_seq::result_type>::deallocate(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, __gnu_cxx::new_allocator<std::seed_seq::result_type>::pointer, __gnu_cxx::new_allocator<std::seed_seq::result_type>::size_type) (isz = 0) (sz = 7)
+      -> EXTERN: /usr/include/c++/4.8.5/ext/new_allocator.h:(110,9) operator delete(void *)
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(160,7):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Vector_baseIjSaIjEED1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:160
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :      10
+            Global    :       7
+            Local     :       3
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::allocator_traits<std::allocator<std::seed_seq::result_type>>::destroy<std::seed_seq::result_type>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::allocator_traits<std::allocator<std::seed_seq::result_type>>::destroy<std::seed_seq::result_type>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *)) /usr/include/c++/4.8.5/bits/alloc_traits.h(405,2)
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_deallocate(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::size_t)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_deallocate(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::size_t)) [12/58=20.7%] /usr/include/c++/4.8.5/bits/stl_vector.h(172,7)
+  -> INLINE (MANUAL): (174,12) __gnu_cxx::new_allocator<std::seed_seq::result_type>::deallocate(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, __gnu_cxx::new_allocator<std::seed_seq::result_type>::pointer, __gnu_cxx::new_allocator<std::seed_seq::result_type>::size_type) (isz = 0) (sz = 7)
+    -> EXTERN: /usr/include/c++/4.8.5/ext/new_allocator.h:(110,9) operator delete(void *)
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(172,7):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Vector_baseIjSaIjEE13_M_deallocateEPjm] /usr/include/c++/4.8.5/bits/stl_vector.h:172
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    3[ rdx rsi rdi]
+        
+    Routine temporaries
+        Total         :      11
+            Global    :       7
+            Local     :       4
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *)) [13/58=22.4%] /usr/include/c++/4.8.5/bits/stl_vector.h(114,7)
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(114,7):remark #34051: REGISTER ALLOCATION : [_ZNSt12_Vector_baseIjSaIjEE19_M_get_Tp_allocatorEv] /usr/include/c++/4.8.5/bits/stl_vector.h:114
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    2[ rax rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const) [14/58=24.1%] /usr/include/c++/4.8.5/bits/stl_vector.h(646,7)
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(646,7):remark #34051: REGISTER ALLOCATION : [_ZNKSt6vectorIjSaIjEE4sizeEv] /usr/include/c++/4.8.5/bits/stl_vector.h:646
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    2[ rax rdi]
+        
+    Routine temporaries
+        Total         :      12
+            Global    :       0
+            Local     :      12
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &)) /usr/include/c++/4.8.5/bits/stl_construct.h(150,5)
+
+===========================================================================
+
+Begin optimization report for: __gnu_cxx::new_allocator<std::seed_seq::result_type>::max_size(const __gnu_cxx::new_allocator<std::seed_seq::result_type> *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (__gnu_cxx::new_allocator<std::seed_seq::result_type>::max_size(const __gnu_cxx::new_allocator<std::seed_seq::result_type> *) const) /usr/include/c++/4.8.5/ext/new_allocator.h(114,7)
+
+===========================================================================
+
+Begin optimization report for: std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *)) [17/58=29.3%] /usr/include/c++/4.8.5/bits/stl_vector.h(249,17)
+  -> INLINE (MANUAL): (248,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 13) (sz = 18)
+    -> INLINE (MANUAL): (124,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 13) (sz = 18)
+      -> INLINE (MANUAL): (124,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_Vector_impl::_Vector_impl(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_Vector_impl *) (isz = 11) (sz = 16)
+        -> INLINE (MANUAL): (86,2) std::allocator<std::seed_seq::result_type>::allocator(std::allocator<std::seed_seq::result_type> *const) (isz = 5) (sz = 10)
+          -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/allocator.h:(113,7) std::allocator<std::seed_seq::result_type>::allocator(std::allocator<std::seed_seq::result_type> *) (isz = 5) (sz = 10)
+            -> DELETED: (113,7) __gnu_cxx::new_allocator<std::seed_seq::result_type>::new_allocator(__gnu_cxx::new_allocator<std::seed_seq::result_type> *const) (isz = 0) (sz = 5)
+            -> EXTERN: (113,27) __cxa_call_unexpected
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(249,17):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIjSaIjEEC1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:249
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    2[ rax rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       1
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
+
+===========================================================================
+
+Begin optimization report for: __gnu_cxx::new_allocator<std::seed_seq::result_type>::new_allocator(__gnu_cxx::new_allocator<std::seed_seq::result_type> *const)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (__gnu_cxx::new_allocator<std::seed_seq::result_type>::new_allocator(__gnu_cxx::new_allocator<std::seed_seq::result_type> *const)) /usr/include/c++/4.8.5/ext/new_allocator.h(79,7)
+
+===========================================================================
+
+Begin optimization report for: std::_Destroy_aux<true>::__destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::_Destroy_aux<true>::__destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer)) /usr/include/c++/4.8.5/bits/stl_construct.h(112,55)
+
+===========================================================================
+
+Begin optimization report for: std::allocator<std::seed_seq::result_type>::allocator(std::allocator<std::seed_seq::result_type> *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::allocator<std::seed_seq::result_type>::allocator(std::allocator<std::seed_seq::result_type> *)) /usr/include/c++/4.8.5/bits/allocator.h(113,27)
+
+===========================================================================
+
+Begin optimization report for: std::allocator<std::seed_seq::result_type>::allocator(std::allocator<std::seed_seq::result_type> *const)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::allocator<std::seed_seq::result_type>::allocator(std::allocator<std::seed_seq::result_type> *const)) /usr/include/c++/4.8.5/bits/allocator.h(113,7)
+
+===========================================================================
+
+Begin optimization report for: std::allocator_traits<std::allocator<std::seed_seq::result_type>>::_S_construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::allocator_traits<std::allocator<std::seed_seq::result_type>>::_S_construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &)) /usr/include/c++/4.8.5/bits/alloc_traits.h(254,2)
+
+===========================================================================
+
+Begin optimization report for: std::allocator_traits<std::allocator<std::seed_seq::result_type>>::construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &)->std::enable_if<true, void>::type
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::allocator_traits<std::allocator<std::seed_seq::result_type>>::construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &)->std::enable_if<true, void>::type) /usr/include/c++/4.8.5/bits/alloc_traits.h(393,2)
+
+===========================================================================
+
+Begin optimization report for: std::allocator_traits<std::allocator<std::seed_seq::result_type>>::_S_max_size<const std::allocator<std::seed_seq::result_type>>(const std::allocator<std::seed_seq::result_type> &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::allocator_traits<std::allocator<std::seed_seq::result_type>>::_S_max_size<const std::allocator<std::seed_seq::result_type>>(const std::allocator<std::seed_seq::result_type> &)) /usr/include/c++/4.8.5/bits/alloc_traits.h(306,2)
+
+===========================================================================
+
+Begin optimization report for: std::allocator_traits<std::allocator<std::seed_seq::result_type>>::_S_destroy<std::seed_seq::result_type>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::allocator_traits<std::allocator<std::seed_seq::result_type>>::_S_destroy<std::seed_seq::result_type>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *)) /usr/include/c++/4.8.5/bits/alloc_traits.h(281,2)
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(const std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(const std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const) /usr/include/c++/4.8.5/bits/stl_vector.h(118,7)
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *)) /usr/include/c++/4.8.5/bits/stl_vector.h(125,19)
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const)) /usr/include/c++/4.8.5/bits/stl_vector.h(124,7)
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_allocate(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::size_t)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_allocate(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::size_t)) /usr/include/c++/4.8.5/bits/stl_vector.h(168,7)
+
+===========================================================================
+
+Begin optimization report for: std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_Vector_impl::_Vector_impl(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_Vector_impl *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_Vector_impl::_Vector_impl(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_Vector_impl *)) /usr/include/c++/4.8.5/bits/stl_vector.h(88,2)
+
+===========================================================================
+
+Begin optimization report for: std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::max_size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::max_size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const) /usr/include/c++/4.8.5/bits/stl_vector.h(651,7)
+
+===========================================================================
+
+Begin optimization report for: std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type)) /usr/include/c++/4.8.5/bits/stl_vector.h(771,7)
+
+===========================================================================
+
+Begin optimization report for: std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::push_back(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::push_back(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &)) /usr/include/c++/4.8.5/bits/stl_vector.h(902,7)
+
+===========================================================================
+
+Begin optimization report for: std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_check_len(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type, const char *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_check_len(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type, const char *) const) /usr/include/c++/4.8.5/bits/stl_vector.h(1337,7)
+
+===========================================================================
+
+Begin optimization report for: std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_emplace_back_aux<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_emplace_back_aux<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &)) /usr/include/c++/4.8.5/bits/vector.tcc(401,7)
+
+===========================================================================
+
+Begin optimization report for: std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>::move_iterator(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer> *, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>::iterator_type)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>::move_iterator(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer> *, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>::iterator_type)) /usr/include/c++/4.8.5/bits/stl_iterator.h(951,25)
+
+===========================================================================
+
+Begin optimization report for: std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>::base(const std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer> *) const
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>::base(const std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer> *) const) /usr/include/c++/4.8.5/bits/stl_iterator.h(959,7)
+
+===========================================================================
+
+Begin optimization report for: std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::_S_base(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::_S_base(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>)) /usr/include/c++/4.8.5/bits/stl_iterator_base_types.h(221,7)
+
+===========================================================================
+
+Begin optimization report for: std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::_S_base(std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::_S_base(std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type)) /usr/include/c++/4.8.5/bits/stl_iterator_base_types.h(213,7)
+
+===========================================================================
+
+Begin optimization report for: std::__copy_move<true, true, std::iterator_traits<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>::iterator_category>::__copy_m<std::seed_seq::result_type>(const std::seed_seq::result_type *, const std::seed_seq::result_type *, std::seed_seq::result_type *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::__copy_move<true, true, std::iterator_traits<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>::iterator_category>::__copy_m<std::seed_seq::result_type>(const std::seed_seq::result_type *, const std::seed_seq::result_type *, std::seed_seq::result_type *)) /usr/include/c++/4.8.5/bits/stl_algobase.h(369,9)
+
+===========================================================================
+
+Begin optimization report for: __gnu_cxx::new_allocator<std::seed_seq::result_type>::new_allocator(__gnu_cxx::new_allocator<std::seed_seq::result_type> *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (__gnu_cxx::new_allocator<std::seed_seq::result_type>::new_allocator(__gnu_cxx::new_allocator<std::seed_seq::result_type> *)) /usr/include/c++/4.8.5/ext/new_allocator.h(79,45)
+
+===========================================================================
+
+Begin optimization report for: __gnu_cxx::new_allocator<std::seed_seq::result_type>::allocate(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, __gnu_cxx::new_allocator<std::seed_seq::result_type>::size_type, const void *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (__gnu_cxx::new_allocator<std::seed_seq::result_type>::allocate(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, __gnu_cxx::new_allocator<std::seed_seq::result_type>::size_type, const void *)) /usr/include/c++/4.8.5/ext/new_allocator.h(100,7)
+
+===========================================================================
+
+Begin optimization report for: __gnu_cxx::new_allocator<std::seed_seq::result_type>::deallocate(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, __gnu_cxx::new_allocator<std::seed_seq::result_type>::pointer, __gnu_cxx::new_allocator<std::seed_seq::result_type>::size_type)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (__gnu_cxx::new_allocator<std::seed_seq::result_type>::deallocate(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, __gnu_cxx::new_allocator<std::seed_seq::result_type>::pointer, __gnu_cxx::new_allocator<std::seed_seq::result_type>::size_type)) /usr/include/c++/4.8.5/ext/new_allocator.h(110,7)
+
+===========================================================================
+
+Begin optimization report for: __gnu_cxx::new_allocator<std::seed_seq::result_type>::construct<unsigned int, const unsigned int &>(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, unsigned int *, const unsigned int &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (__gnu_cxx::new_allocator<std::seed_seq::result_type>::construct<unsigned int, const unsigned int &>(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, unsigned int *, const unsigned int &)) /usr/include/c++/4.8.5/ext/new_allocator.h(120,2)
+
+===========================================================================
+
+Begin optimization report for: __gnu_cxx::new_allocator<std::seed_seq::result_type>::destroy<unsigned int>(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, unsigned int *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (__gnu_cxx::new_allocator<std::seed_seq::result_type>::destroy<unsigned int>(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, unsigned int *)) /usr/include/c++/4.8.5/ext/new_allocator.h(124,27)
+
+===========================================================================
+
+Begin optimization report for: std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer)) /usr/include/c++/4.8.5/bits/stl_construct.h(123,5)
+
+===========================================================================
+
+Begin optimization report for: std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &)) /usr/include/c++/4.8.5/bits/move.h(77,5)
+
+===========================================================================
+
+Begin optimization report for: std::max<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type>(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type &, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::max<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type>(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type &, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type &)) /usr/include/c++/4.8.5/bits/stl_algobase.h(217,5)
+
+===========================================================================
+
+Begin optimization report for: std::__make_move_if_noexcept_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::__make_move_if_noexcept_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer)) /usr/include/c++/4.8.5/bits/stl_iterator.h(1133,5)
+
+===========================================================================
+
+Begin optimization report for: std::copy<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::copy<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer)) /usr/include/c++/4.8.5/bits/stl_algobase.h(451,5)
+
+===========================================================================
+
+Begin optimization report for: std::__miter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>>(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::__miter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>>(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>)) /usr/include/c++/4.8.5/bits/stl_algobase.h(289,5)
+
+===========================================================================
+
+Begin optimization report for: std::__copy_move_a2<true, std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>(std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::__copy_move_a2<true, std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>(std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer)) /usr/include/c++/4.8.5/bits/stl_algobase.h(425,5)
+
+===========================================================================
+
+Begin optimization report for: std::__niter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type>(std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::__niter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type>(std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type)) /usr/include/c++/4.8.5/bits/stl_algobase.h(278,5)
+
+===========================================================================
+
+Begin optimization report for: std::__copy_move_a<true, std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::iterator_type, std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::iterator_type>(std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::iterator_type, std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::iterator_type, std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::iterator_type)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::__copy_move_a<true, std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::iterator_type, std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::iterator_type>(std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::iterator_type, std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::iterator_type, std::_Iter_base<std::_Iter_base<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, true>::iterator_type, false>::iterator_type)) /usr/include/c++/4.8.5/bits/stl_algobase.h(380,5)
+
+===========================================================================
+
+Begin optimization report for: std::uninitialized_copy<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::uninitialized_copy<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer)) /usr/include/c++/4.8.5/bits/stl_uninitialized.h(109,5)
+
+===========================================================================
+
+Begin optimization report for: std::__uninitialized_copy_a<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::__uninitialized_copy_a<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &)) /usr/include/c++/4.8.5/bits/stl_uninitialized.h(258,5)
+
+===========================================================================
+
+Begin optimization report for: std::__uninitialized_move_if_noexcept_a<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_Tp_alloc_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_Tp_alloc_type &)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::__uninitialized_move_if_noexcept_a<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_Tp_alloc_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_Tp_alloc_type &)) /usr/include/c++/4.8.5/bits/stl_uninitialized.h(278,5)
+
+===========================================================================
+
+Begin optimization report for: std::__uninitialized_copy<true>::__uninit_copy<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (std::__uninitialized_copy<true>::__uninit_copy<std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>(std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::move_iterator<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer>, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer)) /usr/include/c++/4.8.5/bits/stl_uninitialized.h(93,9)
+
+===========================================================================
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINING FOOTNOTES:
+
+<1> The routine declaration is annotated with "__attribute__((noinline))".  
+    Remove this annotation to permit the compiler to inline this routine.
+
+<2> The compiler's heuristics indicate that the function is not profitable to 
+    inline.  Override this decision by adding "inline 
+    __attribute__((always_inline))" to the declaration of the called function, 
+    or add "#pragma forceinline" before the call site.
+
+<3> Inlining the function will lead to incorrect program behavior.
+

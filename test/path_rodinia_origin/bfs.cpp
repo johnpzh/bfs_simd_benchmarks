@@ -133,7 +133,7 @@ void BFSGraph( int argc, char** argv)
 		//if no thread changes this value then the loop stops
 		stop = true;
 
-		//vector<unsigned> nodes;
+		vector<unsigned> nodes;
 
 #ifdef OPEN
 		omp_set_num_threads(num_omp_threads);
@@ -142,7 +142,7 @@ void BFSGraph( int argc, char** argv)
 		for(unsigned int tid = 0; tid < no_of_nodes; tid++ )
 		{
 			if (h_graph_mask[tid] == true) {
-				//nodes.push_back(tid);
+				nodes.push_back(tid);
 				h_graph_mask[tid]=false;
 				int next_starting = h_graph_nodes[tid].starting + h_graph_nodes[tid].no_of_edges;
 				//printf("From: %d\t\t", tid);//test
@@ -165,9 +165,9 @@ void BFSGraph( int argc, char** argv)
 		}
 		//printf("======= %d =======\n", k);//test
 		//sort(nodes.begin(), nodes.end());
-		//for (unsigned i = 0; i < nodes.size(); ++i) {
-		//	printf("%u ", nodes[i]);
-		//}
+		for (unsigned i = 0; i < nodes.size(); ++i) {
+			printf("%u\n", nodes[i]);
+		}
 		//printf("\n");//test
 #ifdef OPEN
 #pragma omp parallel for
