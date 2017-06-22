@@ -32,7 +32,7 @@ while [	$power -le $power_max ]
 do
 #${bin_addr}/bfs ${tno} ${data_addr}/${data_file}.txt 8192 8192 >> $result_file
 #${bin_addr}/bfs 64 ${data_addr}/${data_file}.txt ${size} 8192 >> $result_file
-	${bin_addr}/bfs 64 ${data_addr}/${data_file}.txt 512 ${size} >> $result_file
+	${bin_addr}/bfs 64 ${data_addr}/${data_file}.txt 32768 ${size} >> $result_file
 #${bin_addr}/bfs 64 ${data_addr}/${data_file}.txt 16384 ${size} >> $result_file
 	echo -n .
 #tno=$((tno*2))
