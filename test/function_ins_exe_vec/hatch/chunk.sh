@@ -21,8 +21,8 @@ result_file="result_${version}_${data_file}_$(date +%Y%m%d-%H%M%S).txt"
 
 touch $result_file
 
-echo '==== 64 threads ===='
-echo '==== 64 threads ====' >> $result_file
+echo '**** 64 threads ****'
+echo '**** 64 threads ****' >> $result_file
 echo 'bfs:' >> $result_file
 power=4
 size=$((2 ** power))
@@ -46,8 +46,8 @@ do
 done
 echo ''
 
-echo '==== 256 threads ===='
-echo '==== 256 threads ====' >> $result_file
+echo '**** 256 threads ****'
+echo '**** 256 threads ****' >> $result_file
 echo 'bfs:' >> $result_file
 power=4
 size=$((2 ** power))
