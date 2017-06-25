@@ -8,6 +8,7 @@
 # Ignore those useless result files
 *path.txt
 *result.txt
+*report*
 
 # Compiled source #
 ###################
