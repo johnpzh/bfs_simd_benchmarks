@@ -33,7 +33,25 @@ Begin optimization report for: main(int, char **)
     Report from: Interprocedural optimizations [ipo]
 
 INLINE REPORT: (main(int, char **)) [1/157=0.6%] bfs.cpp(36,1)
-  -> INLINE: (37,2) BFSGraph(int, char **) (isz = 1602) (sz = 1610)
+  -> INLINE: (37,2) BFSGraph(int, char **) (isz = 1696) (sz = 1704)
+    -> INLINE (MANUAL): (46,1) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
+      -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) __cxa_call_unexpected
+      -> /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
+         [[ Callee not marked with inlining pragma  <1>]]
+      -> DELETED: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,9) std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 0) (sz = 8)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,9) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,33) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
+        -> (159,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 18) (sz = 23)
+           [[ Unable to inline callsite  <2>]]
+    -> INLINE (MANUAL): (46,1) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
+      -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) __cxa_call_unexpected
+      -> /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
+         [[ Callee not marked with inlining pragma  <1>]]
+      -> DELETED: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,9) std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 0) (sz = 8)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,9) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,33) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
+        -> (159,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 18) (sz = 23)
+           [[ Unable to inline callsite  <2>]]
     -> INLINE (MANUAL): (46,1) std::vector<Node, std::allocator<Node>>::~vector(std::vector<Node, std::allocator<Node>> *) (isz = 22) (sz = 27)
       -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) __cxa_call_unexpected
       -> /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) std::_Vector_base<Node, std::allocator<Node>>::~_Vector_base(std::_Vector_base<Node, std::allocator<Node>> *const) (isz = 0) (sz = 5)
@@ -52,52 +70,39 @@ INLINE REPORT: (main(int, char **)) [1/157=0.6%] bfs.cpp(36,1)
       -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,33) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
         -> (159,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 18) (sz = 23)
            [[ Unable to inline callsite  <2>]]
-    -> INLINE (MANUAL): (46,1) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
-      -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) __cxa_call_unexpected
-      -> /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
-         [[ Callee not marked with inlining pragma  <1>]]
-      -> DELETED: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,9) std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 0) (sz = 8)
-      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,9) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
-      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,33) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
-        -> (159,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 18) (sz = 23)
-           [[ Unable to inline callsite  <2>]]
-    -> INLINE (MANUAL): (46,1) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
-      -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) __cxa_call_unexpected
-      -> /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
-         [[ Callee not marked with inlining pragma  <1>]]
-      -> DELETED: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,9) std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 0) (sz = 8)
-      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,9) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
-      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,33) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
-        -> (159,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 18) (sz = 23)
-           [[ Unable to inline callsite  <2>]]
-    -> INLINE (MANUAL): (61,20) atoi(const char *) (isz = 7) (sz = 14)
+    -> INLINE (MANUAL): (59,20) atoi(const char *) (isz = 7) (sz = 14)
       -> EXTERN: /usr/include/stdlib.h:(280,16) strtol(const char *, char **, int)
-    -> EXTERN: (67,7) fopen(const char *, const char *)
-    -> EXTERN: (70,3) printf(const char *, ...)
-    -> EXTERN: (76,2) fscanf(FILE *, const char *, ...)
-    -> EXTERN: (79,32) malloc(size_t)
-    -> EXTERN: (80,31) malloc(size_t)
-    -> EXTERN: (81,40) malloc(size_t)
-    -> EXTERN: (82,34) malloc(size_t)
-    -> EXTERN: (88,3) fscanf(FILE *, const char *, ...)
-    -> EXTERN: (97,2) fscanf(FILE *, const char *, ...)
+    -> EXTERN: (60,7) strcmp(const char *, const char *)
+    -> EXTERN: (62,14) strcmp(const char *, const char *)
+    -> EXTERN: (64,14) strcmp(const char *, const char *)
+    -> EXTERN: (67,3) fprintf(FILE *, const char *, ...)
+    -> EXTERN: (68,3) exit(int)
+    -> EXTERN: (74,7) fopen(const char *, const char *)
+    -> EXTERN: (77,3) printf(const char *, ...)
+    -> EXTERN: (83,2) fscanf(FILE *, const char *, ...)
+    -> EXTERN: (86,32) malloc(size_t)
+    -> EXTERN: (87,31) malloc(size_t)
+    -> EXTERN: (88,40) malloc(size_t)
+    -> EXTERN: (89,34) malloc(size_t)
+    -> EXTERN: (95,3) fscanf(FILE *, const char *, ...)
     -> EXTERN: (104,2) fscanf(FILE *, const char *, ...)
-    -> EXTERN: (107,30) malloc(size_t)
-    -> EXTERN: (110,3) fscanf(FILE *, const char *, ...)
-    -> EXTERN: (111,3) fscanf(FILE *, const char *, ...)
-    -> EXTERN: (116,3) fclose(FILE *)
-    -> EXTERN: (120,23) malloc(size_t)
-    -> (128,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 13) (sz = 18)
+    -> EXTERN: (111,2) fscanf(FILE *, const char *, ...)
+    -> EXTERN: (114,30) malloc(size_t)
+    -> EXTERN: (117,3) fscanf(FILE *, const char *, ...)
+    -> EXTERN: (118,3) fscanf(FILE *, const char *, ...)
+    -> EXTERN: (123,3) fclose(FILE *)
+    -> EXTERN: (127,23) malloc(size_t)
+    -> (135,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 13) (sz = 18)
        [[ Called routine is noinline  <3>]]
-    -> (128,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
+    -> (135,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
        [[ Callee not marked with inlining pragma  <1>]]
-    -> EXTERN: (130,29) omp_get_wtime()
-    -> (138,20) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 13) (sz = 18)
+    -> EXTERN: (137,29) omp_get_wtime()
+    -> (145,20) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 13) (sz = 18)
        [[ Called routine is noinline  <3>]]
-    -> (138,20) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
+    -> (145,20) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
        [[ Callee not marked with inlining pragma  <1>]]
-    -> EXTERN: (141,3) omp_set_num_threads(int)
-    -> INLINE (MANUAL): (147,11) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::push_back(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 339) (sz = 346)
+    -> EXTERN: (148,3) omp_set_num_threads(int)
+    -> INLINE (MANUAL): (154,11) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::push_back(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 339) (sz = 346)
       -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(905,6) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &)->std::enable_if<true, void>::type (isz = 21) (sz = 30)
         -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,4) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::_S_construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 18) (sz = 27)
           -> INLINE (MANUAL): (254,8) __gnu_cxx::new_allocator<std::seed_seq::result_type>::construct<unsigned int, const unsigned int &>(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, unsigned int *, const unsigned int &) (isz = 15) (sz = 24)
@@ -107,7 +112,7 @@ INLINE REPORT: (main(int, char **)) [1/157=0.6%] bfs.cpp(36,1)
         -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,27) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
       -> /usr/include/c++/4.8.5/bits/stl_vector.h:(911,4) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_emplace_back_aux<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 303) (sz = 310)
          [[ Inlining inhibited by overrideable criterion  <4>]]
-    -> INLINE (MANUAL): (168,3) std::sort<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::iterator>(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::iterator, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::iterator) (isz = 1787) (sz = 1794)
+    -> INLINE (MANUAL): (175,3) std::sort<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::iterator>(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::iterator, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::iterator) (isz = 1787) (sz = 1794)
       -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_algo.h:(5458,19) __gnu_cxx::operator!=<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>>(const __gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>> &, const __gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>> &) (isz = 9) (sz = 18)
         -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_iterator.h:(825,20) __gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>>::base(const __gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>> *) const (isz = 1) (sz = 7)
         -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_iterator.h:(825,36) __gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>>::base(const __gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>> *) const (isz = 1) (sz = 7)
@@ -214,15 +219,15 @@ INLINE REPORT: (main(int, char **)) [1/157=0.6%] bfs.cpp(36,1)
           -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_iterator.h:(779,34) __gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>>::__normal_iterator(__gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer &) (isz = 0) (sz = 7)
         -> (2215,2) std::__insertion_sort<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::iterator>(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::iterator, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::iterator) (isz = 259) (sz = 267)
            [[ Inlining inhibited by overrideable criterion  <4>]]
-    -> INLINE (MANUAL): (168,8) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::begin(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 11) (sz = 18)
+    -> INLINE (MANUAL): (175,8) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::begin(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 11) (sz = 18)
       -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(539,7) __cxa_call_unexpected
       -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(539,25) __gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>>::__normal_iterator(__gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer &) (isz = 0) (sz = 7)
-    -> INLINE (MANUAL): (168,23) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::end(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 11) (sz = 18)
+    -> INLINE (MANUAL): (175,23) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::end(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 11) (sz = 18)
       -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(557,7) __cxa_call_unexpected
       -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(557,25) __gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>>::__normal_iterator(__gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer &) (isz = 0) (sz = 7)
-    -> INLINE (MANUAL): (169,34) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
-    -> INLINE (MANUAL): (169,34) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
-    -> INLINE (MANUAL): (171,21) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::push_back(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 339) (sz = 346)
+    -> INLINE (MANUAL): (176,34) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+    -> INLINE (MANUAL): (176,34) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+    -> INLINE (MANUAL): (178,21) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::push_back(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 339) (sz = 346)
       -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(905,6) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &)->std::enable_if<true, void>::type (isz = 21) (sz = 30)
         -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,4) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::_S_construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 18) (sz = 27)
           -> INLINE (MANUAL): (254,8) __gnu_cxx::new_allocator<std::seed_seq::result_type>::construct<unsigned int, const unsigned int &>(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, unsigned int *, const unsigned int &) (isz = 15) (sz = 24)
@@ -232,8 +237,8 @@ INLINE REPORT: (main(int, char **)) [1/157=0.6%] bfs.cpp(36,1)
         -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,27) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
       -> /usr/include/c++/4.8.5/bits/stl_vector.h:(911,4) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_emplace_back_aux<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 303) (sz = 310)
          [[ Inlining inhibited by overrideable criterion  <4>]]
-    -> INLINE (MANUAL): (171,36) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
-    -> INLINE (MANUAL): (186,2) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
+    -> INLINE (MANUAL): (178,36) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
+    -> INLINE (MANUAL): (193,2) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
       -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) __cxa_call_unexpected
       -> /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
          [[ Callee not marked with inlining pragma  <1>]]
@@ -242,44 +247,12 @@ INLINE REPORT: (main(int, char **)) [1/157=0.6%] bfs.cpp(36,1)
       -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,33) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
         -> (159,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 18) (sz = 23)
            [[ Unable to inline callsite  <2>]]
-    -> EXTERN: (189,27) omp_get_wtime()
-    -> (199,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 13) (sz = 18)
+    -> EXTERN: (196,27) omp_get_wtime()
+    -> (206,15) std::vector<Node, std::allocator<Node>>::vector(std::vector<Node, std::allocator<Node>> *) (isz = 13) (sz = 18)
        [[ Called routine is noinline  <3>]]
-    -> (199,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
+    -> (206,15) std::vector<Node, std::allocator<Node>>::~vector(std::vector<Node, std::allocator<Node>> *) (isz = 22) (sz = 27)
        [[ Callee not marked with inlining pragma  <1>]]
-    -> INLINE (MANUAL): (200,18) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::resize(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 384) (sz = 391)
-      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(666,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
-      -> /usr/include/c++/4.8.5/bits/stl_vector.h:(667,4) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_default_append(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 340) (sz = 347)
-         [[ Inlining inhibited by overrideable criterion  <4>]]
-      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(667,35) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
-      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(668,24) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
-      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(669,4) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_erase_at_end(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer) (isz = 8) (sz = 15)
-        -> DELETED: (1352,2) std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 0) (sz = 8)
-        -> INLINE (MANUAL): (1352,48) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
-    -> INLINE (MANUAL): (201,44) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
-    -> INLINE (MANUAL): (201,44) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
-    -> INLINE (MANUAL): (202,18) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
-    -> INLINE (MANUAL): (202,35) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
-    -> (204,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 13) (sz = 18)
-       [[ Called routine is noinline  <3>]]
-    -> (204,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
-       [[ Callee not marked with inlining pragma  <1>]]
-    -> INLINE (MANUAL): (205,16) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::resize(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 384) (sz = 391)
-      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(666,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
-      -> /usr/include/c++/4.8.5/bits/stl_vector.h:(667,4) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_default_append(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 340) (sz = 347)
-         [[ Inlining inhibited by overrideable criterion  <4>]]
-      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(667,35) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
-      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(668,24) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
-      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(669,4) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_erase_at_end(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer) (isz = 8) (sz = 15)
-        -> DELETED: (1352,2) std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 0) (sz = 8)
-        -> INLINE (MANUAL): (1352,48) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
-    -> INLINE (MANUAL): (207,16) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
-    -> INLINE (MANUAL): (207,37) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
-    -> (209,15) std::vector<Node, std::allocator<Node>>::vector(std::vector<Node, std::allocator<Node>> *) (isz = 13) (sz = 18)
-       [[ Called routine is noinline  <3>]]
-    -> (209,15) std::vector<Node, std::allocator<Node>>::~vector(std::vector<Node, std::allocator<Node>> *) (isz = 22) (sz = 27)
-       [[ Callee not marked with inlining pragma  <1>]]
-    -> INLINE (MANUAL): (210,16) std::vector<Node, std::allocator<Node>>::resize(std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 394) (sz = 401)
+    -> INLINE (MANUAL): (207,16) std::vector<Node, std::allocator<Node>>::resize(std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 394) (sz = 401)
       -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(666,19) std::vector<Node, std::allocator<Node>>::size(const std::vector<Node, std::allocator<Node>> *) const (isz = 5) (sz = 12)
       -> /usr/include/c++/4.8.5/bits/stl_vector.h:(667,4) std::vector<Node, std::allocator<Node>>::_M_default_append(std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 350) (sz = 357)
          [[ Inlining inhibited by overrideable criterion  <4>]]
@@ -288,57 +261,94 @@ INLINE REPORT: (main(int, char **)) [1/157=0.6%] bfs.cpp(36,1)
       -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(669,4) std::vector<Node, std::allocator<Node>>::_M_erase_at_end(std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::pointer) (isz = 8) (sz = 15)
         -> DELETED: (1352,2) std::_Destroy<std::_Vector_base<Node, std::allocator<Node>>::pointer, Node>(std::_Vector_base<Node, std::allocator<Node>>::pointer, std::_Vector_base<Node, std::allocator<Node>>::pointer, std::allocator<Node> &) (isz = 0) (sz = 8)
         -> INLINE (MANUAL): (1352,48) std::_Vector_base<Node, std::allocator<Node>>::_M_get_Tp_allocator(std::_Vector_base<Node, std::allocator<Node>> *) (isz = 1) (sz = 8)
-    -> INLINE (MANUAL): (212,33) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
-    -> INLINE (MANUAL): (213,16) std::vector<Node, std::allocator<Node>>::operator[](std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 1) (sz = 9)
-    -> INLINE (MANUAL): (214,16) std::vector<Node, std::allocator<Node>>::operator[](std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 1) (sz = 9)
-    -> INLINE (MANUAL): (216,43) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
-    -> EXTERN: (224,15) fopen(const char *, const char *)
-    -> EXTERN: (225,2) fprintf(FILE *, const char *, ...)
-    -> EXTERN: (227,3) fprintf(FILE *, const char *, ...)
-    -> INLINE (MANUAL): (227,41) std::vector<Node, std::allocator<Node>>::operator[](std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 1) (sz = 9)
-    -> INLINE (MANUAL): (227,68) std::vector<Node, std::allocator<Node>>::operator[](std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 1) (sz = 9)
-    -> EXTERN: (229,2) fprintf(FILE *, const char *, ...)
-    -> EXTERN: (230,2) fprintf(FILE *, const char *, ...)
-    -> EXTERN: (232,3) fprintf(FILE *, const char *, ...)
-    -> INLINE (MANUAL): (232,41) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
-    -> EXTERN: (234,2) fclose(FILE *)
-    -> EXTERN: (237,2) free(void *)
-    -> EXTERN: (238,2) free(void *)
-    -> EXTERN: (239,2) free(void *)
-    -> EXTERN: (240,2) free(void *)
-    -> EXTERN: (241,2) free(void *)
-    -> EXTERN: (242,2) free(void *)
+    -> INLINE (MANUAL): (210,37) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
+    -> INLINE (MANUAL): (211,16) std::vector<Node, std::allocator<Node>>::operator[](std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 1) (sz = 9)
+    -> INLINE (MANUAL): (212,16) std::vector<Node, std::allocator<Node>>::operator[](std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 1) (sz = 9)
+    -> INLINE (MANUAL): (213,26) std::vector<Node, std::allocator<Node>>::operator[](std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 1) (sz = 9)
+    -> (218,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 13) (sz = 18)
+       [[ Called routine is noinline  <3>]]
+    -> (218,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
+       [[ Callee not marked with inlining pragma  <1>]]
+    -> INLINE (MANUAL): (219,18) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::resize(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 384) (sz = 391)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(666,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+      -> /usr/include/c++/4.8.5/bits/stl_vector.h:(667,4) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_default_append(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 340) (sz = 347)
+         [[ Inlining inhibited by overrideable criterion  <4>]]
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(667,35) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(668,24) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(669,4) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_erase_at_end(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer) (isz = 8) (sz = 15)
+        -> DELETED: (1352,2) std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 0) (sz = 8)
+        -> INLINE (MANUAL): (1352,48) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
+    -> INLINE (MANUAL): (220,44) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+    -> INLINE (MANUAL): (220,44) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+    -> INLINE (MANUAL): (221,18) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
+    -> INLINE (MANUAL): (221,35) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
+    -> (224,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 13) (sz = 18)
+       [[ Called routine is noinline  <3>]]
+    -> (224,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
+       [[ Callee not marked with inlining pragma  <1>]]
+    -> INLINE (MANUAL): (228,39) std::vector<Node, std::allocator<Node>>::operator[](std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 1) (sz = 9)
+    -> INLINE (MANUAL): (229,37) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
+    -> INLINE (MANUAL): (232,18) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::push_back(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 339) (sz = 346)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(905,6) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &)->std::enable_if<true, void>::type (isz = 21) (sz = 30)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,4) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::_S_construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 18) (sz = 27)
+          -> INLINE (MANUAL): (254,8) __gnu_cxx::new_allocator<std::seed_seq::result_type>::construct<unsigned int, const unsigned int &>(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, unsigned int *, const unsigned int &) (isz = 15) (sz = 24)
+            -> INLINE (MANUAL): /usr/include/c++/4.8.5/ext/new_allocator.h:(120,18) operator new(std::size_t, void *) (isz = 0) (sz = 7)
+            -> INLINE (MANUAL): /usr/include/c++/4.8.5/ext/new_allocator.h:(120,27) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
+          -> INLINE (MANUAL): (254,23) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
+        -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,27) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
+      -> /usr/include/c++/4.8.5/bits/stl_vector.h:(911,4) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_emplace_back_aux<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 303) (sz = 310)
+         [[ Inlining inhibited by overrideable criterion  <4>]]
+    -> INLINE (MANUAL): (232,43) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
+    -> EXTERN: (258,8) strcmp(const char *, const char *)
+    -> EXTERN: (260,15) strcmp(const char *, const char *)
+    -> EXTERN: (262,15) strcmp(const char *, const char *)
+    -> EXTERN: (268,15) fopen(const char *, const char *)
+    -> EXTERN: (269,2) fprintf(FILE *, const char *, ...)
+    -> EXTERN: (271,3) fprintf(FILE *, const char *, ...)
+    -> INLINE (MANUAL): (271,41) std::vector<Node, std::allocator<Node>>::operator[](std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 1) (sz = 9)
+    -> INLINE (MANUAL): (271,68) std::vector<Node, std::allocator<Node>>::operator[](std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 1) (sz = 9)
+    -> EXTERN: (273,2) fprintf(FILE *, const char *, ...)
+    -> EXTERN: (274,2) fprintf(FILE *, const char *, ...)
+    -> EXTERN: (276,3) fprintf(FILE *, const char *, ...)
+    -> INLINE (MANUAL): (276,41) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
+    -> EXTERN: (278,2) fclose(FILE *)
+    -> EXTERN: (281,2) free(void *)
+    -> EXTERN: (282,2) free(void *)
+    -> EXTERN: (283,2) free(void *)
+    -> EXTERN: (284,2) free(void *)
+    -> EXTERN: (285,2) free(void *)
+    -> EXTERN: (286,2) free(void *)
 
 
     Report from: OpenMP optimizations [openmp]
 
-bfs.cpp(142:1-142:1):OMP:main:  OpenMP DEFINED LOOP WAS PARALLELIZED
-bfs.cpp(174:1-174:1):OMP:main:  OpenMP DEFINED LOOP WAS PARALLELIZED
+bfs.cpp(149:1-149:1):OMP:main:  OpenMP DEFINED LOOP WAS PARALLELIZED
+bfs.cpp(181:1-181:1):OMP:main:  OpenMP DEFINED LOOP WAS PARALLELIZED
 
     Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
 
 
-LOOP BEGIN at bfs.cpp(86,2) inlined into bfs.cpp(37,2)
+LOOP BEGIN at bfs.cpp(93,2) inlined into bfs.cpp(37,2)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
    remark #25456: Number of Array Refs Scalar Replaced In Loop: 1
 LOOP END
 
-LOOP BEGIN at bfs.cpp(108,2) inlined into bfs.cpp(37,2)
+LOOP BEGIN at bfs.cpp(115,2) inlined into bfs.cpp(37,2)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
    remark #25456: Number of Array Refs Scalar Replaced In Loop: 1
 LOOP END
 
-LOOP BEGIN at bfs.cpp(121,2) inlined into bfs.cpp(37,2)
+LOOP BEGIN at bfs.cpp(128,2) inlined into bfs.cpp(37,2)
    remark #25408: memset generated
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at bfs.cpp(121,2) inlined into bfs.cpp(37,2)
+   LOOP BEGIN at bfs.cpp(128,2) inlined into bfs.cpp(37,2)
    <Peeled loop for vectorization>
       remark #25015: Estimate of max trip count of loop=3
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(121,2) inlined into bfs.cpp(37,2)
-      remark #15388: vectorization support: reference h_cost[i] has aligned access   [ bfs.cpp(122,3) ]
+   LOOP BEGIN at bfs.cpp(128,2) inlined into bfs.cpp(37,2)
+      remark #15388: vectorization support: reference h_cost[i] has aligned access   [ bfs.cpp(129,3) ]
       remark #15305: vectorization support: vector length 4
       remark #15309: vectorization support: normalized vectorization overhead 3.333
       remark #15300: LOOP WAS VECTORIZED
@@ -352,7 +362,7 @@ LOOP BEGIN at bfs.cpp(121,2) inlined into bfs.cpp(37,2)
       remark #25015: Estimate of max trip count of loop=6
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(121,2) inlined into bfs.cpp(37,2)
+   LOOP BEGIN at bfs.cpp(128,2) inlined into bfs.cpp(37,2)
    <Remainder loop for vectorization>
       remark #25015: Estimate of max trip count of loop=24
    LOOP END
@@ -388,15 +398,27 @@ LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algo.h(2180,53) inlined into bfs.c
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(169,34) inlined into bfs.cpp(37,2)
+LOOP BEGIN at bfs.cpp(176,34) inlined into bfs.cpp(37,2)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 
-LOOP BEGIN at bfs.cpp(201,44) inlined into bfs.cpp(37,2)
-   remark #15389: vectorization support: reference ordered_nodes_id.__b_St12_Vector_baseIjSaIjEE._M_impl._M_start[i] has unaligned access   [ bfs.cpp(202,35) ]
+LOOP BEGIN at bfs.cpp(209,2) inlined into bfs.cpp(37,2)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between offset (213:3) and offset (211:16)
+   remark #15346: vector dependence: assumed ANTI dependence between offset (211:16) and offset (213:3)
+   remark #25439: unrolled with remainder by 2  
+   remark #25456: Number of Array Refs Scalar Replaced In Loop: 2
+LOOP END
+
+LOOP BEGIN at bfs.cpp(209,2) inlined into bfs.cpp(37,2)
+<Remainder>
+LOOP END
+
+LOOP BEGIN at bfs.cpp(220,44) inlined into bfs.cpp(37,2)
+   remark #15389: vectorization support: reference ordered_nodes_id.__b_St12_Vector_baseIjSaIjEE._M_impl._M_start[i] has unaligned access   [ bfs.cpp(221,35) ]
    remark #15381: vectorization support: unaligned access used inside loop body
    remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
-   remark #15329: vectorization support: irregularly indexed store was emulated for the variable <ordered_indices.__b_St12_Vector_baseIjSaIjEE._M_impl._M_start[*(>, part of index is read from memory   [ bfs.cpp(202,18) ]
+   remark #15329: vectorization support: irregularly indexed store was emulated for the variable <ordered_indices.__b_St12_Vector_baseIjSaIjEE._M_impl._M_start[*(>, part of index is read from memory   [ bfs.cpp(221,18) ]
    remark #15305: vectorization support: vector length 4
    remark #15309: vectorization support: normalized vectorization overhead 0.087
    remark #15450: unmasked unaligned unit stride loads: 1 
@@ -409,87 +431,51 @@ LOOP BEGIN at bfs.cpp(201,44) inlined into bfs.cpp(37,2)
    remark #25439: unrolled with remainder by 2  
 LOOP END
 
-LOOP BEGIN at bfs.cpp(201,44) inlined into bfs.cpp(37,2)
-<Remainder>
-LOOP END
-
-LOOP BEGIN at bfs.cpp(206,2) inlined into bfs.cpp(37,2)
-   remark #15389: vectorization support: reference ordered_edges.__b_St12_Vector_baseIjSaIjEE._M_impl._M_start[i] has unaligned access   [ bfs.cpp(207,16) ]
-   remark #15389: vectorization support: reference h_graph_edges[i] has unaligned access   [ bfs.cpp(207,38) ]
-   remark #15381: vectorization support: unaligned access used inside loop body
-   remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
-   remark #15328: vectorization support: irregularly indexed load was emulated for the variable <ordered_indices.__b_St12_Vector_baseIjSaIjEE._M_impl._M_start[*(>, part of index is read from memory   [ bfs.cpp(207,37) ]
-   remark #15305: vectorization support: vector length 4
-   remark #15309: vectorization support: normalized vectorization overhead 0.122
-   remark #15450: unmasked unaligned unit stride loads: 1 
-   remark #15451: unmasked unaligned unit stride stores: 1 
-   remark #15462: unmasked indexed (or gather) loads: 1 
-   remark #15475: --- begin vector cost summary ---
-   remark #15476: scalar cost: 8 
-   remark #15477: vector cost: 12.250 
-   remark #15478: estimated potential speedup: 0.650 
-   remark #15488: --- end vector cost summary ---
-   remark #25439: unrolled with remainder by 2  
-LOOP END
-
-LOOP BEGIN at bfs.cpp(206,2) inlined into bfs.cpp(37,2)
-<Remainder>
-LOOP END
-
-LOOP BEGIN at bfs.cpp(211,2) inlined into bfs.cpp(37,2)
-   remark #15389: vectorization support: reference ordered_nodes_id.__b_St12_Vector_baseIjSaIjEE._M_impl._M_start[i] has unaligned access   [ bfs.cpp(212,33) ]
-   remark #15389: vectorization support: reference ordered_nodes.__b_St12_Vector_baseI4NodeSaIS0_EE._M_impl._M_start->starting[i] has unaligned access   [ bfs.cpp(213,16) ]
-   remark #15381: vectorization support: unaligned access used inside loop body
-   remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
-   remark #15329: vectorization support: non-unit strided store was emulated for the variable <ordered_nodes.__b_St12_Vector_baseI4NodeSaIS0_EE._M_impl._M_star>, stride is 2   [ bfs.cpp(213,16) ]
-   remark #15328: vectorization support: irregularly indexed load was emulated for the variable <h_graph_nodes->starting[id]>, part of index is read from memory   [ bfs.cpp(213,31) ]
-   remark #15329: vectorization support: non-unit strided store was emulated for the variable <ordered_nodes.__b_St12_Vector_baseI4NodeSaIS0_EE._M_impl._M_star>, stride is 2   [ bfs.cpp(214,16) ]
-   remark #15328: vectorization support: irregularly indexed load was emulated for the variable <h_graph_nodes->no_of_edges[id]>, part of index is read from memory   [ bfs.cpp(214,34) ]
-   remark #15305: vectorization support: vector length 4
-   remark #15309: vectorization support: normalized vectorization overhead 0.057
-   remark #15450: unmasked unaligned unit stride loads: 1 
-   remark #15453: unmasked strided stores: 2 
-   remark #15462: unmasked indexed (or gather) loads: 2 
-   remark #15475: --- begin vector cost summary ---
-   remark #15476: scalar cost: 13 
-   remark #15477: vector cost: 26.250 
-   remark #15478: estimated potential speedup: 0.490 
-   remark #15488: --- end vector cost summary ---
-   remark #25439: unrolled with remainder by 2  
-LOOP END
-
-LOOP BEGIN at bfs.cpp(211,2) inlined into bfs.cpp(37,2)
+LOOP BEGIN at bfs.cpp(220,44) inlined into bfs.cpp(37,2)
 <Remainder>
 LOOP END
 
 LOOP BEGIN at bfs.cpp(226,2) inlined into bfs.cpp(37,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(227,3) ]
-LOOP END
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
 
-LOOP BEGIN at bfs.cpp(231,2) inlined into bfs.cpp(37,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(232,3) ]
-LOOP END
-
-LOOP BEGIN at bfs.cpp(144,3) inlined into bfs.cpp(37,2)
-   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
-
-   LOOP BEGIN at bfs.cpp(154,5) inlined into bfs.cpp(37,2)
-      remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed FLOW dependence between h_cost (161:7) and h_cost (161:7)
-      remark #15346: vector dependence: assumed ANTI dependence between h_cost (161:7) and h_cost (161:7)
+   LOOP BEGIN at bfs.cpp(231,3) inlined into bfs.cpp(37,2)
+      remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ /usr/include/c++/4.8.5/bits/stl_vector.h(911,4) ]
       remark #25439: unrolled with remainder by 2  
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(154,5) inlined into bfs.cpp(37,2)
+   LOOP BEGIN at bfs.cpp(231,3) inlined into bfs.cpp(37,2)
    <Remainder>
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(174,1) inlined into bfs.cpp(37,2)
-   remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(179,5) ]
-   remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(180,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(182,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(182,5) ]
+LOOP BEGIN at bfs.cpp(270,2) inlined into bfs.cpp(37,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(271,3) ]
+LOOP END
+
+LOOP BEGIN at bfs.cpp(275,2) inlined into bfs.cpp(37,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(276,3) ]
+LOOP END
+
+LOOP BEGIN at bfs.cpp(151,3) inlined into bfs.cpp(37,2)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+
+   LOOP BEGIN at bfs.cpp(161,5) inlined into bfs.cpp(37,2)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed FLOW dependence between h_cost (168:7) and h_cost (168:7)
+      remark #15346: vector dependence: assumed ANTI dependence between h_cost (168:7) and h_cost (168:7)
+      remark #25439: unrolled with remainder by 2  
+   LOOP END
+
+   LOOP BEGIN at bfs.cpp(161,5) inlined into bfs.cpp(37,2)
+   <Remainder>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at bfs.cpp(181,1) inlined into bfs.cpp(37,2)
+   remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(186,5) ]
+   remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(187,5) ]
+   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(189,5) ]
+   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(189,5) ]
    remark #15381: vectorization support: unaligned access used inside loop body
    remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
    remark #15305: vectorization support: vector length 4
@@ -506,7 +492,7 @@ LOOP BEGIN at bfs.cpp(174,1) inlined into bfs.cpp(37,2)
    remark #25439: unrolled with remainder by 2  
 LOOP END
 
-LOOP BEGIN at bfs.cpp(174,1) inlined into bfs.cpp(37,2)
+LOOP BEGIN at bfs.cpp(181,1) inlined into bfs.cpp(37,2)
 <Remainder>
 LOOP END
 
@@ -514,8 +500,8 @@ LOOP END
 Non-optimizable loops:
 
 
-LOOP BEGIN at bfs.cpp(187,9) inlined into bfs.cpp(37,2)
-   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ bfs.cpp(141,3) ]
+LOOP BEGIN at bfs.cpp(194,9) inlined into bfs.cpp(37,2)
+   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ bfs.cpp(148,3) ]
 
    LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algo.h(2306,7) inlined into bfs.cpp(37,2)
       remark #15522: loop was not vectorized: loop control flow is too complex. Try using canonical loop form from OpenMP specification
@@ -524,8 +510,8 @@ LOOP END
 
     Report from: Code generation optimizations [cg]
 
-bfs.cpp(122,3):remark #34014: optimization advice for memset: increase the destination's alignment to 16 (and use __assume_aligned) to speed up library implementation
-bfs.cpp(122,3):remark #34026: call to memset implemented as a call to optimized library version
+bfs.cpp(129,3):remark #34014: optimization advice for memset: increase the destination's alignment to 16 (and use __assume_aligned) to speed up library implementation
+bfs.cpp(129,3):remark #34026: call to memset implemented as a call to optimized library version
 bfs.cpp(36,1):remark #34051: REGISTER ALLOCATION : [main] bfs.cpp:36
 
     Hardware registers
@@ -535,67 +521,19 @@ bfs.cpp(36,1):remark #34051: REGISTER ALLOCATION : [main] bfs.cpp:36
         Assigned     :   15[ rax rdx rcx rbx rsi rdi r8-r15 zmm0]
         
     Routine temporaries
-        Total         :     683
-            Global    :     195
-            Local     :     488
-        Regenerable   :     209
-        Spilled       :       9
+        Total         :     733
+            Global    :     210
+            Local     :     523
+        Regenerable   :     226
+        Spilled       :      12
         
     Routine stack
         Variables     :     281 bytes*
-            Reads     :      88 [2.08e+02 ~ 4.6%]
-            Writes    :      44 [2.83e+02 ~ 6.3%]
-        Spills        :     112 bytes*
-            Reads     :      28 [2.18e+01 ~ 0.5%]
-            Writes    :      27 [8.13e+01 ~ 1.8%]
-    
-    Notes
-    
-        *Non-overlapping variables and spills may share stack space,
-         so the total stack size might be less than this.
-    
-
-===========================================================================
-
-Begin optimization report for: std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *)
-
-    Report from: Interprocedural optimizations [ipo]
-
-INLINE REPORT: (std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *)) [2/157=1.3%] /usr/include/c++/4.8.5/bits/stl_vector.h(415,7)
-  -> EXTERN: (415,7) __cxa_call_unexpected
-  -> (415,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
-     [[ Callee not marked with inlining pragma  <1>]]
-  -> DELETED: (415,9) std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 0) (sz = 8)
-  -> INLINE (MANUAL): (416,9) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
-  -> INLINE (MANUAL): (416,33) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
-    -> (159,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 18) (sz = 23)
-       [[ Unable to inline callsite  <2>]]
-
-
-    Report from: Code generation optimizations [cg]
-
-/usr/include/c++/4.8.5/bits/stl_vector.h(415,7):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIjSaIjEED1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:415
-
-    Hardware registers
-        Reserved     :    2[ rsp rip]
-        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
-        Callee-save  :    6[ rbx rbp r12-r15]
-        Assigned     :    1[ rdi]
-        
-    Routine temporaries
-        Total         :       9
-            Global    :       0
-            Local     :       9
-        Regenerable   :       0
-        Spilled       :       0
-        
-    Routine stack
-        Variables     :       0 bytes*
-            Reads     :       0 [0.00e+00 ~ 0.0%]
-            Writes    :       0 [0.00e+00 ~ 0.0%]
-        Spills        :       0 bytes*
-            Reads     :       0 [0.00e+00 ~ 0.0%]
-            Writes    :       0 [0.00e+00 ~ 0.0%]
+            Reads     :      96 [3.18e+02 ~ 6.4%]
+            Writes    :      46 [2.90e+02 ~ 5.9%]
+        Spills        :     136 bytes*
+            Reads     :      35 [4.07e+01 ~ 0.8%]
+            Writes    :      30 [8.95e+01 ~ 1.8%]
     
     Notes
     
@@ -609,7 +547,7 @@ Begin optimization report for: std::_Vector_base<Node, std::allocator<Node>>::~_
 
     Report from: Interprocedural optimizations [ipo]
 
-INLINE REPORT: (std::_Vector_base<Node, std::allocator<Node>>::~_Vector_base(std::_Vector_base<Node, std::allocator<Node>> *)) [3/157=1.9%] /usr/include/c++/4.8.5/bits/stl_vector.h(160,7)
+INLINE REPORT: (std::_Vector_base<Node, std::allocator<Node>>::~_Vector_base(std::_Vector_base<Node, std::allocator<Node>> *)) [2/157=1.3%] /usr/include/c++/4.8.5/bits/stl_vector.h(160,7)
   -> EXTERN: (160,7) __cxa_call_unexpected
   -> INLINE (MANUAL): (160,9) std::_Vector_base<Node, std::allocator<Node>>::_M_deallocate(std::_Vector_base<Node, std::allocator<Node>> *, std::_Vector_base<Node, std::allocator<Node>>::pointer, std::size_t) (isz = 4) (sz = 13)
     -> INLINE (MANUAL): (174,12) __gnu_cxx::new_allocator<Node>::deallocate(__gnu_cxx::new_allocator<Node> *, __gnu_cxx::new_allocator<Node>::pointer, __gnu_cxx::new_allocator<Node>::size_type) (isz = 0) (sz = 7)
@@ -653,7 +591,7 @@ Begin optimization report for: std::_Vector_base<Node, std::allocator<Node>>::~_
 
     Report from: Interprocedural optimizations [ipo]
 
-INLINE REPORT: (std::_Vector_base<Node, std::allocator<Node>>::~_Vector_base(std::_Vector_base<Node, std::allocator<Node>> *const)) [4/157=2.5%] /usr/include/c++/4.8.5/bits/stl_vector.h(159,7)
+INLINE REPORT: (std::_Vector_base<Node, std::allocator<Node>>::~_Vector_base(std::_Vector_base<Node, std::allocator<Node>> *const)) [3/157=1.9%] /usr/include/c++/4.8.5/bits/stl_vector.h(159,7)
   -> (159,7) std::_Vector_base<Node, std::allocator<Node>>::~_Vector_base(std::_Vector_base<Node, std::allocator<Node>> *) (isz = 18) (sz = 23)
      [[ Unable to inline callsite  <2>]]
 
@@ -703,7 +641,7 @@ Begin optimization report for: std::vector<Node, std::allocator<Node>>::~vector(
 
     Report from: Interprocedural optimizations [ipo]
 
-INLINE REPORT: (std::vector<Node, std::allocator<Node>>::~vector(std::vector<Node, std::allocator<Node>> *)) [6/157=3.8%] /usr/include/c++/4.8.5/bits/stl_vector.h(415,7)
+INLINE REPORT: (std::vector<Node, std::allocator<Node>>::~vector(std::vector<Node, std::allocator<Node>> *)) [5/157=3.2%] /usr/include/c++/4.8.5/bits/stl_vector.h(415,7)
   -> EXTERN: (415,7) __cxa_call_unexpected
   -> (415,7) std::_Vector_base<Node, std::allocator<Node>>::~_Vector_base(std::_Vector_base<Node, std::allocator<Node>> *const) (isz = 0) (sz = 5)
      [[ Callee not marked with inlining pragma  <1>]]
@@ -751,7 +689,7 @@ Begin optimization report for: std::vector<Node, std::allocator<Node>>::vector(s
 
     Report from: Interprocedural optimizations [ipo]
 
-INLINE REPORT: (std::vector<Node, std::allocator<Node>>::vector(std::vector<Node, std::allocator<Node>> *)) [7/157=4.5%] /usr/include/c++/4.8.5/bits/stl_vector.h(249,17)
+INLINE REPORT: (std::vector<Node, std::allocator<Node>>::vector(std::vector<Node, std::allocator<Node>> *)) [6/157=3.8%] /usr/include/c++/4.8.5/bits/stl_vector.h(249,17)
   -> INLINE (MANUAL): (248,7) std::_Vector_base<Node, std::allocator<Node>>::_Vector_base(std::_Vector_base<Node, std::allocator<Node>> *const) (isz = 13) (sz = 18)
     -> INLINE (MANUAL): (124,7) std::_Vector_base<Node, std::allocator<Node>>::_Vector_base(std::_Vector_base<Node, std::allocator<Node>> *) (isz = 13) (sz = 18)
       -> INLINE (MANUAL): (124,7) std::_Vector_base<Node, std::allocator<Node>>::_Vector_impl::_Vector_impl(std::_Vector_base<Node, std::allocator<Node>>::_Vector_impl *) (isz = 11) (sz = 16)
@@ -799,6 +737,54 @@ Begin optimization report for: __gnu_cxx::new_allocator<Node>::new_allocator(__g
     Report from: Interprocedural optimizations [ipo]
 
 DEAD STATIC FUNCTION: (__gnu_cxx::new_allocator<Node>::new_allocator(__gnu_cxx::new_allocator<Node> *const)) /usr/include/c++/4.8.5/ext/new_allocator.h(79,7)
+
+===========================================================================
+
+Begin optimization report for: std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *)) [8/157=5.1%] /usr/include/c++/4.8.5/bits/stl_vector.h(415,7)
+  -> EXTERN: (415,7) __cxa_call_unexpected
+  -> (415,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
+     [[ Callee not marked with inlining pragma  <1>]]
+  -> DELETED: (415,9) std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 0) (sz = 8)
+  -> INLINE (MANUAL): (416,9) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
+  -> INLINE (MANUAL): (416,33) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
+    -> (159,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 18) (sz = 23)
+       [[ Unable to inline callsite  <2>]]
+
+
+    Report from: Code generation optimizations [cg]
+
+/usr/include/c++/4.8.5/bits/stl_vector.h(415,7):remark #34051: REGISTER ALLOCATION : [_ZNSt6vectorIjSaIjEED1Ev] /usr/include/c++/4.8.5/bits/stl_vector.h:415
+
+    Hardware registers
+        Reserved     :    2[ rsp rip]
+        Available    :   39[ rax rdx rcx rbx rbp rsi rdi r8-r15 mm0-mm7 zmm0-zmm15]
+        Callee-save  :    6[ rbx rbp r12-r15]
+        Assigned     :    1[ rdi]
+        
+    Routine temporaries
+        Total         :       9
+            Global    :       0
+            Local     :       9
+        Regenerable   :       0
+        Spilled       :       0
+        
+    Routine stack
+        Variables     :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+        Spills        :       0 bytes*
+            Reads     :       0 [0.00e+00 ~ 0.0%]
+            Writes    :       0 [0.00e+00 ~ 0.0%]
+    
+    Notes
+    
+        *Non-overlapping variables and spills may share stack space,
+         so the total stack size might be less than this.
+    
 
 ===========================================================================
 
@@ -873,24 +859,6 @@ INLINE REPORT: (BFSGraph(int, char **)) [13/157=8.3%] bfs.cpp(46,1)
     -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,33) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
       -> (159,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 18) (sz = 23)
          [[ Unable to inline callsite  <2>]]
-  -> INLINE (MANUAL): (46,1) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
-    -> /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
-       [[ Callee not marked with inlining pragma  <1>]]
-    -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) __cxa_call_unexpected
-    -> DELETED: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,9) std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 0) (sz = 8)
-    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,9) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
-    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,33) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
-      -> (159,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 18) (sz = 23)
-         [[ Unable to inline callsite  <2>]]
-  -> INLINE (MANUAL): (46,1) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
-    -> /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
-       [[ Callee not marked with inlining pragma  <1>]]
-    -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) __cxa_call_unexpected
-    -> DELETED: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,9) std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 0) (sz = 8)
-    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,9) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
-    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,33) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
-      -> (159,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 18) (sz = 23)
-         [[ Unable to inline callsite  <2>]]
   -> INLINE (MANUAL): (46,1) std::vector<Node, std::allocator<Node>>::~vector(std::vector<Node, std::allocator<Node>> *) (isz = 22) (sz = 27)
     -> /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) std::_Vector_base<Node, std::allocator<Node>>::~_Vector_base(std::_Vector_base<Node, std::allocator<Node>> *const) (isz = 0) (sz = 5)
        [[ Callee not marked with inlining pragma  <1>]]
@@ -900,34 +868,57 @@ INLINE REPORT: (BFSGraph(int, char **)) [13/157=8.3%] bfs.cpp(46,1)
     -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,33) std::_Vector_base<Node, std::allocator<Node>>::~_Vector_base(std::_Vector_base<Node, std::allocator<Node>> *const) (isz = 0) (sz = 5)
       -> (159,7) std::_Vector_base<Node, std::allocator<Node>>::~_Vector_base(std::_Vector_base<Node, std::allocator<Node>> *) (isz = 18) (sz = 23)
          [[ Unable to inline callsite  <2>]]
-  -> INLINE (MANUAL): (61,20) atoi(const char *) (isz = 7) (sz = 14)
+  -> INLINE (MANUAL): (46,1) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
+    -> /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
+       [[ Callee not marked with inlining pragma  <1>]]
+    -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) __cxa_call_unexpected
+    -> DELETED: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,9) std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 0) (sz = 8)
+    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,9) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
+    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,33) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
+      -> (159,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 18) (sz = 23)
+         [[ Unable to inline callsite  <2>]]
+  -> INLINE (MANUAL): (46,1) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
+    -> /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
+       [[ Callee not marked with inlining pragma  <1>]]
+    -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) __cxa_call_unexpected
+    -> DELETED: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,9) std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 0) (sz = 8)
+    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,9) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
+    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,33) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
+      -> (159,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 18) (sz = 23)
+         [[ Unable to inline callsite  <2>]]
+  -> INLINE (MANUAL): (59,20) atoi(const char *) (isz = 7) (sz = 14)
     -> EXTERN: /usr/include/stdlib.h:(280,16) strtol(const char *, char **, int)
-  -> EXTERN: (67,7) fopen(const char *, const char *)
-  -> EXTERN: (70,3) printf(const char *, ...)
-  -> EXTERN: (76,2) fscanf(FILE *, const char *, ...)
-  -> EXTERN: (79,32) malloc(size_t)
-  -> EXTERN: (80,31) malloc(size_t)
-  -> EXTERN: (81,40) malloc(size_t)
-  -> EXTERN: (82,34) malloc(size_t)
-  -> EXTERN: (88,3) fscanf(FILE *, const char *, ...)
-  -> EXTERN: (97,2) fscanf(FILE *, const char *, ...)
+  -> EXTERN: (60,7) strcmp(const char *, const char *)
+  -> EXTERN: (62,14) strcmp(const char *, const char *)
+  -> EXTERN: (64,14) strcmp(const char *, const char *)
+  -> EXTERN: (67,3) fprintf(FILE *, const char *, ...)
+  -> EXTERN: (68,3) exit(int)
+  -> EXTERN: (74,7) fopen(const char *, const char *)
+  -> EXTERN: (77,3) printf(const char *, ...)
+  -> EXTERN: (83,2) fscanf(FILE *, const char *, ...)
+  -> EXTERN: (86,32) malloc(size_t)
+  -> EXTERN: (87,31) malloc(size_t)
+  -> EXTERN: (88,40) malloc(size_t)
+  -> EXTERN: (89,34) malloc(size_t)
+  -> EXTERN: (95,3) fscanf(FILE *, const char *, ...)
   -> EXTERN: (104,2) fscanf(FILE *, const char *, ...)
-  -> EXTERN: (107,30) malloc(size_t)
-  -> EXTERN: (110,3) fscanf(FILE *, const char *, ...)
-  -> EXTERN: (111,3) fscanf(FILE *, const char *, ...)
-  -> EXTERN: (116,3) fclose(FILE *)
-  -> EXTERN: (120,23) malloc(size_t)
-  -> (128,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
+  -> EXTERN: (111,2) fscanf(FILE *, const char *, ...)
+  -> EXTERN: (114,30) malloc(size_t)
+  -> EXTERN: (117,3) fscanf(FILE *, const char *, ...)
+  -> EXTERN: (118,3) fscanf(FILE *, const char *, ...)
+  -> EXTERN: (123,3) fclose(FILE *)
+  -> EXTERN: (127,23) malloc(size_t)
+  -> (135,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
      [[ Callee not marked with inlining pragma  <1>]]
-  -> (128,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 13) (sz = 18)
+  -> (135,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 13) (sz = 18)
      [[ Called routine is noinline  <3>]]
-  -> EXTERN: (130,29) omp_get_wtime()
-  -> (138,20) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
+  -> EXTERN: (137,29) omp_get_wtime()
+  -> (145,20) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
      [[ Callee not marked with inlining pragma  <1>]]
-  -> (138,20) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 13) (sz = 18)
+  -> (145,20) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 13) (sz = 18)
      [[ Called routine is noinline  <3>]]
-  -> EXTERN: (141,3) omp_set_num_threads(int)
-  -> INLINE (MANUAL): (147,11) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::push_back(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 339) (sz = 346)
+  -> EXTERN: (148,3) omp_set_num_threads(int)
+  -> INLINE (MANUAL): (154,11) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::push_back(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 339) (sz = 346)
     -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(905,6) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &)->std::enable_if<true, void>::type (isz = 21) (sz = 30)
       -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,4) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::_S_construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 18) (sz = 27)
         -> INLINE (MANUAL): (254,8) __gnu_cxx::new_allocator<std::seed_seq::result_type>::construct<unsigned int, const unsigned int &>(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, unsigned int *, const unsigned int &) (isz = 15) (sz = 24)
@@ -937,7 +928,7 @@ INLINE REPORT: (BFSGraph(int, char **)) [13/157=8.3%] bfs.cpp(46,1)
       -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,27) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
     -> /usr/include/c++/4.8.5/bits/stl_vector.h:(911,4) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_emplace_back_aux<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 303) (sz = 310)
        [[ Inlining inhibited by overrideable criterion  <4>]]
-  -> INLINE (MANUAL): (168,3) std::sort<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::iterator>(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::iterator, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::iterator) (isz = 1787) (sz = 1794)
+  -> INLINE (MANUAL): (175,3) std::sort<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::iterator>(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::iterator, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::iterator) (isz = 1787) (sz = 1794)
     -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_algo.h:(5458,19) __gnu_cxx::operator!=<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>>(const __gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>> &, const __gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>> &) (isz = 9) (sz = 18)
       -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_iterator.h:(825,20) __gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>>::base(const __gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>> *) const (isz = 1) (sz = 7)
       -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_iterator.h:(825,36) __gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>>::base(const __gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>> *) const (isz = 1) (sz = 7)
@@ -1044,15 +1035,15 @@ INLINE REPORT: (BFSGraph(int, char **)) [13/157=8.3%] bfs.cpp(46,1)
         -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_iterator.h:(779,34) __gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>>::__normal_iterator(__gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer &) (isz = 0) (sz = 7)
       -> (2215,2) std::__insertion_sort<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::iterator>(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::iterator, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::iterator) (isz = 259) (sz = 267)
          [[ Inlining inhibited by overrideable criterion  <4>]]
-  -> INLINE (MANUAL): (168,8) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::begin(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 11) (sz = 18)
+  -> INLINE (MANUAL): (175,8) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::begin(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 11) (sz = 18)
     -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(539,7) __cxa_call_unexpected
     -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(539,25) __gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>>::__normal_iterator(__gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer &) (isz = 0) (sz = 7)
-  -> INLINE (MANUAL): (168,23) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::end(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 11) (sz = 18)
+  -> INLINE (MANUAL): (175,23) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::end(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 11) (sz = 18)
     -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(557,7) __cxa_call_unexpected
     -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(557,25) __gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>>::__normal_iterator(__gnu_cxx::__normal_iterator<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer &) (isz = 0) (sz = 7)
-  -> INLINE (MANUAL): (169,34) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
-  -> INLINE (MANUAL): (169,34) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
-  -> INLINE (MANUAL): (171,21) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::push_back(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 339) (sz = 346)
+  -> INLINE (MANUAL): (176,34) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+  -> INLINE (MANUAL): (176,34) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+  -> INLINE (MANUAL): (178,21) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::push_back(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 339) (sz = 346)
     -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(905,6) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &)->std::enable_if<true, void>::type (isz = 21) (sz = 30)
       -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,4) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::_S_construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 18) (sz = 27)
         -> INLINE (MANUAL): (254,8) __gnu_cxx::new_allocator<std::seed_seq::result_type>::construct<unsigned int, const unsigned int &>(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, unsigned int *, const unsigned int &) (isz = 15) (sz = 24)
@@ -1062,8 +1053,8 @@ INLINE REPORT: (BFSGraph(int, char **)) [13/157=8.3%] bfs.cpp(46,1)
       -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,27) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
     -> /usr/include/c++/4.8.5/bits/stl_vector.h:(911,4) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_emplace_back_aux<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 303) (sz = 310)
        [[ Inlining inhibited by overrideable criterion  <4>]]
-  -> INLINE (MANUAL): (171,36) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
-  -> INLINE (MANUAL): (186,2) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
+  -> INLINE (MANUAL): (178,36) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
+  -> INLINE (MANUAL): (193,2) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
     -> /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
        [[ Callee not marked with inlining pragma  <1>]]
     -> EXTERN: /usr/include/c++/4.8.5/bits/stl_vector.h:(415,7) __cxa_call_unexpected
@@ -1072,44 +1063,12 @@ INLINE REPORT: (BFSGraph(int, char **)) [13/157=8.3%] bfs.cpp(46,1)
     -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(416,33) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *const) (isz = 0) (sz = 5)
       -> (159,7) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~_Vector_base(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 18) (sz = 23)
          [[ Unable to inline callsite  <2>]]
-  -> EXTERN: (189,27) omp_get_wtime()
-  -> (199,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
+  -> EXTERN: (196,27) omp_get_wtime()
+  -> (206,15) std::vector<Node, std::allocator<Node>>::~vector(std::vector<Node, std::allocator<Node>> *) (isz = 22) (sz = 27)
      [[ Callee not marked with inlining pragma  <1>]]
-  -> (199,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 13) (sz = 18)
+  -> (206,15) std::vector<Node, std::allocator<Node>>::vector(std::vector<Node, std::allocator<Node>> *) (isz = 13) (sz = 18)
      [[ Called routine is noinline  <3>]]
-  -> INLINE (MANUAL): (200,18) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::resize(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 384) (sz = 391)
-    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(666,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
-    -> /usr/include/c++/4.8.5/bits/stl_vector.h:(667,4) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_default_append(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 340) (sz = 347)
-       [[ Inlining inhibited by overrideable criterion  <4>]]
-    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(667,35) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
-    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(668,24) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
-    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(669,4) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_erase_at_end(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer) (isz = 8) (sz = 15)
-      -> DELETED: (1352,2) std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 0) (sz = 8)
-      -> INLINE (MANUAL): (1352,48) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
-  -> INLINE (MANUAL): (201,44) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
-  -> INLINE (MANUAL): (201,44) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
-  -> INLINE (MANUAL): (202,18) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
-  -> INLINE (MANUAL): (202,35) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
-  -> (204,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
-     [[ Callee not marked with inlining pragma  <1>]]
-  -> (204,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 13) (sz = 18)
-     [[ Called routine is noinline  <3>]]
-  -> INLINE (MANUAL): (205,16) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::resize(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 384) (sz = 391)
-    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(666,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
-    -> /usr/include/c++/4.8.5/bits/stl_vector.h:(667,4) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_default_append(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 340) (sz = 347)
-       [[ Inlining inhibited by overrideable criterion  <4>]]
-    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(667,35) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
-    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(668,24) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
-    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(669,4) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_erase_at_end(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer) (isz = 8) (sz = 15)
-      -> DELETED: (1352,2) std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 0) (sz = 8)
-      -> INLINE (MANUAL): (1352,48) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
-  -> INLINE (MANUAL): (207,16) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
-  -> INLINE (MANUAL): (207,37) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
-  -> (209,15) std::vector<Node, std::allocator<Node>>::~vector(std::vector<Node, std::allocator<Node>> *) (isz = 22) (sz = 27)
-     [[ Callee not marked with inlining pragma  <1>]]
-  -> (209,15) std::vector<Node, std::allocator<Node>>::vector(std::vector<Node, std::allocator<Node>> *) (isz = 13) (sz = 18)
-     [[ Called routine is noinline  <3>]]
-  -> INLINE (MANUAL): (210,16) std::vector<Node, std::allocator<Node>>::resize(std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 394) (sz = 401)
+  -> INLINE (MANUAL): (207,16) std::vector<Node, std::allocator<Node>>::resize(std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 394) (sz = 401)
     -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(666,19) std::vector<Node, std::allocator<Node>>::size(const std::vector<Node, std::allocator<Node>> *) const (isz = 5) (sz = 12)
     -> /usr/include/c++/4.8.5/bits/stl_vector.h:(667,4) std::vector<Node, std::allocator<Node>>::_M_default_append(std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 350) (sz = 357)
        [[ Inlining inhibited by overrideable criterion  <4>]]
@@ -1118,57 +1077,94 @@ INLINE REPORT: (BFSGraph(int, char **)) [13/157=8.3%] bfs.cpp(46,1)
     -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(669,4) std::vector<Node, std::allocator<Node>>::_M_erase_at_end(std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::pointer) (isz = 8) (sz = 15)
       -> DELETED: (1352,2) std::_Destroy<std::_Vector_base<Node, std::allocator<Node>>::pointer, Node>(std::_Vector_base<Node, std::allocator<Node>>::pointer, std::_Vector_base<Node, std::allocator<Node>>::pointer, std::allocator<Node> &) (isz = 0) (sz = 8)
       -> INLINE (MANUAL): (1352,48) std::_Vector_base<Node, std::allocator<Node>>::_M_get_Tp_allocator(std::_Vector_base<Node, std::allocator<Node>> *) (isz = 1) (sz = 8)
-  -> INLINE (MANUAL): (212,33) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
-  -> INLINE (MANUAL): (213,16) std::vector<Node, std::allocator<Node>>::operator[](std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 1) (sz = 9)
-  -> INLINE (MANUAL): (214,16) std::vector<Node, std::allocator<Node>>::operator[](std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 1) (sz = 9)
-  -> INLINE (MANUAL): (216,43) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
-  -> EXTERN: (224,15) fopen(const char *, const char *)
-  -> EXTERN: (225,2) fprintf(FILE *, const char *, ...)
-  -> EXTERN: (227,3) fprintf(FILE *, const char *, ...)
-  -> INLINE (MANUAL): (227,41) std::vector<Node, std::allocator<Node>>::operator[](std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 1) (sz = 9)
-  -> INLINE (MANUAL): (227,68) std::vector<Node, std::allocator<Node>>::operator[](std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 1) (sz = 9)
-  -> EXTERN: (229,2) fprintf(FILE *, const char *, ...)
-  -> EXTERN: (230,2) fprintf(FILE *, const char *, ...)
-  -> EXTERN: (232,3) fprintf(FILE *, const char *, ...)
-  -> INLINE (MANUAL): (232,41) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
-  -> EXTERN: (234,2) fclose(FILE *)
-  -> EXTERN: (237,2) free(void *)
-  -> EXTERN: (238,2) free(void *)
-  -> EXTERN: (239,2) free(void *)
-  -> EXTERN: (240,2) free(void *)
-  -> EXTERN: (241,2) free(void *)
-  -> EXTERN: (242,2) free(void *)
+  -> INLINE (MANUAL): (210,37) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
+  -> INLINE (MANUAL): (211,16) std::vector<Node, std::allocator<Node>>::operator[](std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 1) (sz = 9)
+  -> INLINE (MANUAL): (212,16) std::vector<Node, std::allocator<Node>>::operator[](std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 1) (sz = 9)
+  -> INLINE (MANUAL): (213,26) std::vector<Node, std::allocator<Node>>::operator[](std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 1) (sz = 9)
+  -> (218,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
+     [[ Callee not marked with inlining pragma  <1>]]
+  -> (218,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 13) (sz = 18)
+     [[ Called routine is noinline  <3>]]
+  -> INLINE (MANUAL): (219,18) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::resize(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 384) (sz = 391)
+    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(666,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+    -> /usr/include/c++/4.8.5/bits/stl_vector.h:(667,4) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_default_append(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 340) (sz = 347)
+       [[ Inlining inhibited by overrideable criterion  <4>]]
+    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(667,35) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(668,24) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(669,4) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_erase_at_end(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer) (isz = 8) (sz = 15)
+      -> DELETED: (1352,2) std::_Destroy<std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::seed_seq::result_type>(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::pointer, std::allocator<std::seed_seq::result_type> &) (isz = 0) (sz = 8)
+      -> INLINE (MANUAL): (1352,48) std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_get_Tp_allocator(std::_Vector_base<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 1) (sz = 8)
+  -> INLINE (MANUAL): (220,44) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+  -> INLINE (MANUAL): (220,44) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size(const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) const (isz = 5) (sz = 12)
+  -> INLINE (MANUAL): (221,18) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
+  -> INLINE (MANUAL): (221,35) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
+  -> (224,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::~vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 22) (sz = 27)
+     [[ Callee not marked with inlining pragma  <1>]]
+  -> (224,19) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::vector(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *) (isz = 13) (sz = 18)
+     [[ Called routine is noinline  <3>]]
+  -> INLINE (MANUAL): (228,39) std::vector<Node, std::allocator<Node>>::operator[](std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 1) (sz = 9)
+  -> INLINE (MANUAL): (229,37) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
+  -> INLINE (MANUAL): (232,18) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::push_back(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 339) (sz = 346)
+    -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/stl_vector.h:(905,6) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &)->std::enable_if<true, void>::type (isz = 21) (sz = 30)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,4) std::allocator_traits<std::allocator<std::seed_seq::result_type>>::_S_construct<std::seed_seq::result_type, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::allocator<std::seed_seq::result_type> &, std::seed_seq::result_type *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 18) (sz = 27)
+        -> INLINE (MANUAL): (254,8) __gnu_cxx::new_allocator<std::seed_seq::result_type>::construct<unsigned int, const unsigned int &>(__gnu_cxx::new_allocator<std::seed_seq::result_type> *, unsigned int *, const unsigned int &) (isz = 15) (sz = 24)
+          -> INLINE (MANUAL): /usr/include/c++/4.8.5/ext/new_allocator.h:(120,18) operator new(std::size_t, void *) (isz = 0) (sz = 7)
+          -> INLINE (MANUAL): /usr/include/c++/4.8.5/ext/new_allocator.h:(120,27) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
+        -> INLINE (MANUAL): (254,23) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
+      -> INLINE (MANUAL): /usr/include/c++/4.8.5/bits/alloc_traits.h:(393,27) std::forward<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::remove_reference<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>::type &) (isz = 0) (sz = 6)
+    -> /usr/include/c++/4.8.5/bits/stl_vector.h:(911,4) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::_M_emplace_back_aux<const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &>(std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, const std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::value_type &) (isz = 303) (sz = 310)
+       [[ Inlining inhibited by overrideable criterion  <4>]]
+  -> INLINE (MANUAL): (232,43) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
+  -> EXTERN: (258,8) strcmp(const char *, const char *)
+  -> EXTERN: (260,15) strcmp(const char *, const char *)
+  -> EXTERN: (262,15) strcmp(const char *, const char *)
+  -> EXTERN: (268,15) fopen(const char *, const char *)
+  -> EXTERN: (269,2) fprintf(FILE *, const char *, ...)
+  -> EXTERN: (271,3) fprintf(FILE *, const char *, ...)
+  -> INLINE (MANUAL): (271,41) std::vector<Node, std::allocator<Node>>::operator[](std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 1) (sz = 9)
+  -> INLINE (MANUAL): (271,68) std::vector<Node, std::allocator<Node>>::operator[](std::vector<Node, std::allocator<Node>> *, std::vector<Node, std::allocator<Node>>::size_type) (isz = 1) (sz = 9)
+  -> EXTERN: (273,2) fprintf(FILE *, const char *, ...)
+  -> EXTERN: (274,2) fprintf(FILE *, const char *, ...)
+  -> EXTERN: (276,3) fprintf(FILE *, const char *, ...)
+  -> INLINE (MANUAL): (276,41) std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::operator[](std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>> *, std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type) (isz = 1) (sz = 9)
+  -> EXTERN: (278,2) fclose(FILE *)
+  -> EXTERN: (281,2) free(void *)
+  -> EXTERN: (282,2) free(void *)
+  -> EXTERN: (283,2) free(void *)
+  -> EXTERN: (284,2) free(void *)
+  -> EXTERN: (285,2) free(void *)
+  -> EXTERN: (286,2) free(void *)
 
 
     Report from: OpenMP optimizations [openmp]
 
-bfs.cpp(142:1-142:1):OMP:_Z8BFSGraphiPPc:  OpenMP DEFINED LOOP WAS PARALLELIZED
-bfs.cpp(174:1-174:1):OMP:_Z8BFSGraphiPPc:  OpenMP DEFINED LOOP WAS PARALLELIZED
+bfs.cpp(149:1-149:1):OMP:_Z8BFSGraphiPPc:  OpenMP DEFINED LOOP WAS PARALLELIZED
+bfs.cpp(181:1-181:1):OMP:_Z8BFSGraphiPPc:  OpenMP DEFINED LOOP WAS PARALLELIZED
 
     Report from: Loop nest, Vector & Auto-parallelization optimizations [loop, vec, par]
 
 
-LOOP BEGIN at bfs.cpp(86,2)
+LOOP BEGIN at bfs.cpp(93,2)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
    remark #25456: Number of Array Refs Scalar Replaced In Loop: 1
 LOOP END
 
-LOOP BEGIN at bfs.cpp(108,2)
+LOOP BEGIN at bfs.cpp(115,2)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
    remark #25456: Number of Array Refs Scalar Replaced In Loop: 1
 LOOP END
 
-LOOP BEGIN at bfs.cpp(121,2)
+LOOP BEGIN at bfs.cpp(128,2)
    remark #25408: memset generated
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at bfs.cpp(121,2)
+   LOOP BEGIN at bfs.cpp(128,2)
    <Peeled loop for vectorization>
       remark #25015: Estimate of max trip count of loop=3
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(121,2)
-      remark #15388: vectorization support: reference h_cost[i] has aligned access   [ bfs.cpp(122,3) ]
+   LOOP BEGIN at bfs.cpp(128,2)
+      remark #15388: vectorization support: reference h_cost[i] has aligned access   [ bfs.cpp(129,3) ]
       remark #15305: vectorization support: vector length 4
       remark #15309: vectorization support: normalized vectorization overhead 3.333
       remark #15300: LOOP WAS VECTORIZED
@@ -1182,51 +1178,63 @@ LOOP BEGIN at bfs.cpp(121,2)
       remark #25015: Estimate of max trip count of loop=6
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(121,2)
+   LOOP BEGIN at bfs.cpp(128,2)
    <Remainder loop for vectorization>
       remark #25015: Estimate of max trip count of loop=24
    LOOP END
 LOOP END
 
-LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_iterator.h(748,4) inlined into bfs.cpp(168,3)
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_iterator.h(748,4) inlined into bfs.cpp(175,3)
    remark #15522: loop was not vectorized: loop control flow is too complex. Try using canonical loop form from OpenMP specification
 
-   LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algo.h(2242,4) inlined into bfs.cpp(168,3)
+   LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algo.h(2242,4) inlined into bfs.cpp(175,3)
       remark #15523: loop was not vectorized: loop control variable __first._M_current was found, but loop iteration count cannot be computed before executing the loop
       remark #25478: While Loop Unrolled by 2  
    LOOP END
 
-   LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algo.h(2245,4) inlined into bfs.cpp(168,3)
+   LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algo.h(2245,4) inlined into bfs.cpp(175,3)
       remark #15523: loop was not vectorized: loop control variable __last._M_current was found, but loop iteration count cannot be computed before executing the loop
       remark #25478: While Loop Unrolled by 2  
    LOOP END
 LOOP END
 
-LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_heap.h(475,7) inlined into bfs.cpp(168,3)
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_heap.h(475,7) inlined into bfs.cpp(175,3)
    remark #15523: loop was not vectorized: loop control variable __last._M_current was found, but loop iteration count cannot be computed before executing the loop
    remark #25456: Number of Array Refs Scalar Replaced In Loop: 1
 LOOP END
 
-LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algo.h(2180,53) inlined into bfs.cpp(168,3)
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algo.h(2180,53) inlined into bfs.cpp(175,3)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
    remark #15346: vector dependence: assumed ANTI dependence between *__i._M_current (2095:10) and *__last._M_current (2104:7)
    remark #15346: vector dependence: assumed FLOW dependence between *__last._M_current (2104:7) and *__i._M_current (2095:10)
 
-   LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algo.h(2098,7) inlined into bfs.cpp(168,3)
+   LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algo.h(2098,7) inlined into bfs.cpp(175,3)
       remark #15523: loop was not vectorized: loop control variable __next._M_current was found, but loop iteration count cannot be computed before executing the loop
       remark #25478: While Loop Unrolled by 2  
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(169,34)
+LOOP BEGIN at bfs.cpp(176,34)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 
-LOOP BEGIN at bfs.cpp(201,44)
-   remark #15389: vectorization support: reference ordered_nodes_id.__b_St12_Vector_baseIjSaIjEE._M_impl._M_start[i] has unaligned access   [ bfs.cpp(202,35) ]
+LOOP BEGIN at bfs.cpp(209,2)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between offset (213:3) and offset (211:16)
+   remark #15346: vector dependence: assumed ANTI dependence between offset (211:16) and offset (213:3)
+   remark #25439: unrolled with remainder by 2  
+   remark #25456: Number of Array Refs Scalar Replaced In Loop: 2
+LOOP END
+
+LOOP BEGIN at bfs.cpp(209,2)
+<Remainder>
+LOOP END
+
+LOOP BEGIN at bfs.cpp(220,44)
+   remark #15389: vectorization support: reference ordered_nodes_id.__b_St12_Vector_baseIjSaIjEE._M_impl._M_start[i] has unaligned access   [ bfs.cpp(221,35) ]
    remark #15381: vectorization support: unaligned access used inside loop body
    remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
-   remark #15329: vectorization support: irregularly indexed store was emulated for the variable <ordered_indices.__b_St12_Vector_baseIjSaIjEE._M_impl._M_start[*(>, part of index is read from memory   [ bfs.cpp(202,18) ]
+   remark #15329: vectorization support: irregularly indexed store was emulated for the variable <ordered_indices.__b_St12_Vector_baseIjSaIjEE._M_impl._M_start[*(>, part of index is read from memory   [ bfs.cpp(221,18) ]
    remark #15305: vectorization support: vector length 4
    remark #15309: vectorization support: normalized vectorization overhead 0.087
    remark #15450: unmasked unaligned unit stride loads: 1 
@@ -1239,87 +1247,51 @@ LOOP BEGIN at bfs.cpp(201,44)
    remark #25439: unrolled with remainder by 2  
 LOOP END
 
-LOOP BEGIN at bfs.cpp(201,44)
-<Remainder>
-LOOP END
-
-LOOP BEGIN at bfs.cpp(206,2)
-   remark #15389: vectorization support: reference ordered_edges.__b_St12_Vector_baseIjSaIjEE._M_impl._M_start[i] has unaligned access   [ bfs.cpp(207,16) ]
-   remark #15389: vectorization support: reference h_graph_edges[i] has unaligned access   [ bfs.cpp(207,38) ]
-   remark #15381: vectorization support: unaligned access used inside loop body
-   remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
-   remark #15328: vectorization support: irregularly indexed load was emulated for the variable <ordered_indices.__b_St12_Vector_baseIjSaIjEE._M_impl._M_start[*(>, part of index is read from memory   [ bfs.cpp(207,37) ]
-   remark #15305: vectorization support: vector length 4
-   remark #15309: vectorization support: normalized vectorization overhead 0.122
-   remark #15450: unmasked unaligned unit stride loads: 1 
-   remark #15451: unmasked unaligned unit stride stores: 1 
-   remark #15462: unmasked indexed (or gather) loads: 1 
-   remark #15475: --- begin vector cost summary ---
-   remark #15476: scalar cost: 8 
-   remark #15477: vector cost: 12.250 
-   remark #15478: estimated potential speedup: 0.650 
-   remark #15488: --- end vector cost summary ---
-   remark #25439: unrolled with remainder by 2  
-LOOP END
-
-LOOP BEGIN at bfs.cpp(206,2)
-<Remainder>
-LOOP END
-
-LOOP BEGIN at bfs.cpp(211,2)
-   remark #15389: vectorization support: reference ordered_nodes_id.__b_St12_Vector_baseIjSaIjEE._M_impl._M_start[i] has unaligned access   [ bfs.cpp(212,33) ]
-   remark #15389: vectorization support: reference ordered_nodes.__b_St12_Vector_baseI4NodeSaIS0_EE._M_impl._M_start->starting[i] has unaligned access   [ bfs.cpp(213,16) ]
-   remark #15381: vectorization support: unaligned access used inside loop body
-   remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
-   remark #15329: vectorization support: non-unit strided store was emulated for the variable <ordered_nodes.__b_St12_Vector_baseI4NodeSaIS0_EE._M_impl._M_star>, stride is 2   [ bfs.cpp(213,16) ]
-   remark #15328: vectorization support: irregularly indexed load was emulated for the variable <h_graph_nodes->starting[id]>, part of index is read from memory   [ bfs.cpp(213,31) ]
-   remark #15329: vectorization support: non-unit strided store was emulated for the variable <ordered_nodes.__b_St12_Vector_baseI4NodeSaIS0_EE._M_impl._M_star>, stride is 2   [ bfs.cpp(214,16) ]
-   remark #15328: vectorization support: irregularly indexed load was emulated for the variable <h_graph_nodes->no_of_edges[id]>, part of index is read from memory   [ bfs.cpp(214,34) ]
-   remark #15305: vectorization support: vector length 4
-   remark #15309: vectorization support: normalized vectorization overhead 0.057
-   remark #15450: unmasked unaligned unit stride loads: 1 
-   remark #15453: unmasked strided stores: 2 
-   remark #15462: unmasked indexed (or gather) loads: 2 
-   remark #15475: --- begin vector cost summary ---
-   remark #15476: scalar cost: 13 
-   remark #15477: vector cost: 26.250 
-   remark #15478: estimated potential speedup: 0.490 
-   remark #15488: --- end vector cost summary ---
-   remark #25439: unrolled with remainder by 2  
-LOOP END
-
-LOOP BEGIN at bfs.cpp(211,2)
+LOOP BEGIN at bfs.cpp(220,44)
 <Remainder>
 LOOP END
 
 LOOP BEGIN at bfs.cpp(226,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(227,3) ]
-LOOP END
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
 
-LOOP BEGIN at bfs.cpp(231,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(232,3) ]
-LOOP END
-
-LOOP BEGIN at bfs.cpp(144,3)
-   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
-
-   LOOP BEGIN at bfs.cpp(154,5)
-      remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed FLOW dependence between h_cost (161:7) and h_cost (161:7)
-      remark #15346: vector dependence: assumed ANTI dependence between h_cost (161:7) and h_cost (161:7)
+   LOOP BEGIN at bfs.cpp(231,3)
+      remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ /usr/include/c++/4.8.5/bits/stl_vector.h(911,4) ]
       remark #25439: unrolled with remainder by 2  
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(154,5)
+   LOOP BEGIN at bfs.cpp(231,3)
    <Remainder>
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(174,1)
-   remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(179,5) ]
-   remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(180,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(182,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(182,5) ]
+LOOP BEGIN at bfs.cpp(270,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(271,3) ]
+LOOP END
+
+LOOP BEGIN at bfs.cpp(275,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(276,3) ]
+LOOP END
+
+LOOP BEGIN at bfs.cpp(151,3)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+
+   LOOP BEGIN at bfs.cpp(161,5)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed FLOW dependence between h_cost (168:7) and h_cost (168:7)
+      remark #15346: vector dependence: assumed ANTI dependence between h_cost (168:7) and h_cost (168:7)
+      remark #25439: unrolled with remainder by 2  
+   LOOP END
+
+   LOOP BEGIN at bfs.cpp(161,5)
+   <Remainder>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at bfs.cpp(181,1)
+   remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(186,5) ]
+   remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(187,5) ]
+   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(189,5) ]
+   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(189,5) ]
    remark #15381: vectorization support: unaligned access used inside loop body
    remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
    remark #15305: vectorization support: vector length 4
@@ -1336,7 +1308,7 @@ LOOP BEGIN at bfs.cpp(174,1)
    remark #25439: unrolled with remainder by 2  
 LOOP END
 
-LOOP BEGIN at bfs.cpp(174,1)
+LOOP BEGIN at bfs.cpp(181,1)
 <Remainder>
 LOOP END
 
@@ -1344,18 +1316,18 @@ LOOP END
 Non-optimizable loops:
 
 
-LOOP BEGIN at bfs.cpp(187,9)
-   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ bfs.cpp(141,3) ]
+LOOP BEGIN at bfs.cpp(194,9)
+   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ bfs.cpp(148,3) ]
 
-   LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algo.h(2306,7) inlined into bfs.cpp(168,3)
+   LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_algo.h(2306,7) inlined into bfs.cpp(175,3)
       remark #15522: loop was not vectorized: loop control flow is too complex. Try using canonical loop form from OpenMP specification
    LOOP END
 LOOP END
 
     Report from: Code generation optimizations [cg]
 
-bfs.cpp(122,3):remark #34014: optimization advice for memset: increase the destination's alignment to 16 (and use __assume_aligned) to speed up library implementation
-bfs.cpp(122,3):remark #34026: call to memset implemented as a call to optimized library version
+bfs.cpp(129,3):remark #34014: optimization advice for memset: increase the destination's alignment to 16 (and use __assume_aligned) to speed up library implementation
+bfs.cpp(129,3):remark #34026: call to memset implemented as a call to optimized library version
 bfs.cpp(46,1):remark #34051: REGISTER ALLOCATION : [_Z8BFSGraphiPPc] bfs.cpp:46
 
     Hardware registers
@@ -1365,19 +1337,19 @@ bfs.cpp(46,1):remark #34051: REGISTER ALLOCATION : [_Z8BFSGraphiPPc] bfs.cpp:46
         Assigned     :   16[ rax rdx rcx rbx rbp rsi rdi r8-r15 zmm0]
         
     Routine temporaries
-        Total         :     675
-            Global    :     195
-            Local     :     480
-        Regenerable   :     197
-        Spilled       :       7
+        Total         :     725
+            Global    :     210
+            Local     :     515
+        Regenerable   :     214
+        Spilled       :       9
         
     Routine stack
         Variables     :     277 bytes*
-            Reads     :      86 [2.08e+02 ~ 4.6%]
-            Writes    :      42 [2.83e+02 ~ 6.3%]
-        Spills        :     104 bytes*
-            Reads     :      34 [1.91e+01 ~ 0.4%]
-            Writes    :      27 [9.07e+01 ~ 2.0%]
+            Reads     :      94 [3.18e+02 ~ 6.4%]
+            Writes    :      44 [2.90e+02 ~ 5.8%]
+        Spills        :     120 bytes*
+            Reads     :      39 [2.15e+01 ~ 0.4%]
+            Writes    :      29 [9.25e+01 ~ 1.9%]
     
     Notes
     

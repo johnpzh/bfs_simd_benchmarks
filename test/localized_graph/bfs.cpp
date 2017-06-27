@@ -54,12 +54,19 @@ void BFSGraph( int argc, char** argv)
 	//Usage( argv);
 	//exit(0);
 	num_omp_threads = 1;
-	//static char add[] = "/home/zpeng/benchmarks/rodinia_3.1/data/bfs/graph4096.txt";
-	static char add[] = "/home/zpeng/benchmarks/rodinia_3.1/data/bfs/graph128M.txt";
-	input_f = add;
+	input_f = "/home/zpeng/benchmarks/rodinia_3.1/data/bfs/graph4096.txt";
 	} else {
 	num_omp_threads = atoi(argv[1]);
-	input_f = argv[2];
+	if (!strcmp(argv[2], "4096")) {
+		input_f = "/home/zpeng/benchmarks/rodinia_3.1/data/bfs/graph4096.txt";
+	} else if (!strcmp(argv[2], "16M")) {
+		input_f = "/home/zpeng/benchmarks/rodinia_3.1/data/bfs/graph16M.txt";
+	} else if (!strcmp(argv[2], "128M")) {
+		input_f = "/home/zpeng/benchmarks/rodinia_3.1/data/bfs/graph128M.txt";
+	} else {
+		fprintf(stderr, "Error: data file does not exist.\n");
+		exit(1);
+	}
 	}
 	
 	//printf("Reading File\n");
@@ -196,24 +203,49 @@ void BFSGraph( int argc, char** argv)
 	//fclose(fpo);
 	//printf("Result stored in result.txt\n");
 	
+	vector<Node> ordered_nodes;
+	ordered_nodes.resize(no_of_nodes);
+	unsigned offset = 0;
+	for (unsigned i = 0; i < no_of_nodes; ++i) {
+		unsigned old_id = ordered_nodes_id[i];
+		ordered_nodes[i].starting = offset;
+		ordered_nodes[i].no_of_edges = h_graph_nodes[old_id].no_of_edges;
+		offset += ordered_nodes[i].no_of_edges;
+	}
+
+	unsigned ordered_source = 0;
+
 	vector<unsigned> ordered_indices;
 	ordered_indices.resize(no_of_nodes);
 	for (unsigned i = 0; i < ordered_nodes_id.size(); ++i) {
 		ordered_indices[ordered_nodes_id[i]] = i;
 	}
+	
 	vector<unsigned> ordered_edges;
-	ordered_edges.resize(edge_list_size);
-	for (unsigned i = 0; i < edge_list_size; ++i) {
-		ordered_edges[i] = ordered_indices[h_graph_edges[i]];
-	}
-	vector<Node> ordered_nodes;
-	ordered_nodes.resize(no_of_nodes);
+	//ordered_edges.resize(edge_list_size);
 	for (unsigned i = 0; i < no_of_nodes; ++i) {
-		unsigned id = ordered_nodes_id[i];
-		ordered_nodes[i].starting = h_graph_nodes[id].starting;
-		ordered_nodes[i].no_of_edges = h_graph_nodes[id].no_of_edges;
+		//unsigned starting = ordered_nodes[i].starting;
+		unsigned no_of_edges = ordered_nodes[i].no_of_edges;
+		unsigned old_id = ordered_nodes_id[i];
+		unsigned next_starting = h_graph_nodes[old_id].starting + no_of_edges;
+		for (unsigned j = h_graph_nodes[old_id].starting; j < next_starting; ++j) {
+			ordered_edges.push_back(ordered_indices[h_graph_edges[j]]);
+		}
 	}
-	unsigned ordered_source = ordered_indices[source];
+
+	//vector<unsigned> ordered_edges;
+	//ordered_edges.resize(edge_list_size);
+	//for (unsigned i = 0; i < edge_list_size; ++i) {
+	//	ordered_edges[i] = ordered_indices[h_graph_edges[i]];
+	//}
+	//vector<Node> ordered_nodes;
+	//ordered_nodes.resize(no_of_nodes);
+	//for (unsigned i = 0; i < no_of_nodes; ++i) {
+	//	unsigned id = ordered_nodes_id[i];
+	//	ordered_nodes[i].starting = h_graph_nodes[id].starting;
+	//	ordered_nodes[i].no_of_edges = h_graph_nodes[id].no_of_edges;
+	//}
+	//unsigned ordered_source = ordered_indices[source];
 
 	//FILE *fout = fopen("ordered_edges.txt", "w");
 	//for (unsigned i = 0; i < edge_list_size; ++i) {
@@ -221,13 +253,25 @@ void BFSGraph( int argc, char** argv)
 	//}
 	//fclose(fout);
 	
-	FILE *fout = fopen("local_graph128M.txt", "w");
+	char *output;
+	if (argc == 3) {
+		if (!strcmp(argv[2], "4096")) {
+			output = "local_graph4096.txt";
+		} else if (!strcmp(argv[2], "16M")) {
+			output = "local_graph16M.txt";
+		} else if (!strcmp(argv[2], "128M")) {
+			output = "local_graph128M.txt";
+		}
+	} else {
+		output = "local_graph4096.txt";
+	}
+	FILE *fout = fopen(output, "w");
 	fprintf(fout, "%u\n", no_of_nodes);
 	for (unsigned i = 0; i < no_of_nodes; ++i) {
 		fprintf(fout, "%d %d\n", ordered_nodes[i].starting, ordered_nodes[i].no_of_edges);
 	}
-	fprintf(fout, "%d\n", ordered_source);
-	fprintf(fout, "%d\n", edge_list_size);
+	fprintf(fout, "\n%d\n", ordered_source);
+	fprintf(fout, "\n%d\n", edge_list_size);
 	for (unsigned i = 0; i < edge_list_size; ++i) {
 		fprintf(fout, "%u %d\n", ordered_edges[i], 1);
 	}

@@ -239,15 +239,21 @@ void BFSGraph( int argc, char** argv)
 	//exit(0);
 	//num_omp_threads = 1;
 	num_omp_threads = 64;
-	//static char add[] = "/home/zpeng/benchmarks/rodinia_3.1/data/bfs/graph4096.txt";
-	static char add[] = "/home/zpeng/benchmarks/test/localized_graph/local_graph4096.txt";
-	input_f = add;
+	input_f = "/home/zpeng/benchmarks/test/localized_graph/local_graph4096.txt";
 	//BUFFER_SIZE_MAX = 4096;
-	BUFFER_SIZE_MAX = 32768;
-	CHUNK_SIZE = 512;
+	BUFFER_SIZE_MAX = 65536;
+	CHUNK_SIZE = 4096;
 	} else {
 	num_omp_threads = atoi(argv[1]);
-	input_f = argv[2];
+	if (!strcmp(argv[2], "4096")) {
+		input_f = "/home/zpeng/benchmarks/test/localized_graph/local_graph4096.txt";
+	} else if (!strcmp(argv[2], "16M")) {
+		input_f = "/home/zpeng/benchmarks/test/localized_graph/local_graph16M.txt";
+	} else if (!strcmp(argv[2], "128M")) {
+		input_f = "/home/zpeng/benchmarks/test/localized_graph/local_graph128M.txt";
+	} else {
+		input_f = argv[2];
+	}
 	BUFFER_SIZE_MAX = atoi(argv[3]);
 	CHUNK_SIZE = atoi(argv[4]);
 	}
