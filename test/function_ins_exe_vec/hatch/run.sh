@@ -11,12 +11,13 @@ case $1 in
 	data_file="graph16M"
 	;;
 esac
-data_file="local_$data_file"
+#data_file="local_$data_file"
+data_file="$data_file"
 version="ins-exe-vec"
 #bin_addr="/home/zpeng/benchmarks/test/function_ins_exe_vec/hatch"
 bin_addr="."
-#data_addr="/home/zpeng/benchmarks/rodinia_3.1/data/bfs"
-data_addr="/home/zpeng/benchmarks/test/localized_graph"
+data_addr="/home/zpeng/benchmarks/rodinia_3.1/data/bfs"
+#data_addr="/home/zpeng/benchmarks/test/localized_graph"
 no_core=256
 #power_max=16
 result_file="result_${version}_${data_file}_$(date +%Y%m%d-%H%M%S).txt"

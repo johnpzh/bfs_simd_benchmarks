@@ -1,4 +1,5 @@
 # Ignore those large data files
+*graph*.txt
 *graph128M.txt
 *graph16M.txt
 *graph1M.txt
