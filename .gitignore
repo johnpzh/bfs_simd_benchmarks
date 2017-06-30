@@ -1,4 +1,8 @@
 # Ignore those large data files
+data/**
+data/
+data/*
+**/data
 *graph128M.txt
 *graph16M.txt
 *graph1M.txt
@@ -6,6 +10,7 @@
 *graph65536.txt
 graph16M.bak.txt
 graph16M_d16.txt
+graph16M_d32.txt
 graph16M_d64.txt
 
 # Ignore those useless result files

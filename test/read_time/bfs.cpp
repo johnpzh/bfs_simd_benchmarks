@@ -50,7 +50,8 @@ void BFS_kernel(\
 		int edge_list_size,\
 		int num_omp_threads,\
 		unsigned BUFFER_SIZE_MAX,\
-		unsigned CHUNK_SIZE \
+		unsigned CHUNK_SIZE, \
+		unsigned read_threads \
 		)
 {
 	
@@ -232,8 +233,9 @@ void BFSGraph( int argc, char** argv)
 	int	 num_omp_threads;
 	unsigned BUFFER_SIZE_MAX;
 	unsigned CHUNK_SIZE;
+	unsigned read_threads;
 	
-	if(argc!=5){
+	if(argc!=6){
 	//Usage(argc, argv);
 	//Usage( argv);
 	//exit(0);
@@ -243,6 +245,7 @@ void BFSGraph( int argc, char** argv)
 	//BUFFER_SIZE_MAX = 4096;
 	BUFFER_SIZE_MAX = 65536;
 	CHUNK_SIZE = 4096;
+	read_threads = 64;
 	} else {
 	num_omp_threads = atoi(argv[1]);
 	if (!strcmp(argv[2], "4096")) {
@@ -256,6 +259,7 @@ void BFSGraph( int argc, char** argv)
 	}
 	BUFFER_SIZE_MAX = atoi(argv[3]);
 	CHUNK_SIZE = atoi(argv[4]);
+	read_threads = atoi(argv[5]);
 	}
 	
 	//printf("Reading File\n");
@@ -277,13 +281,12 @@ void BFSGraph( int argc, char** argv)
 	int *h_updating_graph_mask = (int*) _mm_malloc(SIZE_INT*no_of_nodes, ALIGNED_BYTES);
 	int *h_graph_visited = (int*) _mm_malloc(SIZE_INT*no_of_nodes, ALIGNED_BYTES);
 
-	//omp_set_num_threads(64);
+	omp_set_num_threads(read_threads);
 	int start, edgeno;   
 	// initalize the memory
-//#pragma omp parallel for ordered private(start, edgeno)
+#pragma omp parallel for ordered
 	for( unsigned int i = 0; i < no_of_nodes; i++) 
 	{
-//#pragma omp ordered
 		fscanf(fp,"%d %d",&start,&edgeno);
 		h_graph_nodes[i].starting = start;
 		h_graph_nodes[i].no_of_edges = edgeno;
@@ -305,12 +308,11 @@ void BFSGraph( int argc, char** argv)
 	int id,cost;
 	int* h_graph_edges = (int*) _mm_malloc(SIZE_INT*edge_list_size, ALIGNED_BYTES);
 
-//#pragma omp parallel for ordered private(id, cost)
+#pragma omp parallel for ordered
 	for(unsigned int i=0; i < edge_list_size ; i++)
 	{
-//#pragma omp ordered
-		fscanf(fp,"%d %d",&id, &cost);
-		//fscanf(fp,"%d",&cost);
+		fscanf(fp,"%d",&id);
+		fscanf(fp,"%d",&cost);
 		h_graph_edges[i] = id;
 	}
 
@@ -335,7 +337,8 @@ void BFSGraph( int argc, char** argv)
 		edge_list_size,\
 		num_omp_threads,\
 		BUFFER_SIZE_MAX,\
-		CHUNK_SIZE \
+		CHUNK_SIZE, \
+		read_threads \
 		);
 	//printf("Start traversing the tree\n");
 	
@@ -507,11 +510,10 @@ void BFSGraph( int argc, char** argv)
 //		//printf("%u %lf\n", CHUNK_SIZE, (end_time - start_time));
 //#endif
 	//Store the result into a file
-	//omp_set_num_threads(64);
+	omp_set_num_threads(read_threads);
 	FILE *fpo = fopen("path.txt","w");
-//#pragma omp parallel for ordered
+#pragma omp parallel for ordered
 	for(unsigned int i=0;i<no_of_nodes;i++)
-//#pragma omp ordered
 		fprintf(fpo,"%d) cost:%d\n",i,h_cost[i]);
 	fclose(fpo);
 	//printf("Result stored in result.txt\n");
