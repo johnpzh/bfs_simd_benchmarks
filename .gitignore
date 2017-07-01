@@ -1,6 +1,7 @@
 # Ignore those large data files
 #data/**
 data/
+splitGen/graph*.txt
 #data/*
 #**/data
 *graph128M.txt
