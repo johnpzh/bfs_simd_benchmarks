@@ -1,8 +1,8 @@
 # Ignore those large data files
-data/**
+#data/**
 data/
-data/*
-**/data
+#data/*
+#**/data
 *graph128M.txt
 *graph16M.txt
 *graph1M.txt
