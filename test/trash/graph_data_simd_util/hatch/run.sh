@@ -7,15 +7,17 @@ case $1 in
 128M)
 	data_file="graph128M"
 	;;
-*)
+16M)
 	data_file="graph16M"
 	;;
+*)
+	data_file=$1
+	;;
 esac
-data_file="local_$data_file"
 version="ins-exe-vec"
 bin_addr="."
 #data_addr="/home/zpeng/benchmarks/rodinia_3.1/data/bfs"
-data_addr="/home/zpeng/benchmarks/test/localized_graph"
+data_addr="/home/zpeng/benchmarks/data"
 #no_core=64
 power_max=16
 result_file="result_${version}_${data_file}_$(date +%Y%m%d-%H%M%S).txt"
@@ -31,7 +33,7 @@ size=$((2 ** power))
 while [	$power -le $power_max ]
 do
 #${bin_addr}/bfs ${tno} ${data_addr}/${data_file}.txt 8192 8192 >> $result_file
-	${bin_addr}/bfs 1 ${data_addr}/${data_file}.txt ${size} 512 >> $result_file
+	${bin_addr}/bfs 1 ${data_addr}/${data_file} ${size} 32768 >> $result_file
 #${bin_addr}/bfs 64 ${data_addr}/${data_file}.txt 32768 ${size} >> $result_file
 #${bin_addr}/bfs 64 ${data_addr}/${data_file}.txt 16384 ${size} >> $result_file
 	echo -n .

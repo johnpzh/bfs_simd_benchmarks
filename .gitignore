@@ -15,6 +15,7 @@ graph16M_d32.txt
 graph16M_d64.txt
 
 # Ignore those useless result files
+path/
 *path.txt
 *result.txt
 *report*
