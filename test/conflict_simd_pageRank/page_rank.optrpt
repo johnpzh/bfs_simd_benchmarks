@@ -1,0 +1,406 @@
+Intel(R) Advisor can now assist with vectorization and show optimization
+  report messages with your source code.
+See "https://software.intel.com/en-us/intel-advisor-xe" for details.
+
+Intel(R) C++ Intel(R) 64 Compiler for applications running on Intel(R) 64, Version 17.0.1.132 Build 20161005
+
+Compiler options: -Wall -Wextra -g -std=c++11 -qopenmp -O3 -qopt-prefetch=5 -qopt-report=5 -qopt-report-phase=vec -o page_rank
+
+Begin optimization report for: main(int, char **)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at page_rank.cpp(63,2) inlined into page_rank.cpp(224,2)
+   remark #15527: loop was not vectorized: function call to _mm_malloc(size_t, size_t) cannot be vectorized   [ page_rank.cpp(64,30) ]
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(69,2) inlined into page_rank.cpp(224,2)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(88,2) inlined into page_rank.cpp(224,2)
+   remark #15382: vectorization support: call to function _mm_free(void *) cannot be vectorized   [ page_rank.cpp(89,3) ]
+   remark #15382: vectorization support: call to function _mm_free(void *) cannot be vectorized   [ page_rank.cpp(90,3) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm_free(void *) (89:3) and call:_mm_free(void *) (90:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm_free(void *) (90:3) and call:_mm_free(void *) (89:3)
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(200,2) inlined into page_rank.cpp(228,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(202,3) ]
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(134,1) inlined into page_rank.cpp(224,2)
+<Peeled loop for vectorization>
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(134,1) inlined into page_rank.cpp(224,2)
+   remark #15388: vectorization support: reference rank[i] has aligned access   [ page_rank.cpp(136,3) ]
+   remark #15388: vectorization support: reference sum[i] has aligned access   [ page_rank.cpp(137,3) ]
+   remark #15412: vectorization support: streaming store was generated for rank[i]   [ page_rank.cpp(136,3) ]
+   remark #15412: vectorization support: streaming store was generated for sum[i]   [ page_rank.cpp(137,3) ]
+   remark #15305: vectorization support: vector length 4
+   remark #15309: vectorization support: normalized vectorization overhead 1.667
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15449: unmasked aligned unit stride stores: 2 
+   remark #15467: unmasked aligned streaming stores: 2 
+   remark #15475: --- begin vector cost summary ---
+   remark #15476: scalar cost: 6 
+   remark #15477: vector cost: 1.500 
+   remark #15478: estimated potential speedup: 3.990 
+   remark #15488: --- end vector cost summary ---
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(134,1) inlined into page_rank.cpp(224,2)
+<Remainder loop for vectorization>
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(144,2) inlined into page_rank.cpp(224,2)
+   remark #15382: vectorization support: call to function _mm512_i32extscatter_ps(void *, __m512i, __m512, unsigned int, int, int) cannot be vectorized   [ page_rank.cpp(161,4) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed ANTI dependence between tops (145:18) and call:_mm512_i32extscatter_ps(void *, __m512i, __m512, unsigned i (161:4)
+   remark #15346: vector dependence: assumed FLOW dependence between call:_mm512_i32extscatter_ps(void *, __m512i, __m512, unsigned i (161:4) and tops (145:18)
+
+   LOOP BEGIN at page_rank.cpp(147,3) inlined into page_rank.cpp(224,2)
+      remark #15382: vectorization support: call to function _mm512_i32extscatter_ps(void *, __m512i, __m512, unsigned int, int, int) cannot be vectorized   [ page_rank.cpp(161,4) ]
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed ANTI dependence between tiles_n1 (149:19) and call:_mm512_i32extscatter_ps(void *, __m512i, __m512, unsigned i (161:4)
+      remark #15346: vector dependence: assumed FLOW dependence between call:_mm512_i32extscatter_ps(void *, __m512i, __m512, unsigned i (161:4) and tiles_n1 (149:19)
+
+      LOOP BEGIN at page_rank.cpp(166,5) inlined into page_rank.cpp(224,2)
+         remark #15389: vectorization support: reference at (171:20) has unaligned access   [ page_rank.cpp(171,20) ]
+         remark #15389: vectorization support: reference at (172:20) has unaligned access   [ page_rank.cpp(172,20) ]
+         remark #15388: vectorization support: reference &sum_n2_v[k] has aligned access   [ page_rank.cpp(173,23) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+         remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
+         remark #15328: vectorization support: non-unit strided load was emulated for the variable <at (171:20)>, masked, stride is 1   [ page_rank.cpp(171,20) ]
+         remark #15328: vectorization support: non-unit strided load was emulated for the variable <at (172:20)>, masked, stride is 1   [ page_rank.cpp(172,20) ]
+         remark #15329: vectorization support: irregularly indexed store was emulated for the variable <sum[*(*(?+i*8)+(j+k)*4)]>, masked, part of index is read from memory   [ page_rank.cpp(175,6) ]
+         remark #15328: vectorization support: irregularly indexed load was emulated for the variable <rank[n1]>, masked, part of index is read from memory   [ page_rank.cpp(174,18) ]
+         remark #15328: vectorization support: irregularly indexed load was emulated for the variable <grah.nneibor[n1]>, masked, part of index is read from memory   [ page_rank.cpp(174,27) ]
+         remark #15305: vectorization support: vector length 4
+         remark #15448: unmasked aligned unit stride loads: 1 
+         remark #15456: masked unaligned unit stride loads: 1 
+         remark #15458: masked indexed (or gather) loads: 2 
+         remark #15459: masked indexed (or scatter) stores: 1 
+         remark #15460: masked strided loads: 2 
+         remark #15475: --- begin vector cost summary ---
+         remark #15476: scalar cost: 51 
+         remark #15477: vector cost: 163.750 
+         remark #15478: estimated potential speedup: 0.310 
+         remark #15486: divides: 1 
+         remark #15487: type converts: 1 
+         remark #15488: --- end vector cost summary ---
+      LOOP END
+   LOOP END
+
+   LOOP BEGIN at page_rank.cpp(123,2) inlined into page_rank.cpp(224,2)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed FLOW dependence between sum[*(n2s+i*4)] (126:3) and sum[*(n2s+i*4)] (126:3)
+      remark #15346: vector dependence: assumed ANTI dependence between sum[*(n2s+i*4)] (126:3) and sum[*(n2s+i*4)] (126:3)
+   LOOP END
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(191,1) inlined into page_rank.cpp(224,2)
+<Peeled loop for vectorization>
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(191,1) inlined into page_rank.cpp(224,2)
+   remark #15388: vectorization support: reference rank[j] has aligned access   [ page_rank.cpp(193,3) ]
+   remark #15388: vectorization support: reference sum[j] has aligned access   [ page_rank.cpp(193,42) ]
+   remark #15412: vectorization support: streaming store was generated for rank[j]   [ page_rank.cpp(193,3) ]
+   remark #15305: vectorization support: vector length 4
+   remark #15309: vectorization support: normalized vectorization overhead 0.778
+   remark #15417: vectorization support: number of FP up converts: single precision to double precision 1   [ page_rank.cpp(193,3) ]
+   remark #15418: vectorization support: number of FP down converts: double precision to single precision 1   [ page_rank.cpp(193,3) ]
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15448: unmasked aligned unit stride loads: 1 
+   remark #15449: unmasked aligned unit stride stores: 1 
+   remark #15467: unmasked aligned streaming stores: 1 
+   remark #15475: --- begin vector cost summary ---
+   remark #15476: scalar cost: 38 
+   remark #15477: vector cost: 4.500 
+   remark #15478: estimated potential speedup: 8.440 
+   remark #15487: type converts: 2 
+   remark #15488: --- end vector cost summary ---
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(191,1) inlined into page_rank.cpp(224,2)
+<Remainder loop for vectorization>
+LOOP END
+===========================================================================
+
+Begin optimization report for: input(char *)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at page_rank.cpp(63,2)
+   remark #15527: loop was not vectorized: function call to _mm_malloc(size_t, size_t) cannot be vectorized   [ page_rank.cpp(64,30) ]
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(69,2)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(88,2)
+   remark #15382: vectorization support: call to function _mm_free(void *) cannot be vectorized   [ page_rank.cpp(89,3) ]
+   remark #15382: vectorization support: call to function _mm_free(void *) cannot be vectorized   [ page_rank.cpp(90,3) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm_free(void *) (89:3) and call:_mm_free(void *) (90:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm_free(void *) (90:3) and call:_mm_free(void *) (89:3)
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(134,1) inlined into page_rank.cpp(85,2)
+<Peeled loop for vectorization>
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(134,1) inlined into page_rank.cpp(85,2)
+   remark #15388: vectorization support: reference rank[i] has aligned access   [ page_rank.cpp(136,3) ]
+   remark #15388: vectorization support: reference sum[i] has aligned access   [ page_rank.cpp(137,3) ]
+   remark #15412: vectorization support: streaming store was generated for rank[i]   [ page_rank.cpp(136,3) ]
+   remark #15412: vectorization support: streaming store was generated for sum[i]   [ page_rank.cpp(137,3) ]
+   remark #15305: vectorization support: vector length 4
+   remark #15309: vectorization support: normalized vectorization overhead 1.667
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15449: unmasked aligned unit stride stores: 2 
+   remark #15467: unmasked aligned streaming stores: 2 
+   remark #15475: --- begin vector cost summary ---
+   remark #15476: scalar cost: 6 
+   remark #15477: vector cost: 1.500 
+   remark #15478: estimated potential speedup: 3.990 
+   remark #15488: --- end vector cost summary ---
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(134,1) inlined into page_rank.cpp(85,2)
+<Remainder loop for vectorization>
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(144,2) inlined into page_rank.cpp(85,2)
+   remark #15382: vectorization support: call to function _mm512_i32extscatter_ps(void *, __m512i, __m512, unsigned int, int, int) cannot be vectorized   [ page_rank.cpp(161,4) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed ANTI dependence between tops (145:18) and call:_mm512_i32extscatter_ps(void *, __m512i, __m512, unsigned i (161:4)
+   remark #15346: vector dependence: assumed FLOW dependence between call:_mm512_i32extscatter_ps(void *, __m512i, __m512, unsigned i (161:4) and tops (145:18)
+
+   LOOP BEGIN at page_rank.cpp(147,3) inlined into page_rank.cpp(85,2)
+      remark #15382: vectorization support: call to function _mm512_i32extscatter_ps(void *, __m512i, __m512, unsigned int, int, int) cannot be vectorized   [ page_rank.cpp(161,4) ]
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed ANTI dependence between tiles_n1 (149:19) and call:_mm512_i32extscatter_ps(void *, __m512i, __m512, unsigned i (161:4)
+      remark #15346: vector dependence: assumed FLOW dependence between call:_mm512_i32extscatter_ps(void *, __m512i, __m512, unsigned i (161:4) and tiles_n1 (149:19)
+
+      LOOP BEGIN at page_rank.cpp(166,5) inlined into page_rank.cpp(85,2)
+         remark #15389: vectorization support: reference at (171:20) has unaligned access   [ page_rank.cpp(171,20) ]
+         remark #15389: vectorization support: reference at (172:20) has unaligned access   [ page_rank.cpp(172,20) ]
+         remark #15388: vectorization support: reference &sum_n2_v[k] has aligned access   [ page_rank.cpp(173,23) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+         remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
+         remark #15328: vectorization support: non-unit strided load was emulated for the variable <at (171:20)>, masked, stride is 1   [ page_rank.cpp(171,20) ]
+         remark #15328: vectorization support: non-unit strided load was emulated for the variable <at (172:20)>, masked, stride is 1   [ page_rank.cpp(172,20) ]
+         remark #15329: vectorization support: irregularly indexed store was emulated for the variable <sum[*(*(?+i*8)+(j+k)*4)]>, masked, part of index is read from memory   [ page_rank.cpp(175,6) ]
+         remark #15328: vectorization support: irregularly indexed load was emulated for the variable <rank[n1]>, masked, part of index is read from memory   [ page_rank.cpp(174,18) ]
+         remark #15328: vectorization support: irregularly indexed load was emulated for the variable <grah.nneibor[n1]>, masked, part of index is read from memory   [ page_rank.cpp(174,27) ]
+         remark #15305: vectorization support: vector length 4
+         remark #15448: unmasked aligned unit stride loads: 1 
+         remark #15456: masked unaligned unit stride loads: 1 
+         remark #15458: masked indexed (or gather) loads: 2 
+         remark #15459: masked indexed (or scatter) stores: 1 
+         remark #15460: masked strided loads: 2 
+         remark #15475: --- begin vector cost summary ---
+         remark #15476: scalar cost: 51 
+         remark #15477: vector cost: 163.750 
+         remark #15478: estimated potential speedup: 0.310 
+         remark #15486: divides: 1 
+         remark #15487: type converts: 1 
+         remark #15488: --- end vector cost summary ---
+      LOOP END
+   LOOP END
+
+   LOOP BEGIN at page_rank.cpp(123,2) inlined into page_rank.cpp(85,2)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed FLOW dependence between sum[*(n2s+i*4)] (126:3) and sum[*(n2s+i*4)] (126:3)
+      remark #15346: vector dependence: assumed ANTI dependence between sum[*(n2s+i*4)] (126:3) and sum[*(n2s+i*4)] (126:3)
+   LOOP END
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(191,1) inlined into page_rank.cpp(85,2)
+<Peeled loop for vectorization>
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(191,1) inlined into page_rank.cpp(85,2)
+   remark #15388: vectorization support: reference rank[j] has aligned access   [ page_rank.cpp(193,3) ]
+   remark #15388: vectorization support: reference sum[j] has aligned access   [ page_rank.cpp(193,42) ]
+   remark #15412: vectorization support: streaming store was generated for rank[j]   [ page_rank.cpp(193,3) ]
+   remark #15305: vectorization support: vector length 4
+   remark #15309: vectorization support: normalized vectorization overhead 0.778
+   remark #15417: vectorization support: number of FP up converts: single precision to double precision 1   [ page_rank.cpp(193,3) ]
+   remark #15418: vectorization support: number of FP down converts: double precision to single precision 1   [ page_rank.cpp(193,3) ]
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15448: unmasked aligned unit stride loads: 1 
+   remark #15449: unmasked aligned unit stride stores: 1 
+   remark #15467: unmasked aligned streaming stores: 1 
+   remark #15475: --- begin vector cost summary ---
+   remark #15476: scalar cost: 38 
+   remark #15477: vector cost: 4.500 
+   remark #15478: estimated potential speedup: 8.440 
+   remark #15487: type converts: 2 
+   remark #15488: --- end vector cost summary ---
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(191,1) inlined into page_rank.cpp(85,2)
+<Remainder loop for vectorization>
+LOOP END
+===========================================================================
+
+Begin optimization report for: input2(std::string *, int)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at page_rank.cpp(104,2)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at page_rank.cpp(104,2)
+      remark #15388: vectorization support: reference grah.nneibor[i] has aligned access   [ page_rank.cpp(105,3) ]
+      remark #15305: vectorization support: vector length 4
+      remark #15300: LOOP WAS VECTORIZED
+      remark #15449: unmasked aligned unit stride stores: 1 
+      remark #15475: --- begin vector cost summary ---
+      remark #15476: scalar cost: 2 
+      remark #15477: vector cost: 0.750 
+      remark #15478: estimated potential speedup: 2.660 
+      remark #15488: --- end vector cost summary ---
+   LOOP END
+
+   LOOP BEGIN at page_rank.cpp(104,2)
+   <Remainder loop for vectorization>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(111,21)
+   remark #15522: loop was not vectorized: loop control flow is too complex. Try using canonical loop form from OpenMP specification
+LOOP END
+
+
+Non-optimizable loops:
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/basic_ios.h(276,22) inlined into page_rank.cpp(117,2)
+   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ /usr/include/c++/4.8.5/bits/locale_facets.h(869,8) ]
+LOOP END
+===========================================================================
+
+Begin optimization report for: page_rank(unsigned int **, unsigned int **, unsigned int *, unsigned int)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at page_rank.cpp(134,1)
+<Peeled loop for vectorization>
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(134,1)
+   remark #15388: vectorization support: reference rank[i] has aligned access   [ page_rank.cpp(136,3) ]
+   remark #15388: vectorization support: reference sum[i] has aligned access   [ page_rank.cpp(137,3) ]
+   remark #15412: vectorization support: streaming store was generated for rank[i]   [ page_rank.cpp(136,3) ]
+   remark #15412: vectorization support: streaming store was generated for sum[i]   [ page_rank.cpp(137,3) ]
+   remark #15305: vectorization support: vector length 4
+   remark #15309: vectorization support: normalized vectorization overhead 1.667
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15449: unmasked aligned unit stride stores: 2 
+   remark #15467: unmasked aligned streaming stores: 2 
+   remark #15475: --- begin vector cost summary ---
+   remark #15476: scalar cost: 6 
+   remark #15477: vector cost: 1.500 
+   remark #15478: estimated potential speedup: 3.990 
+   remark #15488: --- end vector cost summary ---
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(134,1)
+<Remainder loop for vectorization>
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(144,2)
+   remark #15382: vectorization support: call to function _mm512_i32extscatter_ps(void *, __m512i, __m512, unsigned int, int, int) cannot be vectorized   [ page_rank.cpp(161,4) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed ANTI dependence between tops (145:18) and call:_mm512_i32extscatter_ps(void *, __m512i, __m512, unsigned i (161:4)
+   remark #15346: vector dependence: assumed FLOW dependence between call:_mm512_i32extscatter_ps(void *, __m512i, __m512, unsigned i (161:4) and tops (145:18)
+
+   LOOP BEGIN at page_rank.cpp(147,3)
+      remark #15382: vectorization support: call to function _mm512_i32extscatter_ps(void *, __m512i, __m512, unsigned int, int, int) cannot be vectorized   [ page_rank.cpp(161,4) ]
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed ANTI dependence between tiles_n1 (149:19) and call:_mm512_i32extscatter_ps(void *, __m512i, __m512, unsigned i (161:4)
+      remark #15346: vector dependence: assumed FLOW dependence between call:_mm512_i32extscatter_ps(void *, __m512i, __m512, unsigned i (161:4) and tiles_n1 (149:19)
+
+      LOOP BEGIN at page_rank.cpp(166,5)
+         remark #15389: vectorization support: reference at (171:20) has unaligned access   [ page_rank.cpp(171,20) ]
+         remark #15389: vectorization support: reference at (172:20) has unaligned access   [ page_rank.cpp(172,20) ]
+         remark #15388: vectorization support: reference &sum_n2_v[k] has aligned access   [ page_rank.cpp(173,23) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+         remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
+         remark #15328: vectorization support: non-unit strided load was emulated for the variable <at (171:20)>, masked, stride is 1   [ page_rank.cpp(171,20) ]
+         remark #15328: vectorization support: non-unit strided load was emulated for the variable <at (172:20)>, masked, stride is 1   [ page_rank.cpp(172,20) ]
+         remark #15329: vectorization support: irregularly indexed store was emulated for the variable <sum[*(*(?+i*8)+(j+k)*4)]>, masked, part of index is read from memory   [ page_rank.cpp(175,6) ]
+         remark #15328: vectorization support: irregularly indexed load was emulated for the variable <rank[n1]>, masked, part of index is read from memory   [ page_rank.cpp(174,18) ]
+         remark #15328: vectorization support: irregularly indexed load was emulated for the variable <grah.nneibor[n1]>, masked, part of index is read from memory   [ page_rank.cpp(174,27) ]
+         remark #15305: vectorization support: vector length 4
+         remark #15448: unmasked aligned unit stride loads: 1 
+         remark #15456: masked unaligned unit stride loads: 1 
+         remark #15458: masked indexed (or gather) loads: 2 
+         remark #15459: masked indexed (or scatter) stores: 1 
+         remark #15460: masked strided loads: 2 
+         remark #15475: --- begin vector cost summary ---
+         remark #15476: scalar cost: 51 
+         remark #15477: vector cost: 163.750 
+         remark #15478: estimated potential speedup: 0.310 
+         remark #15486: divides: 1 
+         remark #15487: type converts: 1 
+         remark #15488: --- end vector cost summary ---
+      LOOP END
+   LOOP END
+
+   LOOP BEGIN at page_rank.cpp(123,2) inlined into page_rank.cpp(184,3)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed FLOW dependence between sum[*(n2s+i*4)] (126:3) and sum[*(n2s+i*4)] (126:3)
+      remark #15346: vector dependence: assumed ANTI dependence between sum[*(n2s+i*4)] (126:3) and sum[*(n2s+i*4)] (126:3)
+   LOOP END
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(191,1)
+<Peeled loop for vectorization>
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(191,1)
+   remark #15388: vectorization support: reference rank[j] has aligned access   [ page_rank.cpp(193,3) ]
+   remark #15388: vectorization support: reference sum[j] has aligned access   [ page_rank.cpp(193,42) ]
+   remark #15412: vectorization support: streaming store was generated for rank[j]   [ page_rank.cpp(193,3) ]
+   remark #15305: vectorization support: vector length 4
+   remark #15309: vectorization support: normalized vectorization overhead 0.778
+   remark #15417: vectorization support: number of FP up converts: single precision to double precision 1   [ page_rank.cpp(193,3) ]
+   remark #15418: vectorization support: number of FP down converts: double precision to single precision 1   [ page_rank.cpp(193,3) ]
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15448: unmasked aligned unit stride loads: 1 
+   remark #15449: unmasked aligned unit stride stores: 1 
+   remark #15467: unmasked aligned streaming stores: 1 
+   remark #15475: --- begin vector cost summary ---
+   remark #15476: scalar cost: 38 
+   remark #15477: vector cost: 4.500 
+   remark #15478: estimated potential speedup: 8.440 
+   remark #15487: type converts: 2 
+   remark #15488: --- end vector cost summary ---
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(191,1)
+<Remainder loop for vectorization>
+LOOP END
+===========================================================================
+
+Begin optimization report for: print()
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at page_rank.cpp(200,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(202,3) ]
+LOOP END
+===========================================================================

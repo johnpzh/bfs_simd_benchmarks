@@ -16,9 +16,12 @@ graph16M_d64.txt
 
 # Ignore those useless result files
 path/
+vtune/
 *path.txt
 *result.txt
 *report*
+ranks.txt
+0ranks.txt
 
 # Compiled source #
 ###################
