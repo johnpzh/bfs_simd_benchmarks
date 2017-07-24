@@ -5,6 +5,7 @@
 #include <string>
 #include <sstream>
 #include <stdlib.h>
+#include <cmath>
 #include <omp.h>
 using std::ifstream;
 using std::string;
@@ -29,6 +30,8 @@ float rank[MAX_NODES];
 float sum[MAX_NODES];
 unsigned NUM_THREADS;
 
+void page_rank();
+
 void input(char filename[]) {
 	//printf("data: %s\n", filename);
 	FILE *fin = fopen(filename, "r");
@@ -41,11 +44,22 @@ void input(char filename[]) {
 		unsigned n1;
 		unsigned n2;
 		fscanf(fin, "%u %u", &n1, &n2);
+		n1--;
+		n2--;
 		grah.n1[i] = n1;
 		grah.n2[i] = n2;
 		grah.nneibor[n1]++;
 	}
 	fclose(fin);
+	// PageRank
+#ifdef ONEDEBUG
+	page_rank();
+#else
+	for (unsigned i = 0; i < 9; ++i) {
+		NUM_THREADS = (unsigned) pow(2, i);
+		page_rank();
+	}
+#endif
 }
 
 void input2(string filename, int tilesize) {
@@ -126,7 +140,9 @@ int main(int argc, char *argv[]) {
 	input(filename);
 	double input_end = omp_get_wtime();
 	//printf("input tims: %lf\n", input_end - input_start);
-	page_rank();
+	//page_rank();
+#ifdef ONEDEBUG
 	print();
+#endif
 	return 0;
 }

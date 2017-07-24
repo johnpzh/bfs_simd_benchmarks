@@ -1,6 +1,10 @@
 ICPC = icpc
-CC_FLAGS = -Wall -Wextra -g -std=c++11 -qopenmp -O3 -qopt-report=5 -qopt-report-phase=vec
-#CC_FLAGS = -Wall -Wextra -g -std=c++11 -qopenmp
+#CC_FLAGS = -Wall -Wextra -g -std=c++11 -qopenmp -O3 -qopt-report=5 -qopt-report-phase=vec
+CC_FLAGS = -Wall -Wextra -g -std=c++11 -qopenmp
+
+ifeq (${debug}, 1)
+	CC_FLAGS += -DONEDEBUG
+endif
 
 .PHONY: clean
 

@@ -221,6 +221,8 @@ int main(int argc, char *argv[]) {
 	double input_end = omp_get_wtime();
 	//printf("input tims: %lf\n", input_end - input_start);
 	//page_rank(tile_width);
-	//print();
+#ifdef ONEDEBUG
+	print();
+#endif
 	return 0;
 }

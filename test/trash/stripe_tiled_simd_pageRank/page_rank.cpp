@@ -40,6 +40,7 @@ unsigned tile_size;
 void page_rank(unsigned **tiles_n1, unsigned **tiles_n2, unsigned *tops, unsigned num_tiles);
 
 void input(char filename[]) {
+	double start = omp_get_wtime();
 	//printf("data: %s\n", filename);
 	FILE *fin = fopen(filename, "r");
 	if (!fin) {
@@ -90,11 +91,17 @@ void input(char filename[]) {
 	}
 	fclose(fin);
 
+	double end = omp_get_wtime();
+	printf("for input: %lf - %lf = %lf\n", start, end, end - start);//test
+	start = omp_get_wtime();
 	// PageRank
 	for (unsigned i = 0; i <9; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 		page_rank(tiles_n1, tiles_n2, tops, num_tiles);
 	}
+	end = omp_get_wtime();
+	printf("PageRank: %lf - %lf = %lf\n", start, end, end - start);//test
+	start = omp_get_wtime();
 
 	// Free memory
 	for (unsigned i = 0; i < num_tiles; ++i) {
@@ -104,6 +111,8 @@ void input(char filename[]) {
 	_mm_free(tiles_n1);
 	_mm_free(tiles_n2);
 	_mm_free(tops);
+	end = omp_get_wtime();
+	printf("free memory: %lf - %lf = %lf\n", start, end, end - start);//test
 }
 
 void input2(string filename, int tilesize) {
@@ -213,7 +222,7 @@ void print() {
 }
 
 int main(int argc, char *argv[]) {
-	double input_start = omp_get_wtime();
+	double start = omp_get_wtime();
 	//if(argc==2)
 	//	input3(filename);
 	//else
@@ -228,9 +237,9 @@ int main(int argc, char *argv[]) {
 		NUM_THREADS = 256;
 		tile_size = 256;
 	}
+	double end = omp_get_wtime();
+	printf("before input: %lf - %lf = %lf\n", start, end, end - start);//test
 	input(filename);
-	double input_end = omp_get_wtime();
-	//printf("input tims: %lf\n", input_end - input_start);
 	//page_rank(tile_size);
 	//print();
 	return 0;
