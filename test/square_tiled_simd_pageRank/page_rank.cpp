@@ -174,23 +174,26 @@ void input(char filename[]) {
 	unsigned *tiles_n2 = (unsigned *) _mm_malloc(nedges * sizeof(unsigned), ALIGNED_BYTES);
 	unsigned *offsets = (unsigned *) _mm_malloc(num_tiles * sizeof(unsigned), ALIGNED_BYTES);
 	unsigned offset = 0;
+	unsigned index = 0;
 	for (unsigned i = 0; i < num_tiles; ++i) {
-		unsigned size = tiles_n1[i].size();
+		unsigned size = tiles_n1v[i].size();
 		offsets[i] = offset;
+		offset += size;
 		for (unsigned j = 0; j < size; ++j) {
 			unsigned n1 = tiles_n1v[i][j];
 			unsigned n2 = tiles_n2v[i][j];
-			unsigned n1_id = n1 / tile_width;
-			unsigned n2_id = n2 / tile_width;
-			unsigned tile_id = n1_id * side_length + n2_id;
-
-			tiles_n1v[tile_id].push_back(n1);
-			tiles_n2v[tile_id].push_back(n2);
+			tiles_n1[index] = n1;
+			tiles_n2[index] = n2;
+			++index;
 		}
 	}
+	// Clean the vectors for saving memory
 	for (unsigned i = 0; i < num_tiles; ++i) {
-		offsets[i] = i * tile_size;
+		tiles_n1v[i].clear();
+		tiles_n2v[i].clear();
 	}
+	tiles_n1v.clear();
+	tiles_n2v.clear();
 	fclose(fin);
 
 	// PageRank
