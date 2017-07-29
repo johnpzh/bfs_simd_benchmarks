@@ -1,3 +1,4 @@
+# C compiler
 ICPC = icpc
 
 ifeq (${debug}, 1)
@@ -8,11 +9,8 @@ endif
 
 .PHONY: clean
 
-all: page_rank
-
-page_rank: page_rank.cpp
-#icc -mmic -O3 -o page_rank page_rank.cpp -w
-	$(ICPC) $(CC_FLAGS) $^ -o $@
+bfs: bfs.cpp 
+	$(ICPC) $(CC_FLAGS) $^ -o $@ 
 
 clean:
-	rm page_rank
+	rm -f bfs

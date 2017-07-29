@@ -24,13 +24,13 @@ else
 		;;
 	esac
 fi
-version="simd-pageRank"
+version="naive-pageRank"
 bin_addr="."
 result_file="result_${version}_${data_file}_$(date +%Y%m%d-%H%M%S).txt"
 
 touch $result_file
 echo "DDR" >> $result_file
-(set -x; numactl -m 0 ${bin_addr}/page_rank ${data_addr}/${data_file} 1 $tile_width 512 >> $result_file)
+(set -x; numactl -m 0 ${bin_addr}/page_rank ${data_addr}/${data_file} 1 >> $result_file)
 echo "MCDRAM" >> $result_file
-(set -x; numactl -m 1 ${bin_addr}/page_rank ${data_addr}/${data_file} 1 $tile_width 512 >> $result_file)
+(set -x; numactl -m 1 ${bin_addr}/page_rank ${data_addr}/${data_file} 1 >> $result_file)
 echo done.

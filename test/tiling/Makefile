@@ -6,6 +6,10 @@ else
 	CC_FLAGS = -Wall -Wextra -g -std=c++11 -qopenmp -O3 -qopt-report=5 -qopt-report-phase=vec
 endif
 
+ifeq (${untile}, 1)
+	CC_FLAGS += -DUNTILE
+endif
+
 .PHONY: clean
 
 all: page_rank
@@ -15,4 +19,4 @@ page_rank: page_rank.cpp
 	$(ICPC) $(CC_FLAGS) $^ -o $@
 
 clean:
-	rm page_rank
+	rm -f page_rank

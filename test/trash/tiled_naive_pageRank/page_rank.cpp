@@ -9,8 +9,6 @@
 #include <cstring>
 #include <cmath>
 #include <omp.h>
-#include <immintrin.h>
-#include <unistd.h>
 using std::ifstream;
 using std::string;
 using std::getline;
@@ -21,101 +19,83 @@ using std::vector;
 using std::to_string;
 
 #define DUMP 0.85
-//#define MAX_NODES 67108864
-//#define MAX_EDGES 2147483648
 
-#define NUM_P_INT 16 // Number of packed intergers in one __m512i variable
-#define ALIGNED_BYTES 64
-
-unsigned nnodes, nedges;
+int nnodes, nedges;
 unsigned NUM_THREADS;
 unsigned TILE_WIDTH;
 unsigned CHUNK_SIZE;
 
-double start;
-double now;
-FILE *time_out;
-char *time_file = "timeline.txt";
-
-
 void page_rank(unsigned *tiles_n1, unsigned *tiles_n2, unsigned *nneibor, unsigned *tops, float *rank, float *sum, unsigned *offsets, unsigned num_tiles);
 void print(float *rank);
 
-//////////////////////////////////////////////////////////////////////////////////
-// Commented for clone
+
+//#define MAX_NODES 1700000
+//#define MAX_EDGES 40000000
+
+/////////////////////////////////////////////////////////////////////////
+//struct Graph {
+//	int n1[MAX_EDGES];
+//	int n2[MAX_EDGES];
+//	int nneibor[MAX_NODES];
+//};
+//Graph grah;
+//float rank[MAX_NODES];
+//float sum[MAX_NODES];
+//void page_rank();
 //void input(char filename[]) {
+//	//printf("data: %s\n", filename);
 //	FILE *fin = fopen(filename, "r");
-//	if (!fin) {
-//		fprintf(stderr, "cannot open file: %s\n", filename);
-//		exit(1);
-//	}
 //
 //	fscanf(fin, "%u %u", &nnodes, &nedges);
-//	memset(nneibor, 0, sizeof(nneibor));
-//	unsigned num_tiles;
-//	//unsigned long long num_tiles;
-//	unsigned side_length;
-//	if (nnodes % TILE_WIDTH) {
-//		side_length = nnodes / TILE_WIDTH + 1;
-//	} else {
-//		side_length = nnodes / TILE_WIDTH;
+//	for (unsigned i = 0; i < nnodes; ++i) {
+//		grah.nneibor[i] = 0;
 //	}
-//	num_tiles = side_length * side_length;
-//	if (nedges < num_tiles) {
-//		fprintf(stderr, "Error: tile size is too small.\n");
-//		exit(2);
-//	}
-//	//unsigned max_top = nedges / num_tiles * 16;
-//	unsigned max_top = TILE_WIDTH * TILE_WIDTH / 128;
-//	unsigned **tiles_n1 = (unsigned **) _mm_malloc(num_tiles * sizeof(unsigned *), ALIGNED_BYTES);
-//	unsigned **tiles_n2 = (unsigned **) _mm_malloc(num_tiles * sizeof(unsigned *), ALIGNED_BYTES);
-//	for (unsigned i = 0; i < num_tiles; ++i) {
-//		tiles_n1[i] = (unsigned *) _mm_malloc(max_top * sizeof(unsigned), ALIGNED_BYTES);
-//		tiles_n2[i] = (unsigned *) _mm_malloc(max_top * sizeof(unsigned), ALIGNED_BYTES);
-//	}
-//	unsigned *tops = (unsigned *) _mm_malloc(num_tiles * sizeof(unsigned), ALIGNED_BYTES);
-//	memset(tops, 0, num_tiles * sizeof(unsigned));
 //	for (unsigned i = 0; i < nedges; ++i) {
 //		unsigned n1;
 //		unsigned n2;
 //		fscanf(fin, "%u %u", &n1, &n2);
 //		n1--;
 //		n2--;
-//		unsigned n1_id = n1 / TILE_WIDTH;
-//		unsigned n2_id = n2 / TILE_WIDTH;
-//		//unsigned n1_id = n1 % side_length;
-//		//unsigned n2_id = n2 % side_length;
-//		unsigned tile_id = n1_id * side_length + n2_id;
-//
-//		unsigned *top = tops + tile_id;
-//		if (*top == max_top) {
-//			fprintf(stderr, "Error: the tile %u is full.\n", tile_id);
-//			exit(1);
-//		}
-//		tiles_n1[tile_id][*top] = n1;
-//		tiles_n2[tile_id][*top] = n2;
-//		(*top)++;
-//		nneibor[n1]++;
+//		grah.n1[i] = n1;
+//		grah.n2[i] = n2;
+//		grah.nneibor[n1]++;
 //	}
 //	fclose(fin);
-//
 //	// PageRank
+//#ifdef ONEDEBUG
+//	page_rank();
+//#else
 //	for (unsigned i = 0; i < 9; ++i) {
 //		NUM_THREADS = (unsigned) pow(2, i);
-//		page_rank(tiles_n1, tiles_n2, tops, num_tiles);
+//		page_rank();
+//	}
+//#endif
+//}
+//
+//void input2(string filename, int tilesize) {
+//	ifstream fin(filename.c_str());
+//	string line;
+//	getline(fin, line);
+//	stringstream sin(line);
+//	sin >> nnodes >> nedges;
+//
+//	for(int i=0;i<nnodes;i++) {
+//		grah.nneibor[i] = 0;
 //	}
 //
-//	// Free memory
-//	for (unsigned i = 0; i < num_tiles; ++i) {
-//		_mm_free(tiles_n1[i]);
-//		_mm_free(tiles_n2[i]);
+//	int cur = 0;
+//	while(getline(fin, line)) {
+//		int n, n1, n2;
+//		stringstream sin1(line);
+//		while(sin1 >> n) {
+//			grah.n1[cur] = n / tilesize;
+//			grah.n2[cur] = n % tilesize;
+//			cur++;
+//		}
 //	}
-//	_mm_free(tiles_n1);
-//	_mm_free(tiles_n2);
-//	_mm_free(tops);
+//	nedges = cur;
 //}
 ////////////////////////////////////////////////////////////////////////////
-
 
 void input(char filename[]) {
 #ifdef ONEDEBUG
@@ -220,18 +200,11 @@ void input(char filename[]) {
 
 	float *rank = (float *) malloc(nnodes * sizeof(float));
 	float *sum = (float *) malloc(nnodes * sizeof(float));
-	now = omp_get_wtime();
-	time_out = fopen(time_file, "w");
-	fprintf(time_out, "input end: %lf\n", now - start);
 	// PageRank
 	for (unsigned i = 0; i < 9; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
-		sleep(10);
 		page_rank(tiles_n1, tiles_n2, nneibor, tops, rank, sum, offsets, num_tiles);
-		now = omp_get_wtime();
-		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 	}
-	fclose(time_out);
 
 #ifdef ONEDEBUG
 	print(rank);
@@ -246,23 +219,8 @@ void input(char filename[]) {
 	free(sum);
 }
 
-inline void get_seq_sum(unsigned *n1s, unsigned *n2s, unsigned *nneibor, float *rank, float *sum, unsigned index, unsigned frontier)
-{
-	for (unsigned i = index; i < frontier; ++i) {
-		unsigned n1 = n1s[i];
-		unsigned n2 = n2s[i];
-//#pragma omp atomic
-		sum[n2] += rank[n1]/nneibor[n1];
-	}
-}
-
 void page_rank(unsigned *tiles_n1, unsigned *tiles_n2, unsigned *nneibor, unsigned *tops, float *rank, float *sum, unsigned *offsets, unsigned num_tiles) {
-#ifdef ONEDEBUG
-	printf("pageRanking...\n");
-#endif
-	const __m512i one_v = _mm512_set1_epi32(1);
-	const __m512i zero_v = _mm512_set1_epi32(0);
-	const __m512i minusone_v = _mm512_set1_epi32(-1);
+//void page_rank() {
 #pragma omp parallel for num_threads(256)
 	for(unsigned i=0;i<nnodes;i++) {
 		rank[i] = 1.0;
@@ -272,74 +230,56 @@ void page_rank(unsigned *tiles_n1, unsigned *tiles_n2, unsigned *nneibor, unsign
 	//for(int i=0;i<10;i++) {
 	double start_time = omp_get_wtime();
 
-#pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic, CHUNK_SIZE)
-	for (unsigned i = 0; i < num_tiles; ++i) {
-		unsigned top = tops[i];
-		unsigned j = 0;
-		unsigned frontier;
-		if (top <= NUM_P_INT) {
-			frontier = 0;
-		} else {
-			frontier = top - NUM_P_INT;
-		}
-		for (; j < frontier; j += NUM_P_INT) {
-			// Full loaded SIMD lanes
-			__m512i n1_v = _mm512_load_epi32(tiles_n1 + offsets[i] + j);
-			__m512i n2_v = _mm512_load_epi32(tiles_n2 + offsets[i] + j);
-			__m512i conflict_n2 = _mm512_conflict_epi32(n2_v);
-			__mmask16 is_conflict = _mm512_cmpneq_epi32_mask(conflict_n2, zero_v);
-			if (*((short *)(&is_conflict)) == 0) {
-				// No conflicts
-				__m512 rank_v = _mm512_i32gather_ps(n1_v, rank, sizeof(float));
-				__m512i nneibor_vi = _mm512_i32gather_epi32(n1_v, nneibor, sizeof(int));
-				__m512 nneibor_v = _mm512_cvtepi32_ps(nneibor_vi);
-				__m512 tmp_sum = _mm512_div_ps(rank_v, nneibor_v);
-				__m512 sum_n2_v = _mm512_i32gather_ps(n2_v, sum, sizeof(float));
-				tmp_sum = _mm512_add_ps(tmp_sum, sum_n2_v);
-				_mm512_i32scatter_ps(sum, n2_v, tmp_sum, sizeof(float));
-			} else {
-				// Conflicts exists, then process sequentially
-				get_seq_sum(tiles_n1 + offsets[i], tiles_n2 + offsets[i], nneibor, rank, sum, j, j + NUM_P_INT);
-			}
-		}
-		// Process remain sequentially
-		get_seq_sum(tiles_n1 + offsets[i], tiles_n2 + offsets[i], nneibor, rank, sum, j, top);
+#pragma omp parallel for num_threads(NUM_THREADS)
+	for(unsigned j=0;j<nedges;j++) {
+		//int n1 = grah.n1[j];
+		//int n2 = grah.n2[j];
+		int n1 = tiles_n1[j];
+		int n2 = tiles_n2[j];
+#pragma omp atomic
+		//sum[n2] += rank[n1]/grah.nneibor[n1];
+		sum[n2] += rank[n1]/nneibor[n1];
 	}
-
+	//cout << (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1000000.0 << endl;
 	double end_time = omp_get_wtime();
 	printf("%u %lf\n", NUM_THREADS, end_time - start_time);
-	//printf("%u %lf\n", TILE_WIDTH, end_time - start_time);
-	//printf("%u %lf\n", CHUNK_SIZE, end_time - start_time);
 
-#pragma omp parallel for num_threads(256)
 	for(unsigned j = 0; j < nnodes; j++) {
 		rank[j] = (1 - DUMP) / nnodes + DUMP * sum[j]; 	
 	}
 	//}
 }
 
-void print(float *rank) {
+void print() {
 	FILE *fout = fopen("ranks.txt", "w");
 	for(unsigned i=0;i<nnodes;i++) {
+		//cout << rank[i] << " ";
 		fprintf(fout, "%lf\n", rank[i]);
 	}
+	//cout << endl;
 	fclose(fout);
 }
 
 int main(int argc, char *argv[]) {
-	start = omp_get_wtime();
+	double input_start = omp_get_wtime();
+	//if(argc==2)
+	//	input3(filename);
+	//else
+	//	input2(filename, 1024);
 	char *filename;
-	if (argc > 4) {
+	if (argc > 2) {
 		filename = argv[1];
 		NUM_THREADS = strtoul(argv[2], NULL, 0);
-		TILE_WIDTH = strtoul(argv[3], NULL, 0);
-		CHUNK_SIZE = strtoul(argv[4], NULL, 0);
 	} else {
-		filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec-relationships.txt";
+		filename = "/home/zpeng/benchmarks/data/soc-pokec-relationships.txt";
 		NUM_THREADS = 256;
-		TILE_WIDTH = 1024;
-		CHUNK_SIZE = 2048;
 	}
 	input(filename);
+	double input_end = omp_get_wtime();
+	//printf("input tims: %lf\n", input_end - input_start);
+	//page_rank();
+#ifdef ONEDEBUG
+	print();
+#endif
 	return 0;
 }

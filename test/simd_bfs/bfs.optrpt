@@ -1,0 +1,190 @@
+Intel(R) Advisor can now assist with vectorization and show optimization
+  report messages with your source code.
+See "https://software.intel.com/en-us/intel-advisor-xe" for details.
+
+Intel(R) C++ Intel(R) 64 Compiler for applications running on Intel(R) 64, Version 17.0.1.132 Build 20161005
+
+Compiler options: -Wall -Wextra -g -std=c++11 -qopenmp -O3 -qopt-report=5 -qopt-report-phase=vec -o bfs
+
+Begin optimization report for: main(int, char **)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at bfs.cpp(168,2) inlined into bfs.cpp(54,2)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at bfs.cpp(192,3) inlined into bfs.cpp(54,2)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at bfs.cpp(192,3) inlined into bfs.cpp(54,2)
+      <Peeled loop for vectorization>
+      LOOP END
+
+      LOOP BEGIN at bfs.cpp(192,3) inlined into bfs.cpp(54,2)
+         remark #15388: vectorization support: reference h_cost[i] has aligned access   [ bfs.cpp(193,4) ]
+         remark #15305: vectorization support: vector length 4
+         remark #15309: vectorization support: normalized vectorization overhead 3.333
+         remark #15300: LOOP WAS VECTORIZED
+         remark #15442: entire loop may be executed in remainder
+         remark #15449: unmasked aligned unit stride stores: 1 
+         remark #15475: --- begin vector cost summary ---
+         remark #15476: scalar cost: 3 
+         remark #15477: vector cost: 0.750 
+         remark #15478: estimated potential speedup: 1.940 
+         remark #15488: --- end vector cost summary ---
+      LOOP END
+
+      LOOP BEGIN at bfs.cpp(192,3) inlined into bfs.cpp(54,2)
+      <Remainder loop for vectorization>
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at bfs.cpp(115,2) inlined into bfs.cpp(54,2)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at bfs.cpp(150,3) inlined into bfs.cpp(54,2)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at bfs.cpp(156,63) inlined into bfs.cpp(54,2)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+===========================================================================
+
+Begin optimization report for: BFSGraph(int, char **)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at bfs.cpp(168,2)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at bfs.cpp(192,3)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at bfs.cpp(192,3)
+      <Peeled loop for vectorization>
+      LOOP END
+
+      LOOP BEGIN at bfs.cpp(192,3)
+         remark #15388: vectorization support: reference h_cost[i] has aligned access   [ bfs.cpp(193,4) ]
+         remark #15305: vectorization support: vector length 4
+         remark #15309: vectorization support: normalized vectorization overhead 3.333
+         remark #15300: LOOP WAS VECTORIZED
+         remark #15442: entire loop may be executed in remainder
+         remark #15449: unmasked aligned unit stride stores: 1 
+         remark #15475: --- begin vector cost summary ---
+         remark #15476: scalar cost: 3 
+         remark #15477: vector cost: 0.750 
+         remark #15478: estimated potential speedup: 1.940 
+         remark #15488: --- end vector cost summary ---
+      LOOP END
+
+      LOOP BEGIN at bfs.cpp(192,3)
+      <Remainder loop for vectorization>
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at bfs.cpp(115,2)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at bfs.cpp(150,3)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at bfs.cpp(156,63)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+===========================================================================
+
+Begin optimization report for: BFS_kernel(Node *, int *, int *, int *, int *, int *, unsigned int, int, int, unsigned int, unsigned int)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at bfs.cpp(255,2)
+   remark #15388: vectorization support: reference offsets[i] has aligned access   [ bfs.cpp(256,3) ]
+   remark #15305: vectorization support: vector length 4
+   remark #15309: vectorization support: normalized vectorization overhead 10.667
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15449: unmasked aligned unit stride stores: 1 
+   remark #15475: --- begin vector cost summary ---
+   remark #15476: scalar cost: 4 
+   remark #15477: vector cost: 0.750 
+   remark #15478: estimated potential speedup: 4.660 
+   remark #15488: --- end vector cost summary ---
+LOOP END
+
+LOOP BEGIN at bfs.cpp(255,2)
+<Remainder loop for vectorization>
+LOOP END
+
+LOOP BEGIN at bfs.cpp(261,2)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+
+LOOP BEGIN at bfs.cpp(288,32)
+   remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
+
+   LOOP BEGIN at bfs.cpp(276,3)
+      remark #15382: vectorization support: call to function _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(295,9) ]
+      remark #15382: vectorization support: call to function _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(296,9) ]
+      remark #15382: vectorization support: call to function _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(301,9) ]
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed FLOW dependence between h_graph_mask[tid] (279:5) and h_cost[tid] (320:30)
+      remark #15346: vector dependence: assumed ANTI dependence between h_cost[tid] (320:30) and h_graph_mask[tid] (279:5)
+
+      LOOP BEGIN at bfs.cpp(282,5)
+         remark #15382: vectorization support: call to function _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(295,9) ]
+         remark #15382: vectorization support: call to function _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(296,9) ]
+         remark #15382: vectorization support: call to function _mm512_mask_i32extscatter_epi32(void *, unsigned short, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ bfs.cpp(301,9) ]
+         remark #15344: loop was not vectorized: vector dependence prevents vectorization
+         remark #15346: vector dependence: assumed ANTI dependence between tops (288:7) and *(*tops+?*4) (325:7)
+         remark #15346: vector dependence: assumed FLOW dependence between *(*tops+?*4) (325:7) and tops (288:7)
+
+         LOOP BEGIN at bfs.cpp(288,7)
+            remark #15523: loop was not vectorized: loop control variable k was found, but loop iteration count cannot be computed before executing the loop
+
+            LOOP BEGIN at bfs.cpp(304,9)
+               remark #15344: loop was not vectorized: vector dependence prevents vectorization
+               remark #15346: vector dependence: assumed OUTPUT dependence between h_updating_graph_mask[id] (307:11) and h_cost[id] (309:11)
+               remark #15346: vector dependence: assumed OUTPUT dependence between h_cost[id] (309:11) and h_updating_graph_mask[id] (307:11)
+            LOOP END
+
+            LOOP BEGIN at bfs.cpp(304,9)
+            <Remainder>
+            LOOP END
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at bfs.cpp(331,3)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+
+   LOOP BEGIN at bfs.cpp(347,5)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed OUTPUT dependence between h_updating_graph_mask[id] (350:7) and h_cost[id] (352:7)
+      remark #15346: vector dependence: assumed OUTPUT dependence between h_cost[id] (352:7) and h_updating_graph_mask[id] (350:7)
+   LOOP END
+
+   LOOP BEGIN at bfs.cpp(347,5)
+   <Remainder>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at bfs.cpp(359,1)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+
+   LOOP BEGIN at bfs.cpp(359,1)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed ANTI dependence between h_updating_graph_mask[i] (363:19) and h_updating_graph_mask[i] (370:5)
+      remark #15346: vector dependence: assumed FLOW dependence between h_updating_graph_mask[i] (370:5) and h_updating_graph_mask[i] (363:19)
+   LOOP END
+LOOP END
+===========================================================================

@@ -16,6 +16,7 @@ using std::getline;
 using std::stringstream;
 using std::cout;
 using std::endl;
+using std::to_string;
 
 #define DUMP 0.85
 //#define MAX_NODES 1700000
@@ -38,35 +39,74 @@ double now;
 FILE *time_out;
 char *time_file = "timeline.txt";
 
-void page_rank(unsigned *tiles_n1, unsigned *tiles_n2, unsigned *nneibor, float *rank, float *sum);
+void page_rank(unsigned *n1s, unsigned *n2s, unsigned *nneibor, float *rank, float *sum);
 void print(float *rank);
 
 void input(char filename[]) {
 	//printf("data: %s\n", filename);
-	FILE *fin = fopen(filename, "r");
-
+	string prefix = string(filename) + "_untiled";
+	string fname = prefix + "-0";
+	FILE *fin = fopen(fname.c_str(), "r");
 	fscanf(fin, "%u %u", &nnodes, &nedges);
-	unsigned *nneibor = (unsigned *) malloc(nnodes * sizeof(unsigned));
-	memset(nneibor, 0, nnodes * sizeof(unsigned));
+	fclose(fin);
+	//memset(nneibor, 0, nnodes * sizeof(unsigned));
 	//for (unsigned i = 0; i < nnodes; ++i) {
 	//	grah.nneibor[i] = 0;
 	//}
-	unsigned *tiles_n1 = (unsigned *) malloc(nedges * sizeof(unsigned));
-	unsigned *tiles_n2 = (unsigned *) malloc(nedges * sizeof(unsigned));
-	for (unsigned i = 0; i < nedges; ++i) {
-		unsigned n1;
-		unsigned n2;
-		fscanf(fin, "%u %u", &n1, &n2);
-		n1--;
-		n2--;
-		//grah.n1[i] = n1;
-		//grah.n2[i] = n2;
-		//grah.nneibor[n1]++;
-		tiles_n1[i] = n1;
-		tiles_n2[i] = n2;
-		nneibor[n1]++;
+	unsigned *n1s = (unsigned *) malloc(nedges * sizeof(unsigned));
+	unsigned *n2s = (unsigned *) malloc(nedges * sizeof(unsigned));
+	NUM_THREADS = 64;
+	unsigned edge_bound = nedges / NUM_THREADS;
+#pragma omp parallel num_threads(NUM_THREADS) private(fname, fin)
+{
+	unsigned tid = omp_get_thread_num();
+	unsigned offset = tid * edge_bound;
+	fname = prefix + "-" + to_string(tid);
+	fin = fopen(fname.c_str(), "r");
+	if (!fin) {
+		fprintf(stderr, "Error: cannot open file %s\n", fname.c_str());
+		exit(1);
+	}
+	if (0 == tid) {
+		fscanf(fin, "%u %u\n", &nnodes, &nedges);
+	}
+	if (NUM_THREADS - 1 != tid) {
+		for (unsigned i = 0; i < edge_bound; ++i) {
+			unsigned index = i + offset;
+			unsigned n1;
+			unsigned n2;
+			fscanf(fin, "%u %u", &n1, &n2);
+			n1--;
+			n2--;
+			n1s[index] = n1;
+			n2s[index] = n2;
+		}
+	} else {
+		for (unsigned i = 0; i + offset < nedges; ++i) {
+			unsigned index = i + offset;
+			unsigned n1;
+			unsigned n2;
+			fscanf(fin, "%u %u", &n1, &n2);
+			n1--;
+			n2--;
+			n1s[index] = n1;
+			n2s[index] = n2;
+		}
 	}
 	fclose(fin);
+}
+	// Read nneibor
+	fname = prefix + "-nneibor";
+	fin = fopen(fname.c_str(), "r");
+	if (!fin) {
+		fprintf(stderr, "Error: cannot open file %s\n", fname.c_str());
+		exit(1);
+	}
+	unsigned *nneibor = (unsigned *) malloc(nnodes * sizeof(unsigned));
+	for (unsigned i = 0; i < nnodes; ++i) {
+		fscanf(fin, "%u", nneibor + i);
+	}
+
 	float *rank = (float *) malloc(nnodes * sizeof(float));
 	float *sum = (float *) malloc(nnodes * sizeof(float));
 	now = omp_get_wtime();
@@ -76,7 +116,7 @@ void input(char filename[]) {
 	for (unsigned i = 0; i < 9; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 		sleep(10);
-		page_rank(tiles_n1, tiles_n2, nneibor, rank, sum);
+		page_rank(n1s, n2s, nneibor, rank, sum);
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 	}
@@ -86,8 +126,8 @@ void input(char filename[]) {
 #endif
 	// Free memory
 	free(nneibor);
-	free(tiles_n1);
-	free(tiles_n2);
+	free(n1s);
+	free(n2s);
 	free(rank);
 	free(sum);
 }
@@ -116,7 +156,7 @@ void input(char filename[]) {
 //	nedges = cur;
 //}
 
-void page_rank(unsigned *tiles_n1, unsigned *tiles_n2, unsigned *nneibor, float *rank, float *sum) {
+void page_rank(unsigned *n1s, unsigned *n2s, unsigned *nneibor, float *rank, float *sum) {
 #pragma omp parallel for num_threads(256)
 	for(unsigned i=0;i<nnodes;i++) {
 		rank[i] = 1.0;
@@ -128,8 +168,8 @@ void page_rank(unsigned *tiles_n1, unsigned *tiles_n2, unsigned *nneibor, float 
 
 #pragma omp parallel for num_threads(NUM_THREADS)
 	for(unsigned j=0;j<nedges;j++) {
-		int n1 = tiles_n1[j];
-		int n2 = tiles_n2[j];
+		int n1 = n1s[j];
+		int n2 = n2s[j];
 #pragma omp atomic
 		sum[n2] += rank[n1]/nneibor[n1];
 	}
