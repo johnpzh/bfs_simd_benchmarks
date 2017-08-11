@@ -2,24 +2,18 @@
 
 longly_do () {
 	./run.sh
-	./run.sh
-	./memory.sh
 	./memory.sh
 	cd ../multiinput_naive_pageRank/
 	./run.sh
-	./run.sh
-	./memory.sh
 	./memory.sh
 	cd ../simd_bfs/
 	./run.sh
-	./run.sh
-	./memory.sh
 	./memory.sh
 	cd ../naive_bfs/
 	./run.sh
-	./run.sh
 	./memory.sh
-	./memory.sh
+	cd ../edges_naive_pageRank/
+	./longly_run.sh
 }
 
 longly_do
