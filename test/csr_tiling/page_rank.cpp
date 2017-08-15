@@ -189,6 +189,33 @@ void input(char filename[]) {
 	for (unsigned i = 0; i < num_tiles; ++i) {
 		manual_sort(tiles_n1v[i], tiles_n2v[i]);
 	}
+
+	// OOC -> CSR
+	for (unsigned i = 0; i < num_tiles; ++i) {
+		unsigned tile_rowid = i / side_length;
+		unsigned tile_colid = i % side_length;
+		unsigned n1_offset = tile_rowid * TILE_WIDTH;
+		unsigned size_tile = tiles_n1v[i].size();
+		unsigned *n1_counts = (unsigned *) malloc(sizeof(unsigned) * TILE_WIDTH);
+		memset(n1_counts, 0, sizeof(unsigned) * TILE_WIDTH);
+		for (unsigned j = 0; j < size_tile; ++j) {
+			unsigned n1 = tiles_n1v[i][j];
+			unsigned n2 = tiles_n2v[i][j];
+			n1_counts[n1 - n1_offset]++;
+		}
+		unsigned *startings = (unsigned *) malloc(sizeof(unsigned) * TILE_WIDTH);
+		memset(startings, 0, sizeof(unsigned) * TILE_WIDTH);
+		unsigned start = 0;
+		for (unsigned k = 0; k < TILE_WIDTH; ++k) {
+			startings[k] = start;
+			start += n1_counts[k];
+		}
+
+		free(n1_counts);
+		free(startings);
+	}
+
+
 	unsigned *tiles_n1 = (unsigned *) malloc(nedges * sizeof(unsigned));
 	unsigned *tiles_n2 = (unsigned *) malloc(nedges * sizeof(unsigned));
 	unsigned tile_index = 0;

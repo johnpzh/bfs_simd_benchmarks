@@ -3,16 +3,20 @@
 #include <math.h>
 #include <stdlib.h>
 #include <omp.h>
+#include <immintrin.h>
 #include <string>
 #include <unistd.h>
-#include <vector>
-//#define NUM_THREAD 4
 
+#define NUM_P_INT 16 // Number of packed integers in one __m512i
+#define ALIGNED_BYTES 64
+#define SIZE_INT sizeof(int)
+
+//#define BUFFER_SIZE_MAX 134217728 // 2^27
+//#define BUFFER_SIZE_MAX 4096 //
 using std::string;
 using std::to_string;
-using std::vector;
 
-int	NUM_THREADS;
+int	 NUM_THREADS;
 
 double start;
 double now;
@@ -35,44 +39,46 @@ void BFS_kernel(\
 		int *h_graph_edges,\
 		int *h_cost,\
 		unsigned num_of_nodes,\
-		int edge_list_size\
+		int edge_list_size,\
+		unsigned BUFFER_SIZE_MAX,\
+		unsigned CHUNK_SIZE \
 		);
 
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 // Main Program
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 int main( int argc, char** argv) 
 {
 	start = omp_get_wtime();
 	BFSGraph( argc, argv);
 }
 
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Apply BFS on a Graph
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//Apply BFS on a Graph using CUDA
+////////////////////////////////////////////////////////////////////////////////
 void BFSGraph( int argc, char** argv) 
 {
 	unsigned int num_of_nodes = 0;
-	int edge_list_size = 0;
+	unsigned int edge_list_size = 0;
 	char *input_f;
+	unsigned BUFFER_SIZE_MAX;
+	unsigned CHUNK_SIZE;
 	
-	if(argc < 2){
-	//Usage(argc, argv);
-	//Usage( argv);
-	//exit(0);
-	//NUM_THREADS = 1;
+	if(argc < 4){
 	input_f = "/home/zpeng/benchmarks/data/twt/out.twitter";
+	BUFFER_SIZE_MAX = 256;
+	CHUNK_SIZE = 32;
 	} else {
-	//NUM_THREADS = atoi(argv[1]);
 	input_f = argv[1];
+	BUFFER_SIZE_MAX = strtoul(argv[2], NULL, 0);
+	CHUNK_SIZE = strtoul(argv[3], NULL, 0);
 	}
-
+	
 	/////////////////////////////////////////////////////////////////////
 	// Input real dataset
 	/////////////////////////////////////////////////////////////////////
-	string prefix = string(input_f) + "_untiled";
+	//string prefix = string(input_f) + "_untiled";
+	string prefix = string(input_f) + "_tiled-4096";
 	string fname = prefix + "-0";
 	FILE *fin = fopen(fname.c_str(), "r");
 	fscanf(fin, "%u %u", &num_of_nodes, &edge_list_size);
@@ -146,10 +152,10 @@ void BFSGraph( int argc, char** argv)
 	//fclose(finput);
 	//unsigned num_lines = num_of_nodes / NUM_CORE;
 	Node* h_graph_nodes = (Node*) malloc(sizeof(Node)*num_of_nodes);
-	int *h_graph_mask = (int*) malloc(sizeof(int)*num_of_nodes);
-	int *h_updating_graph_mask = (int*) malloc(sizeof(int)*num_of_nodes);
-	int *h_graph_visited = (int*) malloc(sizeof(int)*num_of_nodes);
-	int* h_cost = (int*) malloc(sizeof(int)*num_of_nodes);
+	int *h_graph_mask = (int*) _mm_malloc(SIZE_INT*num_of_nodes, ALIGNED_BYTES);
+	int *h_updating_graph_mask = (int*) _mm_malloc(SIZE_INT*num_of_nodes, ALIGNED_BYTES);
+	int *h_graph_visited = (int*) _mm_malloc(SIZE_INT*num_of_nodes, ALIGNED_BYTES);
+	int* h_cost = (int*) _mm_malloc(SIZE_INT*num_of_nodes, ALIGNED_BYTES);
 //#pragma omp parallel private(file_name, finput)
 //{
 //	unsigned thid = omp_get_thread_num();
@@ -192,7 +198,7 @@ void BFSGraph( int argc, char** argv)
 	//h_graph_visited[source] = 1;
 	//h_cost[source] = 0;
 	//num_lines = edge_list_size / NUM_CORE;
-	int* h_graph_edges = (int*) malloc(sizeof(int)*edge_list_size);
+	int* h_graph_edges = (int*) _mm_malloc(SIZE_INT*edge_list_size, ALIGNED_BYTES);
 //#pragma omp parallel private(file_name, finput)
 //{
 //	unsigned thid = omp_get_thread_num();
@@ -234,10 +240,10 @@ void BFSGraph( int argc, char** argv)
 		sleep(10);
 #endif
 		// Re-initializing
-		memset(h_graph_mask, 0, sizeof(int)*num_of_nodes);
+		memset(h_graph_mask, 0, SIZE_INT*num_of_nodes);
 		h_graph_mask[source] = 1;
-		memset(h_updating_graph_mask, 0, sizeof(int)*num_of_nodes);
-		memset(h_graph_visited, 0, sizeof(int)*num_of_nodes);
+		memset(h_updating_graph_mask, 0, SIZE_INT*num_of_nodes);
+		memset(h_graph_visited, 0, SIZE_INT*num_of_nodes);
 		h_graph_visited[source] = 1;
 		for (unsigned i = 0; i < num_of_nodes; ++i) {
 			h_cost[i] = -1;
@@ -252,15 +258,16 @@ void BFSGraph( int argc, char** argv)
 				h_graph_edges,\
 				h_cost,\
 				num_of_nodes,\
-				edge_list_size\
+				edge_list_size,\
+				BUFFER_SIZE_MAX,\
+				CHUNK_SIZE \
 				);
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 	}
 	fclose(time_out);
-
+	
 	//Store the result into a file
-
 #ifdef ONEDEBUG
 	NUM_THREADS = 64;
 	omp_set_num_threads(NUM_THREADS);
@@ -282,17 +289,17 @@ void BFSGraph( int argc, char** argv)
 	//printf("Result stored in result.txt\n");
 
 	// cleanup memory
-	free(nneibor);
-	free(n1s);
-	free(n2s);
 	free( h_graph_nodes);
-	free( h_graph_edges);
-	free( h_graph_mask);
-	free( h_updating_graph_mask);
-	free( h_graph_visited);
-	free( h_cost);
+	_mm_free( h_graph_edges);
+	_mm_free( h_graph_mask);
+	_mm_free( h_updating_graph_mask);
+	_mm_free( h_graph_visited);
+	_mm_free( h_cost);
 }
 
+///////////////////////////////////////////////////
+// BFS Kernel
+///////////////////////////////////////////////////
 void BFS_kernel(\
 		Node *h_graph_nodes,\
 		int *h_graph_mask,\
@@ -301,59 +308,141 @@ void BFS_kernel(\
 		int *h_graph_edges,\
 		int *h_cost,\
 		unsigned num_of_nodes,\
-		int edge_list_size\
+		int edge_list_size,\
+		unsigned BUFFER_SIZE_MAX,\
+		unsigned CHUNK_SIZE \
 		)
 {
-	unsigned *frontier = (unsigned *) malloc(num_of_nodes * sizeof(unsigned));
-	frontier[0] = 0; //source
-	unsigned top = 1;
+	//int k=0;
+	const __m512i one_v = _mm512_set1_epi32(1);
+	const __m512i minusone_v = _mm512_set1_epi32(-1);
+	const __m512i zero_v = _mm512_set1_epi32(0);
 
-	//printf("Start traversing the tree\n");
+	int *id_buffer = (int *) _mm_malloc(SIZE_INT * BUFFER_SIZE_MAX * NUM_THREADS, ALIGNED_BYTES);
+	int *cost_buffer = (int *) _mm_malloc(SIZE_INT * BUFFER_SIZE_MAX * NUM_THREADS, ALIGNED_BYTES);
+	unsigned *tops = (unsigned *) _mm_malloc(SIZE_INT * NUM_THREADS, ALIGNED_BYTES);
+	int thrd;
+	unsigned *offsets = (unsigned *) _mm_malloc(SIZE_INT * NUM_THREADS, ALIGNED_BYTES);
+	for (unsigned i = 0; i < NUM_THREADS; ++i) {
+		offsets[i] = i * BUFFER_SIZE_MAX;
+	}
 	double start_time = omp_get_wtime();
-	bool stop;
+	int stop;
 	do
 	{
 		//if no thread changes this value then the loop stops
-		stop = true;
+		stop = 1;
 
 		omp_set_num_threads(NUM_THREADS);
-#pragma omp parallel for 
-		//for(unsigned int tid = 0; tid < num_of_nodes; tid++ )
-		for (unsigned i = 0; i < top; ++i)
+#pragma omp parallel private(thrd)
+{
+		thrd = omp_get_thread_num();
+		tops[thrd] = 0;
+#pragma omp for schedule(dynamic, CHUNK_SIZE) 
+		for(unsigned int tid = 0; tid < num_of_nodes; tid++ )
 		{
-			//if (h_graph_mask[tid] == true) {
-				//h_graph_mask[tid]=false;
-				unsigned tid = frontier[i];
+			if (h_graph_mask[tid] == 1) {
+				h_graph_mask[tid]=0;
 				int next_starting = h_graph_nodes[tid].starting + h_graph_nodes[tid].num_of_edges;
-//#pragma vector always
-				for(int i = h_graph_nodes[tid].starting; \
-						i < next_starting; \
-						i++)
-				{
-					int id = h_graph_edges[i];
-					if(!h_graph_visited[id])
-					{
-						h_cost[id]=h_cost[tid]+1;
-						h_updating_graph_mask[id]=true;
+
+				for (int i = h_graph_nodes[tid].starting; \
+						 i < next_starting; \
+						 i += NUM_P_INT) {
+					/* Check buffer's size */
+					if (tops[thrd] + NUM_P_INT > BUFFER_SIZE_MAX) {
+						/* If Buffer would be full, then operate */
+						for (unsigned k = 0; k < tops[thrd]; k += NUM_P_INT) {
+							if (k + NUM_P_INT <= tops[thrd]) {
+								/* Vectoried */
+								/* Update those flags */
+								__m512i id_v = _mm512_load_epi32(id_buffer + offsets[thrd] + k);
+								__m512i visited_v = _mm512_i32gather_epi32(id_v, h_graph_visited, SIZE_INT);
+								__mmask16 novisited_mask = _mm512_cmpeq_epi32_mask(visited_v, zero_v);
+								_mm512_mask_i32scatter_epi32(h_updating_graph_mask, novisited_mask, id_v, one_v, SIZE_INT);
+								_mm512_mask_i32scatter_epi32(h_graph_visited, novisited_mask, id_v, one_v, SIZE_INT);
+
+								/* Update the h_cost */
+								__m512i cost_source_v = _mm512_load_epi32(cost_buffer + offsets[thrd] + k);
+								__m512i cost_v = _mm512_add_epi32(cost_source_v, one_v);
+								_mm512_mask_i32scatter_epi32(h_cost, novisited_mask, id_v, cost_v, SIZE_INT);
+							} else {
+								/* Serialized */
+								for (unsigned j = k; j < tops[thrd]; ++j) {
+									int id = id_buffer[offsets[thrd] + j];
+									if (!h_graph_visited[id]) {
+										h_updating_graph_mask[id] = 1;
+										h_graph_visited[id] = 1;
+										h_cost[id] = cost_buffer[offsets[thrd] + j] + 1;
+									}
+								}
+							}
+						}
+
+						tops[thrd] = 0;
+					}
+					/* Load to buffer */
+					__m512i id_v = _mm512_loadu_si512(h_graph_edges + i);
+					_mm512_store_epi32(id_buffer + offsets[thrd] + tops[thrd], id_v);
+					__m512i cost_source_v = _mm512_set1_epi32(h_cost[tid]);
+					_mm512_store_epi32(cost_buffer + offsets[thrd] + tops[thrd], cost_source_v);
+					if (i + NUM_P_INT <= next_starting) {
+						tops[thrd] += NUM_P_INT;
+					} else {
+						tops[thrd] += next_starting - i;
 					}
 				}
-			//}
-		}
-		top = 0;
-#pragma omp parallel for
-		for(unsigned int tid=0; tid< num_of_nodes ; tid++ )
-		{
-			if (h_updating_graph_mask[tid] == true) {
-				//h_graph_mask[tid]=true;
-#pragma omp atomic
-				frontier[top++] = tid;
-				h_graph_visited[tid]=true;
-				stop = false;
-				h_updating_graph_mask[tid]=false;
 			}
 		}
+
+		for (unsigned i = 0; i < tops[thrd]; i += NUM_P_INT) {
+			if (i + NUM_P_INT <= tops[thrd]) {
+				/* Vectoried */
+				/* Update those flags */
+				__m512i id_v = _mm512_load_epi32(id_buffer + offsets[thrd] + i);
+				__m512i visited_v = _mm512_i32gather_epi32(id_v, h_graph_visited, SIZE_INT);
+				__mmask16 novisited_mask = _mm512_cmpeq_epi32_mask(visited_v, zero_v);
+				_mm512_mask_i32scatter_epi32(h_updating_graph_mask, novisited_mask, id_v, one_v, SIZE_INT);
+				_mm512_mask_i32scatter_epi32(h_graph_visited, novisited_mask, id_v, one_v, SIZE_INT);
+
+				/* Update the h_cost */
+				__m512i cost_source_v = _mm512_load_epi32(cost_buffer + offsets[thrd] + i);
+				__m512i cost_v = _mm512_add_epi32(cost_source_v, one_v);
+				_mm512_mask_i32scatter_epi32(h_cost, novisited_mask, id_v, cost_v, SIZE_INT);
+			} else {
+				/* Serialized */
+				for (unsigned j = i; j < tops[thrd]; ++j) {
+					int id = id_buffer[offsets[thrd] + j];
+					if (!h_graph_visited[id]) {
+						h_updating_graph_mask[id] = 1;
+						h_graph_visited[id] = 1;
+						h_cost[id] = cost_buffer[offsets[thrd] + j] + 1;
+					}
+				}
+			}
+		}
+#pragma omp barrier
+#pragma omp for schedule(dynamic, CHUNK_SIZE)
+		for (unsigned i = 0; i < num_of_nodes; i += NUM_P_INT) {
+			__m512i id_v = _mm512_load_epi32(h_updating_graph_mask + i);
+			__mmask16 updated_v = _mm512_cmpeq_epi32_mask(id_v, one_v);
+			if (*((short *)(&updated_v)) != 0) {
+				if (stop) {
+					stop = 0;
+				}
+				_mm512_store_epi32(h_graph_mask + i, id_v);
+				_mm512_store_epi32(h_updating_graph_mask + i, zero_v);
+			}
+		}
+}
 	}
 	while(!stop);
 	double end_time = omp_get_wtime();
 	printf("%d %lf\n", NUM_THREADS, (end_time - start_time));
+	//printf("%u %lf\n", BUFFER_SIZE_MAX, (end_time - start_time));
+	//printf("%u %lf\n", CHUNK_SIZE, (end_time - start_time));
+	_mm_free(id_buffer);
+	_mm_free(cost_buffer);
+	_mm_free(tops);
+	_mm_free(offsets);
 }
+

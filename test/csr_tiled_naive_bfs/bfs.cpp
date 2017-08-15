@@ -61,17 +61,11 @@ void BFSGraph( int argc, char** argv)
 	char *input_f;
 	
 	if(argc < 3){
-	//Usage(argc, argv);
-	//Usage( argv);
-	//exit(0);
-	//NUM_THREADS = 1;
-	//input_f = "/home/zpeng/benchmarks/data/twt/out.twitter";
-	input_f = "/home/zpeng/benchmarks/data/pokec/soc-pokec-relationships.txt";
-	TILE_WIDTH = 1024;
+		input_f = "/home/zpeng/benchmarks/data/pokec/soc-pokec-relationships.txt";
+		TILE_WIDTH = 1024;
 	} else {
-	//NUM_THREADS = atoi(argv[1]);
-	input_f = argv[1];
-	TILE_WIDTH = strtoul(argv[2], NULL, 0);
+		input_f = argv[1];
+		TILE_WIDTH = strtoul(argv[2], NULL, 0);
 	}
 
 	/////////////////////////////////////////////////////////////////////
@@ -83,10 +77,28 @@ void BFSGraph( int argc, char** argv)
 	FILE *fin = fopen(fname.c_str(), "r");
 	fscanf(fin, "%u %u", &num_of_nodes, &edge_list_size);
 	fclose(fin);
-	//memset(nneibor, 0, num_of_nodes * sizeof(unsigned));
-	//for (unsigned i = 0; i < num_of_nodes; ++i) {
-	//	grah.nneibor[i] = 0;
-	//}
+	unsigned side_length;
+	if (num_of_nodes % TILE_WIDTH) {
+		side_length = num_of_nodes / TILE_WIDTH + 1;
+	} else {
+		side_length = num_of_nodes / TILE_WIDTH;
+	}
+	unsigned num_tiles = side_length * side_length;
+	// Read Offsets
+	fname = prefix + "-offsets";
+	fin = fopen(fname.c_str(), "r");
+	if (!fin) {
+		fprintf(stderr, "cannot open file: %s\n", fname.c_str());
+		exit(1);
+	}
+	unsigned *offsets = (unsigned *) malloc(num_tiles * sizeof(unsigned));
+	for (unsigned i = 0; i < num_tiles; ++i) {
+		fscanf(fin, "%u", offsets + i);
+	}
+	fclose(fin);
+	int *h_graph_edges = (int *) malloc(sizeof(int) * edge_list_size);
+
+
 	unsigned *n1s = (unsigned *) malloc(edge_list_size * sizeof(unsigned));
 	unsigned *n2s = (unsigned *) malloc(edge_list_size * sizeof(unsigned));
 	NUM_THREADS = 64;
@@ -141,25 +153,6 @@ void BFSGraph( int argc, char** argv)
 	//	fscanf(fin, "%u", nneibor + i);
 	//}
 	
-	// Read Offsets
-	unsigned side_length;
-	if (num_of_nodes % TILE_WIDTH) {
-		side_length = num_of_nodes / TILE_WIDTH + 1;
-	} else {
-		side_length = num_of_nodes / TILE_WIDTH;
-	}
-	unsigned num_tiles = side_length * side_length;
-	fname = prefix + "-offsets";
-	fin = fopen(fname.c_str(), "r");
-	if (!fin) {
-		fprintf(stderr, "cannot open file: %s\n", fname.c_str());
-		exit(1);
-	}
-	unsigned *offsets = (unsigned *) malloc(num_tiles * sizeof(unsigned));
-	for (unsigned i = 0; i < num_tiles; ++i) {
-		fscanf(fin, "%u", offsets + i);
-	}
-	fclose(fin);
 	
 	// End Input real dataset
 	/////////////////////////////////////////////////////////////////////
@@ -323,7 +316,7 @@ void BFSGraph( int argc, char** argv)
 	free(n1s);
 	free(n2s);
 	free( h_graph_nodes);
-	//free( h_graph_edges);
+	free( h_graph_edges);
 	free( h_graph_mask);
 	free( h_updating_graph_mask);
 	free( h_graph_visited);

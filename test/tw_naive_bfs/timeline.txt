@@ -1,10 +1,2 @@
-input end: 301.866973
-Thread 1 end: 407.840135
-Thread 2 end: 507.529180
-Thread 4 end: 585.367549
-Thread 8 end: 644.304139
-Thread 16 end: 692.247265
-Thread 32 end: 732.129010
-Thread 64 end: 764.436437
-Thread 128 end: 792.160973
-Thread 256 end: 815.145700
+input end: 2.442678
+Thread 1 end: 9.158790

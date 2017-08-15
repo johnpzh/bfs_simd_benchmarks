@@ -61,7 +61,7 @@ void BFSGraph( int argc, char** argv)
 	//Usage( argv);
 	//exit(0);
 	//NUM_THREADS = 1;
-	input_f = "/home/zpeng/benchmarks/data/twt/out.twitter";
+	input_f = "/home/zpeng/benchmarks/data/pokec/soc-pokec-relationships.txt";
 	} else {
 	//NUM_THREADS = atoi(argv[1]);
 	input_f = argv[1];
@@ -226,7 +226,7 @@ void BFSGraph( int argc, char** argv)
 	time_out = fopen(time_file, "w");
 	fprintf(time_out, "input end: %lf\n", now - start);
 	// BFS
-	for (unsigned i = 0; i < 9; ++i) {
+	for (unsigned i = 0; i < 1; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
 		sleep(10);
