@@ -152,7 +152,7 @@ void input(char filename[]) {
 	}
 
 	fscanf(fin, "%u %u", &nnodes, &nedges);
-	unsigned *nneibor = (unsigned *) _mm_malloc(nnodes * sizeof(unsigned), ALIGNED_BYTES);
+	unsigned *nneibor = (unsigned *) malloc(nnodes * sizeof(unsigned));
 	memset(nneibor, 0, nnodes * sizeof(unsigned));
 	unsigned num_tiles;
 	unsigned side_length;
@@ -186,21 +186,40 @@ void input(char filename[]) {
 		tiles_n1v[tile_id].push_back(n1);
 		tiles_n2v[tile_id].push_back(n2);
 	}
+	// test for non-zero tils
+	unsigned non_zero = 0;
+	for (unsigned i = 0; i < num_tiles; ++i) {
+		if (tiles_n1v[i].size()) {
+			non_zero++;
+		}
+	}
+	printf("non empty: %u\n", non_zero);
+	exit(0);
+	// End test
 	for (unsigned i = 0; i < num_tiles; ++i) {
 		manual_sort(tiles_n1v[i], tiles_n2v[i]);
 	}
 
 	// OOC -> CSR
-	for (unsigned i = 0; i < num_tiles; ++i) {
-		unsigned tile_rowid = i / side_length;
-		unsigned tile_colid = i % side_length;
+	string prefix = string(filename) + "_csr-tiled-" + to_string(TILE_WIDTH);
+	unsigned NUM_THREADS = 64;
+	vector< vector<unsigned> > tiles_indices;
+	tiles_index.resize(num_tiles);
+	vector< vector<unsigned> > tiles_startings;
+	tiles_startings.resize(num_tiles);
+#pragma omp parallel for num_threads(NUM_THREADS)
+	for (unsigned tile_id = 0; tile_id < num_tiles; ++tile_id) {
+		unsigned tile_rowid = tile_id / side_length;
+		unsigned tile_colid = tile_id % side_length;
 		unsigned n1_offset = tile_rowid * TILE_WIDTH;
-		unsigned size_tile = tiles_n1v[i].size();
+		unsigned size_tile = tiles_n1v[tile_id].size();
+		// Get Startings
 		unsigned *n1_counts = (unsigned *) malloc(sizeof(unsigned) * TILE_WIDTH);
 		memset(n1_counts, 0, sizeof(unsigned) * TILE_WIDTH);
 		for (unsigned j = 0; j < size_tile; ++j) {
-			unsigned n1 = tiles_n1v[i][j];
-			unsigned n2 = tiles_n2v[i][j];
+			unsigned n1 = tiles_n1v[tile_id][j];
+			//unsigned n2 = tiles_n2v[tile_id][j];
+			n1--;
 			n1_counts[n1 - n1_offset]++;
 		}
 		unsigned *startings = (unsigned *) malloc(sizeof(unsigned) * TILE_WIDTH);
@@ -211,48 +230,95 @@ void input(char filename[]) {
 			start += n1_counts[k];
 		}
 
+		// Save startings as indices
+		for (unsigned k = 0; k < TILE_WIDTH; ++k) {
+			if (k != TILE_WIDTH - 1) {
+				//fprintf(fout, "%u %u\n", startings[k], startings[k+1] - startings[k]);
+				if (startings[k] != startings[k+1]) {
+					tiles_indices[tile_id].push_back(k + n1_offset);
+					tiles_startings[tile_id].push_back(startings[k]);
+				}
+			} else {
+				//fprintf(fout, "%u %u\n", startings[k], size_tile - startings[k]);
+				if (startings[k] != size_tile) {
+					tiles_indices[tile_id].push_back(k + n1_offset);
+					tiles_startings[tile_id].push_back(startings[k]);
+				}
+			}
+		}
+		
+		////////////////////////////////////////////////
+		// Need modification
+		////////////////////////////////////////////////
+		//// Write Startings to file
+		//string fname = prefix + "-" + to_string(tile_id);
+		//FILE *fout = fopen(fname.c_str(), "w");
+		//if (0 == tile_id) {
+		//	fprintf(fout, "%u %u\n", nnodes, nedges);
+		//}
+		//fprintf(fout, "%u %u\n\n", n1_offset, size_tile); // Head index offset, size of tile
+		//for (unsigned k = 0; k < TILE_WIDTH; ++k) {
+		//	if (k != TILE_WIDTH - 1) {
+		//		fprintf(fout, "%u %u\n", startings[k], startings[k+1] - startings[k]);
+		//	} else {
+		//		fprintf(fout, "%u %u\n", startings[k], size_tile - startings[k]);
+		//	}
+		//}
+		//fprintf(fout, "\n");
+
+		//// Write End nodes to file
+		//for (unsigned k = 0; k < size_tile; ++k) {
+#ifdef O//NEDEBUG
+		//	fprintf(fout, "%u %u\n", tiles_n1v[tile_id][k], tiles_n2v[tile_id][k]);//test
+#else
+		//	fprintf(fout, "%u\n", tiles_n2v[tile_id][k]);
+#endif
+		//}
+		////////////////////////////////////////////////
+
+		fclose(fout);
 		free(n1_counts);
 		free(startings);
 	}
 
 
-	unsigned *tiles_n1 = (unsigned *) malloc(nedges * sizeof(unsigned));
-	unsigned *tiles_n2 = (unsigned *) malloc(nedges * sizeof(unsigned));
-	unsigned tile_index = 0;
-	for (unsigned i = 0; i < num_tiles; ++i) {
-		unsigned bound = tiles_n1v[i].size();
-		for (unsigned j = 0; j < bound; ++j) {
-			tiles_n1[tile_index] = tiles_n1v[i][j];
-			tiles_n2[tile_index] = tiles_n2v[i][j];
-			++tile_index;
-		}
-	}
+	//unsigned *tiles_n1 = (unsigned *) malloc(nedges * sizeof(unsigned));
+	//unsigned *tiles_n2 = (unsigned *) malloc(nedges * sizeof(unsigned));
+	//unsigned tile_index = 0;
+	//for (unsigned i = 0; i < num_tiles; ++i) {
+	//	unsigned bound = tiles_n1v[i].size();
+	//	for (unsigned j = 0; j < bound; ++j) {
+	//		tiles_n1[tile_index] = tiles_n1v[i][j];
+	//		tiles_n2[tile_index] = tiles_n2v[i][j];
+	//		++tile_index;
+	//	}
+	//}
 
-	string prefix = string(filename) + "_tiled-" + to_string(TILE_WIDTH);
-	unsigned edge_bound = nedges / ALIGNED_BYTES;
-	unsigned NUM_THREADS = 64;
-#pragma omp parallel num_threads(NUM_THREADS)
-{
-	unsigned tid = omp_get_thread_num();
-	unsigned offset = tid * edge_bound;
-	string fname = prefix + "-" + to_string(tid);
-	FILE *fout = fopen(fname.c_str(), "w");
-	if (0 == tid) {
-		fprintf(fout, "%u %u\n", nnodes, nedges);
-	}
-	if (NUM_THREADS - 1 != tid) {
-		for (unsigned i = 0; i < edge_bound; ++i) {
-			unsigned index = i + offset;
-			fprintf(fout, "%u %u\n", tiles_n1[index], tiles_n2[index]);
-		}
-	} else {
-		for (unsigned i = 0; i + offset < nedges; ++i) {
-			unsigned index = i + offset;
-			fprintf(fout, "%u %u\n", tiles_n1[index], tiles_n2[index]);
-		}
-	}
-	fclose(fout);
-}
+	//string prefix = string(filename) + "_tiled-" + to_string(TILE_WIDTH);
+//	unsigned edge_bound = nedges / ALIGNED_BYTES;
+//	unsigned NUM_THREADS = 64;
+//#pragma omp parallel num_threads(NUM_THREADS)
+//{
+//	unsigned tid = omp_get_thread_num();
+//	unsigned offset = tid * edge_bound;
+//	string fname = prefix + "-" + to_string(tid);
+//	FILE *fout = fopen(fname.c_str(), "w");
+//	if (0 == tid) {
+//		fprintf(fout, "%u %u\n", nnodes, nedges);
+//	}
+//	if (NUM_THREADS - 1 != tid) {
+//		for (unsigned i = 0; i < edge_bound; ++i) {
+//			unsigned index = i + offset;
+//			fprintf(fout, "%u %u\n", tiles_n1[index], tiles_n2[index]);
+//		}
+//	} else {
+//		for (unsigned i = 0; i + offset < nedges; ++i) {
+//			unsigned index = i + offset;
+//			fprintf(fout, "%u %u\n", tiles_n1[index], tiles_n2[index]);
+//		}
+//	}
+//	fclose(fout);
+//}
 	string fname = prefix + "-offsets";
 	FILE *fout = fopen(fname.c_str(), "w");
 	unsigned offset = 0;
@@ -270,7 +336,7 @@ void input(char filename[]) {
 	// Clean the vectors for saving memory
 	fclose(fin);
 	fclose(fout);
-	_mm_free(nneibor);
+	free(nneibor);
 }
 
 void input_untiled(char filename[]) {
@@ -390,7 +456,7 @@ int main(int argc, char *argv[]) {
 		filename = argv[1];
 		TILE_WIDTH = strtoul(argv[2], NULL, 0);
 	} else {
-		filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec-relationships.txt";
+		filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec";
 		TILE_WIDTH = 1024;
 	}
 #ifdef UNTILE

@@ -358,7 +358,6 @@ void BFS_kernel(\
 {
 
 	//printf("Start traversing the tree\n");
-	unsigned test_count = 0;//test
 	omp_set_num_threads(NUM_THREADS);
 	double start_time = omp_get_wtime();
 	bool stop;
@@ -388,7 +387,6 @@ void BFS_kernel(\
 						if(!h_graph_visited[n2])
 						{
 							h_cost[n2]=h_cost[nid]+1;
-							test_count++;//test
 							h_updating_graph_mask[n2]=1;
 						}
 					}
@@ -417,7 +415,6 @@ void BFS_kernel(\
 				h_updating_graph_mask[nid]=0;
 			}
 		}
-		printf("test_count: %u\n", test_count);//test
 	}
 	while(!stop);
 	double end_time = omp_get_wtime();
