@@ -6,11 +6,13 @@
 #include <string>
 #include <unistd.h>
 #include <unordered_map>
+#include <map>
 //#define NUM_THREAD 4
 
 using std::string;
 using std::to_string;
 using std::unordered_map;
+using std::map;
 
 typedef unordered_map<unsigned, unsigned[2]> hashmap_csr;
 
@@ -40,6 +42,9 @@ void BFS_kernel(\
 		unsigned *tile_offsets,\
 		unsigned num_of_nodes,\
 		int edge_list_size,\
+		int *is_empty_tile,\
+		int *is_active_side,\
+		int *is_updating_active_side,\
 		unsigned side_length,\
 		unsigned num_tiles\
 		);
@@ -52,8 +57,6 @@ int main( int argc, char** argv)
 	start = omp_get_wtime();
 	BFSGraph( argc, argv);
 }
-
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Apply BFS on a Graph
@@ -144,11 +147,13 @@ void BFSGraph( int argc, char** argv)
 			unsigned tile_id = i + offset_file;
 			unsigned num_indices;
 			unsigned num_edges;
+			// Read number of indices, number of edges
 			fscanf(fin, "%u %u", &num_indices, &num_edges);
 			if (0 == num_indices) {
 				is_empty_tile[tile_id] = 1;
 				continue;
 			}
+			// Read indices
 			for (unsigned i_indices = 0; i_indices < num_indices; ++i_indices) {
 				unsigned index;
 				unsigned start;
@@ -160,6 +165,7 @@ void BFSGraph( int argc, char** argv)
 				tiles_indices[tile_id][index][0] = start;
 				tiles_indices[tile_id][index][1] = outdegree;
 			}
+			// Read edges
 			for (unsigned i_edges = 0; i_edges < num_edges; ++i_edges) {
 				unsigned index = i_edges + tile_offsets[tile_id];
 				fscanf(fin, "%d", h_graph_edges + index);
@@ -170,11 +176,13 @@ void BFSGraph( int argc, char** argv)
 			unsigned tile_id = i + offset_file;
 			unsigned num_indices;
 			unsigned num_edges;
+			// Read number of indices, number of edges
 			fscanf(fin, "%u %u", &num_indices, &num_edges);
 			if (0 == num_indices) {
 				is_empty_tile[tile_id] = 1;
 				continue;
 			}
+			// Read indices
 			for (unsigned i_indices = 0; i_indices < num_indices; ++i_indices) {
 				unsigned index;
 				unsigned start;
@@ -186,38 +194,13 @@ void BFSGraph( int argc, char** argv)
 				tiles_indices[tile_id][index][0] = start;
 				tiles_indices[tile_id][index][1] = outdegree;
 			}
+			// Read edges
 			for (unsigned i_edges = 0; i_edges < num_edges; ++i_edges) {
 				unsigned index = i_edges + tile_offsets[tile_id];
 				fscanf(fin, "%d", h_graph_edges + index);
 			}
 		}
 	}
-
-
-	//if (NUM_THREADS - 1 != tid) {
-	//	for (unsigned i = 0; i < edge_bound; ++i) {
-	//		unsigned index = i + offset;
-	//		unsigned n1;
-	//		unsigned n2;
-	//		fscanf(fin, "%u %u", &n1, &n2);
-	//		n1--;
-	//		n2--;
-	//		n1s[index] = n1;
-	//		n2s[index] = n2;
-	//	}
-	//} else {
-	//	for (unsigned i = 0; i + offset < edge_list_size; ++i) {
-	//		unsigned index = i + offset;
-	//		unsigned n1;
-	//		unsigned n2;
-	//		fscanf(fin, "%u %u", &n1, &n2);
-	//		n1--;
-	//		n2--;
-	//		n1s[index] = n1;
-	//		n2s[index] = n2;
-	//	}
-	//}
-	//fclose(fin);
 }
 	// Read nneibor
 	//fname = prefix + "-nneibor";
@@ -230,8 +213,6 @@ void BFSGraph( int argc, char** argv)
 	//for (unsigned i = 0; i < num_of_nodes; ++i) {
 	//	fscanf(fin, "%u", nneibor + i);
 	//}
-	
-	
 	// End Input real dataset
 	/////////////////////////////////////////////////////////////////////
 
@@ -243,84 +224,14 @@ void BFSGraph( int argc, char** argv)
 	//fscanf(finput, "%u", &num_of_nodes);
 	//fclose(finput);
 	//unsigned num_lines = num_of_nodes / NUM_CORE;
-	Node* h_graph_nodes = (Node*) malloc(sizeof(Node)*num_of_nodes);
+	//Node* h_graph_nodes = (Node*) malloc(sizeof(Node)*num_of_nodes);
 	int *h_graph_mask = (int*) malloc(sizeof(int)*num_of_nodes);
 	int *h_updating_graph_mask = (int*) malloc(sizeof(int)*num_of_nodes);
 	int *h_graph_visited = (int*) malloc(sizeof(int)*num_of_nodes);
 	int* h_cost = (int*) malloc(sizeof(int)*num_of_nodes);
-//#pragma omp parallel private(file_name, finput)
-//{
-//	unsigned thid = omp_get_thread_num();
-//	file_name = file_prefix + "-v" + to_string(thid) + ".txt";
-//	finput = fopen(file_name.c_str(), "r");
-//	if (0 == thid) {
-//		fscanf(finput, "%u", &num_of_nodes);
-//	}
-//	unsigned start, edgeno;
-//	unsigned offset = thid * num_lines; // here I assume the num_of_nodes can be divided by NUM_CORE
-//	for (unsigned i = 0; i < num_lines; ++i) {
-//		fscanf(finput, "%u %u", &start, &edgeno);
-//		unsigned index = i + offset;
-//		h_graph_nodes[index].starting = start;
-//		h_graph_nodes[index].num_of_edges = edgeno;
-//		h_graph_mask[index] = 0;
-//		h_updating_graph_mask[index] = 0;
-//		h_graph_visited[index] = 0;
-//		h_cost[index] = -1;
-//	}
-//	fclose(finput);
-//}
-	//unsigned edge_start = 0;
-	//for (unsigned i = 0; i < num_of_nodes; ++i) {
-	//	h_graph_nodes[i].starting = edge_start;
-	//	h_graph_nodes[i].num_of_edges = nneibor[i];
-	//	edge_start += nneibor[i];
-	//	//h_graph_mask[i] = 0;
-	//	//h_updating_graph_mask[i] = 0;
-	//	//h_graph_visited[i] = 0;
-	//	//h_cost[i] = -1;
-	//}
-
+	int *is_active_side = (int *) malloc(sizeof(int) * side_length);
+	int *is_updating_active_side = (int *) malloc(sizeof(int) * side_length);
 	unsigned source = 0;
-	//file_name = file_prefix + "-e0.txt";
-	//finput = fopen(file_name.c_str(), "r");
-	//fscanf(finput, "%u %u", &source, &edge_list_size);
-	//fclose(finput);
-	//h_graph_mask[source] = 1;
-	//h_graph_visited[source] = 1;
-	//h_cost[source] = 0;
-	//num_lines = edge_list_size / NUM_CORE;
-	//int* h_graph_edges = (int*) malloc(sizeof(int)*edge_list_size);
-//#pragma omp parallel private(file_name, finput)
-//{
-//	unsigned thid = omp_get_thread_num();
-//	file_name = file_prefix + "-e" + to_string(thid) + ".txt";
-//	finput = fopen(file_name.c_str(), "r");
-//	if (0 == thid) {
-//		fscanf(finput, "%u %u", &source, &edge_list_size);
-//	}
-//	unsigned id;
-//	unsigned cost;
-//	unsigned offset = thid * num_lines;
-//	if (NUM_CORE - 1 != thid) {
-//		for (unsigned i = 0; i < num_lines; ++i) {
-//			fscanf(finput, "%u %u", &id, &cost);
-//			unsigned index = i + offset;
-//			h_graph_edges[index] = id;
-//		}
-//	} else {
-//		for (unsigned i = 0; fscanf(finput, "%u %u", &id, &cost) != EOF; ++i) {
-//			unsigned index = i + offset;
-//			h_graph_edges[index] = id;
-//		}
-//	}
-//	fclose(finput);
-//}
-//	NUM_THREADS = 256;
-//#pragma omp parallel for num_threads(NUM_THREADS)
-//	for (unsigned i = 0; i < edge_list_size; ++i) {
-//		h_graph_edges[i] = n2s[i];
-//	}
 
 	now = omp_get_wtime();
 	time_out = fopen(time_file, "w");
@@ -345,6 +256,9 @@ void BFSGraph( int argc, char** argv)
 			h_cost[i] = -1;
 		}
 		h_cost[source] = 0;
+		memset(is_active_side, 0, sizeof(int) * side_length);
+		is_active_side[0] = 1;
+		memset(is_updating_active_side, 0, sizeof(int) * side_length);
 
 		BFS_kernel(\
 				tiles_indices,\
@@ -356,6 +270,9 @@ void BFSGraph( int argc, char** argv)
 				tile_offsets,\
 				num_of_nodes,\
 				edge_list_size,\
+				is_empty_tile,\
+				is_active_side,\
+				is_updating_active_side,\
 				side_length,\
 				num_tiles\
 				);
@@ -393,7 +310,7 @@ void BFSGraph( int argc, char** argv)
 	//free(nneibor);
 	//free(n1s);
 	//free(n2s);
-	free( h_graph_nodes);
+	//free( h_graph_nodes);
 	free( h_graph_edges);
 	free( h_graph_mask);
 	free( h_updating_graph_mask);
@@ -402,6 +319,8 @@ void BFSGraph( int argc, char** argv)
 	free( tile_offsets);
 	free( tiles_indices);
 	free( is_empty_tile);
+	free( is_active_side);
+	free( is_updating_active_side);
 	//free( file_offsets);
 }
 
@@ -426,13 +345,15 @@ void BFS_kernel(\
 		unsigned *tile_offsets,\
 		unsigned num_of_nodes,\
 		int edge_list_size,\
+		int *is_empty_tile,\
+		int *is_active_side,\
+		int *is_updating_active_side,\
 		unsigned side_length,\
 		unsigned num_tiles\
 		)
 {
 
 	//printf("Start traversing the tree\n");
-	unsigned test_count = 0;//test
 	omp_set_num_threads(NUM_THREADS);
 	double start_time = omp_get_wtime();
 	bool stop;
@@ -442,56 +363,80 @@ void BFS_kernel(\
 		stop = true;
 
 #pragma omp parallel for
-		for(unsigned int nid = 0; nid < num_of_nodes; nid++ )
-		{
-			if (h_graph_mask[nid] == 1) {
-				h_graph_mask[nid]=0;
-				unsigned row_id = nid / TILE_WIDTH;
-				unsigned lower_tile = row_id * side_length;
-				unsigned upper_tile = lower_tile + side_length;
-				unsigned lower_nid = offsets[lower_tile];
-				unsigned upper_nid;
-				if (upper_tile == num_tiles) {
-					upper_nid = edge_list_size;
-				} else {
-					upper_nid = offsets[upper_tile];
-				}
-				for (unsigned i = lower_nid; i < upper_nid; ++i) {
-					if (n1s[i] == nid) {
-						unsigned n2 = n2s[i];
-						if(!h_graph_visited[n2])
-						{
-							h_cost[n2]=h_cost[nid]+1;
-							test_count++;//test
-							h_updating_graph_mask[n2]=1;
+		//for(unsigned int nid = 0; nid < num_of_nodes; nid++ )
+		//{
+		//	if (h_graph_mask[nid] == 1) {
+		//		h_graph_mask[nid]=0;
+		//		//int next_starting = h_graph_nodes[nid].starting + h_graph_nodes[nid].num_of_edges;
+		//		//for(int i = h_graph_nodes[nid].starting; \
+		//		//		i < next_starting; \
+		//		//		i++)
+		//		//{
+		//		//	int id = h_graph_edges[i];
+		//		//	if(!h_graph_visited[id])
+		//		//	{
+		//		//		h_cost[id]=h_cost[nid]+1;
+		//		//		h_updating_graph_mask[id]=1;
+		//		//	}
+		//		//}
+		//	}
+		//}
+		for (unsigned side_id = 0; side_id < side_length; ++side_id) {
+			if (!is_active_side[side_id]) {
+				continue;
+			}
+			is_active_side[side_id] = 0;
+			for (unsigned i = 0; i < side_length; ++i) {
+				unsigned tile_id = side_id * side_length + i;
+				for (auto itor = tiles_indices[tile_id].begin(); \
+						itor != tiles_indices[tile_id].end(); \
+						++itor) {
+					unsigned vertex_id = itor->first;
+					if (0 == h_graph_mask[vertex_id]) {
+						continue;
+					}
+					h_graph_mask[vertex_id] = 0;
+					unsigned start = itor->second[0];
+					unsigned outdegree = itor->second[1];
+					for (unsigned j = 0; j < outdegree; ++j) {
+						unsigned index = start + j;
+						unsigned end = h_graph_edges[index];
+						if (!h_graph_visited[end]) {
+							h_cost[end] = h_cost[vertex_id];
+							h_updating_graph_mask[end] = 1;
+							is_updating_active_side[end/TILE_WIDTH] = 1;
 						}
 					}
 				}
-				//int next_starting = h_graph_nodes[nid].starting + h_graph_nodes[nid].num_of_edges;
-				//for(int i = h_graph_nodes[nid].starting; \
-				//		i < next_starting; \
-				//		i++)
-				//{
-				//	int id = h_graph_edges[i];
-				//	if(!h_graph_visited[id])
-				//	{
-				//		h_cost[id]=h_cost[nid]+1;
-				//		h_updating_graph_mask[id]=1;
-				//	}
-				//}
 			}
 		}
 #pragma omp parallel for
-		for(unsigned int nid=0; nid< num_of_nodes ; nid++ )
-		{
-			if (h_updating_graph_mask[nid] == 1) {
-				h_graph_mask[nid]=1;
-				h_graph_visited[nid]=1;
-				stop = false;
-				h_updating_graph_mask[nid]=0;
+		//for(unsigned int nid=0; nid< num_of_nodes ; nid++ )
+		//{
+		//	if (h_updating_graph_mask[nid] == 1) {
+		//		h_graph_mask[nid]=1;
+		//		h_graph_visited[nid]=1;
+		//		stop = false;
+		//		h_updating_graph_mask[nid]=0;
+		//	}
+		//}
+		for (unsigned side_id = 0; side_id < side_length; ++side_id) {
+			if (!is_updating_active_side[side_id]) {
+				continue;
+			}
+			is_updating_active_side[side_id] = 0;
+			is_active_side[side_id] = 1;
+			stop = false;
+			for (unsigned i = 0; i < TILE_WIDTH; ++i) {
+				unsigned vertex_id = i + side_id * TILE_WIDTH;
+				if (0 == h_updating_graph_mask[vertex_id]) {
+					continue;
+				}
+				h_updating_graph_mask[vertex_id] = 0;
+				h_graph_mask[vertex_id] = 1;
+				h_graph_visited[vertex_id] = 1;
 			}
 		}
-		printf("test_count: %u\n", test_count);//test
 	}
 	while(!stop);
 	double end_time = omp_get_wtime();
