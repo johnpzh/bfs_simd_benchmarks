@@ -5,10 +5,14 @@
 #include <omp.h>
 #include <string>
 #include <unistd.h>
+#include <unordered_map>
 //#define NUM_THREAD 4
 
 using std::string;
 using std::to_string;
+using std::unordered_map;
+
+typedef unordered_map<unsigned, unsigned[2]> hashmap_csr;
 
 int	NUM_THREADS;
 unsigned TILE_WIDTH;
@@ -27,13 +31,13 @@ struct Node
 
 void BFSGraph(int argc, char** argv);
 void BFS_kernel(\
-		unsigned *n1s,\
-		unsigned *n2s,\
+		hashmap_csr *tiles_indices,\
 		int *h_graph_mask,\
 		int *h_updating_graph_mask,\
 		int *h_graph_visited,\
+		int *h_graph_edges,\
 		int *h_cost,\
-		unsigned *offsets,\
+		unsigned *tile_offsets,\
 		unsigned num_of_nodes,\
 		int edge_list_size,\
 		unsigned side_length,\
@@ -61,7 +65,7 @@ void BFSGraph( int argc, char** argv)
 	char *input_f;
 	
 	if(argc < 3){
-		input_f = "/home/zpeng/benchmarks/data/pokec/soc-pokec-relationships.txt";
+		input_f = "/home/zpeng/benchmarks/data/pokec/soc-pokec";
 		TILE_WIDTH = 1024;
 	} else {
 		input_f = argv[1];
@@ -72,7 +76,7 @@ void BFSGraph( int argc, char** argv)
 	// Input real dataset
 	/////////////////////////////////////////////////////////////////////
 	//string prefix = string(input_f) + "_untiled";
-	string prefix = string(input_f) + "_tiled-" + to_string(TILE_WIDTH);
+	string prefix = string(input_f) + "_csr-tiled-" + to_string(TILE_WIDTH);
 	string fname = prefix + "-0";
 	FILE *fin = fopen(fname.c_str(), "r");
 	fscanf(fin, "%u %u", &num_of_nodes, &edge_list_size);
@@ -84,29 +88,47 @@ void BFSGraph( int argc, char** argv)
 		side_length = num_of_nodes / TILE_WIDTH;
 	}
 	unsigned num_tiles = side_length * side_length;
-	// Read Offsets
-	fname = prefix + "-offsets";
+	// Read tile Offsets
+	fname = prefix + "-tile_offsets";
 	fin = fopen(fname.c_str(), "r");
 	if (!fin) {
 		fprintf(stderr, "cannot open file: %s\n", fname.c_str());
 		exit(1);
 	}
-	unsigned *offsets = (unsigned *) malloc(num_tiles * sizeof(unsigned));
+	unsigned *tile_offsets = (unsigned *) malloc(num_tiles * sizeof(unsigned));
 	for (unsigned i = 0; i < num_tiles; ++i) {
-		fscanf(fin, "%u", offsets + i);
+		fscanf(fin, "%u", tile_offsets + i);
 	}
 	fclose(fin);
+	//// Read file Offsets
+	//fname = prefix + "-file_offsets";
+	//fin = fopen(fname.c_str(), "r");
+	//if (!fin) {
+	//	fprintf(stderr, "cannot open file: %s\n", fname.c_str());
+	//	exit(1);
+	//}
+	//NUM_THREADS = 64;
+	//unsigned *file_offsets = (unsigned *) malloc(NUM_THREADS * sizeof(unsigned));
+	//for (unsigned i = 0; i < NUM_THREADS; ++i) {
+	//	fscanf(fin, "%u", file_offsets + i);
+	//}
+	//fclose(fin);
+
+	hashmap_csr *tiles_indices = (hashmap_csr *) malloc(sizeof(hashmap_csr) * num_tiles);
+	
 	int *h_graph_edges = (int *) malloc(sizeof(int) * edge_list_size);
-
-
-	unsigned *n1s = (unsigned *) malloc(edge_list_size * sizeof(unsigned));
-	unsigned *n2s = (unsigned *) malloc(edge_list_size * sizeof(unsigned));
+	//unsigned *n1s = (unsigned *) malloc(edge_list_size * sizeof(unsigned));
+	//unsigned *n2s = (unsigned *) malloc(edge_list_size * sizeof(unsigned));
+	int *is_empty_tile = (int *) malloc(sizeof(int) * num_tiles);
+	memset(is_empty_tile, 0, sizeof(int) * num_tiles);
 	NUM_THREADS = 64;
-	unsigned edge_bound = edge_list_size / NUM_THREADS;
+	//unsigned edge_bound = edge_list_size / NUM_THREADS;
+	unsigned bound_tiles = num_tiles/NUM_THREADS;// number of tiles per file
 #pragma omp parallel num_threads(NUM_THREADS) private(fname, fin)
 {
 	unsigned tid = omp_get_thread_num();
-	unsigned offset = tid * edge_bound;
+	//unsigned offset = tid * edge_bound;
+	//unsigned file_offset = file_offsets[tid];
 	fname = prefix + "-" + to_string(tid);
 	fin = fopen(fname.c_str(), "r");
 	if (!fin) {
@@ -114,32 +136,88 @@ void BFSGraph( int argc, char** argv)
 		exit(1);
 	}
 	if (0 == tid) {
-		fscanf(fin, "%u %u\n", &num_of_nodes, &edge_list_size);
+		fscanf(fin, "%u %u", &num_of_nodes, &edge_list_size);
 	}
+	unsigned offset_file = tid * bound_tiles;
 	if (NUM_THREADS - 1 != tid) {
-		for (unsigned i = 0; i < edge_bound; ++i) {
-			unsigned index = i + offset;
-			unsigned n1;
-			unsigned n2;
-			fscanf(fin, "%u %u", &n1, &n2);
-			n1--;
-			n2--;
-			n1s[index] = n1;
-			n2s[index] = n2;
+		for (unsigned i = 0; i < bound_tiles; ++i) {
+			unsigned tile_id = i + offset_file;
+			unsigned num_indices;
+			unsigned num_edges;
+			fscanf(fin, "%u %u", &num_indices, &num_edges);
+			if (0 == num_indices) {
+				is_empty_tile[tile_id] = 1;
+				continue;
+			}
+			for (unsigned i_indices = 0; i_indices < num_indices; ++i_indices) {
+				unsigned index;
+				unsigned start;
+				unsigned outdegree;
+				fscanf(fin, "%u %u %u", &index, &start, &outdegree);
+				index--;
+				start += tile_offsets[tile_id];
+				//tiles_indices[tile_id][index] = {start, outdegree};
+				tiles_indices[tile_id][index][0] = start;
+				tiles_indices[tile_id][index][1] = outdegree;
+			}
+			for (unsigned i_edges = 0; i_edges < num_edges; ++i_edges) {
+				unsigned index = i_edges + tile_offsets[tile_id];
+				fscanf(fin, "%d", h_graph_edges + index);
+			}
 		}
-	} else {
-		for (unsigned i = 0; i + offset < edge_list_size; ++i) {
-			unsigned index = i + offset;
-			unsigned n1;
-			unsigned n2;
-			fscanf(fin, "%u %u", &n1, &n2);
-			n1--;
-			n2--;
-			n1s[index] = n1;
-			n2s[index] = n2;
+	} else { // the last file contains maybe more tiles
+		for (unsigned i = 0; i + offset_file < num_tiles; ++i) {
+			unsigned tile_id = i + offset_file;
+			unsigned num_indices;
+			unsigned num_edges;
+			fscanf(fin, "%u %u", &num_indices, &num_edges);
+			if (0 == num_indices) {
+				is_empty_tile[tile_id] = 1;
+				continue;
+			}
+			for (unsigned i_indices = 0; i_indices < num_indices; ++i_indices) {
+				unsigned index;
+				unsigned start;
+				unsigned outdegree;
+				fscanf(fin, "%u %u %u", &index, &start, &outdegree);
+				index--;
+				start += tile_offsets[tile_id];
+				//tiles_indices[tile_id][index] = {start, outdegree};
+				tiles_indices[tile_id][index][0] = start;
+				tiles_indices[tile_id][index][1] = outdegree;
+			}
+			for (unsigned i_edges = 0; i_edges < num_edges; ++i_edges) {
+				unsigned index = i_edges + tile_offsets[tile_id];
+				fscanf(fin, "%d", h_graph_edges + index);
+			}
 		}
 	}
-	fclose(fin);
+
+
+	//if (NUM_THREADS - 1 != tid) {
+	//	for (unsigned i = 0; i < edge_bound; ++i) {
+	//		unsigned index = i + offset;
+	//		unsigned n1;
+	//		unsigned n2;
+	//		fscanf(fin, "%u %u", &n1, &n2);
+	//		n1--;
+	//		n2--;
+	//		n1s[index] = n1;
+	//		n2s[index] = n2;
+	//	}
+	//} else {
+	//	for (unsigned i = 0; i + offset < edge_list_size; ++i) {
+	//		unsigned index = i + offset;
+	//		unsigned n1;
+	//		unsigned n2;
+	//		fscanf(fin, "%u %u", &n1, &n2);
+	//		n1--;
+	//		n2--;
+	//		n1s[index] = n1;
+	//		n2s[index] = n2;
+	//	}
+	//}
+	//fclose(fin);
 }
 	// Read nneibor
 	//fname = prefix + "-nneibor";
@@ -269,13 +347,13 @@ void BFSGraph( int argc, char** argv)
 		h_cost[source] = 0;
 
 		BFS_kernel(\
-				n1s,\
-				n2s,\
+				tiles_indices,\
 				h_graph_mask,\
 				h_updating_graph_mask,\
 				h_graph_visited,\
+				h_graph_edges,\
 				h_cost,\
-				offsets,\
+				tile_offsets,\
 				num_of_nodes,\
 				edge_list_size,\
 				side_length,\
@@ -313,15 +391,18 @@ void BFSGraph( int argc, char** argv)
 
 	// cleanup memory
 	//free(nneibor);
-	free(n1s);
-	free(n2s);
+	//free(n1s);
+	//free(n2s);
 	free( h_graph_nodes);
 	free( h_graph_edges);
 	free( h_graph_mask);
 	free( h_updating_graph_mask);
 	free( h_graph_visited);
 	free( h_cost);
-	free( offsets);
+	free( tile_offsets);
+	free( tiles_indices);
+	free( is_empty_tile);
+	//free( file_offsets);
 }
 
 //void BFS_kernel(\
@@ -336,13 +417,13 @@ void BFSGraph( int argc, char** argv)
 //		int edge_list_size\
 //		)
 void BFS_kernel(\
-		unsigned *n1s,\
-		unsigned *n2s,\
+		hashmap_csr *tiles_indices,\
 		int *h_graph_mask,\
 		int *h_updating_graph_mask,\
 		int *h_graph_visited,\
+		int *h_graph_edges,\
 		int *h_cost,\
-		unsigned *offsets,\
+		unsigned *tile_offsets,\
 		unsigned num_of_nodes,\
 		int edge_list_size,\
 		unsigned side_length,\
