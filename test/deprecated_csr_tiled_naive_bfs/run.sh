@@ -2,13 +2,13 @@
 make
 # Determine the data file
 if [[ $# -eq 0 ]]; then
-	data_file="soc-pokec-relationships.txt"
+	data_file="out.twitter"
 else
 	data_file=$1
 fi
 version="naive-bfs"
 bin_addr="."
-data_addr="/home/zpeng/benchmarks/data/pokec/untiled_bak"
+data_addr="/home/zpeng/benchmarks/data/twt"
 result_file="result_${version}_${data_file}_$(date +%Y%m%d-%H%M%S).txt"
 
 touch $result_file

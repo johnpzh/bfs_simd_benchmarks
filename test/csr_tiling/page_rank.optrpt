@@ -6,113 +6,111 @@ Intel(R) C++ Intel(R) 64 Compiler for applications running on Intel(R) 64, Versi
 
 Compiler options: -Wall -Wextra -g -std=c++11 -qopenmp -O3 -qopt-report=5 -qopt-report-phase=vec -o page_rank
 
-Begin optimization report for: input(char *)
+Begin optimization report for: main(int, char **)
 
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at page_rank.cpp(174,2)
+LOOP BEGIN at page_rank.cpp(180,2) inlined into page_rank.cpp(601,2)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(199,2)
-   remark #15382: vectorization support: call to function manual_sort(std::vector<unsigned int, std::allocator<unsigned int>> &, std::vector<unsigned int, std::allocator<unsigned int>> &) cannot be vectorized   [ page_rank.cpp(200,3) ]
+LOOP BEGIN at page_rank.cpp(307,2) inlined into page_rank.cpp(601,2)
+   remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
+   remark #15328: vectorization support: non-unit strided load was emulated for the variable <tiles_indices.__b_St12_Vector_baseISt6vectorIjSaIjEESaIS2_EE._M_>, stride is 3   [ /usr/include/c++/4.8.5/bits/stl_vector.h(646,26) ]
+   remark #15328: vectorization support: non-unit strided load was emulated for the variable <tiles_indices.__b_St12_Vector_baseISt6vectorIjSaIjEESaIS2_EE._M_>, stride is 3   [ /usr/include/c++/4.8.5/bits/stl_vector.h(646,52) ]
+   remark #15305: vectorization support: vector length 2
+   remark #15399: vectorization support: unroll factor set to 4
+   remark #15309: vectorization support: normalized vectorization overhead 0.339
+   remark #15452: unmasked strided loads: 2 
+   remark #15475: --- begin vector cost summary ---
+   remark #15476: scalar cost: 7 
+   remark #15477: vector cost: 7.000 
+   remark #15478: estimated potential speedup: 0.990 
+   remark #15487: type converts: 1 
+   remark #15488: --- end vector cost summary ---
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(307,2) inlined into page_rank.cpp(601,2)
+<Remainder>
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(435,2) inlined into page_rank.cpp(601,2)
+   remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(437,3) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between offset (438:3) and offset (437:3)
+   remark #15346: vector dependence: assumed ANTI dependence between offset (437:3) and offset (438:3)
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(446,2) inlined into page_rank.cpp(601,2)
+   remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(448,3) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between offset (449:3) and offset (448:3)
+   remark #15346: vector dependence: assumed ANTI dependence between offset (448:3) and offset (449:3)
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(467,2) inlined into page_rank.cpp(601,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(468,3) ]
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(206,1) inlined into page_rank.cpp(601,2)
+   remark #15382: vectorization support: call to function manual_sort(std::vector<unsigned int, std::allocator<unsigned int>> &, std::vector<unsigned int, std::allocator<unsigned int>> &) cannot be vectorized   [ page_rank.cpp(209,4) ]
+   remark #15382: vectorization support: call to function omp_get_wtime() cannot be vectorized   [ page_rank.cpp(212,10) ]
+   remark #15382: vectorization support: call to function printf(const char *, ...) cannot be vectorized   [ page_rank.cpp(213,4) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(385,2)
-   remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(387,3) ]
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between offset (388:3) and offset (387:3)
-   remark #15346: vector dependence: assumed ANTI dependence between offset (387:3) and offset (388:3)
-LOOP END
-
-LOOP BEGIN at page_rank.cpp(406,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(407,3) ]
-LOOP END
-
-LOOP BEGIN at page_rank.cpp(213,2)
+LOOP BEGIN at page_rank.cpp(230,2) inlined into page_rank.cpp(601,2)
    remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-   LOOP BEGIN at page_rank.cpp(221,3)
+   LOOP BEGIN at page_rank.cpp(238,3) inlined into page_rank.cpp(601,2)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed ANTI dependence between ((tiles_n1v->_M_start+tile_id*24)->_M_start)[j] (224:4) and n1_counts[n1-n1_offset] (225:4)
-      remark #15346: vector dependence: assumed FLOW dependence between n1_counts[n1-n1_offset] (225:4) and ((tiles_n1v->_M_start+tile_id*24)->_M_start)[j] (224:4)
+      remark #15346: vector dependence: assumed ANTI dependence between ((tiles_n1v->_M_start+tile_id*24)->_M_start)[j] (241:4) and n1_counts[n1-n1_offset] (242:4)
+      remark #15346: vector dependence: assumed FLOW dependence between n1_counts[n1-n1_offset] (242:4) and ((tiles_n1v->_M_start+tile_id*24)->_M_start)[j] (241:4)
    LOOP END
 
-   LOOP BEGIN at page_rank.cpp(221,3)
+   LOOP BEGIN at page_rank.cpp(238,3) inlined into page_rank.cpp(601,2)
    <Remainder>
    LOOP END
 
-   LOOP BEGIN at page_rank.cpp(230,3)
+   LOOP BEGIN at page_rank.cpp(247,3) inlined into page_rank.cpp(601,2)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed FLOW dependence between start (232:4) and start (231:4)
-      remark #15346: vector dependence: assumed ANTI dependence between start (231:4) and start (232:4)
-      remark #15346: vector dependence: assumed ANTI dependence between start (231:4) and start (232:4)
+      remark #15346: vector dependence: assumed FLOW dependence between start (249:4) and start (248:4)
+      remark #15346: vector dependence: assumed ANTI dependence between start (248:4) and start (249:4)
+      remark #15346: vector dependence: assumed ANTI dependence between start (248:4) and start (249:4)
    LOOP END
 
-   LOOP BEGIN at page_rank.cpp(230,3)
+   LOOP BEGIN at page_rank.cpp(247,3) inlined into page_rank.cpp(601,2)
    <Remainder>
    LOOP END
 
-   LOOP BEGIN at page_rank.cpp(236,3)
+   LOOP BEGIN at page_rank.cpp(253,3) inlined into page_rank.cpp(601,2)
       remark #15523: loop was not vectorized: loop control variable k was found, but loop iteration count cannot be computed before executing the loop
    LOOP END
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(303,3)
-   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP BEGIN at page_rank.cpp(333,2) inlined into page_rank.cpp(601,2)
+   remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(337,3) ]
+   remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(340,4) ]
+   remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(342,3) ]
+   remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(345,4) ]
+   remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(347,3) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed ANTI dependence between tiles_indices->_M_start (334:49) and call:fprintf(FILE *, const char *, ...) (347:3)
+   remark #15346: vector dependence: assumed FLOW dependence between call:fprintf(FILE *, const char *, ...) (347:3) and tiles_indices->_M_start (334:49)
 
-   LOOP BEGIN at page_rank.cpp(310,4)
-      remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(311,5) ]
+   LOOP BEGIN at page_rank.cpp(339,3) inlined into page_rank.cpp(601,2)
+      remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(340,4) ]
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed FLOW dependence between call:fprintf(FILE *, const char *, ...) (311:5) and tiles_outdegrees->_M_start (311:5)
-      remark #15346: vector dependence: assumed ANTI dependence between tiles_outdegrees->_M_start (311:5) and call:fprintf(FILE *, const char *, ...) (311:5)
+      remark #15346: vector dependence: assumed FLOW dependence between call:fprintf(FILE *, const char *, ...) (340:4) and tiles_outdegrees->_M_start (340:4)
+      remark #15346: vector dependence: assumed ANTI dependence between tiles_outdegrees->_M_start (340:4) and call:fprintf(FILE *, const char *, ...) (340:4)
    LOOP END
 
-   LOOP BEGIN at page_rank.cpp(315,4)
-      remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(316,5) ]
+   LOOP BEGIN at page_rank.cpp(344,3) inlined into page_rank.cpp(601,2)
+      remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(345,4) ]
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed FLOW dependence between call:fprintf(FILE *, const char *, ...) (316:5) and tiles_n2v->_M_start (316:5)
-      remark #15346: vector dependence: assumed ANTI dependence between tiles_n2v->_M_start (316:5) and call:fprintf(FILE *, const char *, ...) (316:5)
-   LOOP END
-LOOP END
-
-LOOP BEGIN at page_rank.cpp(322,3)
-   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
-
-   LOOP BEGIN at page_rank.cpp(329,4)
-      remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(330,5) ]
-      remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed FLOW dependence between call:fprintf(FILE *, const char *, ...) (330:5) and tiles_outdegrees->_M_start (330:5)
-      remark #15346: vector dependence: assumed ANTI dependence between tiles_outdegrees->_M_start (330:5) and call:fprintf(FILE *, const char *, ...) (330:5)
-   LOOP END
-
-   LOOP BEGIN at page_rank.cpp(334,4)
-      remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(335,5) ]
-      remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed FLOW dependence between call:fprintf(FILE *, const char *, ...) (335:5) and tiles_n2v->_M_start (335:5)
-      remark #15346: vector dependence: assumed ANTI dependence between tiles_n2v->_M_start (335:5) and call:fprintf(FILE *, const char *, ...) (335:5)
-   LOOP END
-LOOP END
-===========================================================================
-
-Begin optimization report for: manual_sort(std::vector<unsigned int, std::allocator<unsigned int>> &, std::vector<unsigned int, std::allocator<unsigned int>> &)
-
-    Report from: Vector optimizations [vec]
-
-
-LOOP BEGIN at page_rank.cpp(125,2)
-   remark #15520: loop was not vectorized: loop with multiple exits cannot be vectorized unless it meets search loop idiom criteria   [ page_rank.cpp(138,3) ]
-
-   LOOP BEGIN at page_rank.cpp(127,3)
-      remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed ANTI dependence between i[j] (129:23) and n2v->_M_start[j+1] (134:8)
-      remark #15346: vector dependence: assumed FLOW dependence between n2v->_M_start[j+1] (134:8) and i[j] (129:23)
-   LOOP END
-
-   LOOP BEGIN at page_rank.cpp(127,3)
-   <Remainder>
+      remark #15346: vector dependence: assumed FLOW dependence between call:fprintf(FILE *, const char *, ...) (345:4) and tiles_n2v->_M_start (345:4)
+      remark #15346: vector dependence: assumed ANTI dependence between tiles_n2v->_M_start (345:4) and call:fprintf(FILE *, const char *, ...) (345:4)
    LOOP END
 LOOP END
 ===========================================================================
@@ -159,24 +157,153 @@ LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_construct.h(102,4) inlined into /u
 LOOP END
 ===========================================================================
 
+Begin optimization report for: input(char *)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at page_rank.cpp(180,2)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(307,2)
+   remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
+   remark #15328: vectorization support: non-unit strided load was emulated for the variable <tiles_indices.__b_St12_Vector_baseISt6vectorIjSaIjEESaIS2_EE._M_>, stride is 3   [ /usr/include/c++/4.8.5/bits/stl_vector.h(646,26) ]
+   remark #15328: vectorization support: non-unit strided load was emulated for the variable <tiles_indices.__b_St12_Vector_baseISt6vectorIjSaIjEESaIS2_EE._M_>, stride is 3   [ /usr/include/c++/4.8.5/bits/stl_vector.h(646,52) ]
+   remark #15305: vectorization support: vector length 2
+   remark #15399: vectorization support: unroll factor set to 4
+   remark #15309: vectorization support: normalized vectorization overhead 0.339
+   remark #15452: unmasked strided loads: 2 
+   remark #15475: --- begin vector cost summary ---
+   remark #15476: scalar cost: 7 
+   remark #15477: vector cost: 7.000 
+   remark #15478: estimated potential speedup: 0.990 
+   remark #15487: type converts: 1 
+   remark #15488: --- end vector cost summary ---
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(307,2)
+<Remainder>
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(435,2)
+   remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(437,3) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between offset (438:3) and offset (437:3)
+   remark #15346: vector dependence: assumed ANTI dependence between offset (437:3) and offset (438:3)
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(446,2)
+   remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(448,3) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between offset (449:3) and offset (448:3)
+   remark #15346: vector dependence: assumed ANTI dependence between offset (448:3) and offset (449:3)
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(467,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(468,3) ]
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(206,1)
+   remark #15382: vectorization support: call to function manual_sort(std::vector<unsigned int, std::allocator<unsigned int>> &, std::vector<unsigned int, std::allocator<unsigned int>> &) cannot be vectorized   [ page_rank.cpp(209,4) ]
+   remark #15382: vectorization support: call to function omp_get_wtime() cannot be vectorized   [ page_rank.cpp(212,10) ]
+   remark #15382: vectorization support: call to function printf(const char *, ...) cannot be vectorized   [ page_rank.cpp(213,4) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(230,2)
+   remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
+
+   LOOP BEGIN at page_rank.cpp(238,3)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed ANTI dependence between ((tiles_n1v->_M_start+tile_id*24)->_M_start)[j] (241:4) and n1_counts[n1-n1_offset] (242:4)
+      remark #15346: vector dependence: assumed FLOW dependence between n1_counts[n1-n1_offset] (242:4) and ((tiles_n1v->_M_start+tile_id*24)->_M_start)[j] (241:4)
+   LOOP END
+
+   LOOP BEGIN at page_rank.cpp(238,3)
+   <Remainder>
+   LOOP END
+
+   LOOP BEGIN at page_rank.cpp(247,3)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed FLOW dependence between start (249:4) and start (248:4)
+      remark #15346: vector dependence: assumed ANTI dependence between start (248:4) and start (249:4)
+      remark #15346: vector dependence: assumed ANTI dependence between start (248:4) and start (249:4)
+   LOOP END
+
+   LOOP BEGIN at page_rank.cpp(247,3)
+   <Remainder>
+   LOOP END
+
+   LOOP BEGIN at page_rank.cpp(253,3)
+      remark #15523: loop was not vectorized: loop control variable k was found, but loop iteration count cannot be computed before executing the loop
+   LOOP END
+LOOP END
+
+LOOP BEGIN at page_rank.cpp(333,2)
+   remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(337,3) ]
+   remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(340,4) ]
+   remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(342,3) ]
+   remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(345,4) ]
+   remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(347,3) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed ANTI dependence between tiles_indices->_M_start (334:49) and call:fprintf(FILE *, const char *, ...) (347:3)
+   remark #15346: vector dependence: assumed FLOW dependence between call:fprintf(FILE *, const char *, ...) (347:3) and tiles_indices->_M_start (334:49)
+
+   LOOP BEGIN at page_rank.cpp(339,3)
+      remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(340,4) ]
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed FLOW dependence between call:fprintf(FILE *, const char *, ...) (340:4) and tiles_outdegrees->_M_start (340:4)
+      remark #15346: vector dependence: assumed ANTI dependence between tiles_outdegrees->_M_start (340:4) and call:fprintf(FILE *, const char *, ...) (340:4)
+   LOOP END
+
+   LOOP BEGIN at page_rank.cpp(344,3)
+      remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(345,4) ]
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed FLOW dependence between call:fprintf(FILE *, const char *, ...) (345:4) and tiles_n2v->_M_start (345:4)
+      remark #15346: vector dependence: assumed ANTI dependence between tiles_n2v->_M_start (345:4) and call:fprintf(FILE *, const char *, ...) (345:4)
+   LOOP END
+LOOP END
+===========================================================================
+
+Begin optimization report for: manual_sort(std::vector<unsigned int, std::allocator<unsigned int>> &, std::vector<unsigned int, std::allocator<unsigned int>> &)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at page_rank.cpp(128,2)
+   remark #15520: loop was not vectorized: loop with multiple exits cannot be vectorized unless it meets search loop idiom criteria   [ page_rank.cpp(141,3) ]
+
+   LOOP BEGIN at page_rank.cpp(130,3)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed ANTI dependence between i[j] (132:23) and n2v->_M_start[j+1] (137:8)
+      remark #15346: vector dependence: assumed FLOW dependence between n2v->_M_start[j+1] (137:8) and i[j] (132:23)
+   LOOP END
+
+   LOOP BEGIN at page_rank.cpp(130,3)
+   <Remainder>
+   LOOP END
+LOOP END
+===========================================================================
+
 Begin optimization report for: input_untiled(char *)
 
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at page_rank.cpp(448,2)
+LOOP BEGIN at page_rank.cpp(509,2)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(516,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(517,3) ]
+LOOP BEGIN at page_rank.cpp(577,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(578,3) ]
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(493,3)
+LOOP BEGIN at page_rank.cpp(554,3)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(498,3)
+LOOP BEGIN at page_rank.cpp(559,3)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 ===========================================================================

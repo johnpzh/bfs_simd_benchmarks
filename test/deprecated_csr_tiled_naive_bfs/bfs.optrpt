@@ -1,0 +1,265 @@
+Intel(R) Advisor can now assist with vectorization and show optimization
+  report messages with your source code.
+See "https://software.intel.com/en-us/intel-advisor-xe" for details.
+
+Intel(R) C++ Intel(R) 64 Compiler for applications running on Intel(R) 64, Version 17.0.1.132 Build 20161005
+
+Compiler options: -Wall -Wextra -g -std=c++11 -qopenmp -O3 -qopt-report=5 -qopt-report-phase=vec -o bfs
+
+Begin optimization report for: main(int, char **)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at bfs.cpp(107,2) inlined into bfs.cpp(63,2)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at bfs.cpp(126,56) inlined into bfs.cpp(63,2)
+   remark #15523: loop was not vectorized: loop control variable U44 was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at bfs.cpp(265,2) inlined into bfs.cpp(63,2)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at bfs.cpp(277,3) inlined into bfs.cpp(63,2)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at bfs.cpp(277,3) inlined into bfs.cpp(63,2)
+      <Peeled loop for vectorization>
+      LOOP END
+
+      LOOP BEGIN at bfs.cpp(277,3) inlined into bfs.cpp(63,2)
+         remark #15388: vectorization support: reference h_cost[i] has aligned access   [ bfs.cpp(278,4) ]
+         remark #15305: vectorization support: vector length 4
+         remark #15309: vectorization support: normalized vectorization overhead 3.333
+         remark #15300: LOOP WAS VECTORIZED
+         remark #15442: entire loop may be executed in remainder
+         remark #15449: unmasked aligned unit stride stores: 1 
+         remark #15475: --- begin vector cost summary ---
+         remark #15476: scalar cost: 3 
+         remark #15477: vector cost: 0.750 
+         remark #15478: estimated potential speedup: 1.940 
+         remark #15488: --- end vector cost summary ---
+      LOOP END
+
+      LOOP BEGIN at bfs.cpp(277,3) inlined into bfs.cpp(63,2)
+      <Remainder loop for vectorization>
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at bfs.cpp(354,2) inlined into bfs.cpp(63,2)
+   remark #15382: vectorization support: call to function operator delete(void *) cannot be vectorized   [ /usr/include/c++/4.8.5/ext/new_allocator.h(110,9) ]
+   remark #15382: vectorization support: call to function __builtin_memset(void *, int, unsigned long) cannot be vectorized   [ /usr/include/c++/4.8.5/bits/hashtable.h(1642,7) ]
+   remark #15382: vectorization support: call to function operator delete(void *) cannot be vectorized   [ /usr/include/c++/4.8.5/ext/new_allocator.h(110,9) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed ANTI dependence between U42_V->_M_h (97:11) and __n->_M_nxt (1644:7)
+   remark #15346: vector dependence: assumed FLOW dependence between __n->_M_nxt (1644:7) and U42_V->_M_h (97:11)
+
+   LOOP BEGIN at /usr/include/c++/4.8.5/bits/hashtable.h(759,7) inlined into bfs.cpp(63,2)
+      remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+   LOOP END
+LOOP END
+
+LOOP BEGIN at bfs.cpp(152,3) inlined into bfs.cpp(63,2)
+   remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
+
+   LOOP BEGIN at bfs.cpp(163,4) inlined into bfs.cpp(63,2)
+      remark #15523: loop was not vectorized: loop control variable i_indices was found, but loop iteration count cannot be computed before executing the loop
+   LOOP END
+
+   LOOP BEGIN at bfs.cpp(180,4) inlined into bfs.cpp(63,2)
+      remark #15523: loop was not vectorized: loop control variable i_edges was found, but loop iteration count cannot be computed before executing the loop
+   LOOP END
+LOOP END
+
+LOOP BEGIN at bfs.cpp(189,3) inlined into bfs.cpp(63,2)
+   remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
+
+   LOOP BEGIN at bfs.cpp(200,4) inlined into bfs.cpp(63,2)
+      remark #15523: loop was not vectorized: loop control variable i_indices was found, but loop iteration count cannot be computed before executing the loop
+   LOOP END
+
+   LOOP BEGIN at bfs.cpp(217,4) inlined into bfs.cpp(63,2)
+      remark #15523: loop was not vectorized: loop control variable i_edges was found, but loop iteration count cannot be computed before executing the loop
+   LOOP END
+LOOP END
+
+LOOP BEGIN at bfs.cpp(126,56) inlined into bfs.cpp(63,2)
+   remark #15382: vectorization support: call to function std::unordered_map<unsigned int, unsigned int [2], std::hash<unsigned int>, std::equal_to<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int [2]>>>::~unordered_map(std::unordered_map<unsigned int, unsigned int [2], std::hash<unsigned int>, std::equal_to<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int [2]>>> *) cannot be vectorized
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+LOOP END
+===========================================================================
+
+Begin optimization report for: BFSGraph(int, char **)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at bfs.cpp(107,2)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at bfs.cpp(126,56)
+   remark #15523: loop was not vectorized: loop control variable U44 was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at bfs.cpp(265,2)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at bfs.cpp(277,3)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at bfs.cpp(277,3)
+      <Peeled loop for vectorization>
+      LOOP END
+
+      LOOP BEGIN at bfs.cpp(277,3)
+         remark #15388: vectorization support: reference h_cost[i] has aligned access   [ bfs.cpp(278,4) ]
+         remark #15305: vectorization support: vector length 4
+         remark #15309: vectorization support: normalized vectorization overhead 3.333
+         remark #15300: LOOP WAS VECTORIZED
+         remark #15442: entire loop may be executed in remainder
+         remark #15449: unmasked aligned unit stride stores: 1 
+         remark #15475: --- begin vector cost summary ---
+         remark #15476: scalar cost: 3 
+         remark #15477: vector cost: 0.750 
+         remark #15478: estimated potential speedup: 1.940 
+         remark #15488: --- end vector cost summary ---
+      LOOP END
+
+      LOOP BEGIN at bfs.cpp(277,3)
+      <Remainder loop for vectorization>
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at bfs.cpp(354,2)
+   remark #15382: vectorization support: call to function operator delete(void *) cannot be vectorized   [ /usr/include/c++/4.8.5/ext/new_allocator.h(110,9) ]
+   remark #15382: vectorization support: call to function __builtin_memset(void *, int, unsigned long) cannot be vectorized   [ /usr/include/c++/4.8.5/bits/hashtable.h(1642,7) ]
+   remark #15382: vectorization support: call to function operator delete(void *) cannot be vectorized   [ /usr/include/c++/4.8.5/ext/new_allocator.h(110,9) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed ANTI dependence between U42_V->_M_h (97:11) and __n->_M_nxt (1644:7)
+   remark #15346: vector dependence: assumed FLOW dependence between __n->_M_nxt (1644:7) and U42_V->_M_h (97:11)
+
+   LOOP BEGIN at /usr/include/c++/4.8.5/bits/hashtable.h(759,7) inlined into bfs.cpp(354,2)
+      remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+   LOOP END
+LOOP END
+
+LOOP BEGIN at bfs.cpp(152,3)
+   remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
+
+   LOOP BEGIN at bfs.cpp(163,4)
+      remark #15523: loop was not vectorized: loop control variable i_indices was found, but loop iteration count cannot be computed before executing the loop
+   LOOP END
+
+   LOOP BEGIN at bfs.cpp(180,4)
+      remark #15523: loop was not vectorized: loop control variable i_edges was found, but loop iteration count cannot be computed before executing the loop
+   LOOP END
+LOOP END
+
+LOOP BEGIN at bfs.cpp(189,3)
+   remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
+
+   LOOP BEGIN at bfs.cpp(200,4)
+      remark #15523: loop was not vectorized: loop control variable i_indices was found, but loop iteration count cannot be computed before executing the loop
+   LOOP END
+
+   LOOP BEGIN at bfs.cpp(217,4)
+      remark #15523: loop was not vectorized: loop control variable i_edges was found, but loop iteration count cannot be computed before executing the loop
+   LOOP END
+LOOP END
+
+LOOP BEGIN at bfs.cpp(126,56)
+   remark #15382: vectorization support: call to function std::unordered_map<unsigned int, unsigned int [2], std::hash<unsigned int>, std::equal_to<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int [2]>>>::~unordered_map(std::unordered_map<unsigned int, unsigned int [2], std::hash<unsigned int>, std::equal_to<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int [2]>>> *) cannot be vectorized
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+LOOP END
+===========================================================================
+
+Begin optimization report for: BFS_kernel(hashmap_csr *, int *, int *, int *, int *, int *, unsigned int *, unsigned int, int, int *, int *, int *, unsigned int, unsigned int)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at bfs.cpp(392,22)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+
+LOOP BEGIN at bfs.cpp(418,3)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between is_active_side (422:4) and start->second[1] (439:41)
+   remark #15346: vector dependence: assumed ANTI dependence between start->second[1] (439:41) and is_active_side (422:4)
+
+   LOOP BEGIN at bfs.cpp(423,4)
+      remark #15520: loop was not vectorized: loop with multiple exits cannot be vectorized unless it meets search loop idiom criteria   [ bfs.cpp(428,5) ]
+
+      LOOP BEGIN at bfs.cpp(432,5)
+         remark #15344: loop was not vectorized: vector dependence prevents vectorization
+         remark #15346: vector dependence: assumed ANTI dependence between __p->_M_nxt->_M_v->first (1167:59) and is_updating_active_side (446:8)
+         remark #15346: vector dependence: assumed FLOW dependence between is_updating_active_side (446:8) and __p->_M_nxt->_M_v->first (1167:59)
+
+         LOOP BEGIN at /usr/include/c++/4.8.5/bits/hashtable.h(1163,15) inlined into bfs.cpp(434,56)
+            remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+         LOOP END
+
+         LOOP BEGIN at bfs.cpp(440,6)
+            remark #15344: loop was not vectorized: vector dependence prevents vectorization
+            remark #15346: vector dependence: assumed FLOW dependence between h_cost (444:8) and h_cost (444:8)
+            remark #15346: vector dependence: assumed ANTI dependence between h_cost (444:8) and h_cost (444:8)
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at bfs.cpp(462,3)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between is_updating_active_side[side_id] (466:4) and TILE_WIDTH (469:29)
+   remark #15346: vector dependence: assumed ANTI dependence between TILE_WIDTH (469:29) and is_updating_active_side[side_id] (466:4)
+
+   LOOP BEGIN at bfs.cpp(469,4)
+      remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+   LOOP END
+LOOP END
+===========================================================================
+
+Begin optimization report for: std::unordered_map<unsigned int, unsigned int [2], std::hash<unsigned int>, std::equal_to<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int [2]>>>::~unordered_map(std::unordered_map<unsigned int, unsigned int [2], std::hash<unsigned int>, std::equal_to<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int [2]>>> *)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/hashtable.h(759,7) inlined into /usr/include/c++/4.8.5/bits/unordered_map.h(98,11)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+===========================================================================
+
+Begin optimization report for: std::_Hashtable<unsigned int, std::pair<const unsigned int, unsigned int [2]>, std::allocator<std::pair<const unsigned int, unsigned int [2]>>, std::__detail::_Select1st, std::equal_to<unsigned int>, std::hash<unsigned int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__umap_traits<false>>::_M_insert_unique_node(std::_Hashtable<unsigned int, std::pair<const unsigned int, unsigned int [2]>, std::allocator<std::pair<const unsigned int, unsigned int [2]>>, std::__detail::_Select1st, std::equal_to<unsigned int>, std::hash<unsigned int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__umap_traits<false>> *, std::_Hashtable<unsigned int, std::pair<const unsigned int, unsigned int [2]>, std::allocator<std::pair<const unsigned int, unsigned int [2]>>, std::__detail::_Select1st, std::equal_to<unsigned int>, std::hash<unsigned int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__umap_traits<false>>::size_type, std::_Hashtable<unsigned int, std::pair<const unsigned int, unsigned int [2]>, std::allocator<std::pair<const unsigned int, unsigned int [2]>>, std::__detail::_Select1st, std::equal_to<unsigned int>, std::hash<unsigned int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__umap_traits<false>>::__hash_code, std::_Hashtable<unsigned int, std::pair<const unsigned int, unsigned int [2]>, std::allocator<std::pair<const unsigned int, unsigned int [2]>>, std::__detail::_Select1st, std::equal_to<unsigned int>, std::hash<unsigned int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__umap_traits<false>>::__node_type *)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/hashtable.h(1705,7) inlined into /usr/include/c++/4.8.5/bits/hashtable.h(1336,8)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+===========================================================================
+
+Begin optimization report for: std::_Hashtable<unsigned int, std::pair<const unsigned int, unsigned int [2]>, std::allocator<std::pair<const unsigned int, unsigned int [2]>>, std::__detail::_Select1st, std::equal_to<unsigned int>, std::hash<unsigned int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__umap_traits<false>>::_M_find_before_node(const std::_Hashtable<unsigned int, std::pair<const unsigned int, unsigned int [2]>, std::allocator<std::pair<const unsigned int, unsigned int [2]>>, std::__detail::_Select1st, std::equal_to<unsigned int>, std::hash<unsigned int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__umap_traits<false>> *, std::_Hashtable<unsigned int, std::pair<const unsigned int, unsigned int [2]>, std::allocator<std::pair<const unsigned int, unsigned int [2]>>, std::__detail::_Select1st, std::equal_to<unsigned int>, std::hash<unsigned int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__umap_traits<false>>::size_type, const std::_Hashtable<unsigned int, std::pair<const unsigned int, unsigned int [2]>, std::allocator<std::pair<const unsigned int, unsigned int [2]>>, std::__detail::_Select1st, std::equal_to<unsigned int>, std::hash<unsigned int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__umap_traits<false>>::key_type &, std::_Hashtable<unsigned int, std::pair<const unsigned int, unsigned int [2]>, std::allocator<std::pair<const unsigned int, unsigned int [2]>>, std::__detail::_Select1st, std::equal_to<unsigned int>, std::hash<unsigned int>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__umap_traits<false>>::__hash_code) const
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/hashtable.h(1163,15)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+===========================================================================
+
+Begin optimization report for: dump_map(hashmap_csr *, unsigned int)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/hashtable.h(1163,15) inlined into bfs.cpp(486,19)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+===========================================================================
