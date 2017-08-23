@@ -221,12 +221,19 @@ void BFSGraph( int argc, char** argv)
 	for (unsigned i = 0; i < edge_list_size; ++i) {
 		h_graph_edges[i] = n2s[i];
 	}
+	free(n1s);
+	free(n2s);
 
 	now = omp_get_wtime();
 	time_out = fopen(time_file, "w");
 	fprintf(time_out, "input end: %lf\n", now - start);
+#ifdef ONEDEBUG
+	unsigned run_count = 1;
+#else
+	unsigned run_count = 9;
+#endif
 	// BFS
-	for (unsigned i = 0; i < 9; ++i) {
+	for (unsigned i = 0; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
 		sleep(10);
@@ -270,8 +277,17 @@ void BFSGraph( int argc, char** argv)
 	string file_prefix = "path/path";
 	string file_name = file_prefix + to_string(tid) + ".txt";
 	FILE *fpo = fopen(file_name.c_str(), "w");
-	for (unsigned i = 0; i < num_lines; ++i) {
-		unsigned index = i + offset;
+	if (!fpo) {
+		fprintf(stderr, "Error: connot open file %s.\n", file_name.c_str());
+		exit(1);
+	}
+	unsigned bound_i;
+	if (NUM_THREADS - 1 != tid) {
+		bound_i = num_lines + offset;
+	} else {
+		bound_i = num_of_nodes;
+	}
+	for (unsigned index = offset; index < bound_i; ++index) {
 		fprintf(fpo, "%d) cost:%d\n", index, h_cost[index]);
 	}
 	fclose(fpo);
@@ -281,8 +297,6 @@ void BFSGraph( int argc, char** argv)
 
 	// cleanup memory
 	free(nneibor);
-	free(n1s);
-	free(n2s);
 	free( h_graph_nodes);
 	free( h_graph_edges);
 	free( h_graph_mask);

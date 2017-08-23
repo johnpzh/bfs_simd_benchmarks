@@ -27,15 +27,15 @@ LOOP BEGIN at bfs.cpp(174,2) inlined into bfs.cpp(45,2)
 <Remainder>
 LOOP END
 
-LOOP BEGIN at bfs.cpp(240,3) inlined into bfs.cpp(45,2)
+LOOP BEGIN at bfs.cpp(245,3) inlined into bfs.cpp(45,2)
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at bfs.cpp(240,3) inlined into bfs.cpp(45,2)
+   LOOP BEGIN at bfs.cpp(245,3) inlined into bfs.cpp(45,2)
    <Peeled loop for vectorization>
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(240,3) inlined into bfs.cpp(45,2)
-      remark #15388: vectorization support: reference h_cost[i] has aligned access   [ bfs.cpp(241,4) ]
+   LOOP BEGIN at bfs.cpp(245,3) inlined into bfs.cpp(45,2)
+      remark #15388: vectorization support: reference h_cost[i] has aligned access   [ bfs.cpp(246,4) ]
       remark #15305: vectorization support: vector length 4
       remark #15309: vectorization support: normalized vectorization overhead 3.333
       remark #15300: LOOP WAS VECTORIZED
@@ -48,12 +48,12 @@ LOOP BEGIN at bfs.cpp(240,3) inlined into bfs.cpp(45,2)
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(240,3) inlined into bfs.cpp(45,2)
+   LOOP BEGIN at bfs.cpp(245,3) inlined into bfs.cpp(45,2)
    <Remainder loop for vectorization>
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(307,22) inlined into bfs.cpp(45,2)
+LOOP BEGIN at bfs.cpp(321,22) inlined into bfs.cpp(45,2)
    remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
 LOOP END
 
@@ -93,27 +93,27 @@ LOOP BEGIN at bfs.cpp(220,1) inlined into bfs.cpp(45,2)
 <Remainder loop for vectorization>
 LOOP END
 
-LOOP BEGIN at bfs.cpp(316,3) inlined into bfs.cpp(45,2)
+LOOP BEGIN at bfs.cpp(330,3) inlined into bfs.cpp(45,2)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between h_cost (329:7) and h_cost (329:7)
-   remark #15346: vector dependence: assumed OUTPUT dependence between h_cost (329:7) and h_cost (329:7)
+   remark #15346: vector dependence: assumed OUTPUT dependence between h_cost (343:7) and h_cost (343:7)
+   remark #15346: vector dependence: assumed OUTPUT dependence between h_cost (343:7) and h_cost (343:7)
 
-   LOOP BEGIN at bfs.cpp(322,5) inlined into bfs.cpp(45,2)
+   LOOP BEGIN at bfs.cpp(336,5) inlined into bfs.cpp(45,2)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed FLOW dependence between h_cost (329:7) and h_cost (329:7)
-      remark #15346: vector dependence: assumed ANTI dependence between h_cost (329:7) and h_cost (329:7)
+      remark #15346: vector dependence: assumed FLOW dependence between h_cost (343:7) and h_cost (343:7)
+      remark #15346: vector dependence: assumed ANTI dependence between h_cost (343:7) and h_cost (343:7)
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(322,5) inlined into bfs.cpp(45,2)
+   LOOP BEGIN at bfs.cpp(336,5) inlined into bfs.cpp(45,2)
    <Remainder>
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(335,1) inlined into bfs.cpp(45,2)
-   remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(339,5) ]
-   remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(340,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(342,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(342,5) ]
+LOOP BEGIN at bfs.cpp(349,1) inlined into bfs.cpp(45,2)
+   remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(353,5) ]
+   remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(354,5) ]
+   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(356,5) ]
+   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(356,5) ]
    remark #15381: vectorization support: unaligned access used inside loop body
    remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
    remark #15305: vectorization support: vector length 4
@@ -128,7 +128,7 @@ LOOP BEGIN at bfs.cpp(335,1) inlined into bfs.cpp(45,2)
    remark #15488: --- end vector cost summary ---
 LOOP END
 
-LOOP BEGIN at bfs.cpp(335,1) inlined into bfs.cpp(45,2)
+LOOP BEGIN at bfs.cpp(349,1) inlined into bfs.cpp(45,2)
 <Remainder>
 LOOP END
 
@@ -136,8 +136,8 @@ LOOP END
 Non-optimizable loops:
 
 
-LOOP BEGIN at bfs.cpp(229,2) inlined into bfs.cpp(45,2)
-   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ bfs.cpp(307,22) ]
+LOOP BEGIN at bfs.cpp(234,2) inlined into bfs.cpp(45,2)
+   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ bfs.cpp(321,22) ]
 LOOP END
 ===========================================================================
 
@@ -162,15 +162,15 @@ LOOP BEGIN at bfs.cpp(174,2)
 <Remainder>
 LOOP END
 
-LOOP BEGIN at bfs.cpp(240,3)
+LOOP BEGIN at bfs.cpp(245,3)
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at bfs.cpp(240,3)
+   LOOP BEGIN at bfs.cpp(245,3)
    <Peeled loop for vectorization>
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(240,3)
-      remark #15388: vectorization support: reference h_cost[i] has aligned access   [ bfs.cpp(241,4) ]
+   LOOP BEGIN at bfs.cpp(245,3)
+      remark #15388: vectorization support: reference h_cost[i] has aligned access   [ bfs.cpp(246,4) ]
       remark #15305: vectorization support: vector length 4
       remark #15309: vectorization support: normalized vectorization overhead 3.333
       remark #15300: LOOP WAS VECTORIZED
@@ -183,12 +183,12 @@ LOOP BEGIN at bfs.cpp(240,3)
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(240,3)
+   LOOP BEGIN at bfs.cpp(245,3)
    <Remainder loop for vectorization>
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(307,22) inlined into bfs.cpp(245,3)
+LOOP BEGIN at bfs.cpp(321,22) inlined into bfs.cpp(250,3)
    remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
 LOOP END
 
@@ -228,27 +228,27 @@ LOOP BEGIN at bfs.cpp(220,1)
 <Remainder loop for vectorization>
 LOOP END
 
-LOOP BEGIN at bfs.cpp(316,3) inlined into bfs.cpp(245,3)
+LOOP BEGIN at bfs.cpp(330,3) inlined into bfs.cpp(250,3)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between h_cost (329:7) and h_cost (329:7)
-   remark #15346: vector dependence: assumed OUTPUT dependence between h_cost (329:7) and h_cost (329:7)
+   remark #15346: vector dependence: assumed OUTPUT dependence between h_cost (343:7) and h_cost (343:7)
+   remark #15346: vector dependence: assumed OUTPUT dependence between h_cost (343:7) and h_cost (343:7)
 
-   LOOP BEGIN at bfs.cpp(322,5) inlined into bfs.cpp(245,3)
+   LOOP BEGIN at bfs.cpp(336,5) inlined into bfs.cpp(250,3)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed FLOW dependence between h_cost (329:7) and h_cost (329:7)
-      remark #15346: vector dependence: assumed ANTI dependence between h_cost (329:7) and h_cost (329:7)
+      remark #15346: vector dependence: assumed FLOW dependence between h_cost (343:7) and h_cost (343:7)
+      remark #15346: vector dependence: assumed ANTI dependence between h_cost (343:7) and h_cost (343:7)
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(322,5) inlined into bfs.cpp(245,3)
+   LOOP BEGIN at bfs.cpp(336,5) inlined into bfs.cpp(250,3)
    <Remainder>
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(335,1) inlined into bfs.cpp(245,3)
-   remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(339,5) ]
-   remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(340,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(342,5) ]
-   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(342,5) ]
+LOOP BEGIN at bfs.cpp(349,1) inlined into bfs.cpp(250,3)
+   remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ bfs.cpp(353,5) ]
+   remark #15389: vectorization support: reference h_graph_visited has unaligned access   [ bfs.cpp(354,5) ]
+   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(356,5) ]
+   remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ bfs.cpp(356,5) ]
    remark #15381: vectorization support: unaligned access used inside loop body
    remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
    remark #15305: vectorization support: vector length 4
@@ -263,7 +263,7 @@ LOOP BEGIN at bfs.cpp(335,1) inlined into bfs.cpp(245,3)
    remark #15488: --- end vector cost summary ---
 LOOP END
 
-LOOP BEGIN at bfs.cpp(335,1) inlined into bfs.cpp(245,3)
+LOOP BEGIN at bfs.cpp(349,1) inlined into bfs.cpp(250,3)
 <Remainder>
 LOOP END
 
@@ -271,8 +271,8 @@ LOOP END
 Non-optimizable loops:
 
 
-LOOP BEGIN at bfs.cpp(229,2)
-   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ bfs.cpp(307,22) ]
+LOOP BEGIN at bfs.cpp(234,2)
+   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ bfs.cpp(321,22) ]
 LOOP END
 ===========================================================================
 
@@ -281,33 +281,33 @@ Begin optimization report for: BFS_kernel(Node *, int *, int *, int *, int *, in
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at bfs.cpp(308,2)
+LOOP BEGIN at bfs.cpp(322,2)
    remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
 LOOP END
 
-LOOP BEGIN at bfs.cpp(316,3)
+LOOP BEGIN at bfs.cpp(330,3)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between h_graph_mask[tid] (319:5) and h_updating_graph_mask[id] (330:7)
-   remark #15346: vector dependence: assumed OUTPUT dependence between h_updating_graph_mask[id] (330:7) and h_graph_mask[tid] (319:5)
+   remark #15346: vector dependence: assumed OUTPUT dependence between h_graph_mask[tid] (333:5) and h_updating_graph_mask[id] (344:7)
+   remark #15346: vector dependence: assumed OUTPUT dependence between h_updating_graph_mask[id] (344:7) and h_graph_mask[tid] (333:5)
 
-   LOOP BEGIN at bfs.cpp(322,5)
+   LOOP BEGIN at bfs.cpp(336,5)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed ANTI dependence between h_graph_edges[i] (326:15) and h_updating_graph_mask[id] (330:7)
-      remark #15346: vector dependence: assumed FLOW dependence between h_updating_graph_mask[id] (330:7) and h_graph_edges[i] (326:15)
+      remark #15346: vector dependence: assumed ANTI dependence between h_graph_edges[i] (340:15) and h_updating_graph_mask[id] (344:7)
+      remark #15346: vector dependence: assumed FLOW dependence between h_updating_graph_mask[id] (344:7) and h_graph_edges[i] (340:15)
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(322,5)
+   LOOP BEGIN at bfs.cpp(336,5)
    <Remainder>
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(335,1)
+LOOP BEGIN at bfs.cpp(349,1)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between h_graph_mask[tid] (339:5) and h_updating_graph_mask[tid] (342:5)
-   remark #15346: vector dependence: assumed OUTPUT dependence between h_updating_graph_mask[tid] (342:5) and h_graph_mask[tid] (339:5)
+   remark #15346: vector dependence: assumed OUTPUT dependence between h_graph_mask[tid] (353:5) and h_updating_graph_mask[tid] (356:5)
+   remark #15346: vector dependence: assumed OUTPUT dependence between h_updating_graph_mask[tid] (356:5) and h_graph_mask[tid] (353:5)
 LOOP END
 
-LOOP BEGIN at bfs.cpp(335,1)
+LOOP BEGIN at bfs.cpp(349,1)
 <Remainder>
 LOOP END
 ===========================================================================

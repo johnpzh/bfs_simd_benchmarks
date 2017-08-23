@@ -5,7 +5,7 @@ longly_do () {
 	./page_rank ~/benchmarks/data/twt/out.twitter 4096 > output.txt
 }
 while true; do
-	sw=$(users)
+	sw=$(top -n 1 -b -u rtian)
 	if ! [[ "$sw" =~ .*rtian.* ]]
 	then
 		echo "Working starts."

@@ -125,23 +125,45 @@ double now;
 void manual_sort(vector<unsigned> &n1v, vector<unsigned> &n2v)
 {
 	unsigned length = n1v.size();
-	for (unsigned i = length; i > 0; --i) {
-		int swapped = 0;
-		for (unsigned j = 0; j < i - 1; ++j) {
-			if (n1v[j] > n1v[j+1]) {
-				unsigned tmp = n1v[j];
-				n1v[j] = n1v[j+1];
-				n1v[j+1] = tmp;
-				tmp = n2v[j];
-				n2v[j] = n2v[j+1];
-				n2v[j+1] = tmp;
-				swapped = 1;
-			}
+	//for (unsigned i = length; i > 0; --i) {
+	//	int swapped = 0;
+	//	for (unsigned j = 0; j < i - 1; ++j) {
+	//		if (n1v[j] > n1v[j+1]) {
+	//			unsigned tmp = n1v[j];
+	//			n1v[j] = n1v[j+1];
+	//			n1v[j+1] = tmp;
+	//			tmp = n2v[j];
+	//			n2v[j] = n2v[j+1];
+	//			n2v[j+1] = tmp;
+	//			swapped = 1;
+	//		}
+	//	}
+	//	if (!swapped) {
+	//		break;
+	//	}
+	//}
+	vector< vector<unsigned> > n1sv(nnodes);
+	int *is_n1_active = (int *) malloc(sizeof(int) * nnodes);
+	memset(is_n1_active, 0, sizeof(int) * nnodes);
+	for (unsigned i = 0; i < length; ++i) {
+		unsigned n1 = n1v[i];
+		n1--;
+		is_n1_active[n1] = 1;
+		n1sv[n1].push_back(n2v[i]);
+	}
+	unsigned edge_id = 0;
+	for (unsigned i = 0; i < nnodes; ++i) {
+		if (!is_n1_active[i]) {
+			continue;
 		}
-		if (!swapped) {
-			break;
+		for (unsigned j = 0; j < n1sv[i].size(); ++j) {
+			n1v[edge_id] = i + 1;
+			n2v[edge_id] = n1sv[i][j];
+			edge_id++;
 		}
 	}
+	edge_id++;
+	free(is_n1_active);
 }
 
 void input(char filename[]) {
@@ -203,7 +225,7 @@ void input(char filename[]) {
 	}
 	printf("There are %u unsorted tiles in total.\n", unsorted_count);
 	unsigned NUM_THREADS = 64;
-#pragma omp parallel for num_threads(NUM_THREADS)
+#pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
 	for (unsigned i = 0; i < num_tiles; ++i) {
 		if (is_unsorted_tiles[i]) {
 			manual_sort(tiles_n1v[i], tiles_n2v[i]);
@@ -237,7 +259,6 @@ void input(char filename[]) {
 		memset(n1_counts, 0, sizeof(unsigned) * TILE_WIDTH);
 		for (unsigned j = 0; j < size_tile; ++j) {
 			unsigned n1 = tiles_n1v[tile_id][j];
-			//unsigned n2 = tiles_n2v[tile_id][j];
 			n1--;
 			n1_counts[n1 - n1_offset]++;
 		}
@@ -268,36 +289,6 @@ void input(char filename[]) {
 			}
 		}
 		
-		////////////////////////////////////////////////
-		// Need modification
-		////////////////////////////////////////////////
-		//// Write Startings to file
-		//string fname = prefix + "-" + to_string(tile_id);
-		//FILE *fout = fopen(fname.c_str(), "w");
-		//if (0 == tile_id) {
-		//	fprintf(fout, "%u %u\n", nnodes, nedges);
-		//}
-		//fprintf(fout, "%u %u\n\n", n1_offset, size_tile); // Head index offset, size of tile
-		//for (unsigned k = 0; k < TILE_WIDTH; ++k) {
-		//	if (k != TILE_WIDTH - 1) {
-		//		fprintf(fout, "%u %u\n", startings[k], startings[k+1] - startings[k]);
-		//	} else {
-		//		fprintf(fout, "%u %u\n", startings[k], size_tile - startings[k]);
-		//	}
-		//}
-		//fprintf(fout, "\n");
-
-		//// Write End nodes to file
-		//for (unsigned k = 0; k < size_tile; ++k) {
-//#ifdef ONEDEBUG
-		//	fprintf(fout, "%u %u\n", tiles_n1v[tile_id][k], tiles_n2v[tile_id][k]);//test
-//#else
-		//	fprintf(fout, "%u\n", tiles_n2v[tile_id][k]);
-//#endif
-		//}
-		////////////////////////////////////////////////
-
-		//fclose(fout);
 		free(n1_counts);
 		free(startings);
 	}
@@ -348,86 +339,9 @@ void input(char filename[]) {
 		files_edges_counts[tid] += num_edges;
 	}
 
-	//if (NUM_THREADS - 1 != tid) {
-	//	for (unsigned i = 0; i < bound_tiles; ++i) {
-	//		unsigned tile_id = i + offset_file;
-	//		unsigned num_indices = tiles_indices[tile_id].size();
-	//		unsigned num_edges = tiles_n1v[tile_id].size();
-	//		// Write num of indices and edges of this tile
-	//		fprintf(fout, "%u %u\n\n", num_indices, num_edges);
-	//		// Write indices
-	//		for (unsigned j = 0; j < num_indices; ++j) {
-	//			fprintf(fout, "%u %u %u\n", tiles_indices[tile_id][j], tiles_startings[tile_id][j], tiles_outdegrees[tile_id][j]);
-	//		}
-	//		fprintf(fout, "\n");
-	//		// Write ends
-	//		for (unsigned j = 0; j < num_edges; ++j) {
-	//			fprintf(fout, "%u\n", tiles_n2v[tile_id][j]);
-	//		}
-	//		fprintf(fout, "\n");
-	//		files_edges_counts[tid] += num_edges;
-	//	}
-	//} else { // the last file contains maybe more tiles
-	//	for (unsigned i = 0; i + offset_file < num_tiles; ++i) {
-	//		unsigned tile_id = i + offset_file;
-	//		unsigned num_indices = tiles_indices[tile_id].size();
-	//		unsigned num_edges = tiles_n1v[tile_id].size();
-	//		// Write num of indices and edges of this tile
-	//		fprintf(fout, "%u %u\n\n", num_indices, num_edges);
-	//		// Write indices
-	//		for (unsigned j = 0; j < num_indices; ++j) {
-	//			fprintf(fout, "%u %u %u\n", tiles_indices[tile_id][j], tiles_startings[tile_id][j], tiles_outdegrees[tile_id][j]);
-	//		}
-	//		fprintf(fout, "\n");
-	//		// Write ends
-	//		for (unsigned j = 0; j < num_edges; ++j) {
-	//			fprintf(fout, "%u\n", tiles_n2v[tile_id][j]);
-	//		}
-	//		fprintf(fout, "\n");
-	//		files_edges_counts[tid] += num_edges;
-	//	}
-	//}
 }
 	printf("Main files done...\n");
 
-
-	//unsigned *tiles_n1 = (unsigned *) malloc(nedges * sizeof(unsigned));
-	//unsigned *tiles_n2 = (unsigned *) malloc(nedges * sizeof(unsigned));
-	//unsigned tile_index = 0;
-	//for (unsigned i = 0; i < num_tiles; ++i) {
-	//	unsigned bound = tiles_n1v[i].size();
-	//	for (unsigned j = 0; j < bound; ++j) {
-	//		tiles_n1[tile_index] = tiles_n1v[i][j];
-	//		tiles_n2[tile_index] = tiles_n2v[i][j];
-	//		++tile_index;
-	//	}
-	//}
-
-	//string prefix = string(filename) + "_tiled-" + to_string(TILE_WIDTH);
-//	unsigned edge_bound = nedges / ALIGNED_BYTES;
-//	unsigned NUM_THREADS = 64;
-//#pragma omp parallel num_threads(NUM_THREADS)
-//{
-//	unsigned tid = omp_get_thread_num();
-//	unsigned offset = tid * edge_bound;
-//	string fname = prefix + "-" + to_string(tid);
-//	FILE *fout = fopen(fname.c_str(), "w");
-//	if (0 == tid) {
-//		fprintf(fout, "%u %u\n", nnodes, nedges);
-//	}
-//	if (NUM_THREADS - 1 != tid) {
-//		for (unsigned i = 0; i < edge_bound; ++i) {
-//			unsigned index = i + offset;
-//			fprintf(fout, "%u %u\n", tiles_n1[index], tiles_n2[index]);
-//		}
-//	} else {
-//		for (unsigned i = 0; i + offset < nedges; ++i) {
-//			unsigned index = i + offset;
-//			fprintf(fout, "%u %u\n", tiles_n1[index], tiles_n2[index]);
-//		}
-//	}
-//	fclose(fout);
-//}
 	// Write tile offsets
 	string fname = prefix + "-tile_offsets";
 	FILE *fout = fopen(fname.c_str(), "w");
@@ -450,17 +364,6 @@ void input(char filename[]) {
 	}
 	fclose(fout);
 
-	//// Write file offsets
-	//fname = prefix + "-file_offsets";
-	//fout = fopen(fname.c_str(), "w");
-	//offset = 0;
-	//NUM_THREADS = 64;
-	//for (unsigned i = 0; i < NUM_THREADS; ++i) {
-	//	fprintf(fout, "%u\n", offset);//Format: offset
-	//	offset += files_edges_counts[i];
-	//}
-	//fclose(fout);
-
 	// Write number of neighbors
 	fname = prefix + "-nneibor";
 	fout = fopen(fname.c_str(), "w");
@@ -473,6 +376,40 @@ void input(char filename[]) {
 	free(nneibor);
 	free(files_edges_counts);
 }
+
+//inline void insert_sort(unsigned *n1s, unsigned *n2s, unsigned n1, unsigned n2, unsigned size)
+//{
+//	int loc;
+//	for (loc = size; loc > 0; --loc) {
+//		if (n1s[loc - 1] <= n1) {
+//			break;
+//		}
+//	}
+//	if (loc == size) {
+//		n1s[loc] = n1;
+//		n2s[loc] = n2;
+//		return;
+//	}
+//	unsigned *n1s_tmp = (unsigned *) malloc(sizeof(unsigned) * (size - loc));
+//	unsigned *n2s_tmp = (unsigned *) malloc(sizeof(unsigned) * (size - loc));
+//
+//#pragma omp parallel for num_threads(64)
+//	for (unsigned i = loc; i < size; ++i) {
+//		n1s_tmp[i - loc] = n1s[i];
+//		n2s_tmp[i - loc] = n2s[i];
+//	}
+//	n1s[loc] = n1;
+//	n2s[loc] = n2;
+//	size++;
+//#pragma omp parallel for num_threads(64)
+//	for (unsigned i = loc + 1; i < size; ++i) {
+//		n1s[i] = n1s_tmp[i - loc - 1];
+//		n2s[i] = n2s_tmp[i - loc - 1];
+//	}
+//
+//	free(n1s_tmp);
+//	free(n2s_tmp);
+//}
 
 void input_untiled(char filename[]) {
 #ifdef ONEDEBUG
@@ -487,57 +424,34 @@ void input_untiled(char filename[]) {
 	fscanf(fin, "%u %u", &nnodes, &nedges);
 	unsigned *nneibor = (unsigned *) malloc(nnodes * sizeof(unsigned));
 	memset(nneibor, 0, nnodes * sizeof(unsigned));
-	//unsigned num_tiles;
-	//unsigned side_length;
-	//if (nnodes % TILE_WIDTH) {
-	//	side_length = nnodes / TILE_WIDTH + 1;
-	//} else {
-	//	side_length = nnodes / TILE_WIDTH;
-	//}
-	//num_tiles = side_length * side_length;
-	//if (nedges/num_tiles < NUM_P_INT/2) {
-	//	printf("nedges: %u, num_tiles: %u, average: %u\n", nedges, num_tiles, nedges/num_tiles);
-	//	fprintf(stderr, "Error: the tile width %u is too small.\n", TILE_WIDTH);
-	//	exit(2);
-	//}
-	//vector< vector<unsigned> > tiles_n1v;
-	//tiles_n1v.resize(num_tiles);
-	//vector< vector<unsigned> > tiles_n2v;
-	//tiles_n2v.resize(num_tiles);
 	unsigned *n1s = (unsigned *) malloc(nedges * sizeof(unsigned));
 	unsigned *n2s = (unsigned *) malloc(nedges * sizeof(unsigned));
+	vector< vector<unsigned> > n1sv(nnodes);
 	for (unsigned i = 0; i < nedges; ++i) {
-		//fscanf(fin, "%u %u", n1s + i, n2s + i);
 		unsigned n1;
 		unsigned n2;
 		fscanf(fin, "%u %u", &n1, &n2);
-		n1s[i] = n1;
-		n2s[i] = n2;
+		//n1s[i] = n1;
+		//n2s[i] = n2;
+		//insert_sort(n1s, n2s, n1, n2, i);
 		n1--;
-		n2--;
+		n1sv[n1].push_back(n2);
 		nneibor[n1]++;
-		//unsigned n1_id = n1 / TILE_WIDTH;
-		//unsigned n2_id = n2 / TILE_WIDTH;
-		//unsigned tile_id = n1_id * side_length + n2_id;
-		//nneibor[n1]++;
-		//n1++;
-		//n2++;
-		//tiles_n1v[tile_id].push_back(n1);
-		//tiles_n2v[tile_id].push_back(n2);
+		if (i % 10000000 == 0) {
+			now = omp_get_wtime();
+			printf("time: %lf, got %u 10M edges...\n", now - start, i/10000000);//test
+		}
 	}
-	//unsigned *tiles_n1 = (unsigned *) malloc(nedges * sizeof(unsigned));
-	//unsigned *tiles_n2 = (unsigned *) malloc(nedges * sizeof(unsigned));
-	//unsigned tile_index = 0;
-	//for (unsigned i = 0; i < num_tiles; ++i) {
-	//	unsigned bound = tiles_n1v[i].size();
-	//	for (unsigned j = 0; j < bound; ++j) {
-	//		tiles_n1[tile_index] = tiles_n1v[i][j];
-	//		tiles_n2[tile_index] = tiles_n2v[i][j];
-	//		++tile_index;
-	//	}
-	//}
+	unsigned edge_id = 0;
+	for (unsigned i = 0; i < nnodes; ++i) {
+		for (unsigned j = 0; j < n1sv[i].size(); ++j) {
+			n1s[edge_id] = i + 1;
+			n2s[edge_id] = n1sv[i][j];
+			edge_id++;
+		}
+	}
+	printf("Got origin data: %s\n", filename);
 
-	//string prefix = string(filename) + "_tiled-" + to_string(TILE_WIDTH);
 	string prefix = string(filename) + "_untiled";
 	unsigned NUM_THREADS = 64;
 	unsigned edge_bound = nedges / NUM_THREADS;
@@ -550,28 +464,18 @@ void input_untiled(char filename[]) {
 	if (0 == tid) {
 		fprintf(fout, "%u %u\n", nnodes, nedges);
 	}
+	unsigned bound_index;
 	if (NUM_THREADS - 1 != tid) {
-		for (unsigned i = 0; i < edge_bound; ++i) {
-			unsigned index = i + offset;
-			fprintf(fout, "%u %u\n", n1s[index], n2s[index]);
-		}
+		bound_index = offset + edge_bound;
 	} else {
-		for (unsigned i = 0; i + offset < nedges; ++i) {
-			unsigned index = i + offset;
-			fprintf(fout, "%u %u\n", n1s[index], n2s[index]);
-		}
+		bound_index = nedges;
+	}
+	for (unsigned index = offset; index < bound_index; ++index) {
+		fprintf(fout, "%u %u\n", n1s[index], n2s[index]);
 	}
 	fclose(fout);
 }
-	//string fname = prefix + "-offsets";
-	//FILE *fout = fopen(fname.c_str(), "w");
-	//unsigned offset = 0;
-	//for (unsigned i = 0; i < num_tiles; ++i) {
-	//	unsigned size = tiles_n1v[i].size();
-	//	fprintf(fout, "%u\n", offset);//Format: offset
-	//	offset += size;
-	//}
-	//fclose(fout);
+	printf("Main files done...\n");
 	string fname = prefix + "-nneibor";
 	FILE *fout = fopen(fname.c_str(), "w");
 	for (unsigned i = 0; i < nnodes; ++i) {
