@@ -326,7 +326,8 @@ void BFS_kernel(\
 		stop = true;
 
 		omp_set_num_threads(NUM_THREADS);
-#pragma omp parallel for 
+//#pragma omp parallel for 
+#pragma omp parallel for schedule(dynamic, 512)
 		for(unsigned int tid = 0; tid < num_of_nodes; tid++ )
 		{
 			if (h_graph_mask[tid] == true) {
@@ -346,7 +347,8 @@ void BFS_kernel(\
 				}
 			}
 		}
-#pragma omp parallel for
+//#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic, 512)
 		for(unsigned int tid=0; tid< num_of_nodes ; tid++ )
 		{
 			if (h_updating_graph_mask[tid] == true) {

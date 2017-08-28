@@ -126,7 +126,8 @@ void input(char filename[]) {
 #ifdef ONEDEBUG
 	printf("input: %s\n", filename);
 #endif
-	string prefix = string(filename) + "_untiled";
+	//string prefix = string(filename) + "_untiled";
+	string prefix = string(filename) + "_reordered";
 	string fname = prefix + "-0";
 	FILE *fin = fopen(fname.c_str(), "r");
 	fscanf(fin, "%u %u", &nnodes, &nedges);
@@ -200,7 +201,7 @@ void input(char filename[]) {
 		side_length = nnodes / TILE_WIDTH;
 	}
 	num_tiles = side_length * side_length;
-	if (nedges/num_tiles < NUM_P_INT/2) {
+	if (nedges/num_tiles < 1) {
 		printf("nedges: %u, num_tiles: %u, average: %u\n", nedges, num_tiles, nedges/num_tiles);
 		fprintf(stderr, "Error: the tile width %u is too small.\n", TILE_WIDTH);
 		exit(2);
