@@ -10,7 +10,8 @@ ifeq (${untile}, 1)
 	CC_FLAGS += -DUNTILE
 endif
 
-CC_FLAGS += -I/home/zpeng/lib/include/igraph -L/home/zpeng/lib/lib -ligraph
+#CC_FLAGS += -I/home/zpeng/lib/include/igraph -L/home/zpeng/lib/lib -ligraph
+CC_FLAGS += -I/sciclone/pscr/zpeng01/lib/include/igraph -L/sciclone/pscr/zpeng01/lib/lib -ligraph
 
 .PHONY: clean
 
