@@ -502,7 +502,8 @@ int main(int argc, char *argv[]) {
 #ifdef UNTILE
 	input_untiled(filename);
 #else
-	input(filename);
+	//input(filename);
+	printf("Error: need define UNTILE.\n");
 #endif
 	return 0;
 }
