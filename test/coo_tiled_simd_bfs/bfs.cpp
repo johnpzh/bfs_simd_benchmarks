@@ -87,7 +87,7 @@ void BFS_kernel(\
 		unsigned num_of_nodes,\
 		int edge_list_size,\
 		//unsigned num_of_indices,
-		int *is_empty_tile,\
+		int *not_empty_tile,\
 		int *is_active_side,\
 		int *is_updating_active_side,\
 		unsigned side_length,\
@@ -187,8 +187,9 @@ void BFSGraph( int argc, char** argv)
 	//Tile *h_graph_tiles = new Tile[num_tiles];
 	unsigned *h_graph_heads = (unsigned *) _mm_malloc(sizeof(unsigned) * edge_list_size, ALIGNED_BYTES);
 	unsigned *h_graph_ends = (unsigned *) malloc(sizeof(unsigned) * edge_list_size);
-	int *is_empty_tile = (int *) malloc(sizeof(int) * num_tiles);
-	memset(is_empty_tile, 0, sizeof(int) * num_tiles);
+	//int *is_empty_tile = (int *) malloc(sizeof(int) * num_tiles);
+	int *not_empty_tile = (int *) malloc(sizeof(int) * num_tiles);
+	memset(not_empty_tile, 0, sizeof(int) * num_tiles);
 	NUM_THREADS = 64;
 	unsigned edge_bound = edge_list_size / NUM_THREADS;
 	//unsigned bound_tiles = num_tiles/NUM_THREADS;// number of tiles per file
@@ -220,6 +221,10 @@ void BFSGraph( int argc, char** argv)
 		n2--;
 		h_graph_heads[index] = n1;
 		h_graph_ends[index] = n2;
+		unsigned n1_id = n1 / TILE_WIDTH;
+		unsigned n2_id = n2 / TILE_WIDTH;
+		unsigned tile_id = n1_id * side_length + n2_id;
+		not_empty_tile[tile_id] = 1;
 	}
 
 	//unsigned offset_file = tid * bound_tiles;
@@ -275,6 +280,18 @@ void BFSGraph( int argc, char** argv)
 	//	}
 	//}
 }
+	/////////////////////////////////////////
+	//Empty Tiles Percentage
+	unsigned empty_count = 0;
+	for (unsigned i = 0; i < num_tiles; ++i) {
+		if (!not_empty_tile[i]) {
+			++empty_count;
+		}
+	}
+	printf("empty tile percentage: %lf\n", empty_count * 1.0 / num_tiles);
+	//exit(3);
+	///////////////////////////////////////////////
+	
 	// Read nneibor
 	//fname = prefix + "-nneibor";
 	//fin = fopen(fname.c_str(), "r");
@@ -352,7 +369,7 @@ void BFSGraph( int argc, char** argv)
 			num_of_nodes,\
 			edge_list_size,\
 			//unsigned num_of_indices,
-			is_empty_tile,\
+			not_empty_tile,\
 			is_active_side,\
 			is_updating_active_side,\
 			side_length,\
@@ -429,7 +446,7 @@ void BFSGraph( int argc, char** argv)
 	free( tile_offsets);
 	//free( indices_offsets);
 	//delete [] tiles_indices;
-	free( is_empty_tile);
+	free( not_empty_tile);
 	free( is_active_side);
 	free( is_updating_active_side);
 	//free( file_offsets);
@@ -463,7 +480,7 @@ void BFS_kernel(\
 		unsigned num_of_nodes,\
 		int edge_list_size,\
 		//unsigned num_of_indices,
-		int *is_empty_tile,\
+		int *not_empty_tile,\
 		int *is_active_side,\
 		int *is_updating_active_side,\
 		unsigned side_length,\
@@ -515,7 +532,7 @@ void BFS_kernel(\
 			for (unsigned tile_id = start_tile_id; \
 					tile_id < bound_tile_id;\
 					++tile_id) {
-				if (is_empty_tile[tile_id]) {
+				if (!not_empty_tile[tile_id]) {
 					continue;
 				}
 				unsigned bound_edge_i;
