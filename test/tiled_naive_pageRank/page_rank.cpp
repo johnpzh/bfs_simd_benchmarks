@@ -130,7 +130,8 @@ void input(char filename[])
 #ifdef ONEDEBUG
 	printf("input: %s\n", filename);
 #endif
-	string prefix = string(filename) + "_tiled-" + to_string(TILE_WIDTH);
+	//string prefix = string(filename) + "_tiled-" + to_string(TILE_WIDTH);
+	string prefix = string(filename) + "_coo-tiled-" + to_string(TILE_WIDTH);
 	string fname = prefix + "-" + to_string(0);
 	FILE *fin = fopen(fname.c_str(), "r");
 	if (!fin) {
@@ -261,7 +262,7 @@ void input(char filename[])
 	// PageRank
 	for (unsigned i = 0; i < bound_i; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
-#pragma omp parallel for num_threads(256)
+#pragma omp parallel for num_threads(64)
 		for (unsigned i = 0; i < nnodes; i++) {
 			rank[i] = 1.0;
 			sum[i] = 0.0;
@@ -382,10 +383,10 @@ int main(int argc, char *argv[])
 	char *filename;
 	if (argc > 2) {
 		filename = argv[1];
-		NUM_THREADS = strtoul(argv[2], NULL, 0);
+		TILE_WIDTH = strtoul(argv[2], NULL, 0);
 	} else {
 		filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec-relationships.txt";
-		NUM_THREADS = 256;
+		TILE_WIDTH = 1024;
 	}
 	input(filename);
 	return 0;
