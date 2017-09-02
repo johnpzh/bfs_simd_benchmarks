@@ -196,12 +196,12 @@ void print(float *rank) {
 int main(int argc, char *argv[]) {
 	start = omp_get_wtime();
 	char *filename;
-	if (argc > 2) {
+	if (argc > 1) {
 		filename = argv[1];
-		NUM_THREADS = strtoul(argv[2], NULL, 0);
+		//NUM_THREADS = strtoul(argv[2], NULL, 0);
 	} else {
 		filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec-relationships.txt";
-		NUM_THREADS = 256;
+		//NUM_THREADS = 256;
 	}
 	input(filename);
 	return 0;

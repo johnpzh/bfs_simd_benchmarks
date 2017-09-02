@@ -123,7 +123,7 @@ void print(float *rank);
 //	free(sum);
 //}
 
-void page_rank(unsigned *tiles_n1, unsigned *tiles_n2, unsigned *nneibor, unsigned *tops, float *rank, float *sum, unsigned *offsets, unsigned num_tiles, unsigned side_length, int *not_empty_tile);
+void page_rank(unsigned *tiles_n1, unsigned *tiles_n2, unsigned *nneibor, unsigned *tops, float *rank, float *sum, unsigned *offsets, unsigned num_tiles, unsigned side_length, int *not_empty_tile, unsigned row_step);
 
 void input(char filename[])
 {
@@ -207,7 +207,7 @@ void input(char filename[])
 	} else {
 		bound_index = nedges;
 	}
-	for (unsigned index = 0; index < bound_index; ++index) {
+	for (unsigned index = offset; index < bound_index; ++index) {
 		unsigned n1;
 		unsigned n2;
 		fscanf(fin, "%u %u", &n1, &n2);
@@ -260,6 +260,9 @@ void input(char filename[])
 	unsigned bound_i = 9;
 #endif
 	// PageRank
+	//for (unsigned row_step = 2048; row_step < 10000; row_step *= 2) {
+	//	printf("row_step: %u\n", row_step);//test
+	unsigned row_step = 1024;
 	for (unsigned i = 0; i < bound_i; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #pragma omp parallel for num_threads(64)
@@ -268,10 +271,11 @@ void input(char filename[])
 			sum[i] = 0.0;
 		}
 		sleep(10);
-		page_rank(tiles_n1, tiles_n2, nneibor, tops, rank, sum, offsets, num_tiles, side_length, not_empty_tile);
+		page_rank(tiles_n1, tiles_n2, nneibor, tops, rank, sum, offsets, num_tiles, side_length, not_empty_tile, row_step);
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 	}
+	//}
 	fclose(time_out);
 
 #ifdef ONEDEBUG
@@ -312,10 +316,15 @@ void input(char filename[])
 //}
 ////////////////////////////
 
-void page_rank(unsigned *tiles_n1, unsigned *tiles_n2, unsigned *nneibor, unsigned *tops, float *rank, float *sum, unsigned *offsets, unsigned num_tiles, unsigned side_length, int *not_empty_tile)
+void page_rank(unsigned *tiles_n1, unsigned *tiles_n2, unsigned *nneibor, unsigned *tops, float *rank, float *sum, unsigned *offsets, unsigned num_tiles, unsigned side_length, int *not_empty_tile, unsigned row_step)
 {
-	unsigned row_step = 1;
+	//unsigned row_step = 1;
 	unsigned row_index;
+	if (side_length < row_step) {
+		printf("Error: row_step (%u) is to large, larger than side_length (%u)\n", \
+				row_step, side_length);
+		exit(3);
+	}
 	double start_time = omp_get_wtime();
 	for (row_index = 0; row_index <= side_length - row_step; row_index += row_step) {
 #pragma omp parallel num_threads(NUM_THREADS)
@@ -385,7 +394,7 @@ int main(int argc, char *argv[])
 		filename = argv[1];
 		TILE_WIDTH = strtoul(argv[2], NULL, 0);
 	} else {
-		filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec-relationships.txt";
+		filename = "/home/zpeng/benchmarks/data/pokec/coo_tiled_bak/soc-pokec";
 		TILE_WIDTH = 1024;
 	}
 	input(filename);
