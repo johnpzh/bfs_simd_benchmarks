@@ -11,19 +11,19 @@ Begin optimization report for: main(int, char **)
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at page_rank.cpp(174,2) inlined into page_rank.cpp(641,2)
-   remark #15527: loop was not vectorized: function call to fscanf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(175,3) ]
+LOOP BEGIN at page_rank.cpp(175,2) inlined into page_rank.cpp(699,2)
+   remark #15527: loop was not vectorized: function call to fscanf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(176,3) ]
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(180,2) inlined into page_rank.cpp(641,2)
-   remark #15389: vectorization support: reference tops[i] has unaligned access   [ page_rank.cpp(182,4) ]
-   remark #15389: vectorization support: reference offsets[i] has unaligned access   [ page_rank.cpp(182,31) ]
-   remark #15389: vectorization support: reference tops[i] has unaligned access   [ page_rank.cpp(184,4) ]
-   remark #15389: vectorization support: reference offsets[i] has unaligned access   [ page_rank.cpp(184,23) ]
-   remark #15389: vectorization support: reference tops[i] has unaligned access   [ page_rank.cpp(184,4) ]
+LOOP BEGIN at page_rank.cpp(181,2) inlined into page_rank.cpp(699,2)
+   remark #15389: vectorization support: reference tops[i] has unaligned access   [ page_rank.cpp(183,4) ]
+   remark #15389: vectorization support: reference offsets[i] has unaligned access   [ page_rank.cpp(183,31) ]
+   remark #15389: vectorization support: reference tops[i] has unaligned access   [ page_rank.cpp(185,4) ]
+   remark #15389: vectorization support: reference offsets[i] has unaligned access   [ page_rank.cpp(185,23) ]
+   remark #15389: vectorization support: reference tops[i] has unaligned access   [ page_rank.cpp(185,4) ]
    remark #15381: vectorization support: unaligned access used inside loop body
    remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
-   remark #15328: vectorization support: irregularly indexed load was emulated for the variable <offsets[i+1]>, masked, part of index is linear but may overflow   [ page_rank.cpp(182,14) ]
+   remark #15328: vectorization support: irregularly indexed load was emulated for the variable <offsets[i+1]>, masked, part of index is linear but may overflow   [ page_rank.cpp(183,14) ]
    remark #15305: vectorization support: vector length 4
    remark #15309: vectorization support: normalized vectorization overhead 0.092
    remark #15450: unmasked unaligned unit stride loads: 2 
@@ -37,26 +37,26 @@ LOOP BEGIN at page_rank.cpp(180,2) inlined into page_rank.cpp(641,2)
    remark #15488: --- end vector cost summary ---
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(180,2) inlined into page_rank.cpp(641,2)
+LOOP BEGIN at page_rank.cpp(181,2) inlined into page_rank.cpp(699,2)
 <Remainder>
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(195,2) inlined into page_rank.cpp(641,2)
+LOOP BEGIN at page_rank.cpp(196,2) inlined into page_rank.cpp(699,2)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(245,2) inlined into page_rank.cpp(641,2)
+LOOP BEGIN at page_rank.cpp(246,2) inlined into page_rank.cpp(699,2)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between not_empty_tile[not_empty_count] (247:4) and not_empty_tile[tile_id] (246:3)
-   remark #15346: vector dependence: assumed ANTI dependence between not_empty_tile[tile_id] (246:3) and not_empty_tile[not_empty_count] (247:4)
+   remark #15346: vector dependence: assumed FLOW dependence between not_empty_tile[not_empty_count] (248:4) and not_empty_tile[tile_id] (247:3)
+   remark #15346: vector dependence: assumed ANTI dependence between not_empty_tile[tile_id] (247:3) and not_empty_tile[not_empty_count] (248:4)
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(258,2) inlined into page_rank.cpp(641,2)
+LOOP BEGIN at page_rank.cpp(259,2) inlined into page_rank.cpp(699,2)
 <Peeled loop for vectorization>
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(258,2) inlined into page_rank.cpp(641,2)
-   remark #15388: vectorization support: reference row_starts[last_row_id] has aligned access   [ page_rank.cpp(260,3) ]
+LOOP BEGIN at page_rank.cpp(259,2) inlined into page_rank.cpp(699,2)
+   remark #15388: vectorization support: reference row_starts[last_row_id] has aligned access   [ page_rank.cpp(261,3) ]
    remark #15305: vectorization support: vector length 4
    remark #15309: vectorization support: normalized vectorization overhead 4.333
    remark #15300: LOOP WAS VECTORIZED
@@ -69,28 +69,28 @@ LOOP BEGIN at page_rank.cpp(258,2) inlined into page_rank.cpp(641,2)
    remark #15488: --- end vector cost summary ---
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(258,2) inlined into page_rank.cpp(641,2)
+LOOP BEGIN at page_rank.cpp(259,2) inlined into page_rank.cpp(699,2)
 <Remainder loop for vectorization>
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(278,2) inlined into page_rank.cpp(641,2)
-   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ page_rank.cpp(289,3) ]
+LOOP BEGIN at page_rank.cpp(284,2) inlined into page_rank.cpp(699,2)
+   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ page_rank.cpp(295,3) ]
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(225,2) inlined into page_rank.cpp(641,2)
-   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(228,3) ]
+LOOP BEGIN at page_rank.cpp(226,2) inlined into page_rank.cpp(699,2)
+   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(229,3) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (228:3) and n2 (230:3)
-   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (230:3) and n2 (228:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (229:3) and n2 (231:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (231:3) and n2 (229:3)
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(280,1) inlined into page_rank.cpp(641,2)
+LOOP BEGIN at page_rank.cpp(286,1) inlined into page_rank.cpp(699,2)
 <Peeled loop for vectorization>
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(280,1) inlined into page_rank.cpp(641,2)
-   remark #15388: vectorization support: reference rank has aligned access   [ page_rank.cpp(282,4) ]
-   remark #15388: vectorization support: reference sum has aligned access   [ page_rank.cpp(283,4) ]
+LOOP BEGIN at page_rank.cpp(286,1) inlined into page_rank.cpp(699,2)
+   remark #15388: vectorization support: reference rank has aligned access   [ page_rank.cpp(288,4) ]
+   remark #15388: vectorization support: reference sum has aligned access   [ page_rank.cpp(289,4) ]
    remark #15305: vectorization support: vector length 4
    remark #15399: vectorization support: unroll factor set to 2
    remark #15309: vectorization support: normalized vectorization overhead 1.167
@@ -104,12 +104,20 @@ LOOP BEGIN at page_rank.cpp(280,1) inlined into page_rank.cpp(641,2)
    remark #15488: --- end vector cost summary ---
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(280,1) inlined into page_rank.cpp(641,2)
+LOOP BEGIN at page_rank.cpp(286,1) inlined into page_rank.cpp(699,2)
 <Alternate Alignment Vectorized Loop>
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(280,1) inlined into page_rank.cpp(641,2)
+LOOP BEGIN at page_rank.cpp(286,1) inlined into page_rank.cpp(699,2)
 <Remainder loop for vectorization>
+LOOP END
+
+
+Non-optimizable loops:
+
+
+LOOP BEGIN at page_rank.cpp(275,2) inlined into page_rank.cpp(699,2)
+   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ page_rank.cpp(276,3) ]
 LOOP END
 ===========================================================================
 
@@ -118,19 +126,19 @@ Begin optimization report for: input(char *)
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at page_rank.cpp(174,2)
-   remark #15527: loop was not vectorized: function call to fscanf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(175,3) ]
+LOOP BEGIN at page_rank.cpp(175,2)
+   remark #15527: loop was not vectorized: function call to fscanf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(176,3) ]
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(180,2)
-   remark #15389: vectorization support: reference tops[i] has unaligned access   [ page_rank.cpp(182,4) ]
-   remark #15389: vectorization support: reference offsets[i] has unaligned access   [ page_rank.cpp(182,31) ]
-   remark #15389: vectorization support: reference tops[i] has unaligned access   [ page_rank.cpp(184,4) ]
-   remark #15389: vectorization support: reference offsets[i] has unaligned access   [ page_rank.cpp(184,23) ]
-   remark #15389: vectorization support: reference tops[i] has unaligned access   [ page_rank.cpp(184,4) ]
+LOOP BEGIN at page_rank.cpp(181,2)
+   remark #15389: vectorization support: reference tops[i] has unaligned access   [ page_rank.cpp(183,4) ]
+   remark #15389: vectorization support: reference offsets[i] has unaligned access   [ page_rank.cpp(183,31) ]
+   remark #15389: vectorization support: reference tops[i] has unaligned access   [ page_rank.cpp(185,4) ]
+   remark #15389: vectorization support: reference offsets[i] has unaligned access   [ page_rank.cpp(185,23) ]
+   remark #15389: vectorization support: reference tops[i] has unaligned access   [ page_rank.cpp(185,4) ]
    remark #15381: vectorization support: unaligned access used inside loop body
    remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
-   remark #15328: vectorization support: irregularly indexed load was emulated for the variable <offsets[i+1]>, masked, part of index is linear but may overflow   [ page_rank.cpp(182,14) ]
+   remark #15328: vectorization support: irregularly indexed load was emulated for the variable <offsets[i+1]>, masked, part of index is linear but may overflow   [ page_rank.cpp(183,14) ]
    remark #15305: vectorization support: vector length 4
    remark #15309: vectorization support: normalized vectorization overhead 0.092
    remark #15450: unmasked unaligned unit stride loads: 2 
@@ -144,26 +152,26 @@ LOOP BEGIN at page_rank.cpp(180,2)
    remark #15488: --- end vector cost summary ---
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(180,2)
+LOOP BEGIN at page_rank.cpp(181,2)
 <Remainder>
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(195,2)
+LOOP BEGIN at page_rank.cpp(196,2)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(245,2)
+LOOP BEGIN at page_rank.cpp(246,2)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between not_empty_tile[not_empty_count] (247:4) and not_empty_tile[tile_id] (246:3)
-   remark #15346: vector dependence: assumed ANTI dependence between not_empty_tile[tile_id] (246:3) and not_empty_tile[not_empty_count] (247:4)
+   remark #15346: vector dependence: assumed FLOW dependence between not_empty_tile[not_empty_count] (248:4) and not_empty_tile[tile_id] (247:3)
+   remark #15346: vector dependence: assumed ANTI dependence between not_empty_tile[tile_id] (247:3) and not_empty_tile[not_empty_count] (248:4)
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(258,2)
+LOOP BEGIN at page_rank.cpp(259,2)
 <Peeled loop for vectorization>
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(258,2)
-   remark #15388: vectorization support: reference row_starts[last_row_id] has aligned access   [ page_rank.cpp(260,3) ]
+LOOP BEGIN at page_rank.cpp(259,2)
+   remark #15388: vectorization support: reference row_starts[last_row_id] has aligned access   [ page_rank.cpp(261,3) ]
    remark #15305: vectorization support: vector length 4
    remark #15309: vectorization support: normalized vectorization overhead 4.333
    remark #15300: LOOP WAS VECTORIZED
@@ -176,28 +184,28 @@ LOOP BEGIN at page_rank.cpp(258,2)
    remark #15488: --- end vector cost summary ---
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(258,2)
+LOOP BEGIN at page_rank.cpp(259,2)
 <Remainder loop for vectorization>
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(278,2)
-   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ page_rank.cpp(289,3) ]
+LOOP BEGIN at page_rank.cpp(284,2)
+   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ page_rank.cpp(295,3) ]
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(225,2)
-   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(228,3) ]
+LOOP BEGIN at page_rank.cpp(226,2)
+   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(229,3) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (228:3) and n2 (230:3)
-   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (230:3) and n2 (228:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (229:3) and n2 (231:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (231:3) and n2 (229:3)
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(280,1)
+LOOP BEGIN at page_rank.cpp(286,1)
 <Peeled loop for vectorization>
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(280,1)
-   remark #15388: vectorization support: reference rank has aligned access   [ page_rank.cpp(282,4) ]
-   remark #15388: vectorization support: reference sum has aligned access   [ page_rank.cpp(283,4) ]
+LOOP BEGIN at page_rank.cpp(286,1)
+   remark #15388: vectorization support: reference rank has aligned access   [ page_rank.cpp(288,4) ]
+   remark #15388: vectorization support: reference sum has aligned access   [ page_rank.cpp(289,4) ]
    remark #15305: vectorization support: vector length 4
    remark #15399: vectorization support: unroll factor set to 2
    remark #15309: vectorization support: normalized vectorization overhead 1.167
@@ -211,12 +219,20 @@ LOOP BEGIN at page_rank.cpp(280,1)
    remark #15488: --- end vector cost summary ---
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(280,1)
+LOOP BEGIN at page_rank.cpp(286,1)
 <Alternate Alignment Vectorized Loop>
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(280,1)
+LOOP BEGIN at page_rank.cpp(286,1)
 <Remainder loop for vectorization>
+LOOP END
+
+
+Non-optimizable loops:
+
+
+LOOP BEGIN at page_rank.cpp(275,2)
+   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ page_rank.cpp(276,3) ]
 LOOP END
 ===========================================================================
 
@@ -225,129 +241,73 @@ Begin optimization report for: page_rank(unsigned int *, unsigned int *, unsigne
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at page_rank.cpp(463,2)
-   remark #15542: loop was not vectorized: inner loop was already vectorized
+LOOP BEGIN at page_rank.cpp(511,2)
+   remark #15523: loop was not vectorized: loop control variable row_index was found, but loop iteration count cannot be computed before executing the loop
 
-   LOOP BEGIN at page_rank.cpp(479,3)
-   <Peeled loop for vectorization>
-   LOOP END
-
-   LOOP BEGIN at page_rank.cpp(479,3)
-      remark #15388: vectorization support: reference queue_master[size_master] has aligned access   [ page_rank.cpp(482,4) ]
-      remark #15388: vectorization support: reference not_empty_tile[tile_index] has aligned access   [ page_rank.cpp(482,34) ]
-      remark #15305: vectorization support: vector length 4
-      remark #15309: vectorization support: normalized vectorization overhead 4.667
-      remark #15300: LOOP WAS VECTORIZED
-      remark #15442: entire loop may be executed in remainder
-      remark #15448: unmasked aligned unit stride loads: 1 
-      remark #15449: unmasked aligned unit stride stores: 1 
-      remark #15475: --- begin vector cost summary ---
-      remark #15476: scalar cost: 5 
-      remark #15477: vector cost: 0.750 
-      remark #15478: estimated potential speedup: 5.850 
-      remark #15488: --- end vector cost summary ---
-   LOOP END
-
-   LOOP BEGIN at page_rank.cpp(479,3)
-   <Alternate Alignment Vectorized Loop>
-   LOOP END
-
-   LOOP BEGIN at page_rank.cpp(479,3)
-   <Remainder loop for vectorization>
-   LOOP END
-
-   LOOP BEGIN at page_rank.cpp(369,2) inlined into page_rank.cpp(484,3)
+   LOOP BEGIN at page_rank.cpp(437,2) inlined into page_rank.cpp(536,3)
       remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
    LOOP END
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(545,3)
-<Peeled loop for vectorization>
-LOOP END
-
-LOOP BEGIN at page_rank.cpp(545,3)
-   remark #15388: vectorization support: reference queue_master[size_master] has aligned access   [ page_rank.cpp(546,4) ]
-   remark #15388: vectorization support: reference not_empty_tile[tile_index] has aligned access   [ page_rank.cpp(546,34) ]
-   remark #15305: vectorization support: vector length 4
-   remark #15309: vectorization support: normalized vectorization overhead 4.667
-   remark #15300: LOOP WAS VECTORIZED
-   remark #15442: entire loop may be executed in remainder
-   remark #15448: unmasked aligned unit stride loads: 1 
-   remark #15449: unmasked aligned unit stride stores: 1 
-   remark #15475: --- begin vector cost summary ---
-   remark #15476: scalar cost: 5 
-   remark #15477: vector cost: 0.750 
-   remark #15478: estimated potential speedup: 5.850 
-   remark #15488: --- end vector cost summary ---
-LOOP END
-
-LOOP BEGIN at page_rank.cpp(545,3)
-<Alternate Alignment Vectorized Loop>
-LOOP END
-
-LOOP BEGIN at page_rank.cpp(545,3)
-<Remainder loop for vectorization>
-LOOP END
-
-LOOP BEGIN at page_rank.cpp(369,2) inlined into page_rank.cpp(548,3)
+LOOP BEGIN at page_rank.cpp(437,2) inlined into page_rank.cpp(605,3)
    remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(456,1)
-   remark #15382: vectorization support: call to function __kmpc_init_lock cannot be vectorized   [ page_rank.cpp(458,3) ]
-   remark #15382: vectorization support: call to function omp_init_lock(omp_lock_t *) cannot be vectorized   [ page_rank.cpp(458,3) ]
+LOOP BEGIN at page_rank.cpp(504,1)
+   remark #15382: vectorization support: call to function __kmpc_init_lock cannot be vectorized   [ page_rank.cpp(506,3) ]
+   remark #15382: vectorization support: call to function omp_init_lock(omp_lock_t *) cannot be vectorized   [ page_rank.cpp(506,3) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(372,1) inlined into page_rank.cpp(484,3)
+LOOP BEGIN at page_rank.cpp(440,1) inlined into page_rank.cpp(536,3)
    remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
 
-   LOOP BEGIN at page_rank.cpp(373,3) inlined into page_rank.cpp(484,3)
-      remark #15382: vectorization support: call to function __kmpc_test_lock cannot be vectorized   [ page_rank.cpp(380,8) ]
-      remark #15382: vectorization support: call to function omp_test_lock(omp_lock_t *) cannot be vectorized   [ page_rank.cpp(380,8) ]
-      remark #15382: vectorization support: call to function __kmpc_unset_lock cannot be vectorized   [ page_rank.cpp(388,5) ]
-      remark #15382: vectorization support: call to function omp_unset_lock(omp_lock_t *) cannot be vectorized   [ page_rank.cpp(388,5) ]
+   LOOP BEGIN at page_rank.cpp(441,3) inlined into page_rank.cpp(536,3)
+      remark #15382: vectorization support: call to function __kmpc_test_lock cannot be vectorized   [ page_rank.cpp(448,8) ]
+      remark #15382: vectorization support: call to function omp_test_lock(omp_lock_t *) cannot be vectorized   [ page_rank.cpp(448,8) ]
+      remark #15382: vectorization support: call to function __kmpc_unset_lock cannot be vectorized   [ page_rank.cpp(456,5) ]
+      remark #15382: vectorization support: call to function omp_unset_lock(omp_lock_t *) cannot be vectorized   [ page_rank.cpp(456,5) ]
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed OUTPUT dependence between *not_finished_yet (377:4) and call:omp_unset_lock(omp_lock_t *) (388:5)
-      remark #15346: vector dependence: assumed OUTPUT dependence between call:omp_unset_lock(omp_lock_t *) (388:5) and *not_finished_yet (377:4)
+      remark #15346: vector dependence: assumed OUTPUT dependence between *not_finished_yet (445:4) and call:omp_unset_lock(omp_lock_t *) (456:5)
+      remark #15346: vector dependence: assumed OUTPUT dependence between call:omp_unset_lock(omp_lock_t *) (456:5) and *not_finished_yet (445:4)
 
-      LOOP BEGIN at page_rank.cpp(381,5) inlined into page_rank.cpp(484,3)
+      LOOP BEGIN at page_rank.cpp(449,5) inlined into page_rank.cpp(536,3)
          remark #15523: loop was not vectorized: loop control variable edge_i was found, but loop iteration count cannot be computed before executing the loop
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(372,1) inlined into page_rank.cpp(548,3)
+LOOP BEGIN at page_rank.cpp(440,1) inlined into page_rank.cpp(605,3)
    remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
 
-   LOOP BEGIN at page_rank.cpp(373,3) inlined into page_rank.cpp(548,3)
-      remark #15382: vectorization support: call to function __kmpc_test_lock cannot be vectorized   [ page_rank.cpp(380,8) ]
-      remark #15382: vectorization support: call to function omp_test_lock(omp_lock_t *) cannot be vectorized   [ page_rank.cpp(380,8) ]
-      remark #15382: vectorization support: call to function __kmpc_unset_lock cannot be vectorized   [ page_rank.cpp(388,5) ]
-      remark #15382: vectorization support: call to function omp_unset_lock(omp_lock_t *) cannot be vectorized   [ page_rank.cpp(388,5) ]
+   LOOP BEGIN at page_rank.cpp(441,3) inlined into page_rank.cpp(605,3)
+      remark #15382: vectorization support: call to function __kmpc_test_lock cannot be vectorized   [ page_rank.cpp(448,8) ]
+      remark #15382: vectorization support: call to function omp_test_lock(omp_lock_t *) cannot be vectorized   [ page_rank.cpp(448,8) ]
+      remark #15382: vectorization support: call to function __kmpc_unset_lock cannot be vectorized   [ page_rank.cpp(456,5) ]
+      remark #15382: vectorization support: call to function omp_unset_lock(omp_lock_t *) cannot be vectorized   [ page_rank.cpp(456,5) ]
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed OUTPUT dependence between *not_finished_yet (377:4) and call:omp_unset_lock(omp_lock_t *) (388:5)
-      remark #15346: vector dependence: assumed OUTPUT dependence between call:omp_unset_lock(omp_lock_t *) (388:5) and *not_finished_yet (377:4)
+      remark #15346: vector dependence: assumed OUTPUT dependence between *not_finished_yet (445:4) and call:omp_unset_lock(omp_lock_t *) (456:5)
+      remark #15346: vector dependence: assumed OUTPUT dependence between call:omp_unset_lock(omp_lock_t *) (456:5) and *not_finished_yet (445:4)
 
-      LOOP BEGIN at page_rank.cpp(381,5) inlined into page_rank.cpp(548,3)
+      LOOP BEGIN at page_rank.cpp(449,5) inlined into page_rank.cpp(605,3)
          remark #15523: loop was not vectorized: loop control variable edge_i was found, but loop iteration count cannot be computed before executing the loop
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(614,2)
+LOOP BEGIN at page_rank.cpp(672,2)
 <Peeled loop for vectorization, Multiversioned v1>
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(614,2)
+LOOP BEGIN at page_rank.cpp(672,2)
 <Multiversioned v1>
-   remark #15388: vectorization support: reference rank[j] has aligned access   [ page_rank.cpp(615,3) ]
-   remark #15388: vectorization support: reference sum[j] has aligned access   [ page_rank.cpp(615,42) ]
+   remark #15388: vectorization support: reference rank[j] has aligned access   [ page_rank.cpp(673,3) ]
+   remark #15388: vectorization support: reference sum[j] has aligned access   [ page_rank.cpp(673,42) ]
    remark #15305: vectorization support: vector length 4
    remark #15399: vectorization support: unroll factor set to 2
    remark #15309: vectorization support: normalized vectorization overhead 0.500
-   remark #15417: vectorization support: number of FP up converts: single precision to double precision 1   [ page_rank.cpp(615,3) ]
-   remark #15418: vectorization support: number of FP down converts: double precision to single precision 1   [ page_rank.cpp(615,3) ]
+   remark #15417: vectorization support: number of FP up converts: single precision to double precision 1   [ page_rank.cpp(673,3) ]
+   remark #15418: vectorization support: number of FP down converts: double precision to single precision 1   [ page_rank.cpp(673,3) ]
    remark #15300: LOOP WAS VECTORIZED
    remark #15442: entire loop may be executed in remainder
    remark #15448: unmasked aligned unit stride loads: 1 
@@ -360,32 +320,32 @@ LOOP BEGIN at page_rank.cpp(614,2)
    remark #15488: --- end vector cost summary ---
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(614,2)
+LOOP BEGIN at page_rank.cpp(672,2)
 <Alternate Alignment Vectorized Loop, Multiversioned v1>
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(614,2)
+LOOP BEGIN at page_rank.cpp(672,2)
 <Remainder loop for vectorization, Multiversioned v1>
-   remark #15388: vectorization support: reference rank[j] has aligned access   [ page_rank.cpp(615,3) ]
-   remark #15389: vectorization support: reference sum[j] has unaligned access   [ page_rank.cpp(615,42) ]
+   remark #15388: vectorization support: reference rank[j] has aligned access   [ page_rank.cpp(673,3) ]
+   remark #15389: vectorization support: reference sum[j] has unaligned access   [ page_rank.cpp(673,42) ]
    remark #15381: vectorization support: unaligned access used inside loop body
    remark #15305: vectorization support: vector length 2
    remark #15309: vectorization support: normalized vectorization overhead 1.200
-   remark #15417: vectorization support: number of FP up converts: single precision to double precision 1   [ page_rank.cpp(615,3) ]
-   remark #15418: vectorization support: number of FP down converts: double precision to single precision 1   [ page_rank.cpp(615,3) ]
+   remark #15417: vectorization support: number of FP up converts: single precision to double precision 1   [ page_rank.cpp(673,3) ]
+   remark #15418: vectorization support: number of FP down converts: double precision to single precision 1   [ page_rank.cpp(673,3) ]
    remark #15301: REMAINDER LOOP WAS VECTORIZED
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(614,2)
+LOOP BEGIN at page_rank.cpp(672,2)
 <Remainder loop for vectorization, Multiversioned v1>
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(614,2)
+LOOP BEGIN at page_rank.cpp(672,2)
 <Multiversioned v2>
    remark #15304: loop was not vectorized: non-vectorizable loop instance from multiversioning
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(614,2)
+LOOP BEGIN at page_rank.cpp(672,2)
 <Remainder, Multiversioned v2>
 LOOP END
 ===========================================================================
@@ -395,7 +355,7 @@ Begin optimization report for: print(float *)
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at page_rank.cpp(622,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(624,3) ]
+LOOP BEGIN at page_rank.cpp(680,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(682,3) ]
 LOOP END
 ===========================================================================

@@ -25,6 +25,7 @@ using std::to_string;
 unsigned nnodes, nedges;
 unsigned NUM_THREADS;
 unsigned TILE_WIDTH;
+unsigned CHUNK_SIZE;
 
 double start;
 double now;
@@ -271,10 +272,15 @@ void input(char filename[])
 	unsigned bound_i = 9;
 #endif
 	// PageRank
-	//for (unsigned row_step = 2048; row_step < 10000; row_step *= 2) {
-	//	printf("row_step: %u\n", row_step);//test
-	unsigned row_step = 1024;
-	//unsigned row_step = 32;
+	for (unsigned row_step = 1; row_step < 10000; row_step *= 2) {
+		printf("row_step: %u\n", row_step);//test
+	//for (unsigned i = 15; i < 21; ++i) {
+	//CHUNK_SIZE = (unsigned) pow(2, i);
+	//printf("CHUNK_SIZE: %u\n", CHUNK_SIZE);//test
+	CHUNK_SIZE = 8192;
+	//unsigned row_step = 1024;
+	//CHUNK_SIZE = 512;
+	//unsigned row_step = 64;
 	for (unsigned i = 0; i < bound_i; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #pragma omp parallel for num_threads(64)
@@ -304,7 +310,7 @@ void input(char filename[])
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 	}
-	//}
+	}
 	fclose(time_out);
 
 #ifdef ONEDEBUG
@@ -369,7 +375,7 @@ inline void scheduler(\
 	while (not_finished_yet) {
 		not_finished_yet = false;
 		// Process tiles in the master queue
-#pragma omp parallel for schedule(dynamic, 1024)
+#pragma omp parallel for schedule(dynamic, CHUNK_SIZE)
 		for (unsigned tile_index = 0; tile_index < size_master; ++tile_index) {
 			if (is_processed_tile[tile_index]) {
 				continue;
@@ -397,19 +403,61 @@ inline void scheduler(\
 //				}
 //			}
 		}
-		//if (size_other > 0) {
-		//	// Swap master and other queue
-		//	unsigned *temp_queue = queue_master;
-		//	queue_master = queue_other;
-		//	queue_other = temp_queue;
-		//	size_master = size_other;
-		//	size_other = 0;
-		//} else {
-		//	not_finished_yet = false;
-		//	size_master = 0;
-		//}
+//		if (size_other > 0) {
+//			// Swap master and other queue
+//			unsigned *temp_queue = queue_master;
+//			queue_master = queue_other;
+//			queue_other = temp_queue;
+//			size_master = size_other;
+//			size_other = 0;
+//		} else {
+//			not_finished_yet = false;
+//		}
 	}
-	size_master = 0;
+	free(is_processed_tile);
+}
+
+
+inline void scheduler_local(\
+		unsigned *queue_master,\
+		unsigned &size_master,\
+		unsigned *tiles_n1,\
+		unsigned *tiles_n2,\
+		unsigned *offsets,\
+		unsigned *tops,\
+		float *sum,\
+		float *rank,\
+		unsigned *nneibor,\
+		omp_lock_t *locks_row_id,\
+		const unsigned &side_length)
+{
+	bool not_finished_yet = true;
+	int *is_processed_tile = (int *) malloc(sizeof(int) * size_master);
+	memset(is_processed_tile, 0, sizeof(int) * size_master);
+	while (not_finished_yet) {
+		not_finished_yet = false;
+		// Process tiles in the master queue
+#pragma omp parallel for schedule(dynamic, CHUNK_SIZE)
+		for (unsigned tile_index = 0; tile_index < size_master; ++tile_index) {
+			if (is_processed_tile[tile_index]) {
+				continue;
+			}
+			not_finished_yet = true;
+			unsigned tile_id = queue_master[tile_index];
+			unsigned row_id = tile_id / side_length;
+			if (omp_test_lock(locks_row_id + row_id)) {
+				for (unsigned edge_i = offsets[tile_id]; \
+						edge_i < offsets[tile_id] + tops[tile_id]; \
+						++edge_i) {
+					unsigned n1 = tiles_n1[edge_i];
+					unsigned n2 = tiles_n2[edge_i];
+					sum[n2] += rank[n1]/nneibor[n1];
+				}
+				omp_unset_lock(locks_row_id + row_id);
+				is_processed_tile[tile_index] = 1;
+			} 
+		}
+	}
 	free(is_processed_tile);
 }
 
@@ -449,9 +497,9 @@ void page_rank(\
 		exit(3);
 	}
 	unsigned *queue_master = (unsigned *) malloc(sizeof(unsigned) * row_step * side_length);
-	unsigned *queue_other = (unsigned *) malloc(sizeof(unsigned) * row_step * side_length);
+	//unsigned *queue_other = (unsigned *) malloc(sizeof(unsigned) * row_step * side_length);
 	unsigned size_master = 0;
-	unsigned size_other = 0;
+	//unsigned size_other = 0;
 	omp_lock_t *locks_row_id = new omp_lock_t[side_length];
 #pragma omp parallel for num_threads(64)
 	for (unsigned i = 0; i < side_length; ++i) {
@@ -476,16 +524,21 @@ void page_rank(\
 		} else {
 			bound_tile_index = not_empty_count;
 		}
-		for (unsigned tile_index = row_starts[row_index]; \
-				tile_index < bound_tile_index; \
-				++tile_index) {
-			queue_master[size_master++] = not_empty_tile[tile_index];
-		}
-		scheduler(\
-				queue_master,\
+		//size_master = 0;
+		size_master = bound_tile_index - row_starts[row_index];
+		//size_other = 0;
+		//for (unsigned tile_index = row_starts[row_index]; \
+		//		tile_index < bound_tile_index; \
+		//		++tile_index) {
+		//	queue_master[size_master++] = not_empty_tile[tile_index];
+		//}
+		//scheduler(
+		scheduler_local(\
+				//queue_master,
+				not_empty_tile + row_starts[row_index],\
 				size_master,\
-				queue_other,\
-				size_other,\
+				//queue_other,
+				//size_other,
 				tiles_n1,\
 				tiles_n2,\
 				offsets,\
@@ -542,14 +595,19 @@ void page_rank(\
 	//}
 	//for (; tile_index < row_id_bounds[row_index]; ++tile_index) {
 	if (row_step > 1) {
-		for (unsigned tile_index = row_starts[row_index]; tile_index < not_empty_count; ++tile_index) {
-			queue_master[size_master++] = not_empty_tile[tile_index];
-		}
-		scheduler(\
-				queue_master,\
+		//size_master = 0;
+		size_master = not_empty_count - row_starts[row_index];
+		//size_other = 0;
+		//for (unsigned tile_index = row_starts[row_index]; tile_index < not_empty_count; ++tile_index) {
+		//	queue_master[size_master++] = not_empty_tile[tile_index];
+		//}
+		//scheduler(
+		scheduler_local(\
+				//queue_master,
+				not_empty_tile + row_starts[row_index],\
 				size_master,\
-				queue_other,\
-				size_other,\
+				//queue_other,
+				//size_other,
 				tiles_n1,\
 				tiles_n2,\
 				offsets,\
@@ -607,7 +665,7 @@ void page_rank(\
 	double end_time = omp_get_wtime();
 	printf("%u %lf\n", NUM_THREADS, end_time - start_time);
 	free(queue_master);
-	free(queue_other);
+	//free(queue_other);
 	delete[] locks_row_id;
 
 #pragma omp parallel num_threads(64)
