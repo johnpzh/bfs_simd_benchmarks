@@ -177,13 +177,13 @@ void input(char filename[])
 	unsigned bound_i = 9;
 #endif
 	// PageRank
-	for (unsigned row_step = 1; row_step < 10000; row_step *= 2) {
-		printf("row_step: %u\n", row_step);//test
+	//for (unsigned row_step = 1; row_step < 10000; row_step *= 2) {
+	//	printf("row_step: %u\n", row_step);//test
 	//for (unsigned i = 0; i < 21; ++i) {
 	//CHUNK_SIZE = (unsigned) pow(2, i);
 	//printf("CHUNK_SIZE: %u\n", CHUNK_SIZE);//test
 	CHUNK_SIZE = 1;
-	//unsigned row_step = 128;
+	unsigned row_step = 8;
 	//CHUNK_SIZE = 512;
 	//unsigned row_step = 64;
 	for (unsigned i = 0; i < bound_i; ++i) {
@@ -211,7 +211,7 @@ void input(char filename[])
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 	}
-	}
+	//}
 	fclose(time_out);
 
 #ifdef ONEDEBUG

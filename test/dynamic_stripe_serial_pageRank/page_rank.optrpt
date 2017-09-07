@@ -83,14 +83,6 @@ LOOP END
 LOOP BEGIN at page_rank.cpp(191,1) inlined into page_rank.cpp(368,2)
 <Remainder loop for vectorization>
 LOOP END
-
-
-Non-optimizable loops:
-
-
-LOOP BEGIN at page_rank.cpp(180,2) inlined into page_rank.cpp(368,2)
-   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ page_rank.cpp(181,3) ]
-LOOP END
 ===========================================================================
 
 Begin optimization report for: input(char *)
@@ -169,14 +161,6 @@ LOOP END
 
 LOOP BEGIN at page_rank.cpp(191,1)
 <Remainder loop for vectorization>
-LOOP END
-
-
-Non-optimizable loops:
-
-
-LOOP BEGIN at page_rank.cpp(180,2)
-   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ page_rank.cpp(181,3) ]
 LOOP END
 ===========================================================================
 
