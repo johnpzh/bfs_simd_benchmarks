@@ -27,6 +27,7 @@ unsigned nnodes, nedges;
 unsigned NUM_THREADS;
 unsigned TILE_WIDTH;
 unsigned CHUNK_SIZE;
+unsigned SIZE_QUEUE_MAX;
 
 double start;
 double now;
@@ -163,6 +164,7 @@ void input(char filename[])
 	//printf("CHUNK_SIZE: %u\n", CHUNK_SIZE);//test
 	CHUNK_SIZE = 1;
 	unsigned row_step = 16;
+	SIZE_QUEUE_MAX = 8388608;
 	//unsigned row_step = 128;
 	//CHUNK_SIZE = 512;
 	//unsigned row_step = 64;
@@ -232,9 +234,9 @@ void input(char filename[])
 //}
 ////////////////////////////
 
-const __m512i one_v = _mm512_set1_epi32(1);
-const __m512i zero_v = _mm512_set1_epi32(0);
-const __m512i minusone_v = _mm512_set1_epi32(-1);
+//const __m512i one_v = _mm512_set1_epi32(1);
+//const __m512i zero_v = _mm512_set1_epi32(0);
+//const __m512i minusone_v = _mm512_set1_epi32(-1);
 
 inline void get_seq_sum(\
 		unsigned *n1s,\
@@ -332,6 +334,43 @@ inline void get_seq_sum(\
 //	}
 //}
 
+inline void kernel_pageRank(\
+		unsigned *n1_queue,\
+		unsigned *n2_queue,\
+		const unsigned &size_queue,\
+		float *sum,\
+		float *rank,\
+		unsigned *nneibor)
+{
+	unsigned edge_i;
+	for (edge_i = 0; edge_i + NUM_P_INT <= size_queue; edge_i += NUM_P_INT) {
+		// Full loaded SIMD lanes
+		__m512i n1_v = _mm512_load_epi32(n1_queue + edge_i);
+		__m512i n2_v = _mm512_load_epi32(n2_queue + edge_i);
+		__m512i conflict_n2 = _mm512_conflict_epi32(n2_v);
+
+		__mmask16 todo_mask = _mm512_test_epi32_mask(conflict_n2, _mm512_set1_epi32(-1));
+		__m512 rank_v = _mm512_i32gather_ps(n1_v, rank, sizeof(float));
+		__m512i nneibor_vi = _mm512_i32gather_epi32(n1_v, nneibor, sizeof(int));
+		__m512 nneibor_v = _mm512_cvtepi32_ps(nneibor_vi);
+		__m512 tmp_sum = _mm512_div_ps(rank_v, nneibor_v);
+		if (todo_mask) {
+			__m512i lz = _mm512_lzcnt_epi32(conflict_n2);
+			__m512i lid = _mm512_sub_epi32(_mm512_set1_epi32(31), lz);
+			while (todo_mask) {
+				__m512i todo_bcast = _mm512_broadcastmw_epi32(todo_mask);
+				__mmask16 now_mask = _mm512_mask_testn_epi32_mask(todo_mask, conflict_n2, todo_bcast);
+				__m512 tmp_sum_perm = _mm512_mask_permutexvar_ps(_mm512_undefined_ps(), now_mask, lid, tmp_sum);
+				tmp_sum = _mm512_mask_add_ps(tmp_sum, now_mask, tmp_sum, tmp_sum_perm);
+				todo_mask = _mm512_kxor(todo_mask, now_mask);
+			}
+		} 
+		__m512 sum_n2_v = _mm512_i32gather_ps(n2_v, sum, sizeof(float));
+		tmp_sum = _mm512_add_ps(tmp_sum, sum_n2_v);
+		_mm512_i32scatter_ps(sum, n2_v, tmp_sum, sizeof(float));
+	}
+	get_seq_sum(n1_queue, n2_queue, nneibor, rank, sum, edge_i, size_queue);
+}
 
 inline void scheduler(\
 		unsigned row_index,\
@@ -346,47 +385,71 @@ inline void scheduler(\
 		unsigned *nneibor,\
 		const unsigned &side_length)
 {
-	unsigned *n1_queue = (unsigned *) malloc(sizeof(unsigned) * (TILE_WIDTH * TILE_WIDTH) * (bound_row_id - row_index));
 #pragma omp parallel for schedule(dynamic, CHUNK_SIZE)
 	for (unsigned col_id = 0; col_id < side_length; ++col_id) {
+		unsigned *n1_queue = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_QUEUE_MAX, ALIGNED_BYTES);
+		unsigned *n2_queue = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_QUEUE_MAX, ALIGNED_BYTES);
+		unsigned size_queue = 0;
 		for (unsigned row_id = row_index; row_id < bound_row_id; ++row_id) {
 			unsigned tile_id = row_id * side_length + col_id;
 			if (!not_empty_tile[tile_id]) {
 				continue;
 			}
+			// Load to buffer
 			unsigned bound_edge_i = offsets[tile_id] + tops[tile_id];
 			unsigned edge_i;
 			for (edge_i = offsets[tile_id]; edge_i + NUM_P_INT <= bound_edge_i; edge_i += NUM_P_INT) {
-				//unsigned n1 = tiles_n1[edge_i];
-				//unsigned n2 = tiles_n2[edge_i];
-				//sum[n2] += rank[n1]/nneibor[n1];
-				// Full loaded SIMD lanes
-				__m512i n1_v = _mm512_load_epi32(tiles_n1 + edge_i);
-				__m512i n2_v = _mm512_load_epi32(tiles_n2 + edge_i);
-				__m512i conflict_n2 = _mm512_conflict_epi32(n2_v);
-
-				__mmask16 todo_mask = _mm512_test_epi32_mask(conflict_n2, _mm512_set1_epi32(-1));
-				__m512 rank_v = _mm512_i32gather_ps(n1_v, rank, sizeof(float));
-				__m512i nneibor_vi = _mm512_i32gather_epi32(n1_v, nneibor, sizeof(int));
-				__m512 nneibor_v = _mm512_cvtepi32_ps(nneibor_vi);
-				__m512 tmp_sum = _mm512_div_ps(rank_v, nneibor_v);
-				if (todo_mask) {
-					__m512i lz = _mm512_lzcnt_epi32(conflict_n2);
-					__m512i lid = _mm512_sub_epi32(_mm512_set1_epi32(31), lz);
-					while (todo_mask) {
-						__m512i todo_bcast = _mm512_broadcastmw_epi32(todo_mask);
-						__mmask16 now_mask = _mm512_mask_testn_epi32_mask(todo_mask, conflict_n2, todo_bcast);
-						__m512 tmp_sum_perm = _mm512_mask_permutexvar_ps(_mm512_undefined_ps(), now_mask, lid, tmp_sum);
-						tmp_sum = _mm512_mask_add_ps(tmp_sum, now_mask, tmp_sum, tmp_sum_perm);
-						todo_mask = _mm512_kxor(todo_mask, now_mask);
-					}
-				} 
-				__m512 sum_n2_v = _mm512_i32gather_ps(n2_v, sum, sizeof(float));
-				tmp_sum = _mm512_add_ps(tmp_sum, sum_n2_v);
-				_mm512_i32scatter_ps(sum, n2_v, tmp_sum, sizeof(float));
+				__m512i n1_tempv = _mm512_load_epi32(tiles_n1 + edge_i);
+				_mm512_store_epi32(n1_queue + size_queue, n1_tempv);
+				__m512i n2_tempv = _mm512_load_epi32(tiles_n2 + edge_i);
+				_mm512_store_epi32(n2_queue + size_queue, n2_tempv);
+				size_queue += NUM_P_INT;
 			}
-			get_seq_sum(tiles_n1, tiles_n2, nneibor, rank, sum, edge_i, bound_edge_i);
+			for (; edge_i < bound_edge_i; ++edge_i) {
+				n1_queue[size_queue] = tiles_n1[edge_i];
+				n2_queue[size_queue] = tiles_n2[edge_i];
+				++size_queue;
+			}
 		}
+		// Process the buffer
+		kernel_pageRank(\
+				n1_queue,\
+				n2_queue,\
+				size_queue,\
+				sum,\
+				rank,\
+				nneibor);
+		//unsigned edge_i;
+		//for (edge_i = 0; edge_i + NUM_P_INT <= size_queue; edge_i += NUM_P_INT) {
+		//	// Full loaded SIMD lanes
+		//	__m512i n1_v = _mm512_load_epi32(n1_queue + edge_i);
+		//	__m512i n2_v = _mm512_load_epi32(n2_queue + edge_i);
+		//	__m512i conflict_n2 = _mm512_conflict_epi32(n2_v);
+
+		//	__mmask16 todo_mask = _mm512_test_epi32_mask(conflict_n2, _mm512_set1_epi32(-1));
+		//	__m512 rank_v = _mm512_i32gather_ps(n1_v, rank, sizeof(float));
+		//	__m512i nneibor_vi = _mm512_i32gather_epi32(n1_v, nneibor, sizeof(int));
+		//	__m512 nneibor_v = _mm512_cvtepi32_ps(nneibor_vi);
+		//	__m512 tmp_sum = _mm512_div_ps(rank_v, nneibor_v);
+		//	if (todo_mask) {
+		//		__m512i lz = _mm512_lzcnt_epi32(conflict_n2);
+		//		__m512i lid = _mm512_sub_epi32(_mm512_set1_epi32(31), lz);
+		//		while (todo_mask) {
+		//			__m512i todo_bcast = _mm512_broadcastmw_epi32(todo_mask);
+		//			__mmask16 now_mask = _mm512_mask_testn_epi32_mask(todo_mask, conflict_n2, todo_bcast);
+		//			__m512 tmp_sum_perm = _mm512_mask_permutexvar_ps(_mm512_undefined_ps(), now_mask, lid, tmp_sum);
+		//			tmp_sum = _mm512_mask_add_ps(tmp_sum, now_mask, tmp_sum, tmp_sum_perm);
+		//			todo_mask = _mm512_kxor(todo_mask, now_mask);
+		//		}
+		//	} 
+		//	__m512 sum_n2_v = _mm512_i32gather_ps(n2_v, sum, sizeof(float));
+		//	tmp_sum = _mm512_add_ps(tmp_sum, sum_n2_v);
+		//	_mm512_i32scatter_ps(sum, n2_v, tmp_sum, sizeof(float));
+		//}
+		//get_seq_sum(n1_queue, n2_queue, nneibor, rank, sum, edge_i, size_queue);
+		//
+		_mm_free(n1_queue);
+		_mm_free(n2_queue);
 	}
 }
 void page_rank(\
