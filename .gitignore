@@ -23,6 +23,7 @@ vtune/
 ranks.txt
 0ranks.txt
 output*.txt
+*distances.txt
 
 # Compiled source #
 ###################

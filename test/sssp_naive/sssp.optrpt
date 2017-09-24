@@ -1,0 +1,152 @@
+Intel(R) Advisor can now assist with vectorization and show optimization
+  report messages with your source code.
+See "https://software.intel.com/en-us/intel-advisor-xe" for details.
+
+Intel(R) C++ Intel(R) 64 Compiler for applications running on Intel(R) 64, Version 17.0.1.132 Build 20161005
+
+Compiler options: -Wall -Wextra -g -std=c++11 -qopenmp -O3 -qopt-report=5 -qopt-report-phase=vec -o sssp
+
+Begin optimization report for: main(int, char **)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at sssp.cpp(196,2)
+   remark #15382: vectorization support: call to function memset(void *, int, size_t) cannot be vectorized   [ sssp.cpp(198,3) ]
+   remark #15382: vectorization support: call to function memset(void *, int, size_t) cannot be vectorized   [ sssp.cpp(200,3) ]
+   remark #15382: vectorization support: call to function memset(void *, int, size_t) cannot be vectorized   [ sssp.cpp(201,3) ]
+   remark #15382: vectorization support: call to function omp_set_num_threads(int) cannot be vectorized   [ sssp.cpp(139,2) ]
+   remark #15382: vectorization support: call to function omp_get_wtime() cannot be vectorized   [ sssp.cpp(140,22) ]
+   remark #15382: vectorization support: call to function __kmpc_ok_to_fork cannot be vectorized   [ sssp.cpp(122,1) ]
+   remark #15382: vectorization support: call to function __kmpc_fork_call cannot be vectorized   [ sssp.cpp(122,1) ]
+   remark #15382: vectorization support: call to function __kmpc_serialized_parallel cannot be vectorized   [ sssp.cpp(122,1) ]
+   remark #15382: vectorization support: call to function .1 cannot be vectorized   [ sssp.cpp(122,1) ]
+   remark #15382: vectorization support: call to function __kmpc_end_serialized_parallel cannot be vectorized   [ sssp.cpp(122,1) ]
+   remark #15382: vectorization support: call to function __kmpc_ok_to_fork cannot be vectorized   [ sssp.cpp(145,1) ]
+   remark #15382: vectorization support: call to function __kmpc_fork_call cannot be vectorized   [ sssp.cpp(145,1) ]
+   remark #15382: vectorization support: call to function __kmpc_serialized_parallel cannot be vectorized   [ sssp.cpp(145,1) ]
+   remark #15382: vectorization support: call to function .2 cannot be vectorized   [ sssp.cpp(145,1) ]
+   remark #15382: vectorization support: call to function __kmpc_end_serialized_parallel cannot be vectorized   [ sssp.cpp(145,1) ]
+   remark #15382: vectorization support: call to function omp_get_wtime() cannot be vectorized   [ sssp.cpp(157,20) ]
+   remark #15382: vectorization support: call to function printf(const char *, ...) cannot be vectorized   [ sssp.cpp(158,2) ]
+   remark #15382: vectorization support: call to function omp_get_wtime() cannot be vectorized   [ sssp.cpp(206,9) ]
+   remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ sssp.cpp(207,3) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:memset(void *, int, size_t) (198:3) and call:fprintf(FILE *, const char *, ...) (207:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:fprintf(FILE *, const char *, ...) (207:3) and call:memset(void *, int, size_t) (198:3)
+
+   LOOP BEGIN at sssp.cpp(142,2) inlined into sssp.cpp(205,3)
+      remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+   LOOP END
+LOOP END
+
+LOOP BEGIN at sssp.cpp(122,1) inlined into sssp.cpp(205,3)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed ANTI dependence between dists (129:3) and dists (130:4)
+   remark #15346: vector dependence: assumed FLOW dependence between dists (130:4) and dists (129:3)
+LOOP END
+
+LOOP BEGIN at sssp.cpp(145,1) inlined into sssp.cpp(205,3)
+<Peeled loop for vectorization>
+LOOP END
+
+LOOP BEGIN at sssp.cpp(145,1) inlined into sssp.cpp(205,3)
+   remark #15388: vectorization support: reference graph_updating_active has aligned access   [ sssp.cpp(148,5) ]
+   remark #15388: vectorization support: reference graph_active has aligned access   [ sssp.cpp(149,5) ]
+   remark #15388: vectorization support: reference graph_active has aligned access   [ sssp.cpp(152,5) ]
+   remark #15388: vectorization support: reference graph_updating_active has aligned access   [ sssp.cpp(148,5) ]
+   remark #15388: vectorization support: reference graph_active has aligned access   [ sssp.cpp(149,5) ]
+   remark #15388: vectorization support: reference graph_active has aligned access   [ sssp.cpp(152,5) ]
+   remark #15305: vectorization support: vector length 4
+   remark #15309: vectorization support: normalized vectorization overhead 0.621
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15442: entire loop may be executed in remainder
+   remark #15448: unmasked aligned unit stride loads: 2 
+   remark #15449: unmasked aligned unit stride stores: 3 
+   remark #15475: --- begin vector cost summary ---
+   remark #15476: scalar cost: 23 
+   remark #15477: vector cost: 7.250 
+   remark #15478: estimated potential speedup: 3.050 
+   remark #15488: --- end vector cost summary ---
+LOOP END
+
+LOOP BEGIN at sssp.cpp(145,1) inlined into sssp.cpp(205,3)
+<Alternate Alignment Vectorized Loop>
+LOOP END
+
+LOOP BEGIN at sssp.cpp(145,1) inlined into sssp.cpp(205,3)
+<Remainder loop for vectorization>
+LOOP END
+===========================================================================
+
+Begin optimization report for: input(char *, unsigned int *&, unsigned int *&)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at sssp.cpp(63,3)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at sssp.cpp(74,3)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+===========================================================================
+
+Begin optimization report for: input_serial(char *, unsigned int *&, unsigned int *&)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at sssp.cpp(100,2)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+===========================================================================
+
+Begin optimization report for: print(int *)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at sssp.cpp(114,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ sssp.cpp(115,3) ]
+LOOP END
+===========================================================================
+
+Begin optimization report for: sssp_kernel(unsigned int *, unsigned int *, int *, int *, int *, unsigned int, unsigned int)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at sssp.cpp(122,1)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed ANTI dependence between graph_heads[edge_i] (124:19) and graph_updating_active[end] (131:4)
+   remark #15346: vector dependence: assumed FLOW dependence between graph_updating_active[end] (131:4) and graph_heads[edge_i] (124:19)
+LOOP END
+===========================================================================
+
+Begin optimization report for: sssp(unsigned int *, unsigned int *, int *, int *, int *)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at sssp.cpp(142,2)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+
+LOOP BEGIN at sssp.cpp(122,1) inlined into sssp.cpp(144,3)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed ANTI dependence between graph_heads (124:19) and graph_updating_active (131:4)
+   remark #15346: vector dependence: assumed FLOW dependence between graph_updating_active (131:4) and graph_heads (124:19)
+LOOP END
+
+LOOP BEGIN at sssp.cpp(145,1)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed OUTPUT dependence between graph_updating_active[i] (148:5) and graph_active[i] (152:5)
+   remark #15346: vector dependence: assumed OUTPUT dependence between graph_active[i] (152:5) and graph_updating_active[i] (148:5)
+LOOP END
+
+LOOP BEGIN at sssp.cpp(145,1)
+<Remainder>
+LOOP END
+===========================================================================
