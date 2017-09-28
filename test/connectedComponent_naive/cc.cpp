@@ -43,10 +43,10 @@ void input(char filename[], unsigned *&graph_heads, unsigned *&graph_ends)
 	}
 	fscanf(fin, "%u %u", &NNODES, &NEDGES);
 	fclose(fin);
-	graph_heads = (unsigned *) malloc(2 * NEDGES * sizeof(unsigned));
-	graph_ends = (unsigned *) malloc(2 * NEDGES * sizeof(unsigned));
+	graph_heads = (unsigned *) malloc(NEDGES * sizeof(unsigned));
+	graph_ends = (unsigned *) malloc(NEDGES * sizeof(unsigned));
 	NUM_THREADS = 64;
-	unsigned edge_bound = 2 * NEDGES / NUM_THREADS;
+	unsigned edge_bound = NEDGES / NUM_THREADS;
 #pragma omp parallel num_threads(NUM_THREADS) private(fname, fin)
 {
 	unsigned tid = omp_get_thread_num();
@@ -64,7 +64,7 @@ void input(char filename[], unsigned *&graph_heads, unsigned *&graph_ends)
 	if (NUM_THREADS - 1 != tid) {
 		bound_index = offset + edge_bound;
 	} else {
-		bound_index = 2 * NEDGES;
+		bound_index = NEDGES;
 	}
 	for (unsigned index = offset; index < bound_index; ++index) {
 		unsigned n1;
@@ -74,9 +74,6 @@ void input(char filename[], unsigned *&graph_heads, unsigned *&graph_ends)
 		n2--;
 		graph_heads[index] = n1;
 		graph_ends[index] = n2;
-		++index;
-		graph_heads[index] = n2;
-		graph_ends[index] = n1;
 	}
 
 	fclose(fin);
@@ -92,9 +89,9 @@ void input_serial(char filename[], unsigned *&graph_heads, unsigned *&graph_ends
 		exit(1);
 	}
 	fscanf(fin, "%u %u", &NNODES, &NEDGES);
-	graph_heads = (unsigned *) malloc(2 * NEDGES * sizeof(unsigned));
-	graph_ends = (unsigned *) malloc(2 * NEDGES * sizeof(unsigned));
-	for (unsigned i = 0; i < 2 * NEDGES; ++i) {
+	graph_heads = (unsigned *) malloc(NEDGES * sizeof(unsigned));
+	graph_ends = (unsigned *) malloc(NEDGES * sizeof(unsigned));
+	for (unsigned i = 0; i < NEDGES; ++i) {
 		unsigned head;
 		unsigned end;
 		fscanf(fin, "%u %u", &head, &end);
@@ -102,69 +99,78 @@ void input_serial(char filename[], unsigned *&graph_heads, unsigned *&graph_ends
 		--end;
 		graph_heads[i] = head;
 		graph_ends[i] = end;
-		++i;
-		graph_heads[i] = end;
-		graph_ends[i] = head;
 	}
 	fclose(fin);
 }
 
-void print(int cc_count) {
-	printf("Conneted Component: %u\n", cc_count);
+void print(unsigned *graph_component) {
+	FILE *foutput = fopen("ranks.txt", "w");
+	unsigned cc_count = 0;
+	for (unsigned i = 0; i < NNODES; ++i) {
+		fprintf(foutput, "%u: %u\n", i+1, graph_component[i]+1);
+		if (cc_count < graph_component[i]) {
+			cc_count = graph_component[i];
+			printf("cc_count: %u, graph_component[%u]: %u\n", cc_count, i, graph_component[i]);
+		}
+	}
+	fprintf(foutput, "Conneted Component: %u\n", cc_count);
 }
 
-void sssp_kernel(
+void cc_kernel(
 				unsigned *graph_heads, 
 				unsigned *graph_ends, 
 				int *graph_active, 
 				int *graph_updating_active, 
 				unsigned *graph_component,
-				unsigned edge_i_start, 
-				unsigned edge_i_bound)
+				const unsigned &edge_i_start, 
+				const unsigned &edge_i_bound)
 {
 #pragma omp parallel for
 	for (unsigned edge_i = edge_i_start; edge_i < edge_i_bound; ++edge_i) {
 		unsigned head = graph_heads[edge_i];
 		unsigned end = graph_ends[edge_i];
-		if (0 == graph_active[end]) {
-			continue;
+		if (1 == graph_active[head]) {
+			if (graph_component[head] < graph_component[end]) {
+				graph_updating_active[end] = 1;
+				graph_component[end] = graph_component[head];
+			}
 		}
-		if (graph_component[head] > graph_component[end]) {
-			graph_updating_active[head] = 1;
-			graph_component[head] = graph_component[end];
+		if (1 == graph_active[end]) {
+			if (graph_component[end] < graph_component[head]) {
+				graph_updating_active[head] = 1;
+				graph_component[head] = graph_component[end];
+			}
 		}
 	}
 }
 //void page_rank(unsigned *graph_heads, unsigned *graph_ends, unsigned *nneibor, float *rank, float *sum) {}
-void sssp(
+void cc(
 		unsigned *graph_heads, 
 		unsigned *graph_ends, 
 		int *graph_active, 
 		int *graph_updating_active,
 		unsigned *graph_component)
 {
-	unsigned visited_count = 1;
 	//for(int i=0;i<10;i++) {
 	omp_set_num_threads(NUM_THREADS);
 	double start_time = omp_get_wtime();
 	int stop = 0;
 	while (!stop) {
 		stop = 1;
-		sssp_kernel(
+		cc_kernel(
 				graph_heads, 
 				graph_ends, 
 				graph_active, 
 				graph_updating_active, 
 				graph_component,
 				0, 
-				2 * NEDGES);
+				NEDGES);
 #pragma omp parallel for
 		for (unsigned i = 0; i < NNODES; ++i) {
 			if (1 == graph_updating_active[i]) {
 				graph_updating_active[i] = 0;
 				graph_active[i] = 1;
 				stop = 0;
-				++visited_count;
 			} else {
 				graph_active[i] = 0;
 			}
@@ -211,18 +217,17 @@ int main(int argc, char *argv[])
 #else
 	unsigned run_count = 9;
 #endif
-	unsigned source = 0;
 	for (unsigned i = 0; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
-		memset(graph_active, 0, NNODES * sizeof(int));
 		for (unsigned k = 0; k < NNODES; ++k) {
 			graph_active[k] = 1;
 		}
+		memset(graph_updating_active, 0, NNODES * sizeof(int));
 		for (unsigned k = 0; k < NNODES; ++k) {
 			graph_component[k] = k;
 		}
 		//sleep(10);
-		sssp(
+		cc(
 			graph_heads, 
 			graph_ends, 
 			graph_active, 
@@ -233,13 +238,7 @@ int main(int argc, char *argv[])
 	}
 	fclose(time_out);
 #ifdef ONEDEBUG
-	unsigned cc_count = NNODES;
-	for (unsigned i = 0; i < NNODES; ++i) {
-		if (cc_count > graph_component[i]) {
-			cc_count = graph_component[i];
-		}
-	}
-	print(cc_count + 1);
+	print(graph_component);
 #endif
 
 	// Free memory
@@ -247,6 +246,7 @@ int main(int argc, char *argv[])
 	free(graph_ends);
 	free(graph_active);
 	free(graph_updating_active);
+	free(graph_component);
 
 	return 0;
 }

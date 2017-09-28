@@ -327,7 +327,6 @@ void sssp(
 	unsigned *ends_buffer = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS, ALIGNED_BYTES);
 	double start_time = omp_get_wtime();
 	int stop = 0;
-	int vcount = 1;//test
 	while (!stop) {
 		stop = 1;
 		unsigned side_id;
@@ -400,7 +399,6 @@ void sssp(
 				}
 				_mm512_mask_storeu_epi32(graph_updating_active + vertex_id, is_updating_m, _mm512_set1_epi32(0));
 				_mm512_storeu_si512(graph_active + vertex_id, updating_flag_v);
-				vcount += 16;//test
 			}
 			__m512i vertex_id_v = _mm512_set_epi32(
 											vertex_id + 15, vertex_id + 14, vertex_id + 13, vertex_id + 12,\
@@ -416,9 +414,7 @@ void sssp(
 			}
 			_mm512_mask_storeu_epi32(graph_updating_active + vertex_id, is_updating_m, _mm512_set1_epi32(0));
 			_mm512_storeu_si512(graph_active + vertex_id, updating_flag_v);
-			vcount += 16;//test
 		}
-		printf("vcount: %d\n", vcount);//test
 	}
 
 	double end_time = omp_get_wtime();

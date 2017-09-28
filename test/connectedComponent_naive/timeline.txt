@@ -1,3 +1,3 @@
-input end: 23.683279
-Thread 1 end: 2313.283907
-Thread 2 end: 3602.232505
+input end: 1.246268
+Thread 1 end: 8.449868
+Thread 2 end: 13.655237
