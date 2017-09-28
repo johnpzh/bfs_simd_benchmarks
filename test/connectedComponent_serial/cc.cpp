@@ -172,9 +172,6 @@ inline void cc_kernel(
 	for (unsigned edge_i = edge_i_start; edge_i < edge_i_bound; ++edge_i) {
 		unsigned head = graph_heads[edge_i];
 		unsigned end = graph_ends[edge_i];
-		if (0 == graph_active[end]) {
-			continue;
-		}
 		if (1 == graph_active[head]) {
 			if (graph_component[head] < graph_component[end]) {
 				graph_updating_active[end] = 1;

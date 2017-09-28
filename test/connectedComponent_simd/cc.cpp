@@ -70,11 +70,11 @@ void input(
 		//fscanf(fin, "%u", tile_offsets + i);
 		unsigned offset;
 		fscanf(fin, "%u", &offset);
-		tile_offsets[i] = 2 * offset;
+		tile_offsets[i] = offset;
 	}
 	fclose(fin);
-	graph_heads = (unsigned *) malloc(2 * NEDGES * sizeof(unsigned));
-	graph_ends = (unsigned *) malloc(2 * NEDGES * sizeof(unsigned));
+	graph_heads = (unsigned *) malloc(NEDGES * sizeof(unsigned));
+	graph_ends = (unsigned *) malloc(NEDGES * sizeof(unsigned));
 	is_empty_tile = (int *) malloc(sizeof(int) * NUM_TILES);
 	memset(is_empty_tile, 0, sizeof(int) * NUM_TILES);
 	for (unsigned i = 0; i < NUM_TILES; ++i) {
@@ -83,13 +83,13 @@ void input(
 				is_empty_tile[i] = 1;
 			}
 		} else {
-			if (tile_offsets[i] == 2 * NEDGES) {
+			if (tile_offsets[i] == NEDGES) {
 				is_empty_tile[i] = 1;
 			}
 		}
 	}
 	NUM_THREADS = 64;
-	unsigned edge_bound = 2 * NEDGES / NUM_THREADS;
+	unsigned edge_bound = NEDGES / NUM_THREADS;
 #pragma omp parallel num_threads(NUM_THREADS) private(fname, fin)
 {
 	unsigned tid = omp_get_thread_num();
@@ -107,7 +107,7 @@ void input(
 	if (NUM_THREADS - 1 != tid) {
 		bound_index = offset + edge_bound;
 	} else {
-		bound_index = 2 * NEDGES;
+		bound_index = NEDGES;
 	}
 	for (unsigned index = offset; index < bound_index; ++index) {
 		unsigned n1;
@@ -117,9 +117,6 @@ void input(
 		n2--;
 		graph_heads[index] = n1;
 		graph_ends[index] = n2;
-		++index;
-		graph_heads[index] = n2;
-		graph_ends[index] = n1;
 	}
 
 	fclose(fin);
@@ -135,9 +132,9 @@ void input_serial(char filename[], unsigned *&graph_heads, unsigned *&graph_ends
 		exit(1);
 	}
 	fscanf(fin, "%u %u", &NNODES, &NEDGES);
-	graph_heads = (unsigned *) malloc(2 * NEDGES * sizeof(unsigned));
-	graph_ends = (unsigned *) malloc(2 * NEDGES * sizeof(unsigned));
-	for (unsigned i = 0; i < 2 * NEDGES; ++i) {
+	graph_heads = (unsigned *) malloc(NEDGES * sizeof(unsigned));
+	graph_ends = (unsigned *) malloc(NEDGES * sizeof(unsigned));
+	for (unsigned i = 0; i < NEDGES; ++i) {
 		unsigned head;
 		unsigned end;
 		fscanf(fin, "%u %u", &head, &end);
@@ -145,15 +142,20 @@ void input_serial(char filename[], unsigned *&graph_heads, unsigned *&graph_ends
 		--end;
 		graph_heads[i] = head;
 		graph_ends[i] = end;
-		++i;
-		graph_heads[i] = end;
-		graph_ends[i] = head;
 	}
 	fclose(fin);
 }
 
-void print(int cc_count) {
-	printf("Conneted Component: %u\n", cc_count);
+void print(unsigned *graph_component) {
+	FILE *foutput = fopen("ranks.txt", "w");
+	unsigned cc_count = 0;
+	for (unsigned i = 0; i < NNODES; ++i) {
+		fprintf(foutput, "CC[%u]: %u\n", i, graph_component[i]);
+		if (cc_count < graph_component[i]) {
+			cc_count = graph_component[i];
+		}
+	}
+	fprintf(foutput, "Conneted Component: %u\n", cc_count);
 }
 
 inline void cc_kernel(
@@ -171,28 +173,81 @@ inline void cc_kernel(
 	//for (unsigned edge_i = edge_i_start; edge_i < edge_i_bound; ++edge_i) {
 	//	unsigned head = graph_heads[edge_i];
 	//	unsigned end = graph_ends[edge_i];
-	//	if (0 == graph_active[end]) {
-	//		continue;
+	//	if (1 == graph_active[head]) {
+	//		if (graph_component[head] < graph_component[end]) {
+	//			graph_updating_active[end] = 1;
+	//			graph_component[end] = graph_component[head];
+	//			is_updating_active_side[end/TILE_WIDTH] = 1;
+	//		}
 	//	}
-	//	if (graph_component[head] > graph_component[end]) {
-	//		graph_updating_active[head] = 1;
-	//		graph_component[head] = graph_component[end];
+	//	if (1 == graph_active[end]) {
+	//		if (graph_component[end] < graph_component[head]) {
+	//			graph_updating_active[head] = 1;
+	//			graph_component[head] = graph_component[end];
+	//			is_updating_active_side[head/TILE_WIDTH] = 1;
+	//		}
 	//	}
 	//}
 	unsigned edge_i;
 	for (edge_i = edge_i_start; edge_i + NUM_P_INT <= edge_i_bound; edge_i += NUM_P_INT) {
 		__m512i head_v = _mm512_load_epi32(graph_heads + edge_i);
 		__m512i end_v = _mm512_load_epi32(graph_ends + edge_i);
-		__m512i active_v = _mm512_i32gather_epi32(end_v, graph_active, sizeof(int));
+		__m512i active_v = _mm512_i32gather_epi32(head_v, graph_active, sizeof(int));
 		__mmask16 is_active_m = _mm512_test_epi32_mask(active_v, _mm512_set1_epi32(-1));
-		if (!is_active_m) {
-			continue;
+		if (is_active_m) {
+			__m512i component_head_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), is_active_m, head_v, graph_component, sizeof(unsigned));
+			__m512i component_end_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), is_active_m, end_v, graph_component, sizeof(unsigned));
+			__mmask16 head_lt_end_m = _mm512_cmplt_epi32_mask(component_head_v, component_end_v);
+			_mm512_mask_i32scatter_epi32(graph_updating_active, head_lt_end_m, end_v, _mm512_set1_epi32(1), sizeof(int));
+			_mm512_mask_i32scatter_epi32(graph_component, head_lt_end_m, end_v, component_head_v, sizeof(unsigned));
+			__m512i tile_width_v = _mm512_set1_epi32(TILE_WIDTH);
+			__m512i side_id_v = _mm512_div_epi32(end_v, tile_width_v);
+			_mm512_mask_i32scatter_epi32(is_updating_active_side, head_lt_end_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
 		}
+		active_v = _mm512_i32gather_epi32(end_v, graph_active, sizeof(int));
+		is_active_m = _mm512_test_epi32_mask(active_v, _mm512_set1_epi32(-1));
+		if (is_active_m) {
+			__m512i component_head_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), is_active_m, head_v, graph_component, sizeof(unsigned));
+			__m512i component_end_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), is_active_m, end_v, graph_component, sizeof(unsigned));
+			__mmask16 end_lt_head_m = _mm512_cmplt_epi32_mask(component_end_v, component_head_v);
+			_mm512_mask_i32scatter_epi32(graph_updating_active, end_lt_head_m, head_v, _mm512_set1_epi32(1), sizeof(int));
+			_mm512_mask_i32scatter_epi32(graph_component, end_lt_head_m, head_v, component_end_v, sizeof(unsigned));
+			__m512i tile_width_v = _mm512_set1_epi32(TILE_WIDTH);
+			__m512i side_id_v = _mm512_div_epi32(head_v, tile_width_v);
+			_mm512_mask_i32scatter_epi32(is_updating_active_side, end_lt_head_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
+		}
+	}
+	__m512i edge_i_v = _mm512_set_epi32(edge_i + 15, edge_i + 14, edge_i + 13, edge_i + 12,\
+										edge_i + 11, edge_i + 10, edge_i + 9, edge_i + 8,\
+										edge_i + 7, edge_i + 6, edge_i + 5, edge_i + 4,\
+										edge_i + 3, edge_i + 2, edge_i + 1, edge_i);
+	__m512i edge_i_bound_v = _mm512_set1_epi32(edge_i_bound);
+	__mmask16 in_range_m = _mm512_cmplt_epi32_mask(edge_i_v, edge_i_bound_v);
+	__m512i head_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, graph_heads + edge_i);
+	__m512i end_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, graph_ends + edge_i);
+	__m512i active_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_range_m, head_v, graph_active, sizeof(int));
+	__mmask16 is_active_m = _mm512_test_epi32_mask(active_v, _mm512_set1_epi32(-1));
+	if (is_active_m) {
 		__m512i component_head_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), is_active_m, head_v, graph_component, sizeof(unsigned));
 		__m512i component_end_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), is_active_m, end_v, graph_component, sizeof(unsigned));
-		__mmask16 head_gt_end_m = _mm512_cmpgt_epi32_mask(component_head_v, component_end_v);
-		_mm512_mask_i32scatter_epi32(graph_updating_active, head_gt_end_m, head_v, _mm512_set1_epi32(1), sizeof(int));
-		_mm512_mask_i32scatter_epi32(graph_component, head_gt_end_m, head_v, component_end_v, sizeof(unsigned));
+		__mmask16 head_lt_end_m = _mm512_cmplt_epi32_mask(component_head_v, component_end_v);
+		_mm512_mask_i32scatter_epi32(graph_updating_active, head_lt_end_m, end_v, _mm512_set1_epi32(1), sizeof(int));
+		_mm512_mask_i32scatter_epi32(graph_component, head_lt_end_m, end_v, component_head_v, sizeof(unsigned));
+		__m512i tile_width_v = _mm512_set1_epi32(TILE_WIDTH);
+		__m512i side_id_v = _mm512_div_epi32(end_v, tile_width_v);
+		_mm512_mask_i32scatter_epi32(is_updating_active_side, head_lt_end_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
+	}
+	active_v =  _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_range_m, end_v, graph_active, sizeof(int));
+	is_active_m = _mm512_test_epi32_mask(active_v, _mm512_set1_epi32(-1));
+	if (is_active_m) {
+		__m512i component_head_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), is_active_m, head_v, graph_component, sizeof(unsigned));
+		__m512i component_end_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), is_active_m, end_v, graph_component, sizeof(unsigned));
+		__mmask16 end_lt_head_m = _mm512_cmplt_epi32_mask(component_end_v, component_head_v);
+		_mm512_mask_i32scatter_epi32(graph_updating_active, end_lt_head_m, head_v, _mm512_set1_epi32(1), sizeof(int));
+		_mm512_mask_i32scatter_epi32(graph_component, end_lt_head_m, head_v, component_end_v, sizeof(unsigned));
+		__m512i tile_width_v = _mm512_set1_epi32(TILE_WIDTH);
+		__m512i side_id_v = _mm512_div_epi32(head_v, tile_width_v);
+		_mm512_mask_i32scatter_epi32(is_updating_active_side, end_lt_head_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
 	}
 }
 
@@ -229,7 +284,7 @@ inline void scheduler(
 			if (NUM_TILES - 1 != tile_id) {
 				remain = tile_offsets[tile_id + 1] - edge_i;
 			} else {
-				remain = 2 * NEDGES - edge_i;
+				remain = NEDGES - edge_i;
 			}
 			while (remain != 0) {
 				if (capacity > 0) {
@@ -367,14 +422,40 @@ void cc(
 			} else {
 				bound_vertex_id = NNODES;
 			}
-			for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++vertex_id) {
-				if (1 == graph_updating_active[vertex_id]) {
-					graph_updating_active[vertex_id] = 0;
-					graph_active[vertex_id] = 1;
-				} else {
-					graph_active[vertex_id] = 0;
+			//for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++vertex_id) {
+			//	if (1 == graph_updating_active[vertex_id]) {
+			//		graph_updating_active[vertex_id] = 0;
+			//		graph_active[vertex_id] = 1;
+			//	} else {
+			//		graph_active[vertex_id] = 0;
+			//	}
+			//}
+			unsigned vertex_id;
+			for (vertex_id = side_id * TILE_WIDTH;
+					vertex_id + NUM_P_INT <= bound_vertex_id;
+					vertex_id += NUM_P_INT) {
+				__m512i updating_v = _mm512_loadu_si512(graph_updating_active + vertex_id);
+				__mmask16 is_updating_m = _mm512_test_epi32_mask(updating_v, _mm512_set1_epi32(-1));
+				if (!is_updating_m) {
+					continue;
 				}
+				_mm512_mask_storeu_epi32(graph_updating_active + vertex_id, is_updating_m, _mm512_set1_epi32(0));
+				_mm512_storeu_si512(graph_active + vertex_id, updating_v);
 			}
+			__m512i vertex_id_v = _mm512_set_epi32(
+											vertex_id + 15, vertex_id + 14, vertex_id + 13, vertex_id + 12,\
+											vertex_id + 11, vertex_id + 10, vertex_id + 9, vertex_id + 8,\
+											vertex_id + 7, vertex_id + 6, vertex_id + 5, vertex_id + 4,\
+											vertex_id + 3, vertex_id + 2, vertex_id + 1, vertex_id);
+			__m512i bound_vertex_id_v = _mm512_set1_epi32(bound_vertex_id);
+			__mmask16 in_range_m = _mm512_cmplt_epi32_mask(vertex_id_v, bound_vertex_id_v);
+			__m512i updating_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), in_range_m, graph_updating_active + vertex_id);
+			__mmask16 is_updating_m = _mm512_test_epi32_mask(updating_v, _mm512_set1_epi32(-1));
+			if (!is_updating_m) {
+				continue;
+			}
+			_mm512_mask_storeu_epi32(graph_updating_active + vertex_id, is_updating_m, _mm512_set1_epi32(0));
+			_mm512_storeu_si512(graph_active + vertex_id, updating_v);
 		}
 	}
 
@@ -461,13 +542,7 @@ int main(int argc, char *argv[])
 	}
 	fclose(time_out);
 #ifdef ONEDEBUG
-	unsigned cc_count = NNODES;
-	for (unsigned i = 0; i < NNODES; ++i) {
-		if (cc_count > graph_component[i]) {
-			cc_count = graph_component[i];
-		}
-	}
-	print(cc_count + 1);
+	print(graph_component);
 #endif
 
 	// Free memory
