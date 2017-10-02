@@ -17,8 +17,9 @@ using std::stringstream;
 using std::cout;
 using std::endl;
 using std::to_string;
+using std::map;
+using std::pair;
 
-#define DUMP 0.85
 
 unsigned NNODES;
 unsigned NEDGES;
@@ -103,17 +104,37 @@ void input_serial(char filename[], unsigned *&graph_heads, unsigned *&graph_ends
 	fclose(fin);
 }
 
-void print(unsigned *graph_component) {
+void print(unsigned *graph_component) 
+{
 	FILE *foutput = fopen("ranks.txt", "w");
-	unsigned cc_count = 0;
+	//unsigned cc_count = 0;
+	map<unsigned, unsigned> concom;
 	for (unsigned i = 0; i < NNODES; ++i) {
-		fprintf(foutput, "%u: %u\n", i+1, graph_component[i]+1);
-		if (cc_count < graph_component[i]) {
-			cc_count = graph_component[i];
-			printf("cc_count: %u, graph_component[%u]: %u\n", cc_count, i, graph_component[i]);
+		unsigned comp_id = graph_component[i];
+		fprintf(foutput, "%u: %u\n", i, comp_id);
+		if (concom.find(comp_id) == concom.end()) {
+			concom.insert(pair<unsigned, unsigned>(comp_id, 0));
+			concom[comp_id]++;
+		} else {
+			concom[comp_id]++;
+		}
+		//if (cc_count < graph_component[i]) {
+		//	cc_count = graph_component[i];
+		//	//printf("cc_count: %u, graph_component[%u]: %u\n", cc_count, i, graph_component[i]);
+		//}
+	}
+	fprintf(foutput, "Number of CC: %lu\n", concom.size());
+	unsigned lcc = 0;
+	unsigned max_count = 0;
+	for (auto it = concom.begin(); it != concom.end(); ++it) {
+		if (max_count < it->second) {
+			max_count = it->second;
+			lcc = it->first;
 		}
 	}
-	fprintf(foutput, "Conneted Component: %u\n", cc_count);
+	fprintf(foutput, "Size of LCC: %u\n", max_count);
+	fprintf(foutput, "LCC ID: %u\n", lcc);
+	//fprintf(foutput, "Conneted Component: %u\n", cc_count);
 }
 
 void cc_kernel(
@@ -135,12 +156,12 @@ void cc_kernel(
 				graph_component[end] = graph_component[head];
 			}
 		}
-		if (1 == graph_active[end]) {
-			if (graph_component[end] < graph_component[head]) {
-				graph_updating_active[head] = 1;
-				graph_component[head] = graph_component[end];
-			}
-		}
+		//if (1 == graph_active[end]) {
+		//	if (graph_component[end] < graph_component[head]) {
+		//		graph_updating_active[head] = 1;
+		//		graph_component[head] = graph_component[end];
+		//	}
+		//}
 	}
 }
 //void page_rank(unsigned *graph_heads, unsigned *graph_ends, unsigned *nneibor, float *rank, float *sum) {}
@@ -190,7 +211,8 @@ int main(int argc, char *argv[])
 	if (argc > 1) {
 		filename = argv[1];
 	} else {
-		filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec";
+		//filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec";
+		filename = "/home/zpeng/benchmarks/data/skitter/out.skitter";
 	}
 	// Input
 	unsigned *graph_heads;
@@ -212,7 +234,7 @@ int main(int argc, char *argv[])
 	time_out = fopen(time_file, "w");
 	fprintf(time_out, "input end: %lf\n", now - start);
 #ifdef ONEDEBUG
-	unsigned run_count = 2;
+	unsigned run_count = 9;
 	printf("Start cc...\n");
 #else
 	unsigned run_count = 9;

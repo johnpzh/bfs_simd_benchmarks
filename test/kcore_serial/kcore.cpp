@@ -10,17 +10,13 @@
 #include <cmath>
 #include <omp.h>
 #include <unistd.h>
-using std::ifstream;
+#include <algorithm>
 using std::string;
 using std::getline;
-using std::stringstream;
 using std::cout;
 using std::endl;
 using std::to_string;
 using std::vector;
-using std::pair;
-using std::map;
-
 
 unsigned NNODES;
 unsigned NEDGES;
@@ -30,15 +26,19 @@ unsigned SIDE_LENGTH; // Number of rows of tiles
 unsigned NUM_TILES; // Number of tiles
 unsigned ROW_STEP; // Number of rows of tiles in a Group
 
+unsigned KCORE;
+
 double start;
 double now;
 FILE *time_out;
 char *time_file = "timeline.txt";
 
+
 void input(
 		char filename[], 
 		unsigned *&graph_heads, 
-		unsigned *&graph_ends,
+		unsigned *&graph_ends, 
+		unsigned *&graph_degrees,
 		unsigned *&tile_offsets,
 		int *&is_empty_tile) 
 {
@@ -89,6 +89,8 @@ void input(
 			}
 		}
 	}
+	graph_degrees = (unsigned *) malloc(NNODES * sizeof(unsigned));
+	memset(graph_degrees, 0, NNODES * sizeof(unsigned));
 	NUM_THREADS = 64;
 	unsigned edge_bound = NEDGES / NUM_THREADS;
 #pragma omp parallel num_threads(NUM_THREADS) private(fname, fin)
@@ -118,13 +120,14 @@ void input(
 		n2--;
 		graph_heads[index] = n1;
 		graph_ends[index] = n2;
+		graph_degrees[n1]++;
 	}
 
 	fclose(fin);
 }
 }
 
-void input_serial(char filename[], unsigned *&graph_heads, unsigned *&graph_ends)
+void input_serial(char filename[], unsigned *&graph_heads, unsigned *&graph_ends, unsigned *&graph_degrees)
 {
 	//printf("data: %s\n", filename);
 	FILE *fin = fopen(filename, "r");
@@ -135,6 +138,7 @@ void input_serial(char filename[], unsigned *&graph_heads, unsigned *&graph_ends
 	fscanf(fin, "%u %u", &NNODES, &NEDGES);
 	graph_heads = (unsigned *) malloc(NEDGES * sizeof(unsigned));
 	graph_ends = (unsigned *) malloc(NEDGES * sizeof(unsigned));
+	graph_degrees = (unsigned *) calloc(NNODES, sizeof(unsigned));
 	for (unsigned i = 0; i < NEDGES; ++i) {
 		unsigned head;
 		unsigned end;
@@ -143,79 +147,53 @@ void input_serial(char filename[], unsigned *&graph_heads, unsigned *&graph_ends
 		--end;
 		graph_heads[i] = head;
 		graph_ends[i] = end;
+		graph_degrees[head]++;
+		//graph_degrees[end]++;
 	}
 	fclose(fin);
 }
 
-void print(unsigned *graph_component) 
-{
+void print(unsigned *graph_cores) {
 	FILE *foutput = fopen("ranks.txt", "w");
-	map<unsigned, unsigned> concom;
+	unsigned kc = 0;
 	for (unsigned i = 0; i < NNODES; ++i) {
-		unsigned comp_id = graph_component[i];
-		fprintf(foutput, "%u: %u\n", i, comp_id);
-		if (concom.find(comp_id) == concom.end()) {
-			concom.insert(pair<unsigned, unsigned>(comp_id, 0));
-			concom[comp_id]++;
-		} else {
-			concom[comp_id]++;
+		fprintf(foutput, "%u: %u\n", i+1, graph_cores[i]);
+		if (kc < graph_cores[i]) {
+			kc = graph_cores[i];
 		}
 	}
-	fprintf(foutput, "Number of CC: %lu\n", concom.size());
-	unsigned lcc = 0;
-	unsigned max_count = 0;
-	for (auto it = concom.begin(); it != concom.end(); ++it) {
-		if (max_count < it->second) {
-			max_count = it->second;
-			lcc = it->first;
-		}
-	}
-	fprintf(foutput, "Size of LCC: %u\n", max_count);
-	fprintf(foutput, "LCC ID: %u\n", lcc);
+	fprintf(foutput, "kc: %u, KCORE: %u\n", kc, KCORE);
 }
-
-inline void cc_kernel(
+//unsigned test_count = 0;//test
+inline void kcore_kernel(
 				unsigned *graph_heads, 
-				unsigned *graph_ends, 
-				int *graph_active, 
+				unsigned *graph_ends,
+				unsigned *graph_degrees,
 				int *graph_updating_active, 
-				int *is_active_side,
-				int *is_updating_active_side,
-				unsigned *graph_component,
+				unsigned *graph_cores,
 				const unsigned &edge_i_start, 
 				const unsigned &edge_i_bound)
 {
-//#pragma omp parallel for
 	for (unsigned edge_i = edge_i_start; edge_i < edge_i_bound; ++edge_i) {
 		unsigned head = graph_heads[edge_i];
 		unsigned end = graph_ends[edge_i];
-		if (1 == graph_active[head]) {
-			if (graph_component[head] < graph_component[end]) {
-				graph_updating_active[end] = 1;
-				graph_component[end] = graph_component[head];
-				is_updating_active_side[end/TILE_WIDTH] = 1;
+		if (graph_updating_active[head] && graph_degrees[end]) {
+			graph_degrees[end]--;
+			if (!graph_degrees[end]) {
+				graph_cores[end] = KCORE - 1;
+				//test_count++;//test
 			}
 		}
-		//if (1 == graph_active[end]) {
-		//	if (graph_component[end] < graph_component[head]) {
-		//		graph_updating_active[head] = 1;
-		//		graph_component[head] = graph_component[end];
-		//		is_updating_active_side[head/TILE_WIDTH] = 1;
-		//	}
-		//}
 	}
 }
-
 inline void scheduler(
 					unsigned *graph_heads, 
 					unsigned *graph_ends, 
+					unsigned *graph_degrees,
 					unsigned *tile_offsets,
-					int *graph_active, 
 					int *graph_updating_active,
-					int *is_active_side,
-					int *is_updating_active_side,
 					int *is_empty_tile,
-					unsigned *graph_component,
+					unsigned *graph_cores,
 					const unsigned &start_row_index,
 					const unsigned &bound_row_index)
 {
@@ -233,102 +211,98 @@ inline void scheduler(
 			} else {
 				bound_edge_i = NEDGES;
 			}
-			cc_kernel(
+			kcore_kernel(
 				graph_heads, 
 				graph_ends, 
-				graph_active, 
+				graph_degrees,
 				graph_updating_active,
-				is_active_side,
-				is_updating_active_side,
-				graph_component,
+				graph_cores,
 				tile_offsets[tile_id], 
 				bound_edge_i);
 		}
 	}
 }
-
-void cc(
+void kcore(
 		unsigned *graph_heads, 
 		unsigned *graph_ends, 
+		unsigned *graph_degrees,
 		unsigned *tile_offsets,
-		int *graph_active, 
 		int *graph_updating_active,
-		int *is_active_side,
 		int *is_updating_active_side,
 		int *is_empty_tile,
-		unsigned *graph_component)
+		unsigned *graph_cores)
 {
 	omp_set_num_threads(NUM_THREADS);
 	double start_time = omp_get_wtime();
 	int stop = 0;
+	//test_count = 0;
 	while (!stop) {
 		stop = 1;
-		unsigned side_id;
-		for (side_id = 0; side_id + ROW_STEP <= SIDE_LENGTH; ) {
-			if (!is_active_side[side_id]) {
-				++side_id;
-				continue;
-			}
-			scheduler(
-				graph_heads, 
-				graph_ends, 
-				tile_offsets,
-				graph_active, 
-				graph_updating_active,
-				is_active_side,
-				is_updating_active_side,
-				is_empty_tile,
-				graph_component,
-				side_id,
-				side_id + ROW_STEP);
-			side_id += ROW_STEP;
-		}
-		scheduler(
-			graph_heads, 
-			graph_ends, 
-			tile_offsets,
-			graph_active, 
-			graph_updating_active,
-			is_active_side,
-			is_updating_active_side,
-			is_empty_tile,
-			graph_component,
-			side_id,
-			SIDE_LENGTH);
+		int has_remove = 1;
+		KCORE++;
+		while (has_remove) {
+			//double ts = omp_get_wtime();
+			has_remove = 0;
+//#pragma omp parallel for schedule(dynamic, 1)
 #pragma omp parallel for
-		//for (unsigned i = 0; i < NNODES; ++i) {
-		//	if (1 == graph_updating_active[i]) {
-		//		graph_updating_active[i] = 0;
-		//		graph_active[i] = 1;
-		//		stop = 0;
-		//	} else {
-		//		graph_active[i] = 0;
-		//	}
-		//}
-		for (unsigned side_id = 0; side_id < SIDE_LENGTH; ++side_id) {
-			if (!is_updating_active_side[side_id]) {
-				is_active_side[side_id] = 0;
-				continue;
-			}
-			is_updating_active_side[side_id] = 0;
-			is_active_side[side_id] = 1;
-			stop = 0;
-			unsigned bound_vertex_id;
-			if (SIDE_LENGTH - 1 != side_id) {
-				bound_vertex_id = side_id * TILE_WIDTH + TILE_WIDTH;
-			} else {
-				bound_vertex_id = NNODES;
-			}
-			for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++vertex_id) {
-				if (1 == graph_updating_active[vertex_id]) {
-					graph_updating_active[vertex_id] = 0;
-					graph_active[vertex_id] = 1;
-				} else {
-					graph_active[vertex_id] = 0;
+			for (unsigned i = 0; i < NNODES; ++i) {
+				if (graph_degrees[i]) {
+					stop = 0;
+					if(graph_degrees[i] < KCORE) {
+						graph_updating_active[i] = 1;
+						is_updating_active_side[i/TILE_WIDTH] = 1;
+						graph_degrees[i] = 0;
+						graph_cores[i] = KCORE - 1;
+						//test_count++;//test
+						has_remove = 1;
+					}
 				}
 			}
+			//double ts2 = omp_get_wtime();
+			//printf("time for vertices: %lf\n", ts2 - ts);
+			unsigned side_id;
+			for (side_id = 0; side_id + ROW_STEP <= SIDE_LENGTH; ) {
+				if (!is_updating_active_side[side_id]) {
+					++side_id;
+					continue;
+				}
+				scheduler(
+						graph_heads, 
+						graph_ends, 
+						graph_degrees,
+						tile_offsets,
+						graph_updating_active,
+						is_empty_tile,
+						graph_cores,
+						side_id,
+						side_id + ROW_STEP);
+				side_id += ROW_STEP;
+			}
+			scheduler(
+					graph_heads, 
+					graph_ends, 
+					graph_degrees,
+					tile_offsets,
+					graph_updating_active,
+					is_empty_tile,
+					graph_cores,
+					side_id,
+					SIDE_LENGTH);
+			//kcore_kernel(
+			//		graph_heads, 
+			//		graph_ends, 
+			//		graph_degrees,
+			//		graph_updating_active, 
+			//		0, 
+			//		NEDGES,
+			//		graph_cores);
+			//printf("time for edges: %lf\n", omp_get_wtime() - ts2);
+			memset(graph_updating_active, 0, NNODES * sizeof(int));
+			memset(is_updating_active_side, 0, SIDE_LENGTH * sizeof(int));
 		}
+		//printf("test_count: %u, KCORE: %u\n", test_count, KCORE);//test
 	}
+	KCORE -= 2;
 
 	double end_time = omp_get_wtime();
 	printf("%u %lf\n", NUM_THREADS, end_time - start_time);
@@ -343,87 +317,88 @@ int main(int argc, char *argv[])
 		filename = argv[1];
 		TILE_WIDTH = strtoul(argv[2], NULL, 0);
 	} else {
-		//filename = "/home/zpeng/benchmarks/data/pokec/coo_tiled_bak/soc-pokec";
-		filename = "/home/zpeng/benchmarks/data/skitter/coo_tiled_bak/out.skitter";
+		//filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec";
+		filename = "/home/zpeng/benchmarks/data/skitter/out.skitter";
 		TILE_WIDTH = 1024;
 	}
 	// Input
 	unsigned *graph_heads;
 	unsigned *graph_ends;
+	unsigned *graph_degrees;
 	unsigned *tile_offsets;
 	int *is_empty_tile;
-	//unsigned *nneibor;
 #ifdef ONESERIAL
-	//input_serial("/home/zpeng/benchmarks/data/fake/data.txt", graph_heads, graph_ends);
-	input_serial("/home/zpeng/benchmarks/data/fake/mun_twitter", graph_heads, graph_ends);
+	//input_serial("/home/zpeng/benchmarks/data/fake/data.txt", graph_heads, graph_ends, graph_degrees);
+	//input_serial("/home/zpeng/benchmarks/data/fake/mun_twitter", graph_heads, graph_ends,graph_degrees);
+	input_serial("/home/zpeng/benchmarks/data/zebra/out.zebra", graph_heads, graph_ends,graph_degrees);
 #else
 	input(
 		filename, 
 		graph_heads, 
-		graph_ends,
+		graph_ends, 
+		graph_degrees,
 		tile_offsets,
 		is_empty_tile);
 #endif
 
-	// Connected Component
-	int *graph_active = (int *) malloc(NNODES * sizeof(int));
+	// K-core
 	int *graph_updating_active = (int *) malloc(NNODES * sizeof(int));
-	int *is_active_side = (int *) malloc(sizeof(int) * SIDE_LENGTH);
 	int *is_updating_active_side = (int *) malloc(sizeof(int) * SIDE_LENGTH);
-	unsigned *graph_component = (unsigned *) malloc(NNODES * sizeof(unsigned));
+	unsigned *graph_cores = (unsigned *) malloc(NNODES * sizeof(unsigned));
+	unsigned *graph_degrees_bak = (unsigned *) malloc(NNODES * sizeof(unsigned));
+	memcpy(graph_degrees_bak, graph_degrees, NNODES * sizeof(unsigned));
 	
 	now = omp_get_wtime();
 	time_out = fopen(time_file, "w");
 	fprintf(time_out, "input end: %lf\n", now - start);
 #ifdef ONEDEBUG
-	unsigned run_count = 2;
-	printf("Start cc...\n");
+	unsigned run_count = 9;
+	printf("Start K-core...\n");
 #else
 	unsigned run_count = 9;
 #endif
-	ROW_STEP = 16;
+	//for (unsigned s = 1; s < 2048; s *= 2) {
+	//ROW_STEP = s;
+	printf("ROW_STEP: %u\n", ROW_STEP);
+	//ROW_STEP = 16;
 	for (unsigned i = 0; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
-		for (unsigned k = 0; k < NNODES; ++k) {
-			graph_active[k] = 1;
-		}
 		memset(graph_updating_active, 0, NNODES * sizeof(int));
-		for (unsigned k = 0; k < SIDE_LENGTH; ++k) {
-			is_active_side[k] = 1;
-		}
 		memset(is_updating_active_side, 0, SIDE_LENGTH * sizeof(int));
 		for (unsigned k = 0; k < NNODES; ++k) {
-			graph_component[k] = k;
+			graph_cores[k] = 0;
 		}
+		KCORE = 0;
+		memcpy(graph_degrees, graph_degrees_bak, NNODES * sizeof(unsigned));
 		//sleep(10);
-		cc(
+		kcore(
 			graph_heads, 
 			graph_ends, 
+			graph_degrees,
 			tile_offsets,
-			graph_active, 
-			graph_updating_active, 
-			is_active_side,
+			graph_updating_active,
 			is_updating_active_side,
 			is_empty_tile,
-			graph_component);
+			graph_cores);
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 	}
+	//}
 	fclose(time_out);
 #ifdef ONEDEBUG
-	print(graph_component);
+	print(graph_cores);
 #endif
 
 	// Free memory
 	free(graph_heads);
 	free(graph_ends);
+	free(graph_degrees);
 	free(tile_offsets);
-	free(graph_active);
+	free(graph_degrees_bak);
 	free(graph_updating_active);
-	free(is_active_side);
 	free(is_updating_active_side);
 	free(is_empty_tile);
-	free(graph_component);
+	free(graph_cores);
 
 	return 0;
 }

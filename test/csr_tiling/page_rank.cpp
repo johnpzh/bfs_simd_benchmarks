@@ -422,21 +422,36 @@ void input_untiled(char filename[]) {
 	}
 
 	fscanf(fin, "%u %u", &nnodes, &nedges);
+#ifdef ONESYMMETRIC
+	nedges *= 2;
+#endif
 	unsigned *nneibor = (unsigned *) malloc(nnodes * sizeof(unsigned));
 	memset(nneibor, 0, nnodes * sizeof(unsigned));
 	unsigned *n1s = (unsigned *) malloc(nedges * sizeof(unsigned));
 	unsigned *n2s = (unsigned *) malloc(nedges * sizeof(unsigned));
 	vector< vector<unsigned> > n1sv(nnodes);
-	for (unsigned i = 0; i < nedges; ++i) {
+#ifdef ONESYMMETRIC
+	unsigned bound_i = nedges/2;
+#else
+	unsigned bound_i = nedges;
+#endif
+	for (unsigned i = 0; i < bound_i; ++i) {
 		unsigned n1;
 		unsigned n2;
 		fscanf(fin, "%u %u", &n1, &n2);
 		//n1s[i] = n1;
 		//n2s[i] = n2;
 		//insert_sort(n1s, n2s, n1, n2, i);
+#ifdef ONESYMMETRIC
+		n1sv[n1-1].push_back(n2);
+		n1sv[n2-1].push_back(n1);
+		nneibor[n1-1]++;
+		nneibor[n2-1]++;
+#else
 		n1--;
 		n1sv[n1].push_back(n2);
 		nneibor[n1]++;
+#endif
 		if (i % 10000000 == 0) {
 			now = omp_get_wtime();
 			printf("time: %lf, got %u 10M edges...\n", now - start, i/10000000);//test
@@ -492,12 +507,12 @@ void input_untiled(char filename[]) {
 int main(int argc, char *argv[]) {
 	start = omp_get_wtime();
 	char *filename;
-	if (argc > 2) {
+	if (argc > 1) {
 		filename = argv[1];
-		TILE_WIDTH = strtoul(argv[2], NULL, 0);
+		//TILE_WIDTH = strtoul(argv[2], NULL, 0);
 	} else {
 		filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec";
-		TILE_WIDTH = 1024;
+		//TILE_WIDTH = 1024;
 	}
 #ifdef UNTILE
 	input_untiled(filename);

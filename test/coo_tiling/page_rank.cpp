@@ -126,8 +126,8 @@ void input(char filename[]) {
 #ifdef ONEDEBUG
 	printf("input: %s\n", filename);
 #endif
-	//string prefix = string(filename) + "_untiled";
-	string prefix = string(filename) + "_reordered";
+	string prefix = string(filename) + "_untiled";
+	//string prefix = string(filename) + "_reordered";
 	string fname = prefix + "-0";
 	FILE *fin = fopen(fname.c_str(), "r");
 	fscanf(fin, "%u %u", &nnodes, &nedges);

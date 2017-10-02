@@ -10,6 +10,10 @@ ifeq (${untile}, 1)
 	CC_FLAGS += -DUNTILE
 endif
 
+ifeq (${symmetric}, 1)
+	CC_FLAGS += -DONESYMMETRIC
+endif
+
 .PHONY: clean
 
 all: page_rank

@@ -16,6 +16,9 @@ using std::getline;
 using std::cout;
 using std::endl;
 using std::to_string;
+using std::vector;
+using std::pair;
+using std::map;
 
 #define NUM_P_INT 16 // Number of packed intergers in one __m512i variable
 #define ALIGNED_BYTES 64
@@ -146,16 +149,31 @@ void input_serial(char filename[], unsigned *&graph_heads, unsigned *&graph_ends
 	fclose(fin);
 }
 
-void print(unsigned *graph_component) {
+void print(unsigned *graph_component) 
+{
 	FILE *foutput = fopen("ranks.txt", "w");
-	unsigned cc_count = 0;
+	map<unsigned, unsigned> concom;
 	for (unsigned i = 0; i < NNODES; ++i) {
-		fprintf(foutput, "CC[%u]: %u\n", i, graph_component[i]);
-		if (cc_count < graph_component[i]) {
-			cc_count = graph_component[i];
+		unsigned comp_id = graph_component[i];
+		fprintf(foutput, "%u: %u\n", i, comp_id);
+		if (concom.find(comp_id) == concom.end()) {
+			concom.insert(pair<unsigned, unsigned>(comp_id, 0));
+			concom[comp_id]++;
+		} else {
+			concom[comp_id]++;
 		}
 	}
-	fprintf(foutput, "Conneted Component: %u\n", cc_count);
+	fprintf(foutput, "Number of CC: %lu\n", concom.size());
+	unsigned lcc = 0;
+	unsigned max_count = 0;
+	for (auto it = concom.begin(); it != concom.end(); ++it) {
+		if (max_count < it->second) {
+			max_count = it->second;
+			lcc = it->first;
+		}
+	}
+	fprintf(foutput, "Size of LCC: %u\n", max_count);
+	fprintf(foutput, "LCC ID: %u\n", lcc);
 }
 
 inline void cc_kernel(
@@ -204,18 +222,18 @@ inline void cc_kernel(
 			__m512i side_id_v = _mm512_div_epi32(end_v, tile_width_v);
 			_mm512_mask_i32scatter_epi32(is_updating_active_side, head_lt_end_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
 		}
-		active_v = _mm512_i32gather_epi32(end_v, graph_active, sizeof(int));
-		is_active_m = _mm512_test_epi32_mask(active_v, _mm512_set1_epi32(-1));
-		if (is_active_m) {
-			__m512i component_head_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), is_active_m, head_v, graph_component, sizeof(unsigned));
-			__m512i component_end_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), is_active_m, end_v, graph_component, sizeof(unsigned));
-			__mmask16 end_lt_head_m = _mm512_cmplt_epi32_mask(component_end_v, component_head_v);
-			_mm512_mask_i32scatter_epi32(graph_updating_active, end_lt_head_m, head_v, _mm512_set1_epi32(1), sizeof(int));
-			_mm512_mask_i32scatter_epi32(graph_component, end_lt_head_m, head_v, component_end_v, sizeof(unsigned));
-			__m512i tile_width_v = _mm512_set1_epi32(TILE_WIDTH);
-			__m512i side_id_v = _mm512_div_epi32(head_v, tile_width_v);
-			_mm512_mask_i32scatter_epi32(is_updating_active_side, end_lt_head_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
-		}
+		//active_v = _mm512_i32gather_epi32(end_v, graph_active, sizeof(int));
+		//is_active_m = _mm512_test_epi32_mask(active_v, _mm512_set1_epi32(-1));
+		//if (is_active_m) {
+		//	__m512i component_head_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), is_active_m, head_v, graph_component, sizeof(unsigned));
+		//	__m512i component_end_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), is_active_m, end_v, graph_component, sizeof(unsigned));
+		//	__mmask16 end_lt_head_m = _mm512_cmplt_epi32_mask(component_end_v, component_head_v);
+		//	_mm512_mask_i32scatter_epi32(graph_updating_active, end_lt_head_m, head_v, _mm512_set1_epi32(1), sizeof(int));
+		//	_mm512_mask_i32scatter_epi32(graph_component, end_lt_head_m, head_v, component_end_v, sizeof(unsigned));
+		//	__m512i tile_width_v = _mm512_set1_epi32(TILE_WIDTH);
+		//	__m512i side_id_v = _mm512_div_epi32(head_v, tile_width_v);
+		//	_mm512_mask_i32scatter_epi32(is_updating_active_side, end_lt_head_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
+		//}
 	}
 	__m512i edge_i_v = _mm512_set_epi32(edge_i + 15, edge_i + 14, edge_i + 13, edge_i + 12,\
 										edge_i + 11, edge_i + 10, edge_i + 9, edge_i + 8,\
@@ -237,18 +255,18 @@ inline void cc_kernel(
 		__m512i side_id_v = _mm512_div_epi32(end_v, tile_width_v);
 		_mm512_mask_i32scatter_epi32(is_updating_active_side, head_lt_end_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
 	}
-	active_v =  _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_range_m, end_v, graph_active, sizeof(int));
-	is_active_m = _mm512_test_epi32_mask(active_v, _mm512_set1_epi32(-1));
-	if (is_active_m) {
-		__m512i component_head_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), is_active_m, head_v, graph_component, sizeof(unsigned));
-		__m512i component_end_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), is_active_m, end_v, graph_component, sizeof(unsigned));
-		__mmask16 end_lt_head_m = _mm512_cmplt_epi32_mask(component_end_v, component_head_v);
-		_mm512_mask_i32scatter_epi32(graph_updating_active, end_lt_head_m, head_v, _mm512_set1_epi32(1), sizeof(int));
-		_mm512_mask_i32scatter_epi32(graph_component, end_lt_head_m, head_v, component_end_v, sizeof(unsigned));
-		__m512i tile_width_v = _mm512_set1_epi32(TILE_WIDTH);
-		__m512i side_id_v = _mm512_div_epi32(head_v, tile_width_v);
-		_mm512_mask_i32scatter_epi32(is_updating_active_side, end_lt_head_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
-	}
+	//active_v =  _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_range_m, end_v, graph_active, sizeof(int));
+	//is_active_m = _mm512_test_epi32_mask(active_v, _mm512_set1_epi32(-1));
+	//if (is_active_m) {
+	//	__m512i component_head_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), is_active_m, head_v, graph_component, sizeof(unsigned));
+	//	__m512i component_end_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), is_active_m, end_v, graph_component, sizeof(unsigned));
+	//	__mmask16 end_lt_head_m = _mm512_cmplt_epi32_mask(component_end_v, component_head_v);
+	//	_mm512_mask_i32scatter_epi32(graph_updating_active, end_lt_head_m, head_v, _mm512_set1_epi32(1), sizeof(int));
+	//	_mm512_mask_i32scatter_epi32(graph_component, end_lt_head_m, head_v, component_end_v, sizeof(unsigned));
+	//	__m512i tile_width_v = _mm512_set1_epi32(TILE_WIDTH);
+	//	__m512i side_id_v = _mm512_div_epi32(head_v, tile_width_v);
+	//	_mm512_mask_i32scatter_epi32(is_updating_active_side, end_lt_head_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
+	//}
 }
 
 inline void scheduler(
@@ -474,7 +492,8 @@ int main(int argc, char *argv[])
 		filename = argv[1];
 		TILE_WIDTH = strtoul(argv[2], NULL, 0);
 	} else {
-		filename = "/home/zpeng/benchmarks/data/pokec/coo_tiled_bak/soc-pokec";
+		//filename = "/home/zpeng/benchmarks/data/pokec/coo_tiled_bak/soc-pokec";
+		filename = "/home/zpeng/benchmarks/data/skitter/coo_tiled_bak/out.skitter";
 		TILE_WIDTH = 1024;
 	}
 	// Input

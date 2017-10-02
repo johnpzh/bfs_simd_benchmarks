@@ -1,0 +1,58 @@
+Intel(R) Advisor can now assist with vectorization and show optimization
+  report messages with your source code.
+See "https://software.intel.com/en-us/intel-advisor-xe" for details.
+
+Intel(R) C++ Intel(R) 64 Compiler for applications running on Intel(R) 64, Version 17.0.1.132 Build 20161005
+
+Compiler options: -Wall -Wextra -g -std=c++11 -qopenmp -O3 -qopt-report=5 -qopt-report-phase=vec -o kcore
+
+Begin optimization report for: main(int, char **)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at kcore.cpp(89,2) inlined into kcore.cpp(158,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ kcore.cpp(92,3) ]
+LOOP END
+
+LOOP BEGIN at kcore.cpp(70,2) inlined into kcore.cpp(158,2)
+   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ kcore.cpp(73,3) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:fscanf(FILE *, const char *, ...) (73:3) and *(graph_degrees+n2*4) (79:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between *(graph_degrees+n2*4) (79:3) and call:fscanf(FILE *, const char *, ...) (73:3)
+LOOP END
+===========================================================================
+
+Begin optimization report for: input(char *, unsigned int *&, unsigned int *&, unsigned int *&)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at kcore.cpp(89,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ kcore.cpp(92,3) ]
+LOOP END
+
+LOOP BEGIN at kcore.cpp(70,2)
+   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ kcore.cpp(73,3) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:fscanf(FILE *, const char *, ...) (73:3) and *(graph_degrees+n2*4) (79:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between *(graph_degrees+n2*4) (79:3) and call:fscanf(FILE *, const char *, ...) (73:3)
+LOOP END
+===========================================================================
+
+Begin optimization report for: input_serial(char *, unsigned int *&, unsigned int *&, unsigned int *&)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at kcore.cpp(109,2)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at kcore.cpp(133,2)
+   remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ kcore.cpp(136,3) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between call:fprintf(FILE *, const char *, ...) (136:3) and *graph_ends (136:3)
+   remark #15346: vector dependence: assumed ANTI dependence between *graph_ends (136:3) and call:fprintf(FILE *, const char *, ...) (136:3)
+LOOP END
+===========================================================================

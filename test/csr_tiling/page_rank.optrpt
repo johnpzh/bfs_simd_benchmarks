@@ -4,43 +4,43 @@ See "https://software.intel.com/en-us/intel-advisor-xe" for details.
 
 Intel(R) C++ Intel(R) 64 Compiler for applications running on Intel(R) 64, Version 17.0.1.132 Build 20161005
 
-Compiler options: -Wall -Wextra -g -std=c++11 -qopenmp -O3 -qopt-report=5 -qopt-report-phase=vec -DUNTILE -o page_rank
+Compiler options: -Wall -Wextra -g -std=c++11 -qopenmp -O3 -qopt-report=5 -qopt-report-phase=vec -DUNTILE -DONESYMMETRIC -o page_rank
 
 Begin optimization report for: main(int, char **)
 
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_uninitialized.h(494,8) inlined into page_rank.cpp(503,2)
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_uninitialized.h(494,8) inlined into page_rank.cpp(518,2)
    remark #15382: vectorization support: call to function std::vector<unsigned int, std::allocator<unsigned int>>::vector(std::vector<unsigned int, std::allocator<unsigned int>> *) cannot be vectorized   [ /usr/include/c++/4.8.5/bits/stl_construct.h(75,7) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(430,2) inlined into page_rank.cpp(503,2)
-   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP BEGIN at page_rank.cpp(438,2) inlined into page_rank.cpp(518,2)
+   remark #15324: loop was not vectorized: unsigned types for induction variable and/or for lower/upper iteration bounds make loop uncountable
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(446,2) inlined into page_rank.cpp(503,2)
+LOOP BEGIN at page_rank.cpp(461,2) inlined into page_rank.cpp(518,2)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between n1s[edge_id] (448:4) and n1s[edge_id] (448:4)
-   remark #15346: vector dependence: assumed OUTPUT dependence between n1s[edge_id] (448:4) and n1s[edge_id] (448:4)
+   remark #15346: vector dependence: assumed OUTPUT dependence between n1s[edge_id] (463:4) and n1s[edge_id] (463:4)
+   remark #15346: vector dependence: assumed OUTPUT dependence between n1s[edge_id] (463:4) and n1s[edge_id] (463:4)
 
-   LOOP BEGIN at page_rank.cpp(447,36) inlined into page_rank.cpp(503,2)
+   LOOP BEGIN at page_rank.cpp(462,36) inlined into page_rank.cpp(518,2)
       remark #15523: loop was not vectorized: loop control variable j was found, but loop iteration count cannot be computed before executing the loop
    LOOP END
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(481,2) inlined into page_rank.cpp(503,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(482,3) ]
+LOOP BEGIN at page_rank.cpp(496,2) inlined into page_rank.cpp(518,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(497,3) ]
 LOOP END
 
-LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_construct.h(102,4) inlined into page_rank.cpp(503,2)
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_construct.h(102,4) inlined into page_rank.cpp(518,2)
    remark #15382: vectorization support: call to function std::_Vector_base<unsigned int, std::allocator<unsigned int>>::~_Vector_base(std::_Vector_base<unsigned int, std::allocator<unsigned int>> *) cannot be vectorized   [ /usr/include/c++/4.8.5/bits/stl_vector.h(159,7) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(473,2) inlined into page_rank.cpp(503,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(474,3) ]
+LOOP BEGIN at page_rank.cpp(488,2) inlined into page_rank.cpp(518,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(489,3) ]
 LOOP END
 ===========================================================================
 
@@ -88,27 +88,27 @@ Begin optimization report for: input_untiled(char *)
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_uninitialized.h(494,8) inlined into page_rank.cpp(429,34)
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_uninitialized.h(494,8) inlined into page_rank.cpp(432,34)
    remark #15382: vectorization support: call to function std::vector<unsigned int, std::allocator<unsigned int>>::vector(std::vector<unsigned int, std::allocator<unsigned int>> *) cannot be vectorized   [ /usr/include/c++/4.8.5/bits/stl_construct.h(75,7) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(430,2)
-   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP BEGIN at page_rank.cpp(438,2)
+   remark #15324: loop was not vectorized: unsigned types for induction variable and/or for lower/upper iteration bounds make loop uncountable
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(446,2)
+LOOP BEGIN at page_rank.cpp(461,2)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between n1s[edge_id] (448:4) and n1s[edge_id] (448:4)
-   remark #15346: vector dependence: assumed OUTPUT dependence between n1s[edge_id] (448:4) and n1s[edge_id] (448:4)
+   remark #15346: vector dependence: assumed OUTPUT dependence between n1s[edge_id] (463:4) and n1s[edge_id] (463:4)
+   remark #15346: vector dependence: assumed OUTPUT dependence between n1s[edge_id] (463:4) and n1s[edge_id] (463:4)
 
-   LOOP BEGIN at page_rank.cpp(447,36)
+   LOOP BEGIN at page_rank.cpp(462,36)
       remark #15523: loop was not vectorized: loop control variable j was found, but loop iteration count cannot be computed before executing the loop
    LOOP END
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(481,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(482,3) ]
+LOOP BEGIN at page_rank.cpp(496,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(497,3) ]
 LOOP END
 
 LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_construct.h(102,4) inlined into page_rank.cpp(414,37)
@@ -116,8 +116,8 @@ LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_construct.h(102,4) inlined into pa
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
 LOOP END
 
-LOOP BEGIN at page_rank.cpp(473,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(474,3) ]
+LOOP BEGIN at page_rank.cpp(488,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ page_rank.cpp(489,3) ]
 LOOP END
 ===========================================================================
 
