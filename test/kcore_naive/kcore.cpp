@@ -308,7 +308,7 @@ int main(int argc, char *argv[])
 #ifdef ONESERIAL
 	//input_serial("/home/zpeng/benchmarks/data/fake/data.txt", graph_heads, graph_ends, graph_degrees);
 	//input_serial("/home/zpeng/benchmarks/data/fake/mun_twitter", graph_heads, graph_ends,graph_degrees);
-	input_serial("/home/zpeng/benchmarks/data/zebra/out.zebra", graph_heads, graph_ends,graph_degrees);
+	input_serial("/home/zpeng/benchmarks/data/zebra/out.zebra_sym", graph_heads, graph_ends,graph_degrees);
 #else
 	input(
 		filename, 

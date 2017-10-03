@@ -179,17 +179,18 @@ inline void kcore_kernel(
 				const unsigned &edge_i_start, 
 				const unsigned &edge_i_bound)
 {
-	//for (unsigned edge_i = edge_i_start; edge_i < edge_i_bound; ++edge_i) {
-	//	unsigned head = graph_heads[edge_i];
-	//	unsigned end = graph_ends[edge_i];
-	//	if (graph_updating_active[head] && graph_degrees[end]) {
-	//		graph_degrees[end]--;
-	//		if (!graph_degrees[end]) {
-	//			graph_cores[end] = KCORE - 1;
-	//			//test_count++;//test
-	//		}
-	//	}
-	//}
+	for (unsigned edge_i = edge_i_start; edge_i < edge_i_bound; ++edge_i) {
+		unsigned head = graph_heads[edge_i];
+		unsigned end = graph_ends[edge_i];
+		if (graph_updating_active[head] && graph_degrees[end]) {
+			graph_degrees[end]--;
+			if (!graph_degrees[end]) {
+				graph_cores[end] = KCORE - 1;
+				//test_count++;//test
+			}
+		}
+	}
+	/*
 	unsigned edge_i;
 	for (edge_i = edge_i_start; edge_i + NUM_P_INT <= edge_i_bound; edge_i += NUM_P_INT) {
 		__m512i head_v = _mm512_load_epi32(graph_heads + edge_i);
@@ -251,6 +252,7 @@ inline void kcore_kernel(
 		__m512i end_degrees_results_v = _mm512_mask_sub_epi32(end_degrees_v, need_reduce_m, end_degrees_v, subt_one_v);
 		_mm512_mask_i32scatter_epi32(graph_degrees, need_reduce_m, end_v, end_degrees_results_v, sizeof(unsigned));
 	}
+	*/
 }
 inline void scheduler(
 					unsigned *graph_heads, 
@@ -483,7 +485,7 @@ int main(int argc, char *argv[])
 	time_out = fopen(time_file, "w");
 	fprintf(time_out, "input end: %lf\n", now - start);
 #ifdef ONEDEBUG
-	unsigned run_count = 9;
+	unsigned run_count = 1;
 	printf("Start K-core...\n");
 #else
 	unsigned run_count = 9;

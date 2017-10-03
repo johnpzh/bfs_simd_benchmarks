@@ -352,15 +352,15 @@ int main(int argc, char *argv[])
 	time_out = fopen(time_file, "w");
 	fprintf(time_out, "input end: %lf\n", now - start);
 #ifdef ONEDEBUG
-	unsigned run_count = 9;
+	unsigned run_count = 2;
 	printf("Start K-core...\n");
 #else
 	unsigned run_count = 9;
 #endif
 	//for (unsigned s = 1; s < 2048; s *= 2) {
 	//ROW_STEP = s;
-	printf("ROW_STEP: %u\n", ROW_STEP);
-	//ROW_STEP = 16;
+	//printf("ROW_STEP: %u\n", ROW_STEP);
+	ROW_STEP = 16;
 	for (unsigned i = 0; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 		memset(graph_updating_active, 0, NNODES * sizeof(int));
