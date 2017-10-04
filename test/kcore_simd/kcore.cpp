@@ -125,6 +125,7 @@ void input(
 		n2--;
 		graph_heads[index] = n1;
 		graph_ends[index] = n2;
+#pragma omp atomic
 		graph_degrees[n1]++;
 	}
 
@@ -179,18 +180,17 @@ inline void kcore_kernel(
 				const unsigned &edge_i_start, 
 				const unsigned &edge_i_bound)
 {
-	for (unsigned edge_i = edge_i_start; edge_i < edge_i_bound; ++edge_i) {
-		unsigned head = graph_heads[edge_i];
-		unsigned end = graph_ends[edge_i];
-		if (graph_updating_active[head] && graph_degrees[end]) {
-			graph_degrees[end]--;
-			if (!graph_degrees[end]) {
-				graph_cores[end] = KCORE - 1;
-				//test_count++;//test
-			}
-		}
-	}
-	/*
+	//for (unsigned edge_i = edge_i_start; edge_i < edge_i_bound; ++edge_i) {
+	//	unsigned head = graph_heads[edge_i];
+	//	unsigned end = graph_ends[edge_i];
+	//	if (graph_updating_active[head] && graph_degrees[end]) {
+	//		graph_degrees[end]--;
+	//		if (!graph_degrees[end]) {
+	//			graph_cores[end] = KCORE - 1;
+	//			//test_count++;//test
+	//		}
+	//	}
+	//}
 	unsigned edge_i;
 	for (edge_i = edge_i_start; edge_i + NUM_P_INT <= edge_i_bound; edge_i += NUM_P_INT) {
 		__m512i head_v = _mm512_load_epi32(graph_heads + edge_i);
@@ -201,9 +201,12 @@ inline void kcore_kernel(
 		__mmask16 not_removed_m = _mm512_test_epi32_mask(end_degrees_v, _mm512_set1_epi32(-1));
 		__mmask16 need_reduce_m = is_active_m & not_removed_m;
 		if (need_reduce_m) {
+			//__m512i subt_one_v = _mm512_set1_epi32(1);
+			__m512i subt_one_v = _mm512_mask_set1_epi32(_mm512_set1_epi32(0), need_reduce_m, 1);
 			__m512i conflict_end = _mm512_conflict_epi32(end_v);
+			//__m512i conflict_end = _mm512_mask_conflict_epi32(_mm512_set1_epi32(0), need_reduce_m, end_v);
 			__mmask16 todo_mask = _mm512_test_epi32_mask(conflict_end, _mm512_set1_epi32(-1));
-			__m512i subt_one_v = _mm512_set1_epi32(1);
+			//__mmask16 todo_mask = _mm512_mask_test_epi32_mask(need_reduce_m, conflict_end, _mm512_set1_epi32(-1));
 			if (todo_mask) {
 				__m512i lz = _mm512_lzcnt_epi32(conflict_end);
 				__m512i lid = _mm512_sub_epi32(_mm512_set1_epi32(31), lz);
@@ -234,9 +237,12 @@ inline void kcore_kernel(
 	__mmask16 not_removed_m = _mm512_test_epi32_mask(end_degrees_v, _mm512_set1_epi32(-1));
 	__mmask16 need_reduce_m = is_active_m & not_removed_m;
 	if (need_reduce_m) {
+		//__m512i subt_one_v = _mm512_set1_epi32(1);
+		__m512i subt_one_v = _mm512_mask_set1_epi32(_mm512_set1_epi32(0), need_reduce_m, 1);
 		__m512i conflict_end = _mm512_conflict_epi32(end_v);
+		//__m512i conflict_end = _mm512_mask_conflict_epi32(_mm512_set1_epi32(0), need_reduce_m, end_v);
 		__mmask16 todo_mask = _mm512_test_epi32_mask(conflict_end, _mm512_set1_epi32(-1));
-		__m512i subt_one_v = _mm512_set1_epi32(1);
+		//__mmask16 todo_mask = _mm512_mask_test_epi32_mask(need_reduce_m, conflict_end, _mm512_set1_epi32(-1));
 		if (todo_mask) {
 			__m512i lz = _mm512_lzcnt_epi32(conflict_end);
 			__m512i lid = _mm512_sub_epi32(_mm512_set1_epi32(31), lz);
@@ -252,7 +258,6 @@ inline void kcore_kernel(
 		__m512i end_degrees_results_v = _mm512_mask_sub_epi32(end_degrees_v, need_reduce_m, end_degrees_v, subt_one_v);
 		_mm512_mask_i32scatter_epi32(graph_degrees, need_reduce_m, end_v, end_degrees_results_v, sizeof(unsigned));
 	}
-	*/
 }
 inline void scheduler(
 					unsigned *graph_heads, 
@@ -386,7 +391,7 @@ void kcore(
 				}
 			}
 			double ts2 = omp_get_wtime();
-			printf("time for vertices: %lf\n", ts2 - ts);
+			//printf("time for vertices: %lf\n", ts2 - ts);
 			unsigned side_id;
 			for (side_id = 0; side_id + ROW_STEP <= SIDE_LENGTH; ) {
 				if (!is_updating_active_side[side_id]) {
@@ -427,11 +432,11 @@ void kcore(
 			//		0, 
 			//		NEDGES,
 			//		graph_cores);
-			printf("time for edges: %lf\n", omp_get_wtime() - ts2);
+			//printf("time for edges: %lf\n", omp_get_wtime() - ts2);
 			memset(graph_updating_active, 0, NNODES * sizeof(int));
 			memset(is_updating_active_side, 0, SIDE_LENGTH * sizeof(int));
 		}
-		printf("KCORE: %u\n", KCORE);//test
+		//printf("KCORE: %u\n", KCORE);//test
 	}
 	KCORE -= 2;
 

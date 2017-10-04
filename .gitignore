@@ -22,6 +22,7 @@ vtune/
 *report*
 ranks.txt
 0ranks.txt
+*ranks.txt
 output*.txt
 *distances.txt
 

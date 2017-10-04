@@ -120,6 +120,7 @@ void input(
 		n2--;
 		graph_heads[index] = n1;
 		graph_ends[index] = n2;
+#pragma omp atomic
 		graph_degrees[n1]++;
 	}
 

@@ -34,7 +34,8 @@ void input(
 		char filename[], 
 		unsigned *&graph_heads, 
 		unsigned *&graph_ends, 
-		unsigned *&graph_degrees)
+		unsigned *&graph_degrees,
+		unsigned *&graph_adj_indices)
 		//(vector<vector<unsigned>> &graph_neighbors) 
 {
 	//printf("data: %s\n", filename);
@@ -81,6 +82,7 @@ void input(
 		n2--;
 		graph_heads[index] = n1;
 		graph_ends[index] = n2;
+#pragma omp atomic
 		graph_degrees[n1]++;
 		//graph_degrees[n2]++;
 //#pragma omp critical
@@ -92,9 +94,35 @@ void input(
 
 	fclose(fin);
 }
+	// Get the edge start index of each index
+	graph_adj_indices = (unsigned *) malloc(NNODES * sizeof(unsigned));
+	unsigned offset = 0;
+	graph_adj_indices[0] = offset;
+	for (unsigned i = 0; i < NNODES - 1; ++i) {
+		offset += graph_degrees[i];
+		graph_adj_indices[i + 1] = offset;
+	}
+
+	//unsigned head_last = 0;
+	//graph_adj_indices[head_last] = 0;
+	//for (unsigned i = 0; i < NEDGES; ++i) {
+	//	unsigned head = graph_heads[i];
+	//	//unsigned end = graph_ends[i];
+	//	if (head != head_last) {
+	//		for (unsigned j = head_last + 1; j <= head; ++j) {
+	//			graph_adj_indices[j] = i;
+	//		}
+	//		head_last = head;
+	//	}
+	//}
 }
 
-void input_serial(char filename[], unsigned *&graph_heads, unsigned *&graph_ends, unsigned *&graph_degrees)
+void input_serial(
+				char filename[], 
+				unsigned *&graph_heads, 
+				unsigned *&graph_ends, 
+				unsigned *&graph_degrees,
+				unsigned *&graph_adj_indices)
 {
 	//printf("data: %s\n", filename);
 	FILE *fin = fopen(filename, "r");
@@ -118,6 +146,27 @@ void input_serial(char filename[], unsigned *&graph_heads, unsigned *&graph_ends
 		//graph_degrees[end]++;
 	}
 	fclose(fin);
+
+	//graph_adj_indices = (unsigned *) malloc(NNODES * sizeof(unsigned));
+	//unsigned head_last = 0;
+	//graph_adj_indices[head_last] = 0;
+	//for (unsigned i = 0; i < NEDGES; ++i) {
+	//	unsigned head = graph_heads[i];
+	//	//unsigned end = graph_ends[i];
+	//	if (head != head_last) {
+	//		for (unsigned j = head_last + 1; j <= head; ++j) {
+	//			graph_adj_indices[j] = i;
+	//		}
+	//		head_last = head;
+	//	}
+	//}
+	graph_adj_indices = (unsigned *) malloc(NNODES * sizeof(unsigned));
+	unsigned offset = 0;
+	graph_adj_indices[0] = offset;
+	for (unsigned i = 0; i < NNODES - 1; ++i) {
+		offset += graph_degrees[i];
+		graph_adj_indices[i + 1] = offset;
+	}
 }
 
 void print(unsigned *graph_cores) {
@@ -136,80 +185,31 @@ void kcore_kernel(
 				unsigned *graph_heads, 
 				unsigned *graph_ends,
 				unsigned *graph_degrees,
-				//const vector<vector<unsigned>> &graph_neighbors,
+				unsigned *graph_adj_indices,
 				int *graph_updating_active, 
-				//const unsigned &node_i_start,
-				//const unsigned &node_i_bound,
 				const unsigned &edge_i_start, 
 				const unsigned &edge_i_bound,
 				unsigned *graph_cores)
-				//(int &stop)
 {
-//	int has_remove = 1;
-//	while (has_remove) {
-//		//double ts = omp_get_wtime();
-//		has_remove = 0;
-//#pragma omp parallel for
-//		for (unsigned i = node_i_start; i < node_i_bound; ++i) {
-//			if (graph_degrees[i]) {
-//				stop = 0;
-//				if(graph_degrees[i] < KCORE) {
-//					graph_updating_active[i] = 1;
-//					graph_degrees[i] = 0;
-//					graph_cores[i] = KCORE - 1;
-//					//test_count++;//test
-//					has_remove = 1;
-//				}
-//			}
-//		}
-		//double ts2 = omp_get_wtime();
-		//printf("time for nodes: %lf\n", ts2 - ts);
-
 #pragma omp parallel for
 	for (unsigned edge_i = edge_i_start; edge_i < edge_i_bound; ++edge_i) {
-		unsigned head = graph_heads[edge_i];
+		//unsigned head = graph_heads[edge_i];
 		unsigned end = graph_ends[edge_i];
-		if (graph_updating_active[head] && graph_degrees[end]) {
+		//if (graph_updating_active[head] && graph_degrees[end]) {}
+		if (graph_degrees[end]) {
 			graph_degrees[end]--;
 			if (!graph_degrees[end]) {
 				graph_cores[end] = KCORE - 1;
 				test_count++;//test
 			}
 		}
-		//if (graph_updating_active[end] && graph_degrees[head]) {
-		//	graph_degrees[head]--;
-		//	if (!graph_degrees[head]) {
-		//		graph_cores[head] = KCORE - 1;
-		//		test_count++;//test
-		//	}
-		//}
 	}
-		//for (unsigned vertex_i = 0; vertex_i < NNODES; ++vertex_i) {
-		//	if (!graph_updating_active[vertex_i]) {
-		//		continue;
-		//	}
-		//	for (unsigned neibr_i = 0; neibr_i < graph_neighbors[vertex_i].size(); ++neibr_i) {
-		//		unsigned neighbor = graph_neighbors[vertex_i][neibr_i];
-		//		if (0 == graph_degrees[neighbor]) {
-		//			continue;
-		//		}
-		//		graph_degrees[neighbor]--;
-		//		if (!graph_degrees[neighbor]) {
-		//			graph_cores[neighbor] = KCORE - 1;
-		//			//test_count++;//test
-		//		}
-		//	}
-		//}
-		//double ts3 = omp_get_wtime();
-		//printf("time for edges: %lf\n", ts3 - ts2);//test
-		//memset(graph_updating_active, 0, NNODES * sizeof(int));
-	//}
 }
 void kcore(
 		unsigned *graph_heads, 
 		unsigned *graph_ends, 
 		unsigned *graph_degrees,
-		//const vector<vector<unsigned>> &graph_neighbors,
+		unsigned *graph_adj_indices,
 		int *graph_updating_active,
 		unsigned *graph_cores)
 {
@@ -224,7 +224,7 @@ void kcore(
 		while (has_remove) {
 			double ts = omp_get_wtime();
 			has_remove = 0;
-//#pragma omp parallel for
+#pragma omp parallel for
 			for (unsigned i = 0; i < NNODES; ++i) {
 				if (graph_degrees[i]) {
 					stop = 0;
@@ -239,48 +239,39 @@ void kcore(
 			}
 			double ts2 = omp_get_wtime();
 			//printf("time for vertices: %lf\n", ts2 - ts);//test
-			kcore_kernel(
-					graph_heads, 
-					graph_ends, 
-					graph_degrees,
-					//graph_neighbors,
-					graph_updating_active, 
-					//0,
-					//NNODES,
-					0, 
-					NEDGES,
-					graph_cores);
-//#pragma omp parallel for
-			//for (unsigned edge_i = 0; edge_i < NEDGES; ++edge_i) {
-			//	unsigned head = graph_heads[edge_i];
-			//	unsigned end = graph_ends[edge_i];
-			//	if (graph_updating_active[head] && graph_degrees[end]) {
-			//		graph_degrees[end]--;
-			//		if (!graph_degrees[end]) {
-			//			graph_cores[end] = KCORE - 1;
-			//			test_count++;//test
-			//		}
-			//	}
-			//}
-		//if (graph_updating_active[end] && graph_degrees[head]) {
-		//	graph_degrees[head]--;
-		//	if (!graph_degrees[head]) {
-		//		graph_cores[head] = KCORE - 1;
-		//		test_count++;//test
-		//	}
-		//}
-	//}
-			//printf("time for edges: %lf\n", omp_get_wtime() - ts2);
-			//(stop);
+#pragma omp parallel for
+			for (unsigned vertex_i = 0; vertex_i < NNODES; ++vertex_i) {
+				if (!graph_updating_active[vertex_i]) {
+					continue;
+				}
+				unsigned bound_edge_i;
+				if (NNODES - 1 != vertex_i) {
+					bound_edge_i = graph_adj_indices[vertex_i + 1];
+				} else {
+					bound_edge_i = NEDGES;
+				}
+				kcore_kernel(
+						graph_heads, 
+						graph_ends, 
+						graph_degrees,
+						graph_adj_indices,
+						graph_updating_active, 
+						graph_adj_indices[vertex_i], 
+						bound_edge_i,
+						graph_cores);
+			}
+			//kcore_kernel(
+			//		graph_heads, 
+			//		graph_ends, 
+			//		graph_degrees,
+			//		graph_adj_indices,
+			//		graph_updating_active, 
+			//		0, 
+			//		NEDGES,
+			//		graph_cores);
 			memset(graph_updating_active, 0, NNODES * sizeof(int));
 		}
 		printf("test_count: %u, KCORE: %u\n", test_count, KCORE);//test
-		//memset(graph_updating_active, 0, NNODES * sizeof(int));
-		//if (!stop) {
-		//	KCORE++;
-		//} else {
-		//	KCORE -= 2;
-		//}
 	}
 	KCORE -= 2;
 
@@ -303,25 +294,37 @@ int main(int argc, char *argv[])
 	unsigned *graph_heads;
 	unsigned *graph_ends;
 	unsigned *graph_degrees;
+	unsigned *graph_adj_indices;
 	//vector< vector<unsigned> > graph_neighbors;
 	//unsigned *nneibor;
 #ifdef ONESERIAL
 	//input_serial("/home/zpeng/benchmarks/data/fake/data.txt", graph_heads, graph_ends, graph_degrees);
 	//input_serial("/home/zpeng/benchmarks/data/fake/mun_twitter", graph_heads, graph_ends,graph_degrees);
-	input_serial("/home/zpeng/benchmarks/data/zebra/out.zebra_sym", graph_heads, graph_ends,graph_degrees);
+	input_serial(
+				"/home/zpeng/benchmarks/data/zebra/out.zebra_sym", 
+				graph_heads, 
+				graph_ends,
+				graph_degrees,
+				graph_adj_indices);
 #else
 	input(
 		filename, 
 		graph_heads, 
 		graph_ends, 
-		graph_degrees);
+		graph_degrees,
+		graph_adj_indices);
 		//(graph_neighbors);
 #endif
-	//vector<unsigned> degrees_list(graph_degrees, graph_degrees + NNODES);
-	//std::sort(degrees_list.begin(), degrees_list.end());
+	//FILE *ftest = fopen("output.txt", "w");
+	//fprintf(ftest, "degrees:\n");
 	//for (unsigned i = 0; i < NNODES; ++i) {
-	//	printf("%u: %u\n", i, degrees_list[i]);//test
+	//	fprintf(ftest, "%u: %u\n", i, graph_degrees[i]);
 	//}
+	//fprintf(ftest, "edges:\n");
+	//for (unsigned i = 0; i < NEDGES; ++i) {
+	//	fprintf(ftest, "%u %u\n", graph_heads[i], graph_ends[i]);
+	//}
+	//fclose(ftest);
 	//exit(1);
 
 	// K-core
@@ -334,7 +337,7 @@ int main(int argc, char *argv[])
 	time_out = fopen(time_file, "w");
 	fprintf(time_out, "input end: %lf\n", now - start);
 #ifdef ONEDEBUG
-	unsigned run_count = 1;
+	unsigned run_count = 2;
 	printf("Start K-core...\n");
 #else
 	unsigned run_count = 9;
@@ -354,7 +357,7 @@ int main(int argc, char *argv[])
 			graph_heads, 
 			graph_ends, 
 			graph_degrees,
-			//graph_neighbors,
+			graph_adj_indices,
 			graph_updating_active,
 			graph_cores);
 		now = omp_get_wtime();
@@ -370,6 +373,7 @@ int main(int argc, char *argv[])
 	free(graph_ends);
 	free(graph_degrees);
 	free(graph_degrees_bak);
+	free(graph_adj_indices);
 	free(graph_updating_active);
 	free(graph_cores);
 
