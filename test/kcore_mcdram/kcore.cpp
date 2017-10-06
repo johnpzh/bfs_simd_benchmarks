@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <algorithm>
 #include <immintrin.h>
+#include <hbwmalloc.h>
 using std::string;
 using std::getline;
 using std::cout;
@@ -71,7 +72,7 @@ void input(
 		fprintf(stderr, "cannot open file: %s\n", fname.c_str());
 		exit(1);
 	}
-	tile_offsets = (unsigned *) malloc(NUM_TILES * sizeof(unsigned));
+	tile_offsets = (unsigned *) hbw_malloc(NUM_TILES * sizeof(unsigned));
 	for (unsigned i = 0; i < NUM_TILES; ++i) {
 		//fscanf(fin, "%u", tile_offsets + i);
 		unsigned offset;
@@ -81,7 +82,7 @@ void input(
 	fclose(fin);
 	graph_heads = (unsigned *) malloc(NEDGES * sizeof(unsigned));
 	graph_ends = (unsigned *) malloc(NEDGES * sizeof(unsigned));
-	is_empty_tile = (int *) malloc(sizeof(int) * NUM_TILES);
+	is_empty_tile = (int *) hbw_malloc(sizeof(int) * NUM_TILES);
 	memset(is_empty_tile, 0, sizeof(int) * NUM_TILES);
 	for (unsigned i = 0; i < NUM_TILES; ++i) {
 		if (NUM_TILES - 1 != i) {
@@ -94,7 +95,7 @@ void input(
 			}
 		}
 	}
-	graph_degrees = (unsigned *) malloc(NNODES * sizeof(unsigned));
+	graph_degrees = (unsigned *) hbw_malloc(NNODES * sizeof(unsigned));
 	memset(graph_degrees, 0, NNODES * sizeof(unsigned));
 	NUM_THREADS = 64;
 	unsigned edge_bound = NEDGES / NUM_THREADS;
@@ -363,8 +364,10 @@ void kcore(
 		unsigned *graph_cores)
 {
 	omp_set_num_threads(NUM_THREADS);
-	unsigned *heads_buffer = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS, ALIGNED_BYTES);
-	unsigned *ends_buffer = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS, ALIGNED_BYTES);
+	unsigned *heads_buffer;
+   	hbw_posix_memalign((void **) &heads_buffer, ALIGNED_BYTES, sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS);
+	unsigned *ends_buffer;
+   	hbw_posix_memalign((void **) &ends_buffer, ALIGNED_BYTES, sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS);
 	double start_time = omp_get_wtime();
 	int stop = 0;
 	//test_count = 0;
@@ -442,8 +445,8 @@ void kcore(
 
 	double end_time = omp_get_wtime();
 	printf("%u %lf\n", NUM_THREADS, end_time - start_time);
-	_mm_free(heads_buffer);
-	_mm_free(ends_buffer);
+	hbw_free(heads_buffer);
+	hbw_free(ends_buffer);
 }
 
 
@@ -480,10 +483,10 @@ int main(int argc, char *argv[])
 #endif
 
 	// K-core
-	int *graph_updating_active = (int *) malloc(NNODES * sizeof(int));
-	int *is_updating_active_side = (int *) malloc(sizeof(int) * SIDE_LENGTH);
-	unsigned *graph_cores = (unsigned *) malloc(NNODES * sizeof(unsigned));
-	unsigned *graph_degrees_bak = (unsigned *) malloc(NNODES * sizeof(unsigned));
+	int *graph_updating_active = (int *) hbw_malloc(NNODES * sizeof(int));
+	int *is_updating_active_side = (int *) hbw_malloc(sizeof(int) * SIDE_LENGTH);
+	unsigned *graph_cores = (unsigned *) hbw_malloc(NNODES * sizeof(unsigned));
+	unsigned *graph_degrees_bak = (unsigned *) hbw_malloc(NNODES * sizeof(unsigned));
 	memcpy(graph_degrees_bak, graph_degrees, NNODES * sizeof(unsigned));
 	
 	now = omp_get_wtime();
@@ -494,6 +497,7 @@ int main(int argc, char *argv[])
 	printf("Start K-core...\n");
 #else
 	unsigned run_count = 9;
+	printf("Start K-core...\n");//test
 #endif
 	//for (unsigned s = 1; s < 2048; s *= 2) {
 	//ROW_STEP = s;
@@ -531,13 +535,13 @@ int main(int argc, char *argv[])
 	// Free memory
 	free(graph_heads);
 	free(graph_ends);
-	free(graph_degrees);
-	free(tile_offsets);
-	free(graph_degrees_bak);
-	free(graph_updating_active);
-	free(is_updating_active_side);
-	free(is_empty_tile);
-	free(graph_cores);
+	hbw_free(graph_degrees);
+	hbw_free(tile_offsets);
+	hbw_free(graph_degrees_bak);
+	hbw_free(graph_updating_active);
+	hbw_free(is_updating_active_side);
+	hbw_free(is_empty_tile);
+	hbw_free(graph_cores);
 
 	return 0;
 }

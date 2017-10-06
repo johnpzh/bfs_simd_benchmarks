@@ -160,20 +160,20 @@ void input( int argc, char** argv)
 	// BFS
 	//for (unsigned row_step = 1; row_step < 10000; row_step *= 2) {
 	//printf("row_step: %u\n", row_step);
-	for (unsigned i = 4; i < 16; ++i) {
-	SIZE_BUFFER_MAX = (unsigned) pow(2, i);
-	printf("SIZE_BUFFER_MAX: %u\n", SIZE_BUFFER_MAX);
+	//for (unsigned i = 4; i < 16; ++i) {
+	//SIZE_BUFFER_MAX = (unsigned) pow(2, i);
+	//printf("SIZE_BUFFER_MAX: %u\n", SIZE_BUFFER_MAX);
 	unsigned row_step = 16;
-	//SIZE_BUFFER_MAX = 512;
+	SIZE_BUFFER_MAX = 512;
 
 	if (side_length < row_step) {
 		fprintf(stderr, "Error: row step is too large.\n");
 		exit(3);
 	}
-	for (unsigned i = 0; i < run_count; ++i) {
+	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
-		sleep(10);
+		//sleep(10);
 #endif
 		// Re-initializing
 		memset(h_graph_mask, 0, sizeof(int)*num_of_nodes);
@@ -210,7 +210,7 @@ void input( int argc, char** argv)
 		printf("Thread %u finished.\n", NUM_THREADS);
 #endif
 	}
-	}
+	//}
 	fclose(time_out);
 
 	//Store the result into a file

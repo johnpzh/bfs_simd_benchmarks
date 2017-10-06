@@ -11,6 +11,7 @@
 #include <omp.h>
 #include <unistd.h>
 #include <immintrin.h>
+#include <hbwmalloc.h>
 using std::string;
 using std::getline;
 using std::cout;
@@ -68,7 +69,7 @@ void input(
 		fprintf(stderr, "cannot open file: %s\n", fname.c_str());
 		exit(1);
 	}
-	tile_offsets = (unsigned *) malloc(NUM_TILES * sizeof(unsigned));
+	tile_offsets = (unsigned *) hbw_malloc(NUM_TILES * sizeof(unsigned));
 	for (unsigned i = 0; i < NUM_TILES; ++i) {
 		//fscanf(fin, "%u", tile_offsets + i);
 		unsigned offset;
@@ -78,7 +79,7 @@ void input(
 	fclose(fin);
 	graph_heads = (unsigned *) malloc(NEDGES * sizeof(unsigned));
 	graph_ends = (unsigned *) malloc(NEDGES * sizeof(unsigned));
-	is_empty_tile = (int *) malloc(sizeof(int) * NUM_TILES);
+	is_empty_tile = (int *) hbw_malloc(sizeof(int) * NUM_TILES);
 	memset(is_empty_tile, 0, sizeof(int) * NUM_TILES);
 	for (unsigned i = 0; i < NUM_TILES; ++i) {
 		if (NUM_TILES - 1 != i) {
@@ -383,8 +384,11 @@ void cc(
 		unsigned *graph_component)
 {
 	omp_set_num_threads(NUM_THREADS);
-	unsigned *heads_buffer = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS, ALIGNED_BYTES);
-	unsigned *ends_buffer = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS, ALIGNED_BYTES);
+	unsigned *heads_buffer;
+   	hbw_posix_memalign((void **) &heads_buffer, ALIGNED_BYTES, sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS);
+	//hbw_posix_memalign((void**) &A, 64, sizeof(double)*n);
+	unsigned *ends_buffer;
+   	hbw_posix_memalign((void **) &ends_buffer, ALIGNED_BYTES, sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS);
 	double start_time = omp_get_wtime();
 	int stop = 0;
 	while (!stop) {
@@ -479,8 +483,8 @@ void cc(
 
 	double end_time = omp_get_wtime();
 	printf("%u %lf\n", NUM_THREADS, end_time - start_time);
-	_mm_free(heads_buffer);
-	_mm_free(ends_buffer);
+	hbw_free(heads_buffer);
+	hbw_free(ends_buffer);
 }
 
 
@@ -515,11 +519,11 @@ int main(int argc, char *argv[])
 #endif
 
 	// Connected Component
-	int *graph_active = (int *) malloc(NNODES * sizeof(int));
-	int *graph_updating_active = (int *) malloc(NNODES * sizeof(int));
-	int *is_active_side = (int *) malloc(sizeof(int) * SIDE_LENGTH);
-	int *is_updating_active_side = (int *) malloc(sizeof(int) * SIDE_LENGTH);
-	unsigned *graph_component = (unsigned *) malloc(NNODES * sizeof(unsigned));
+	int *graph_active = (int *) hbw_malloc(NNODES * sizeof(int));
+	int *graph_updating_active = (int *) hbw_malloc(NNODES * sizeof(int));
+	int *is_active_side = (int *) hbw_malloc(sizeof(int) * SIDE_LENGTH);
+	int *is_updating_active_side = (int *) hbw_malloc(sizeof(int) * SIDE_LENGTH);
+	unsigned *graph_component = (unsigned *) hbw_malloc(NNODES * sizeof(unsigned));
 	
 	now = omp_get_wtime();
 	time_out = fopen(time_file, "w");
@@ -567,13 +571,13 @@ int main(int argc, char *argv[])
 	// Free memory
 	free(graph_heads);
 	free(graph_ends);
-	free(tile_offsets);
-	free(graph_active);
-	free(graph_updating_active);
-	free(is_active_side);
-	free(is_updating_active_side);
-	free(is_empty_tile);
-	free(graph_component);
+	hbw_free(tile_offsets);
+	hbw_free(graph_active);
+	hbw_free(graph_updating_active);
+	hbw_free(is_active_side);
+	hbw_free(is_updating_active_side);
+	hbw_free(is_empty_tile);
+	hbw_free(graph_component);
 
 	return 0;
 }

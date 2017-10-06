@@ -472,14 +472,6 @@ LOOP BEGIN at page_rank.cpp(555,2) inlined into page_rank.cpp(585,2)
    remark #15418: vectorization support: number of FP down converts: double precision to single precision 1   [ page_rank.cpp(556,3) ]
    remark #15301: REMAINDER LOOP WAS VECTORIZED
 LOOP END
-
-
-Non-optimizable loops:
-
-
-LOOP BEGIN at page_rank.cpp(156,2) inlined into page_rank.cpp(585,2)
-   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ page_rank.cpp(157,3) ]
-LOOP END
 ===========================================================================
 
 Begin optimization report for: input(char *)
@@ -947,14 +939,6 @@ LOOP BEGIN at page_rank.cpp(555,2) inlined into page_rank.cpp(180,3)
    remark #15417: vectorization support: number of FP up converts: single precision to double precision 1   [ page_rank.cpp(556,3) ]
    remark #15418: vectorization support: number of FP down converts: double precision to single precision 1   [ page_rank.cpp(556,3) ]
    remark #15301: REMAINDER LOOP WAS VECTORIZED
-LOOP END
-
-
-Non-optimizable loops:
-
-
-LOOP BEGIN at page_rank.cpp(156,2)
-   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ page_rank.cpp(157,3) ]
 LOOP END
 ===========================================================================
 

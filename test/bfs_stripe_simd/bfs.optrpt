@@ -95,14 +95,6 @@ LOOP BEGIN at bfs.cpp(129,2) inlined into bfs.cpp(51,2)
    remark #15346: vector dependence: assumed OUTPUT dependence between n2 (132:3) and n2 (134:3)
    remark #15346: vector dependence: assumed OUTPUT dependence between n2 (134:3) and n2 (132:3)
 LOOP END
-
-
-Non-optimizable loops:
-
-
-LOOP BEGIN at bfs.cpp(163,2) inlined into bfs.cpp(51,2)
-   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ bfs.cpp(165,2) ]
-LOOP END
 ===========================================================================
 
 Begin optimization report for: input(int, char **)
@@ -193,14 +185,6 @@ LOOP BEGIN at bfs.cpp(129,2)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
    remark #15346: vector dependence: assumed OUTPUT dependence between n2 (132:3) and n2 (134:3)
    remark #15346: vector dependence: assumed OUTPUT dependence between n2 (134:3) and n2 (132:3)
-LOOP END
-
-
-Non-optimizable loops:
-
-
-LOOP BEGIN at bfs.cpp(163,2)
-   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ bfs.cpp(165,2) ]
 LOOP END
 ===========================================================================
 

@@ -197,6 +197,7 @@ void kcore_kernel(
 		unsigned end = graph_ends[edge_i];
 		//if (graph_updating_active[head] && graph_degrees[end]) {}
 		if (graph_degrees[end]) {
+#pragma omp atomic
 			graph_degrees[end]--;
 			if (!graph_degrees[end]) {
 				graph_cores[end] = KCORE - 1;
@@ -340,9 +341,9 @@ int main(int argc, char *argv[])
 	unsigned run_count = 2;
 	printf("Start K-core...\n");
 #else
-	unsigned run_count = 9;
+	unsigned run_count = 2;
 #endif
-	for (unsigned i = 0; i < run_count; ++i) {
+	for (unsigned i = 1; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 		for (unsigned k = 0; k < NNODES; ++k) {
 		}

@@ -302,6 +302,7 @@ void kcore(
 			memset(is_updating_active_side, 0, SIDE_LENGTH * sizeof(int));
 		}
 		//printf("test_count: %u, KCORE: %u\n", test_count, KCORE);//test
+		printf("KCORE: %u\n", KCORE);//test
 	}
 	KCORE -= 2;
 
@@ -353,7 +354,7 @@ int main(int argc, char *argv[])
 	time_out = fopen(time_file, "w");
 	fprintf(time_out, "input end: %lf\n", now - start);
 #ifdef ONEDEBUG
-	unsigned run_count = 2;
+	unsigned run_count = 9;
 	printf("Start K-core...\n");
 #else
 	unsigned run_count = 9;
@@ -362,7 +363,7 @@ int main(int argc, char *argv[])
 	//ROW_STEP = s;
 	//printf("ROW_STEP: %u\n", ROW_STEP);
 	ROW_STEP = 16;
-	for (unsigned i = 0; i < run_count; ++i) {
+	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 		memset(graph_updating_active, 0, NNODES * sizeof(int));
 		memset(is_updating_active_side, 0, SIDE_LENGTH * sizeof(int));
