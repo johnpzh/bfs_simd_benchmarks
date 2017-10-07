@@ -191,13 +191,13 @@ void kcore_kernel(
 				const unsigned &edge_i_bound,
 				unsigned *graph_cores)
 {
-#pragma omp parallel for
+//#pragma omp parallel for
 	for (unsigned edge_i = edge_i_start; edge_i < edge_i_bound; ++edge_i) {
 		//unsigned head = graph_heads[edge_i];
 		unsigned end = graph_ends[edge_i];
 		//if (graph_updating_active[head] && graph_degrees[end]) {}
 		if (graph_degrees[end]) {
-#pragma omp atomic
+//#pragma omp atomic
 			graph_degrees[end]--;
 			if (!graph_degrees[end]) {
 				graph_cores[end] = KCORE - 1;
@@ -225,7 +225,7 @@ void kcore(
 		while (has_remove) {
 			double ts = omp_get_wtime();
 			has_remove = 0;
-#pragma omp parallel for
+//#pragma omp parallel for
 			for (unsigned i = 0; i < NNODES; ++i) {
 				if (graph_degrees[i]) {
 					stop = 0;
@@ -240,7 +240,7 @@ void kcore(
 			}
 			double ts2 = omp_get_wtime();
 			//printf("time for vertices: %lf\n", ts2 - ts);//test
-#pragma omp parallel for
+//#pragma omp parallel for
 			for (unsigned vertex_i = 0; vertex_i < NNODES; ++vertex_i) {
 				if (!graph_updating_active[vertex_i]) {
 					continue;
@@ -338,12 +338,12 @@ int main(int argc, char *argv[])
 	time_out = fopen(time_file, "w");
 	fprintf(time_out, "input end: %lf\n", now - start);
 #ifdef ONEDEBUG
-	unsigned run_count = 2;
+	unsigned run_count = 1;
 	printf("Start K-core...\n");
 #else
-	unsigned run_count = 2;
+	unsigned run_count = 1;
 #endif
-	for (unsigned i = 1; i < run_count; ++i) {
+	for (unsigned i = 0; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 		for (unsigned k = 0; k < NNODES; ++k) {
 		}
