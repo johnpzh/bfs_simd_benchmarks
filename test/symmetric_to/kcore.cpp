@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
 	unsigned *graph_degrees;
 	//unsigned *nneibor;
 #ifdef ONESERIAL
-	input_serial("/home/zpeng/benchmarks/data/fake/data.txt", graph_heads, graph_ends,graph_degrees);
+	input_serial(filename, graph_heads, graph_ends,graph_degrees);
 #else
 	input(filename, graph_heads, graph_ends, graph_degrees);
 #endif

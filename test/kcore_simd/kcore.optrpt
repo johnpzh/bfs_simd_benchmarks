@@ -11,14 +11,14 @@ Begin optimization report for: main(int, char **)
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at kcore.cpp(503,2)
+LOOP BEGIN at kcore.cpp(506,2)
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at kcore.cpp(507,3)
+   LOOP BEGIN at kcore.cpp(510,3)
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at kcore.cpp(507,3)
-         remark #15389: vectorization support: reference graph_cores[k] has unaligned access   [ kcore.cpp(508,4) ]
+      LOOP BEGIN at kcore.cpp(510,3)
+         remark #15389: vectorization support: reference graph_cores[k] has unaligned access   [ kcore.cpp(511,4) ]
          remark #15381: vectorization support: unaligned access used inside loop body
          remark #15305: vectorization support: vector length 16
          remark #15309: vectorization support: normalized vectorization overhead 0.600
@@ -31,9 +31,9 @@ LOOP BEGIN at kcore.cpp(503,2)
          remark #15488: --- end vector cost summary ---
       LOOP END
 
-      LOOP BEGIN at kcore.cpp(507,3)
+      LOOP BEGIN at kcore.cpp(510,3)
       <Remainder loop for vectorization>
-         remark #15389: vectorization support: reference graph_cores[k] has unaligned access   [ kcore.cpp(508,4) ]
+         remark #15389: vectorization support: reference graph_cores[k] has unaligned access   [ kcore.cpp(511,4) ]
          remark #15381: vectorization support: unaligned access used inside loop body
          remark #15305: vectorization support: vector length 16
          remark #15309: vectorization support: normalized vectorization overhead 1.364
@@ -41,100 +41,100 @@ LOOP BEGIN at kcore.cpp(503,2)
       LOOP END
    LOOP END
 
-   LOOP BEGIN at kcore.cpp(371,2) inlined into kcore.cpp(513,3)
+   LOOP BEGIN at kcore.cpp(371,2) inlined into kcore.cpp(516,3)
       remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-      LOOP BEGIN at kcore.cpp(375,3) inlined into kcore.cpp(513,3)
+      LOOP BEGIN at kcore.cpp(375,3) inlined into kcore.cpp(516,3)
          remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-         LOOP BEGIN at kcore.cpp(396,4) inlined into kcore.cpp(513,3)
+         LOOP BEGIN at kcore.cpp(396,4) inlined into kcore.cpp(516,3)
             remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
          LOOP END
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at kcore.cpp(379,1) inlined into kcore.cpp(513,3)
+LOOP BEGIN at kcore.cpp(379,1) inlined into kcore.cpp(516,3)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
    remark #15346: vector dependence: assumed ANTI dependence between TILE_WIDTH (385:7) and graph_degrees (386:7)
    remark #15346: vector dependence: assumed FLOW dependence between graph_degrees (386:7) and TILE_WIDTH (385:7)
 LOOP END
 
-LOOP BEGIN at kcore.cpp(300,46) inlined into kcore.cpp(513,3)
+LOOP BEGIN at kcore.cpp(300,46) inlined into kcore.cpp(516,3)
    remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-   LOOP BEGIN at kcore.cpp(276,2) inlined into kcore.cpp(513,3)
+   LOOP BEGIN at kcore.cpp(276,2) inlined into kcore.cpp(516,3)
       remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-      LOOP BEGIN at kcore.cpp(282,3) inlined into kcore.cpp(513,3)
+      LOOP BEGIN at kcore.cpp(282,3) inlined into kcore.cpp(516,3)
          remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-         LOOP BEGIN at kcore.cpp(295,4) inlined into kcore.cpp(513,3)
+         LOOP BEGIN at kcore.cpp(295,4) inlined into kcore.cpp(516,3)
             remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-            LOOP BEGIN at kcore.cpp(195,2) inlined into kcore.cpp(513,3)
+            LOOP BEGIN at kcore.cpp(195,2) inlined into kcore.cpp(516,3)
                remark #15523: loop was not vectorized: loop control variable edge_i was found, but loop iteration count cannot be computed before executing the loop
 
-               LOOP BEGIN at kcore.cpp(213,5) inlined into kcore.cpp(513,3)
+               LOOP BEGIN at kcore.cpp(213,5) inlined into kcore.cpp(516,3)
                   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
                LOOP END
             LOOP END
 
-            LOOP BEGIN at kcore.cpp(249,4) inlined into kcore.cpp(513,3)
+            LOOP BEGIN at kcore.cpp(249,4) inlined into kcore.cpp(516,3)
                remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
             LOOP END
          LOOP END
       LOOP END
 
-      LOOP BEGIN at kcore.cpp(195,2) inlined into kcore.cpp(513,3)
+      LOOP BEGIN at kcore.cpp(195,2) inlined into kcore.cpp(516,3)
          remark #15523: loop was not vectorized: loop control variable edge_i was found, but loop iteration count cannot be computed before executing the loop
 
-         LOOP BEGIN at kcore.cpp(213,5) inlined into kcore.cpp(513,3)
+         LOOP BEGIN at kcore.cpp(213,5) inlined into kcore.cpp(516,3)
             remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
          LOOP END
       LOOP END
 
-      LOOP BEGIN at kcore.cpp(249,4) inlined into kcore.cpp(513,3)
+      LOOP BEGIN at kcore.cpp(249,4) inlined into kcore.cpp(516,3)
          remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at kcore.cpp(300,46) inlined into kcore.cpp(513,3)
+LOOP BEGIN at kcore.cpp(300,46) inlined into kcore.cpp(516,3)
    remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-   LOOP BEGIN at kcore.cpp(276,2) inlined into kcore.cpp(513,3)
+   LOOP BEGIN at kcore.cpp(276,2) inlined into kcore.cpp(516,3)
       remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-      LOOP BEGIN at kcore.cpp(282,3) inlined into kcore.cpp(513,3)
+      LOOP BEGIN at kcore.cpp(282,3) inlined into kcore.cpp(516,3)
          remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-         LOOP BEGIN at kcore.cpp(295,4) inlined into kcore.cpp(513,3)
+         LOOP BEGIN at kcore.cpp(295,4) inlined into kcore.cpp(516,3)
             remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-            LOOP BEGIN at kcore.cpp(195,2) inlined into kcore.cpp(513,3)
+            LOOP BEGIN at kcore.cpp(195,2) inlined into kcore.cpp(516,3)
                remark #15523: loop was not vectorized: loop control variable edge_i was found, but loop iteration count cannot be computed before executing the loop
 
-               LOOP BEGIN at kcore.cpp(213,5) inlined into kcore.cpp(513,3)
+               LOOP BEGIN at kcore.cpp(213,5) inlined into kcore.cpp(516,3)
                   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
                LOOP END
             LOOP END
 
-            LOOP BEGIN at kcore.cpp(249,4) inlined into kcore.cpp(513,3)
+            LOOP BEGIN at kcore.cpp(249,4) inlined into kcore.cpp(516,3)
                remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
             LOOP END
          LOOP END
       LOOP END
 
-      LOOP BEGIN at kcore.cpp(195,2) inlined into kcore.cpp(513,3)
+      LOOP BEGIN at kcore.cpp(195,2) inlined into kcore.cpp(516,3)
          remark #15523: loop was not vectorized: loop control variable edge_i was found, but loop iteration count cannot be computed before executing the loop
 
-         LOOP BEGIN at kcore.cpp(213,5) inlined into kcore.cpp(513,3)
+         LOOP BEGIN at kcore.cpp(213,5) inlined into kcore.cpp(516,3)
             remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
          LOOP END
       LOOP END
 
-      LOOP BEGIN at kcore.cpp(249,4) inlined into kcore.cpp(513,3)
+      LOOP BEGIN at kcore.cpp(249,4) inlined into kcore.cpp(516,3)
          remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
       LOOP END
    LOOP END

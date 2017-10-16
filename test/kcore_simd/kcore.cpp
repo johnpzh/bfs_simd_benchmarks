@@ -436,7 +436,7 @@ void kcore(
 			memset(graph_updating_active, 0, NNODES * sizeof(int));
 			memset(is_updating_active_side, 0, SIDE_LENGTH * sizeof(int));
 		}
-		printf("KCORE: %u\n", KCORE);//test
+		//printf("KCORE: %u\n", KCORE);//test
 	}
 	KCORE -= 2;
 
@@ -490,7 +490,7 @@ int main(int argc, char *argv[])
 	time_out = fopen(time_file, "w");
 	fprintf(time_out, "input end: %lf\n", now - start);
 #ifdef ONEDEBUG
-	unsigned run_count = 1;
+	unsigned run_count = 9;
 	printf("Start K-core...\n");
 #else
 	unsigned run_count = 9;
@@ -500,6 +500,9 @@ int main(int argc, char *argv[])
 	//printf("ROW_STEP: %u\n", ROW_STEP);
 	ROW_STEP = 16;
 	SIZE_BUFFER_MAX = 512;
+	//for (unsigned p = 4; p < 14; ++p) {
+	//SIZE_BUFFER_MAX = (unsigned) pow(2, p);
+	//printf("SIZE_BUFFER: %u\n", SIZE_BUFFER_MAX);
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 		memset(graph_updating_active, 0, NNODES * sizeof(int));
@@ -521,8 +524,8 @@ int main(int argc, char *argv[])
 			graph_cores);
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
-	}
 	//}
+	}
 	fclose(time_out);
 #ifdef ONEDEBUG
 	print(graph_cores);
