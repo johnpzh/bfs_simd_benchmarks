@@ -439,7 +439,7 @@ void kcore(
 			memset(graph_updating_active, 0, NNODES * sizeof(int));
 			memset(is_updating_active_side, 0, SIDE_LENGTH * sizeof(int));
 		}
-		printf("KCORE: %u\n", KCORE);//test
+		//printf("KCORE: %u\n", KCORE);//test
 	}
 	KCORE -= 2;
 
