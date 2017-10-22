@@ -13,11 +13,14 @@ using std::to_string;
 #define NUM_P_INT 16 // Number of packed intergers in one __m512i variable
 #define ALIGNED_BYTES 64
 
-unsigned num_of_nodes;
-unsigned edge_list_size;
-int	NUM_THREADS;
+unsigned NNODES;
+unsigned NEDGES;
+unsigned NUM_THREADS;
 unsigned TILE_WIDTH;
+unsigned SIDE_LENGTH;
+unsigned NUM_TILES;
 unsigned SIZE_BUFFER_MAX;
+unsigned ROW_STEP;
 
 double start;
 double now;
@@ -36,11 +39,7 @@ void BFS(\
 		unsigned *tile_offsets,
 		unsigned *tile_sizes,
 		int *is_active_side,\
-		int *is_updating_active_side,\
-		unsigned side_length,\
-		unsigned num_tiles,\
-		unsigned row_step\
-		);
+		int *is_updating_active_side);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Main Program
@@ -71,19 +70,18 @@ void input( int argc, char** argv)
 	// Input real dataset
 	/////////////////////////////////////////////////////////////////////
 	//string prefix = string(input_f) + "_untiled";
-	string prefix = string(input_f) + "_coo-tiled-" + to_string(TILE_WIDTH);
+	string prefix = string(input_f) + "_col-16-coo-tiled-" + to_string(TILE_WIDTH);
 	//string prefix = string(input_f) + "_col-16-coo-tiled-" + to_string(TILE_WIDTH);
 	string fname = prefix + "-0";
 	FILE *fin = fopen(fname.c_str(), "r");
-	fscanf(fin, "%u %u", &num_of_nodes, &edge_list_size);
+	fscanf(fin, "%u %u", &NNODES, &NEDGES);
 	fclose(fin);
-	unsigned side_length;
-	if (num_of_nodes % TILE_WIDTH) {
-		side_length = num_of_nodes / TILE_WIDTH + 1;
+	if (NNODES % TILE_WIDTH) {
+		SIDE_LENGTH = NNODES / TILE_WIDTH + 1;
 	} else {
-		side_length = num_of_nodes / TILE_WIDTH;
+		SIDE_LENGTH = NNODES / TILE_WIDTH;
 	}
-	unsigned num_tiles = side_length * side_length;
+	NUM_TILES = SIDE_LENGTH * SIDE_LENGTH;
 	// Read tile Offsets
 	fname = prefix + "-offsets";
 	fin = fopen(fname.c_str(), "r");
@@ -91,23 +89,23 @@ void input( int argc, char** argv)
 		fprintf(stderr, "cannot open file: %s\n", fname.c_str());
 		exit(1);
 	}
-	unsigned *tile_offsets = (unsigned *) malloc(num_tiles * sizeof(unsigned));
-	for (unsigned i = 0; i < num_tiles; ++i) {
+	unsigned *tile_offsets = (unsigned *) malloc(NUM_TILES * sizeof(unsigned));
+	for (unsigned i = 0; i < NUM_TILES; ++i) {
 		fscanf(fin, "%u", tile_offsets + i);
 	}
 	fclose(fin);
-	unsigned *tile_sizes = (unsigned *) malloc(num_tiles * sizeof(unsigned));
-	for (unsigned i = 0; i < num_tiles; ++i) {
-		if (num_tiles - 1 != i) {
+	unsigned *tile_sizes = (unsigned *) malloc(NUM_TILES * sizeof(unsigned));
+	for (unsigned i = 0; i < NUM_TILES; ++i) {
+		if (NUM_TILES - 1 != i) {
 			tile_sizes[i] = tile_offsets[i + 1] - tile_offsets[i];
 		} else {
-			tile_sizes[i] = edge_list_size - tile_offsets[i];
+			tile_sizes[i] = NEDGES - tile_offsets[i];
 		}
 	}
-	unsigned *h_graph_starts = (unsigned *) malloc(sizeof(unsigned) * edge_list_size);
-	unsigned *h_graph_ends = (unsigned *) malloc(sizeof(unsigned) * edge_list_size);
+	unsigned *h_graph_starts = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
+	unsigned *h_graph_ends = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
 	NUM_THREADS = 64;
-	unsigned edge_bound = edge_list_size / NUM_THREADS;
+	unsigned edge_bound = NEDGES / NUM_THREADS;
 #pragma omp parallel num_threads(NUM_THREADS) private(fname, fin)
 {
 	unsigned tid = omp_get_thread_num();
@@ -119,13 +117,13 @@ void input( int argc, char** argv)
 		exit(1);
 	}
 	if (0 == tid) {
-		fscanf(fin, "%u %u", &num_of_nodes, &edge_list_size);
+		fscanf(fin, "%u %u", &NNODES, &NEDGES);
 	}
 	unsigned bound_index;
 	if (NUM_THREADS - 1 != tid) {
 		bound_index = offset + edge_bound;
 	} else {
-		bound_index = edge_list_size;
+		bound_index = NEDGES;
 	}
 	for (unsigned index = offset; index < bound_index; ++index) {
 		unsigned n1;
@@ -141,12 +139,12 @@ void input( int argc, char** argv)
 	// End Input real dataset
 	/////////////////////////////////////////////////////////////////////
 
-	int *h_graph_mask = (int*) malloc(sizeof(int)*num_of_nodes);
-	int *h_updating_graph_mask = (int*) malloc(sizeof(int)*num_of_nodes);
-	int *h_graph_visited = (int*) malloc(sizeof(int)*num_of_nodes);
-	int* h_cost = (int*) malloc(sizeof(int)*num_of_nodes);
-	int *is_active_side = (int *) malloc(sizeof(int) * side_length);
-	int *is_updating_active_side = (int *) malloc(sizeof(int) * side_length);
+	int *h_graph_mask = (int*) malloc(sizeof(int)*NNODES);
+	int *h_updating_graph_mask = (int*) malloc(sizeof(int)*NNODES);
+	int *h_graph_visited = (int*) malloc(sizeof(int)*NNODES);
+	int* h_cost = (int*) malloc(sizeof(int)*NNODES);
+	int *is_active_side = (int *) malloc(sizeof(int) * SIDE_LENGTH);
+	int *is_updating_active_side = (int *) malloc(sizeof(int) * SIDE_LENGTH);
 	unsigned source = 0;
 
 	now = omp_get_wtime();
@@ -159,15 +157,15 @@ void input( int argc, char** argv)
 	unsigned run_count = 9;
 #endif
 	// BFS
-	//for (unsigned row_step = 1; row_step < 10000; row_step *= 2) {
-	//printf("row_step: %u\n", row_step);
+	//for (unsigned ROW_STEP = 1; ROW_STEP < 10000; ROW_STEP *= 2) {
+	//printf("ROW_STEP: %u\n", ROW_STEP);
 	//for (unsigned i = 4; i < 16; ++i) {
 	//SIZE_BUFFER_MAX = (unsigned) pow(2, i);
 	//printf("SIZE_BUFFER_MAX: %u\n", SIZE_BUFFER_MAX);
-	unsigned row_step = 16;
+	ROW_STEP = 16;
 	SIZE_BUFFER_MAX = 512;
 
-	if (side_length < row_step) {
+	if (SIDE_LENGTH < ROW_STEP) {
 		fprintf(stderr, "Error: row step is too large.\n");
 		exit(3);
 	}
@@ -177,18 +175,18 @@ void input( int argc, char** argv)
 		sleep(10);
 #endif
 		// Re-initializing
-		memset(h_graph_mask, 0, sizeof(int)*num_of_nodes);
+		memset(h_graph_mask, 0, sizeof(int)*NNODES);
 		h_graph_mask[source] = 1;
-		memset(h_updating_graph_mask, 0, sizeof(int)*num_of_nodes);
-		memset(h_graph_visited, 0, sizeof(int)*num_of_nodes);
+		memset(h_updating_graph_mask, 0, sizeof(int)*NNODES);
+		memset(h_graph_visited, 0, sizeof(int)*NNODES);
 		h_graph_visited[source] = 1;
-		for (unsigned i = 0; i < num_of_nodes; ++i) {
+		for (unsigned i = 0; i < NNODES; ++i) {
 			h_cost[i] = -1;
 		}
 		h_cost[source] = 0;
-		memset(is_active_side, 0, sizeof(int) * side_length);
+		memset(is_active_side, 0, sizeof(int) * SIDE_LENGTH);
 		is_active_side[0] = 1;
-		memset(is_updating_active_side, 0, sizeof(int) * side_length);
+		memset(is_updating_active_side, 0, sizeof(int) * SIDE_LENGTH);
 
 		BFS(\
 			h_graph_starts,\
@@ -200,11 +198,7 @@ void input( int argc, char** argv)
 			tile_offsets,
 			tile_sizes,\
 			is_active_side,\
-			is_updating_active_side,\
-			side_length,\
-			num_tiles,\
-			row_step\
-			);
+			is_updating_active_side);
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 #ifdef ONEDEBUG
@@ -219,7 +213,7 @@ void input( int argc, char** argv)
 #ifdef ONEDEBUG
 	NUM_THREADS = 64;
 	omp_set_num_threads(NUM_THREADS);
-	unsigned num_lines = num_of_nodes / NUM_THREADS;
+	unsigned num_lines = NNODES / NUM_THREADS;
 #pragma omp parallel
 {
 	unsigned tid = omp_get_thread_num();
@@ -235,7 +229,7 @@ void input( int argc, char** argv)
 	if (tid != NUM_THREADS - 1) {
 		bound_index = offset + num_lines;
 	} else {
-		bound_index = num_of_nodes;
+		bound_index = NNODES;
 	}
 	for (unsigned index = offset; index < bound_index; ++index) {
 		fprintf(fpo, "%d) cost:%d\n", index, h_cost[index]);
@@ -339,34 +333,36 @@ inline void bfs_kernel(\
 	_mm512_mask_i32scatter_epi32(is_updating_active_side, not_visited_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
 }
 
-inline void scheduler(\
-		const unsigned &start_row_index,\
-		const unsigned &bound_row_index,\
-		unsigned *h_graph_heads,\
-		unsigned *h_graph_ends,\
-		unsigned *heads_buffer,
-		unsigned *ends_buffer,
-		int *h_graph_mask,\
-		int *h_updating_graph_mask,\
-		int *h_graph_visited,\
-		int *h_cost,\
-		unsigned *tile_offsets,
-		unsigned *tile_sizes,
-		const unsigned &side_length,\
-		const unsigned &num_tiles,\
-		int *is_updating_active_side\
-		)
+inline void scheduler(
+					unsigned *h_graph_heads,\
+					unsigned *h_graph_ends,\
+					unsigned *heads_buffer,
+					unsigned *ends_buffer,
+					int *h_graph_mask,\
+					int *h_updating_graph_mask,\
+					int *h_graph_visited,\
+					int *h_cost,\
+					unsigned *tile_offsets,
+					unsigned *tile_sizes,
+					int *is_active_side,
+					int *is_updating_active_side,
+					const unsigned &start_tile_id,
+					const unsigned &bound_tile_id,
+					const unsigned &tile_step)
 {
 #pragma omp parallel for schedule(dynamic, 1)
-	for (unsigned col_id = 0; col_id < side_length; ++col_id) {
+	//for (unsigned col_id = 0; col_id < SIDE_LENGTH; ++col_id) {}
+	for (unsigned tile_index = start_tile_id; tile_index < bound_tile_id; tile_index += tile_step) {
 		unsigned tid = omp_get_thread_num();
 		unsigned *heads_buffer_base = heads_buffer + tid * SIZE_BUFFER_MAX;
 		unsigned *ends_buffer_base = ends_buffer + tid * SIZE_BUFFER_MAX;
 		unsigned size_buffer = 0;
 		unsigned capacity = SIZE_BUFFER_MAX;
-		for (unsigned row_id = start_row_index; row_id < bound_row_index; ++row_id) {
-			unsigned tile_id = row_id * side_length + col_id;
-			if (0 == tile_sizes[tile_id]) {
+		//for (unsigned row_id = start_row_index; row_id < bound_row_index; ++row_id) {}
+		//	unsigned tile_id = row_id * SIDE_LENGTH + col_id;
+		unsigned bound_tile_id = tile_index + tile_step;
+		for (unsigned tile_id = tile_index; tile_id < bound_tile_id; ++tile_id) {
+			if (0 == tile_sizes[tile_id] || 0 == is_active_side[tile_id/SIDE_LENGTH]) {
 				continue;
 			}
 			// Load to buffer
@@ -410,10 +406,10 @@ inline void scheduler(\
 			
 			//bfs_kernel();
 			//unsigned bound_edge_i;
-			//if (num_tiles - 1 != tile_id) {
+			//if (NUM_TILES - 1 != tile_id) {
 			//	bound_edge_i = tile_offsets[tile_id + 1];
 			//} else {
-			//	bound_edge_i = edge_list_size;
+			//	bound_edge_i = NEDGES;
 			//}
 			//bfs_kernel(\
 			//		tile_offsets[tile_id],\
@@ -451,11 +447,7 @@ void BFS(\
 		unsigned *tile_offsets,
 		unsigned *tile_sizes,\
 		int *is_active_side,\
-		int *is_updating_active_side,\
-		unsigned side_length,\
-		unsigned num_tiles,\
-		unsigned row_step
-		)
+		int *is_updating_active_side)
 {
 
 	//printf("Start traversing the tree\n");
@@ -468,78 +460,93 @@ void BFS(\
 	{
 		//if no thread changes this value then the loop stops
 		stop = true;
-
-//#pragma omp parallel for 
-		//for(unsigned int nid = 0; nid < num_of_nodes; nid++ )
-		//{
-		//	if (h_graph_mask[nid] == 1) {
-		//		h_graph_mask[nid]=0;
-		//		//int next_starting = h_graph_nodes[nid].starting + h_graph_nodes[nid].num_of_edges;
-		//		//for(int i = h_graph_nodes[nid].starting; \
-		//		//		i < next_starting; \
-		//		//		i++)
-		//		//{
-		//		//	int id = h_graph_edges[i];
-		//		//	if(!h_graph_visited[id])
-		//		//	{
-		//		//		h_cost[id]=h_cost[nid]+1;
-		//		//		h_updating_graph_mask[id]=1;
-		//		//	}
-		//		//}
+		unsigned side_id;
+		for (side_id = 0; side_id + ROW_STEP <= SIDE_LENGTH; side_id += ROW_STEP) {
+			scheduler(
+					h_graph_heads,\
+					h_graph_ends,\
+					heads_buffer,
+					ends_buffer,
+					h_graph_mask,\
+					h_updating_graph_mask,\
+					h_graph_visited,\
+					h_cost,\
+					tile_offsets,
+					tile_sizes,
+					is_active_side,
+					is_updating_active_side,
+					side_id * SIDE_LENGTH,
+					(side_id + ROW_STEP) * SIDE_LENGTH,
+					ROW_STEP);
+		}
+		scheduler(
+				h_graph_heads,\
+				h_graph_ends,\
+				heads_buffer,
+				ends_buffer,
+				h_graph_mask,\
+				h_updating_graph_mask,\
+				h_graph_visited,\
+				h_cost,\
+				tile_offsets,
+				tile_sizes,
+				is_active_side,
+				is_updating_active_side,
+				side_id * SIDE_LENGTH,
+				NUM_TILES,
+				SIDE_LENGTH - side_id);
+		//for (unsigned side_id = 0; side_id < SIDE_LENGTH; ) {
+		//	//if (!is_active_side[side_id]) {
+		//	//	++side_id;
+		//	//	continue;
+		//	//}
+		//	if (side_id + ROW_STEP < SIDE_LENGTH) {
+		//		scheduler(\
+		//				side_id,\
+		//				side_id + ROW_STEP,\
+		//				h_graph_heads,\
+		//				h_graph_ends,\
+		//				heads_buffer,
+		//				ends_buffer,
+		//				h_graph_mask,\
+		//				h_updating_graph_mask,\
+		//				h_graph_visited,\
+		//				h_cost,\
+		//				tile_offsets,
+		//				tile_sizes,
+		//				SIDE_LENGTH,\
+		//				NUM_TILES,\
+		//				is_updating_active_side
+		//				);
+		//		side_id += ROW_STEP;
+		//	} else {
+		//		scheduler(\
+		//				side_id,\
+		//				SIDE_LENGTH,\
+		//				h_graph_heads,\
+		//				h_graph_ends,\
+		//				heads_buffer,
+		//				ends_buffer,
+		//				h_graph_mask,\
+		//				h_updating_graph_mask,\
+		//				h_graph_visited,\
+		//				h_cost,\
+		//				tile_offsets,
+		//				tile_sizes,
+		//				SIDE_LENGTH,\
+		//				NUM_TILES,\
+		//				is_updating_active_side
+		//				);
+		//		side_id = SIDE_LENGTH;
 		//	}
 		//}
-		for (unsigned side_id = 0; side_id < side_length; ) {
-			if (!is_active_side[side_id]) {
-				++side_id;
-				continue;
-			}
-			if (side_id + row_step < side_length) {
-				scheduler(\
-						side_id,\
-						side_id + row_step,\
-						h_graph_heads,\
-						h_graph_ends,\
-						heads_buffer,
-						ends_buffer,
-						h_graph_mask,\
-						h_updating_graph_mask,\
-						h_graph_visited,\
-						h_cost,\
-						tile_offsets,
-						tile_sizes,
-						side_length,\
-						num_tiles,\
-						is_updating_active_side
-						);
-				side_id += row_step;
-			} else {
-				scheduler(\
-						side_id,\
-						side_length,\
-						h_graph_heads,\
-						h_graph_ends,\
-						heads_buffer,
-						ends_buffer,
-						h_graph_mask,\
-						h_updating_graph_mask,\
-						h_graph_visited,\
-						h_cost,\
-						tile_offsets,
-						tile_sizes,
-						side_length,\
-						num_tiles,\
-						is_updating_active_side
-						);
-				side_id = side_length;
-			}
-		}
-		//for (unsigned side_id = 0; side_id < side_length; ++side_id) {
+		//for (unsigned side_id = 0; side_id < SIDE_LENGTH; ++side_id) {
 		//	if (!is_active_side[side_id]) {
 		//		continue;
 		//	}
 		//	is_active_side[side_id] = 0;
-		//	unsigned start_tile_id = side_id * side_length;
-		//	unsigned bound_tile_id = start_tile_id + side_length;
+		//	unsigned start_tile_id = side_id * SIDE_LENGTH;
+		//	unsigned bound_tile_id = start_tile_id + SIDE_LENGTH;
 		//	for (unsigned tile_id = start_tile_id; \
 		//			tile_id < bound_tile_id;\
 		//			++tile_id) {
@@ -547,10 +554,10 @@ void BFS(\
 		//			continue;
 		//		}
 		//		unsigned bound_edge_i;
-		//		if (num_tiles - 1 != tile_id) {
+		//		if (NUM_TILES - 1 != tile_id) {
 		//			bound_edge_i = tile_offsets[tile_id + 1];
 		//		} else {
-		//			bound_edge_i = edge_list_size;
+		//			bound_edge_i = NEDGES;
 		//		}
 		//		for (unsigned edge_i = tile_offsets[tile_id]; \
 		//				edge_i < bound_edge_i; \
@@ -576,7 +583,7 @@ void BFS(\
 		//	}
 		//}
 #pragma omp parallel for
-		//for(unsigned int nid=0; nid< num_of_nodes ; nid++ )
+		//for(unsigned int nid=0; nid< NNODES ; nid++ )
 		//{
 		//	if (h_updating_graph_mask[nid] == 1) {
 		//		h_graph_mask[nid]=1;
@@ -585,7 +592,7 @@ void BFS(\
 		//		h_updating_graph_mask[nid]=0;
 		//	}
 		//}
-		for (unsigned side_id = 0; side_id < side_length; ++side_id) {
+		for (unsigned side_id = 0; side_id < SIDE_LENGTH; ++side_id) {
 			if (!is_updating_active_side[side_id]) {
 				is_active_side[side_id] = 0;
 				continue;
@@ -594,14 +601,14 @@ void BFS(\
 			is_active_side[side_id] = 1;
 			stop = false;
 			unsigned bound_vertex_id;
-			if (side_length - 1 != side_id) {
+			if (SIDE_LENGTH - 1 != side_id) {
 				bound_vertex_id = side_id * TILE_WIDTH + TILE_WIDTH;
 			} else {
-				bound_vertex_id = num_of_nodes;
+				bound_vertex_id = NNODES;
 			}
 			//for (unsigned i = 0; i < TILE_WIDTH; ++i) {
 			//	unsigned vertex_id = i + side_id * TILE_WIDTH;
-			//	if (vertex_id == num_of_nodes) {
+			//	if (vertex_id == NNODES) {
 			//		break;
 			//	}
 			//	if (1 == h_updating_graph_mask[vertex_id]) {
