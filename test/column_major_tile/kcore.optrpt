@@ -52,15 +52,15 @@ LOOP BEGIN at kcore.cpp(166,2)
             remark #15389: vectorization support: reference graph_ends[edge_i] has unaligned access   [ kcore.cpp(179,29) ]
             remark #15381: vectorization support: unaligned access used inside loop body
             remark #15305: vectorization support: vector length 4
-            remark #15309: vectorization support: normalized vectorization overhead 2.091
+            remark #15309: vectorization support: normalized vectorization overhead 1.533
             remark #15300: LOOP WAS VECTORIZED
             remark #15442: entire loop may be executed in remainder
             remark #15449: unmasked aligned unit stride stores: 2 
             remark #15450: unmasked unaligned unit stride loads: 2 
             remark #15475: --- begin vector cost summary ---
-            remark #15476: scalar cost: 10 
-            remark #15477: vector cost: 2.750 
-            remark #15478: estimated potential speedup: 3.420 
+            remark #15476: scalar cost: 12 
+            remark #15477: vector cost: 3.750 
+            remark #15478: estimated potential speedup: 3.040 
             remark #15488: --- end vector cost summary ---
          LOOP END
 
@@ -92,15 +92,15 @@ LOOP BEGIN at kcore.cpp(186,3)
          remark #15389: vectorization support: reference graph_ends[edge_i] has unaligned access   [ kcore.cpp(198,29) ]
          remark #15381: vectorization support: unaligned access used inside loop body
          remark #15305: vectorization support: vector length 4
-         remark #15309: vectorization support: normalized vectorization overhead 2.091
+         remark #15309: vectorization support: normalized vectorization overhead 1.533
          remark #15300: LOOP WAS VECTORIZED
          remark #15442: entire loop may be executed in remainder
          remark #15449: unmasked aligned unit stride stores: 2 
          remark #15450: unmasked unaligned unit stride loads: 2 
          remark #15475: --- begin vector cost summary ---
-         remark #15476: scalar cost: 10 
-         remark #15477: vector cost: 2.750 
-         remark #15478: estimated potential speedup: 3.420 
+         remark #15476: scalar cost: 12 
+         remark #15477: vector cost: 3.750 
+         remark #15478: estimated potential speedup: 3.040 
          remark #15488: --- end vector cost summary ---
       LOOP END
 
@@ -116,6 +116,10 @@ LOOP END
 
 LOOP BEGIN at kcore.cpp(234,2)
    remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ kcore.cpp(235,3) ]
+LOOP END
+
+LOOP BEGIN at kcore.cpp(242,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ kcore.cpp(243,3) ]
 LOOP END
 
 LOOP BEGIN at kcore.cpp(225,2)

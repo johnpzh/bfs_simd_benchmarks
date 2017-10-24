@@ -16,7 +16,9 @@ graph16M_d64.txt
 
 # Ignore those useless result files
 path/
+0path/
 vtune/
+report*/
 *path.txt
 *result.txt
 *report*

@@ -155,7 +155,7 @@ void convert_to_col_major(
 	unsigned *new_heads = (unsigned *) malloc(NEDGES * sizeof(unsigned));
 	unsigned *new_ends = (unsigned *) malloc(NEDGES * sizeof(unsigned));
 	unsigned *new_offsets = (unsigned *) malloc(NUM_TILES * sizeof(unsigned));
-	unsigned step = 16;
+	//unsigned step = 16;
 	//unsigned step = 2;//test
 	unsigned edge_index = 0;
 	unsigned new_tile_id = 0;
@@ -163,9 +163,9 @@ void convert_to_col_major(
 
 	printf("Converting...\n");
 
-	for (side_i = 0; side_i + step <= SIDE_LENGTH; side_i += step) {
+	for (side_i = 0; side_i + ROW_STEP <= SIDE_LENGTH; side_i += ROW_STEP) {
 		for (unsigned col = 0; col < SIDE_LENGTH; ++col) {
-			for (unsigned row = side_i; row < side_i + step; ++row) {
+			for (unsigned row = side_i; row < side_i + ROW_STEP; ++row) {
 				unsigned tile_id = row * SIDE_LENGTH + col;
 				unsigned bound_edge_i;
 				if (NUM_TILES - 1 != tile_id) {
@@ -175,8 +175,8 @@ void convert_to_col_major(
 				}
 				new_offsets[new_tile_id++] = edge_index;
 				for (unsigned edge_i = tile_offsets[tile_id]; edge_i < bound_edge_i; ++edge_i) {
-					new_heads[edge_index] = graph_heads[edge_i];
-					new_ends[edge_index] = graph_ends[edge_i];
+					new_heads[edge_index] = graph_heads[edge_i] + 1;
+					new_ends[edge_index] = graph_ends[edge_i] + 1;
 					++edge_index;
 				}
 			}
@@ -194,8 +194,8 @@ void convert_to_col_major(
 				}
 				new_offsets[new_tile_id++] = edge_index;
 				for (unsigned edge_i = tile_offsets[tile_id]; edge_i < bound_edge_i; ++edge_i) {
-					new_heads[edge_index] = graph_heads[edge_i];
-					new_ends[edge_index] = graph_ends[edge_i];
+					new_heads[edge_index] = graph_heads[edge_i] + 1;
+					new_ends[edge_index] = graph_ends[edge_i] + 1;
 					++edge_index;
 				}
 			}
@@ -204,7 +204,7 @@ void convert_to_col_major(
 	printf("Finally, edge_index: %u (NEDGES: %u), new_tile_id: %u (NUM_TILES: %u)\n", edge_index, NEDGES, new_tile_id, NUM_TILES);
 
 	// Write to files
-	string prefix = string(filename) + "_col-" + to_string(step) + "-coo-tiled-" + to_string(TILE_WIDTH);
+	string prefix = string(filename) + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH);
 	NUM_THREADS = 64;
 	unsigned edge_bound = NEDGES / NUM_THREADS;
 #pragma omp parallel num_threads(NUM_THREADS)
@@ -236,13 +236,13 @@ void convert_to_col_major(
 	}
 	fclose(fout);
 
-	//// test
-	//fout = fopen("output.txt", "w");
-	//fprintf(fout, "%u %u\n", NNODES, NEDGES);
-	//for (unsigned i = 0; i < NEDGES; ++i) {
-	//	fprintf(fout, "%u %u\n", new_heads[i], new_ends[i]);
-	//}
-	//fclose(fout);
+	// test
+	fout = fopen("output.txt", "w");
+	fprintf(fout, "%u %u\n", NNODES, NEDGES);
+	for (unsigned i = 0; i < NEDGES; ++i) {
+		fprintf(fout, "%u %u\n", new_heads[i], new_ends[i]);
+	}
+	fclose(fout);
 
 	free(new_heads);
 	free(new_ends);
@@ -252,13 +252,15 @@ int main(int argc, char *argv[])
 {
 	start = omp_get_wtime();
 	char *filename;
-	if (argc > 2) {
+	if (argc > 3) {
 		filename = argv[1];
 		TILE_WIDTH = strtoul(argv[2], NULL, 0);
+		ROW_STEP = strtoul(argv[3], NULL, 0);
 	} else {
 		//filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec";
 		filename = "/home/zpeng/benchmarks/data/skitter/out.skitter";
 		TILE_WIDTH = 1024;
+		ROW_STEP = 16;
 	}
 	// Input
 	unsigned *graph_heads;

@@ -236,7 +236,7 @@ void BFSGraph( int argc, char** argv)
 	for (unsigned i = 0; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
-		sleep(10);
+		//sleep(10);
 #endif
 		// Re-initializing
 		memset(h_graph_mask, 0, sizeof(int)*num_of_nodes);

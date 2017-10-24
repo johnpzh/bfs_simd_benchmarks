@@ -11,27 +11,27 @@ Begin optimization report for: main(int, char **)
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at bfs.cpp(93,2) inlined into bfs.cpp(50,2)
+LOOP BEGIN at bfs.cpp(536,2) inlined into bfs.cpp(704,2)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 
-LOOP BEGIN at bfs.cpp(98,2) inlined into bfs.cpp(50,2)
+LOOP BEGIN at bfs.cpp(541,2) inlined into bfs.cpp(704,2)
 <Peeled loop for vectorization>
-   remark #15389: vectorization support: reference tile_sizes[i] has unaligned access   [ bfs.cpp(100,4) ]
-   remark #15389: vectorization support: reference tile_offsets[i] has unaligned access   [ bfs.cpp(100,42) ]
-   remark #15389: vectorization support: reference tile_sizes[i] has unaligned access   [ bfs.cpp(102,4) ]
-   remark #15389: vectorization support: reference tile_offsets[i] has unaligned access   [ bfs.cpp(102,29) ]
+   remark #15389: vectorization support: reference tile_sizes[i] has unaligned access   [ bfs.cpp(543,4) ]
+   remark #15389: vectorization support: reference tile_offsets[i] has unaligned access   [ bfs.cpp(543,42) ]
+   remark #15389: vectorization support: reference tile_sizes[i] has unaligned access   [ bfs.cpp(545,4) ]
+   remark #15389: vectorization support: reference tile_offsets[i] has unaligned access   [ bfs.cpp(545,29) ]
    remark #15381: vectorization support: unaligned access used inside loop body
    remark #15305: vectorization support: vector length 16
    remark #15309: vectorization support: normalized vectorization overhead 0.475
    remark #15301: PEEL LOOP WAS VECTORIZED
 LOOP END
 
-LOOP BEGIN at bfs.cpp(98,2) inlined into bfs.cpp(50,2)
-   remark #15389: vectorization support: reference tile_sizes[i] has unaligned access   [ bfs.cpp(100,4) ]
-   remark #15389: vectorization support: reference tile_offsets[i] has unaligned access   [ bfs.cpp(102,29) ]
+LOOP BEGIN at bfs.cpp(541,2) inlined into bfs.cpp(704,2)
+   remark #15389: vectorization support: reference tile_sizes[i] has unaligned access   [ bfs.cpp(543,4) ]
+   remark #15389: vectorization support: reference tile_offsets[i] has unaligned access   [ bfs.cpp(545,29) ]
    remark #15381: vectorization support: unaligned access used inside loop body
-   remark #15415: vectorization support: irregularly indexed load was generated for the variable <tile_offsets[i+1]>, masked, part of index is linear but may overflow   [ bfs.cpp(100,20) ]
+   remark #15415: vectorization support: irregularly indexed load was generated for the variable <tile_offsets[i+1]>, masked, part of index is linear but may overflow   [ bfs.cpp(543,20) ]
    remark #15305: vectorization support: vector length 16
    remark #15309: vectorization support: normalized vectorization overhead 0.415
    remark #15300: LOOP WAS VECTORIZED
@@ -46,26 +46,26 @@ LOOP BEGIN at bfs.cpp(98,2) inlined into bfs.cpp(50,2)
    remark #15488: --- end vector cost summary ---
 LOOP END
 
-LOOP BEGIN at bfs.cpp(98,2) inlined into bfs.cpp(50,2)
+LOOP BEGIN at bfs.cpp(541,2) inlined into bfs.cpp(704,2)
 <Remainder loop for vectorization>
-   remark #15389: vectorization support: reference tile_sizes[i] has unaligned access   [ bfs.cpp(100,4) ]
-   remark #15389: vectorization support: reference tile_offsets[i] has unaligned access   [ bfs.cpp(100,42) ]
-   remark #15389: vectorization support: reference tile_sizes[i] has unaligned access   [ bfs.cpp(102,4) ]
-   remark #15389: vectorization support: reference tile_offsets[i] has unaligned access   [ bfs.cpp(102,29) ]
+   remark #15389: vectorization support: reference tile_sizes[i] has unaligned access   [ bfs.cpp(543,4) ]
+   remark #15389: vectorization support: reference tile_offsets[i] has unaligned access   [ bfs.cpp(543,42) ]
+   remark #15389: vectorization support: reference tile_sizes[i] has unaligned access   [ bfs.cpp(545,4) ]
+   remark #15389: vectorization support: reference tile_offsets[i] has unaligned access   [ bfs.cpp(545,29) ]
    remark #15381: vectorization support: unaligned access used inside loop body
    remark #15305: vectorization support: vector length 16
    remark #15309: vectorization support: normalized vectorization overhead 0.475
    remark #15301: REMAINDER LOOP WAS VECTORIZED
 LOOP END
 
-LOOP BEGIN at bfs.cpp(172,2) inlined into bfs.cpp(50,2)
+LOOP BEGIN at bfs.cpp(615,2) inlined into bfs.cpp(704,2)
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at bfs.cpp(183,3) inlined into bfs.cpp(50,2)
+   LOOP BEGIN at bfs.cpp(626,3) inlined into bfs.cpp(704,2)
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at bfs.cpp(183,3) inlined into bfs.cpp(50,2)
-         remark #15389: vectorization support: reference h_cost[i] has unaligned access   [ bfs.cpp(184,4) ]
+      LOOP BEGIN at bfs.cpp(626,3) inlined into bfs.cpp(704,2)
+         remark #15389: vectorization support: reference h_cost[i] has unaligned access   [ bfs.cpp(627,4) ]
          remark #15381: vectorization support: unaligned access used inside loop body
          remark #15305: vectorization support: vector length 16
          remark #15309: vectorization support: normalized vectorization overhead 0.600
@@ -78,9 +78,9 @@ LOOP BEGIN at bfs.cpp(172,2) inlined into bfs.cpp(50,2)
          remark #15488: --- end vector cost summary ---
       LOOP END
 
-      LOOP BEGIN at bfs.cpp(183,3) inlined into bfs.cpp(50,2)
+      LOOP BEGIN at bfs.cpp(626,3) inlined into bfs.cpp(704,2)
       <Remainder loop for vectorization>
-         remark #15389: vectorization support: reference h_cost[i] has unaligned access   [ bfs.cpp(184,4) ]
+         remark #15389: vectorization support: reference h_cost[i] has unaligned access   [ bfs.cpp(627,4) ]
          remark #15381: vectorization support: unaligned access used inside loop body
          remark #15305: vectorization support: vector length 16
          remark #15309: vectorization support: normalized vectorization overhead 1.364
@@ -89,11 +89,19 @@ LOOP BEGIN at bfs.cpp(172,2) inlined into bfs.cpp(50,2)
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(128,2) inlined into bfs.cpp(50,2)
-   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(131,3) ]
+LOOP BEGIN at bfs.cpp(571,2) inlined into bfs.cpp(704,2)
+   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(574,3) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (131:3) and n2 (133:3)
-   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (133:3) and n2 (131:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (574:3) and n2 (576:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (576:3) and n2 (574:3)
+LOOP END
+
+
+Non-optimizable loops:
+
+
+LOOP BEGIN at bfs.cpp(605,2) inlined into bfs.cpp(704,2)
+   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ bfs.cpp(607,2) ]
 LOOP END
 ===========================================================================
 
@@ -102,27 +110,27 @@ Begin optimization report for: input(int, char **)
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at bfs.cpp(93,2)
+LOOP BEGIN at bfs.cpp(536,2)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 
-LOOP BEGIN at bfs.cpp(98,2)
+LOOP BEGIN at bfs.cpp(541,2)
 <Peeled loop for vectorization>
-   remark #15389: vectorization support: reference tile_sizes[i] has unaligned access   [ bfs.cpp(100,4) ]
-   remark #15389: vectorization support: reference tile_offsets[i] has unaligned access   [ bfs.cpp(100,42) ]
-   remark #15389: vectorization support: reference tile_sizes[i] has unaligned access   [ bfs.cpp(102,4) ]
-   remark #15389: vectorization support: reference tile_offsets[i] has unaligned access   [ bfs.cpp(102,29) ]
+   remark #15389: vectorization support: reference tile_sizes[i] has unaligned access   [ bfs.cpp(543,4) ]
+   remark #15389: vectorization support: reference tile_offsets[i] has unaligned access   [ bfs.cpp(543,42) ]
+   remark #15389: vectorization support: reference tile_sizes[i] has unaligned access   [ bfs.cpp(545,4) ]
+   remark #15389: vectorization support: reference tile_offsets[i] has unaligned access   [ bfs.cpp(545,29) ]
    remark #15381: vectorization support: unaligned access used inside loop body
    remark #15305: vectorization support: vector length 16
    remark #15309: vectorization support: normalized vectorization overhead 0.475
    remark #15301: PEEL LOOP WAS VECTORIZED
 LOOP END
 
-LOOP BEGIN at bfs.cpp(98,2)
-   remark #15389: vectorization support: reference tile_sizes[i] has unaligned access   [ bfs.cpp(100,4) ]
-   remark #15389: vectorization support: reference tile_offsets[i] has unaligned access   [ bfs.cpp(102,29) ]
+LOOP BEGIN at bfs.cpp(541,2)
+   remark #15389: vectorization support: reference tile_sizes[i] has unaligned access   [ bfs.cpp(543,4) ]
+   remark #15389: vectorization support: reference tile_offsets[i] has unaligned access   [ bfs.cpp(545,29) ]
    remark #15381: vectorization support: unaligned access used inside loop body
-   remark #15415: vectorization support: irregularly indexed load was generated for the variable <tile_offsets[i+1]>, masked, part of index is linear but may overflow   [ bfs.cpp(100,20) ]
+   remark #15415: vectorization support: irregularly indexed load was generated for the variable <tile_offsets[i+1]>, masked, part of index is linear but may overflow   [ bfs.cpp(543,20) ]
    remark #15305: vectorization support: vector length 16
    remark #15309: vectorization support: normalized vectorization overhead 0.415
    remark #15300: LOOP WAS VECTORIZED
@@ -137,26 +145,26 @@ LOOP BEGIN at bfs.cpp(98,2)
    remark #15488: --- end vector cost summary ---
 LOOP END
 
-LOOP BEGIN at bfs.cpp(98,2)
+LOOP BEGIN at bfs.cpp(541,2)
 <Remainder loop for vectorization>
-   remark #15389: vectorization support: reference tile_sizes[i] has unaligned access   [ bfs.cpp(100,4) ]
-   remark #15389: vectorization support: reference tile_offsets[i] has unaligned access   [ bfs.cpp(100,42) ]
-   remark #15389: vectorization support: reference tile_sizes[i] has unaligned access   [ bfs.cpp(102,4) ]
-   remark #15389: vectorization support: reference tile_offsets[i] has unaligned access   [ bfs.cpp(102,29) ]
+   remark #15389: vectorization support: reference tile_sizes[i] has unaligned access   [ bfs.cpp(543,4) ]
+   remark #15389: vectorization support: reference tile_offsets[i] has unaligned access   [ bfs.cpp(543,42) ]
+   remark #15389: vectorization support: reference tile_sizes[i] has unaligned access   [ bfs.cpp(545,4) ]
+   remark #15389: vectorization support: reference tile_offsets[i] has unaligned access   [ bfs.cpp(545,29) ]
    remark #15381: vectorization support: unaligned access used inside loop body
    remark #15305: vectorization support: vector length 16
    remark #15309: vectorization support: normalized vectorization overhead 0.475
    remark #15301: REMAINDER LOOP WAS VECTORIZED
 LOOP END
 
-LOOP BEGIN at bfs.cpp(172,2)
+LOOP BEGIN at bfs.cpp(615,2)
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at bfs.cpp(183,3)
+   LOOP BEGIN at bfs.cpp(626,3)
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at bfs.cpp(183,3)
-         remark #15389: vectorization support: reference h_cost[i] has unaligned access   [ bfs.cpp(184,4) ]
+      LOOP BEGIN at bfs.cpp(626,3)
+         remark #15389: vectorization support: reference h_cost[i] has unaligned access   [ bfs.cpp(627,4) ]
          remark #15381: vectorization support: unaligned access used inside loop body
          remark #15305: vectorization support: vector length 16
          remark #15309: vectorization support: normalized vectorization overhead 0.600
@@ -169,9 +177,9 @@ LOOP BEGIN at bfs.cpp(172,2)
          remark #15488: --- end vector cost summary ---
       LOOP END
 
-      LOOP BEGIN at bfs.cpp(183,3)
+      LOOP BEGIN at bfs.cpp(626,3)
       <Remainder loop for vectorization>
-         remark #15389: vectorization support: reference h_cost[i] has unaligned access   [ bfs.cpp(184,4) ]
+         remark #15389: vectorization support: reference h_cost[i] has unaligned access   [ bfs.cpp(627,4) ]
          remark #15381: vectorization support: unaligned access used inside loop body
          remark #15305: vectorization support: vector length 16
          remark #15309: vectorization support: normalized vectorization overhead 1.364
@@ -180,11 +188,19 @@ LOOP BEGIN at bfs.cpp(172,2)
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(128,2)
-   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(131,3) ]
+LOOP BEGIN at bfs.cpp(571,2)
+   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(574,3) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (131:3) and n2 (133:3)
-   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (133:3) and n2 (131:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (574:3) and n2 (576:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (576:3) and n2 (574:3)
+LOOP END
+
+
+Non-optimizable loops:
+
+
+LOOP BEGIN at bfs.cpp(605,2)
+   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ bfs.cpp(607,2) ]
 LOOP END
 ===========================================================================
 
@@ -193,72 +209,64 @@ Begin optimization report for: BFS(unsigned int *, unsigned int *, int *, int *,
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at bfs.cpp(458,2)
+LOOP BEGIN at bfs.cpp(296,2)
    remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-   LOOP BEGIN at bfs.cpp(464,3)
+   LOOP BEGIN at bfs.cpp(302,3)
       remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(376,46) inlined into bfs.cpp(465,4)
+LOOP BEGIN at bfs.cpp(214,2) inlined into bfs.cpp(303,4)
    remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-   LOOP BEGIN at bfs.cpp(355,2) inlined into bfs.cpp(465,4)
+   LOOP BEGIN at bfs.cpp(221,3) inlined into bfs.cpp(303,4)
       remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-      LOOP BEGIN at bfs.cpp(364,3) inlined into bfs.cpp(465,4)
+      LOOP BEGIN at bfs.cpp(229,4) inlined into bfs.cpp(303,4)
          remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-         LOOP BEGIN at bfs.cpp(371,4) inlined into bfs.cpp(465,4)
-            remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
-
-            LOOP BEGIN at bfs.cpp(287,2) inlined into bfs.cpp(465,4)
-               remark #15523: loop was not vectorized: loop control variable edge_i was found, but loop iteration count cannot be computed before executing the loop
-            LOOP END
+         LOOP BEGIN at bfs.cpp(63,2) inlined into bfs.cpp(303,4)
+            remark #15523: loop was not vectorized: loop control variable edge_i was found, but loop iteration count cannot be computed before executing the loop
          LOOP END
       LOOP END
+   LOOP END
 
-      LOOP BEGIN at bfs.cpp(287,2) inlined into bfs.cpp(465,4)
-         remark #15523: loop was not vectorized: loop control variable edge_i was found, but loop iteration count cannot be computed before executing the loop
-      LOOP END
+   LOOP BEGIN at bfs.cpp(63,2) inlined into bfs.cpp(303,4)
+      remark #15523: loop was not vectorized: loop control variable edge_i was found, but loop iteration count cannot be computed before executing the loop
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(376,46) inlined into bfs.cpp(482,3)
+LOOP BEGIN at bfs.cpp(214,2) inlined into bfs.cpp(319,3)
    remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-   LOOP BEGIN at bfs.cpp(355,2) inlined into bfs.cpp(482,3)
+   LOOP BEGIN at bfs.cpp(221,3) inlined into bfs.cpp(319,3)
       remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-      LOOP BEGIN at bfs.cpp(364,3) inlined into bfs.cpp(482,3)
+      LOOP BEGIN at bfs.cpp(229,4) inlined into bfs.cpp(319,3)
          remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-         LOOP BEGIN at bfs.cpp(371,4) inlined into bfs.cpp(482,3)
-            remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
-
-            LOOP BEGIN at bfs.cpp(287,2) inlined into bfs.cpp(482,3)
-               remark #15523: loop was not vectorized: loop control variable edge_i was found, but loop iteration count cannot be computed before executing the loop
-            LOOP END
+         LOOP BEGIN at bfs.cpp(63,2) inlined into bfs.cpp(319,3)
+            remark #15523: loop was not vectorized: loop control variable edge_i was found, but loop iteration count cannot be computed before executing the loop
          LOOP END
       LOOP END
+   LOOP END
 
-      LOOP BEGIN at bfs.cpp(287,2) inlined into bfs.cpp(482,3)
-         remark #15523: loop was not vectorized: loop control variable edge_i was found, but loop iteration count cannot be computed before executing the loop
-      LOOP END
+   LOOP BEGIN at bfs.cpp(63,2) inlined into bfs.cpp(319,3)
+      remark #15523: loop was not vectorized: loop control variable edge_i was found, but loop iteration count cannot be computed before executing the loop
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(595,3)
-   remark #15382: vectorization support: call to function _mm512_mask_storeu_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ bfs.cpp(631,5) ]
-   remark #15382: vectorization support: call to function _mm512_mask_storeu_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ bfs.cpp(633,5) ]
-   remark #15382: vectorization support: call to function _mm512_mask_storeu_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ bfs.cpp(648,4) ]
-   remark #15382: vectorization support: call to function _mm512_mask_storeu_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ bfs.cpp(650,4) ]
+LOOP BEGIN at bfs.cpp(431,3)
+   remark #15382: vectorization support: call to function _mm512_mask_storeu_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ bfs.cpp(467,5) ]
+   remark #15382: vectorization support: call to function _mm512_mask_storeu_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ bfs.cpp(469,5) ]
+   remark #15382: vectorization support: call to function _mm512_mask_storeu_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ bfs.cpp(484,4) ]
+   remark #15382: vectorization support: call to function _mm512_mask_storeu_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ bfs.cpp(486,4) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between is_active_side[side_id] (597:5) and h_graph_mask[vertex_id] (649:4)
-   remark #15346: vector dependence: assumed OUTPUT dependence between h_graph_mask[vertex_id] (649:4) and is_active_side[side_id] (597:5)
+   remark #15346: vector dependence: assumed OUTPUT dependence between is_active_side[side_id] (433:5) and h_graph_mask[vertex_id] (485:4)
+   remark #15346: vector dependence: assumed OUTPUT dependence between h_graph_mask[vertex_id] (485:4) and is_active_side[side_id] (433:5)
 
-   LOOP BEGIN at bfs.cpp(623,4)
+   LOOP BEGIN at bfs.cpp(459,4)
       remark #15523: loop was not vectorized: loop control variable vertex_id was found, but loop iteration count cannot be computed before executing the loop
    LOOP END
 LOOP END

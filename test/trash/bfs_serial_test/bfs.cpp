@@ -286,6 +286,7 @@ inline void scheduler(\
 		const unsigned &side_length,\
 		const unsigned &num_tiles,\
 		int *is_empty_tile,\
+		int *is_active_side,
 		int *is_updating_active_side\
 		)
 {
@@ -293,7 +294,10 @@ inline void scheduler(\
 	for (unsigned col_id = 0; col_id < side_length; ++col_id) {
 		for (unsigned row_id = start_row_index; row_id < bound_row_index; ++row_id) {
 			unsigned tile_id = row_id * side_length + col_id;
-			if (is_empty_tile[tile_id]) {
+			//if (is_empty_tile[tile_id] ) {
+			//	continue;
+			//}
+			if (is_empty_tile[tile_id] || !is_active_side[row_id]) {
 				continue;
 			}
 			//bfs_kernel();
@@ -362,30 +366,11 @@ void BFS(\
 		//if no thread changes this value then the loop stops
 		stop = true;
 
-//#pragma omp parallel for 
-		//for(unsigned int nid = 0; nid < num_of_nodes; nid++ )
-		//{
-		//	if (h_graph_mask[nid] == 1) {
-		//		h_graph_mask[nid]=0;
-		//		//int next_starting = h_graph_nodes[nid].starting + h_graph_nodes[nid].num_of_edges;
-		//		//for(int i = h_graph_nodes[nid].starting; \
-		//		//		i < next_starting; \
-		//		//		i++)
-		//		//{
-		//		//	int id = h_graph_edges[i];
-		//		//	if(!h_graph_visited[id])
-		//		//	{
-		//		//		h_cost[id]=h_cost[nid]+1;
-		//		//		h_updating_graph_mask[id]=1;
-		//		//	}
-		//		//}
-		//	}
-		//}
 		for (unsigned side_id = 0; side_id < side_length; ) {
-			if (!is_active_side[side_id]) {
-				++side_id;
-				continue;
-			}
+			//if (!is_active_side[side_id]) {
+			//	++side_id;
+			//	continue;
+			//}
 			if (side_id + row_step < side_length) {
 				scheduler(\
 						side_id,\
@@ -401,6 +386,7 @@ void BFS(\
 						side_length,\
 						num_tiles,\
 						is_empty_tile,\
+						is_active_side,
 						is_updating_active_side
 						);
 				side_id += row_step;
@@ -419,6 +405,7 @@ void BFS(\
 						side_length,\
 						num_tiles,\
 						is_empty_tile,\
+						is_active_side,
 						is_updating_active_side
 						);
 				side_id = side_length;
