@@ -13,9 +13,9 @@ using std::to_string;
 #define NUM_P_INT 16 // Number of packed intergers in one __m512i variable
 #define ALIGNED_BYTES 64
 
-unsigned num_of_nodes;
-unsigned edge_list_size;
-int	NUM_THREADS;
+unsigned NNODES;
+unsigned NEDGES;
+unsigned NUM_THREADS;
 unsigned TILE_WIDTH;
 unsigned SIZE_BUFFER_MAX;
 
@@ -41,222 +41,6 @@ void BFS(\
 		unsigned num_tiles,\
 		unsigned row_step\
 		);
-
-///////////////////////////////////////////////////////////////////////////////
-// Main Program
-///////////////////////////////////////////////////////////////////////////////
-int main( int argc, char** argv) 
-{
-	start = omp_get_wtime();
-	input( argc, argv);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Apply BFS on a Graph
-///////////////////////////////////////////////////////////////////////////////
-void input( int argc, char** argv) 
-{
-	int num_of_indices;
-	char *input_f;
-	
-	if(argc < 3){
-		input_f = "/home/zpeng/benchmarks/data/pokec/coo_tiled_bak/soc-pokec";
-		TILE_WIDTH = 1024;
-	} else {
-		input_f = argv[1];
-		TILE_WIDTH = strtoul(argv[2], NULL, 0);
-	}
-
-	/////////////////////////////////////////////////////////////////////
-	// Input real dataset
-	/////////////////////////////////////////////////////////////////////
-	//string prefix = string(input_f) + "_untiled";
-	string prefix = string(input_f) + "_coo-tiled-" + to_string(TILE_WIDTH);
-	//string prefix = string(input_f) + "_col-16-coo-tiled-" + to_string(TILE_WIDTH);
-	string fname = prefix + "-0";
-	FILE *fin = fopen(fname.c_str(), "r");
-	fscanf(fin, "%u %u", &num_of_nodes, &edge_list_size);
-	fclose(fin);
-	unsigned side_length;
-	if (num_of_nodes % TILE_WIDTH) {
-		side_length = num_of_nodes / TILE_WIDTH + 1;
-	} else {
-		side_length = num_of_nodes / TILE_WIDTH;
-	}
-	unsigned num_tiles = side_length * side_length;
-	// Read tile Offsets
-	fname = prefix + "-offsets";
-	fin = fopen(fname.c_str(), "r");
-	if (!fin) {
-		fprintf(stderr, "cannot open file: %s\n", fname.c_str());
-		exit(1);
-	}
-	unsigned *tile_offsets = (unsigned *) malloc(num_tiles * sizeof(unsigned));
-	for (unsigned i = 0; i < num_tiles; ++i) {
-		fscanf(fin, "%u", tile_offsets + i);
-	}
-	fclose(fin);
-	unsigned *tile_sizes = (unsigned *) malloc(num_tiles * sizeof(unsigned));
-	for (unsigned i = 0; i < num_tiles; ++i) {
-		if (num_tiles - 1 != i) {
-			tile_sizes[i] = tile_offsets[i + 1] - tile_offsets[i];
-		} else {
-			tile_sizes[i] = edge_list_size - tile_offsets[i];
-		}
-	}
-	unsigned *h_graph_starts = (unsigned *) malloc(sizeof(unsigned) * edge_list_size);
-	unsigned *h_graph_ends = (unsigned *) malloc(sizeof(unsigned) * edge_list_size);
-	NUM_THREADS = 64;
-	unsigned edge_bound = edge_list_size / NUM_THREADS;
-#pragma omp parallel num_threads(NUM_THREADS) private(fname, fin)
-{
-	unsigned tid = omp_get_thread_num();
-	unsigned offset = tid * edge_bound;
-	fname = prefix + "-" + to_string(tid);
-	fin = fopen(fname.c_str(), "r");
-	if (!fin) {
-		fprintf(stderr, "Error: cannot open file %s\n", fname.c_str());
-		exit(1);
-	}
-	if (0 == tid) {
-		fscanf(fin, "%u %u", &num_of_nodes, &edge_list_size);
-	}
-	unsigned bound_index;
-	if (NUM_THREADS - 1 != tid) {
-		bound_index = offset + edge_bound;
-	} else {
-		bound_index = edge_list_size;
-	}
-	for (unsigned index = offset; index < bound_index; ++index) {
-		unsigned n1;
-		unsigned n2;
-		fscanf(fin, "%u %u", &n1, &n2);
-		n1--;
-		n2--;
-		h_graph_starts[index] = n1;
-		h_graph_ends[index] = n2;
-	}
-
-}
-	// End Input real dataset
-	/////////////////////////////////////////////////////////////////////
-
-	int *h_graph_mask = (int*) malloc(sizeof(int)*num_of_nodes);
-	int *h_updating_graph_mask = (int*) malloc(sizeof(int)*num_of_nodes);
-	int *h_graph_visited = (int*) malloc(sizeof(int)*num_of_nodes);
-	int* h_cost = (int*) malloc(sizeof(int)*num_of_nodes);
-	int *is_active_side = (int *) malloc(sizeof(int) * side_length);
-	int *is_updating_active_side = (int *) malloc(sizeof(int) * side_length);
-	unsigned source = 0;
-
-	now = omp_get_wtime();
-	time_out = fopen(time_file, "w");
-	fprintf(time_out, "input end: %lf\n", now - start);
-#ifdef ONEDEBUG
-	printf("Input finished: %s\n", input_f);
-	unsigned run_count = 2;
-#else
-	unsigned run_count = 9;
-#endif
-	// BFS
-	//for (unsigned row_step = 1; row_step < 10000; row_step *= 2) {
-	//printf("row_step: %u\n", row_step);
-	//for (unsigned i = 4; i < 16; ++i) {
-	//SIZE_BUFFER_MAX = (unsigned) pow(2, i);
-	//printf("SIZE_BUFFER_MAX: %u\n", SIZE_BUFFER_MAX);
-	unsigned row_step = 16;
-	SIZE_BUFFER_MAX = 512;
-
-	if (side_length < row_step) {
-		fprintf(stderr, "Error: row step is too large.\n");
-		exit(3);
-	}
-	for (unsigned i = 6; i < run_count; ++i) {
-		NUM_THREADS = (unsigned) pow(2, i);
-#ifndef ONEDEBUG
-		sleep(10);
-#endif
-		// Re-initializing
-		memset(h_graph_mask, 0, sizeof(int)*num_of_nodes);
-		h_graph_mask[source] = 1;
-		memset(h_updating_graph_mask, 0, sizeof(int)*num_of_nodes);
-		memset(h_graph_visited, 0, sizeof(int)*num_of_nodes);
-		h_graph_visited[source] = 1;
-		for (unsigned i = 0; i < num_of_nodes; ++i) {
-			h_cost[i] = -1;
-		}
-		h_cost[source] = 0;
-		memset(is_active_side, 0, sizeof(int) * side_length);
-		is_active_side[0] = 1;
-		memset(is_updating_active_side, 0, sizeof(int) * side_length);
-
-		BFS(\
-			h_graph_starts,\
-			h_graph_ends,\
-			h_graph_mask,\
-			h_updating_graph_mask,\
-			h_graph_visited,\
-			h_cost,\
-			tile_offsets,
-			tile_sizes,\
-			is_active_side,\
-			is_updating_active_side,\
-			side_length,\
-			num_tiles,\
-			row_step\
-			);
-		now = omp_get_wtime();
-		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
-#ifdef ONEDEBUG
-		printf("Thread %u finished.\n", NUM_THREADS);
-#endif
-	}
-	//}
-	fclose(time_out);
-
-	//Store the result into a file
-
-#ifdef ONEDEBUG
-	NUM_THREADS = 64;
-	omp_set_num_threads(NUM_THREADS);
-	unsigned num_lines = num_of_nodes / NUM_THREADS;
-#pragma omp parallel
-{
-	unsigned tid = omp_get_thread_num();
-	unsigned offset = tid * num_lines;
-	string file_prefix = "path/path";
-	string file_name = file_prefix + to_string(tid) + ".txt";
-	FILE *fpo = fopen(file_name.c_str(), "w");
-	if (!fpo) {
-		fprintf(stderr, "Error: cannot open file %s.\n", file_name.c_str());
-		exit(1);
-	}
-	unsigned bound_index;
-	if (tid != NUM_THREADS - 1) {
-		bound_index = offset + num_lines;
-	} else {
-		bound_index = num_of_nodes;
-	}
-	for (unsigned index = offset; index < bound_index; ++index) {
-		fprintf(fpo, "%d) cost:%d\n", index, h_cost[index]);
-	}
-
-	fclose(fpo);
-}
-#endif
-
-	// cleanup memory
-	free( h_graph_starts);
-	free( h_graph_ends);
-	free( h_graph_mask);
-	free( h_updating_graph_mask);
-	free( h_graph_visited);
-	free( h_cost);
-	free( tile_offsets);
-	free( tile_sizes);
-	free( is_active_side);
-	free( is_updating_active_side);
-}
 
 inline void bfs_kernel(\
 		unsigned *heads_buffer,
@@ -413,7 +197,7 @@ inline void scheduler(\
 			//if (num_tiles - 1 != tile_id) {
 			//	bound_edge_i = tile_offsets[tile_id + 1];
 			//} else {
-			//	bound_edge_i = edge_list_size;
+			//	bound_edge_i = NEDGES;
 			//}
 			//bfs_kernel(\
 			//		tile_offsets[tile_id],\
@@ -470,7 +254,7 @@ void BFS(\
 		stop = true;
 
 //#pragma omp parallel for 
-		//for(unsigned int nid = 0; nid < num_of_nodes; nid++ )
+		//for(unsigned int nid = 0; nid < NNODES; nid++ )
 		//{
 		//	if (h_graph_mask[nid] == 1) {
 		//		h_graph_mask[nid]=0;
@@ -550,7 +334,7 @@ void BFS(\
 		//		if (num_tiles - 1 != tile_id) {
 		//			bound_edge_i = tile_offsets[tile_id + 1];
 		//		} else {
-		//			bound_edge_i = edge_list_size;
+		//			bound_edge_i = NEDGES;
 		//		}
 		//		for (unsigned edge_i = tile_offsets[tile_id]; \
 		//				edge_i < bound_edge_i; \
@@ -576,7 +360,7 @@ void BFS(\
 		//	}
 		//}
 #pragma omp parallel for
-		//for(unsigned int nid=0; nid< num_of_nodes ; nid++ )
+		//for(unsigned int nid=0; nid< NNODES ; nid++ )
 		//{
 		//	if (h_updating_graph_mask[nid] == 1) {
 		//		h_graph_mask[nid]=1;
@@ -597,11 +381,11 @@ void BFS(\
 			if (side_length - 1 != side_id) {
 				bound_vertex_id = side_id * TILE_WIDTH + TILE_WIDTH;
 			} else {
-				bound_vertex_id = num_of_nodes;
+				bound_vertex_id = NNODES;
 			}
 			//for (unsigned i = 0; i < TILE_WIDTH; ++i) {
 			//	unsigned vertex_id = i + side_id * TILE_WIDTH;
-			//	if (vertex_id == num_of_nodes) {
+			//	if (vertex_id == NNODES) {
 			//		break;
 			//	}
 			//	if (1 == h_updating_graph_mask[vertex_id]) {
@@ -649,3 +433,220 @@ void BFS(\
 	_mm_free(heads_buffer);
 	_mm_free(ends_buffer);
 }
+///////////////////////////////////////////////////////////////////////////////
+// Apply BFS on a Graph
+///////////////////////////////////////////////////////////////////////////////
+void input( int argc, char** argv) 
+{
+	int num_of_indices;
+	char *input_f;
+	
+	if(argc < 3){
+		input_f = "/home/zpeng/benchmarks/data/pokec/coo_tiled_bak/soc-pokec";
+		TILE_WIDTH = 1024;
+	} else {
+		input_f = argv[1];
+		TILE_WIDTH = strtoul(argv[2], NULL, 0);
+	}
+
+	/////////////////////////////////////////////////////////////////////
+	// Input real dataset
+	/////////////////////////////////////////////////////////////////////
+	//string prefix = string(input_f) + "_untiled";
+	string prefix = string(input_f) + "_coo-tiled-" + to_string(TILE_WIDTH);
+	//string prefix = string(input_f) + "_col-16-coo-tiled-" + to_string(TILE_WIDTH);
+	string fname = prefix + "-0";
+	FILE *fin = fopen(fname.c_str(), "r");
+	fscanf(fin, "%u %u", &NNODES, &NEDGES);
+	fclose(fin);
+	unsigned side_length;
+	if (NNODES % TILE_WIDTH) {
+		side_length = NNODES / TILE_WIDTH + 1;
+	} else {
+		side_length = NNODES / TILE_WIDTH;
+	}
+	unsigned num_tiles = side_length * side_length;
+	// Read tile Offsets
+	fname = prefix + "-offsets";
+	fin = fopen(fname.c_str(), "r");
+	if (!fin) {
+		fprintf(stderr, "cannot open file: %s\n", fname.c_str());
+		exit(1);
+	}
+	unsigned *tile_offsets = (unsigned *) malloc(num_tiles * sizeof(unsigned));
+	for (unsigned i = 0; i < num_tiles; ++i) {
+		fscanf(fin, "%u", tile_offsets + i);
+	}
+	fclose(fin);
+	unsigned *tile_sizes = (unsigned *) malloc(num_tiles * sizeof(unsigned));
+	for (unsigned i = 0; i < num_tiles; ++i) {
+		if (num_tiles - 1 != i) {
+			tile_sizes[i] = tile_offsets[i + 1] - tile_offsets[i];
+		} else {
+			tile_sizes[i] = NEDGES - tile_offsets[i];
+		}
+	}
+	unsigned *h_graph_starts = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
+	unsigned *h_graph_ends = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
+	NUM_THREADS = 64;
+	unsigned edge_bound = NEDGES / NUM_THREADS;
+#pragma omp parallel num_threads(NUM_THREADS) private(fname, fin)
+{
+	unsigned tid = omp_get_thread_num();
+	unsigned offset = tid * edge_bound;
+	fname = prefix + "-" + to_string(tid);
+	fin = fopen(fname.c_str(), "r");
+	if (!fin) {
+		fprintf(stderr, "Error: cannot open file %s\n", fname.c_str());
+		exit(1);
+	}
+	if (0 == tid) {
+		fscanf(fin, "%u %u", &NNODES, &NEDGES);
+	}
+	unsigned bound_index;
+	if (NUM_THREADS - 1 != tid) {
+		bound_index = offset + edge_bound;
+	} else {
+		bound_index = NEDGES;
+	}
+	for (unsigned index = offset; index < bound_index; ++index) {
+		unsigned n1;
+		unsigned n2;
+		fscanf(fin, "%u %u", &n1, &n2);
+		n1--;
+		n2--;
+		h_graph_starts[index] = n1;
+		h_graph_ends[index] = n2;
+	}
+
+}
+	// End Input real dataset
+	/////////////////////////////////////////////////////////////////////
+
+	int *h_graph_mask = (int*) malloc(sizeof(int)*NNODES);
+	int *h_updating_graph_mask = (int*) malloc(sizeof(int)*NNODES);
+	int *h_graph_visited = (int*) malloc(sizeof(int)*NNODES);
+	int* h_cost = (int*) malloc(sizeof(int)*NNODES);
+	int *is_active_side = (int *) malloc(sizeof(int) * side_length);
+	int *is_updating_active_side = (int *) malloc(sizeof(int) * side_length);
+	unsigned source = 0;
+
+	now = omp_get_wtime();
+	time_out = fopen(time_file, "w");
+	fprintf(time_out, "input end: %lf\n", now - start);
+#ifdef ONEDEBUG
+	printf("Input finished: %s\n", input_f);
+	unsigned run_count = 9;
+#else
+	unsigned run_count = 9;
+#endif
+	// BFS
+	for (unsigned row_step = 1; row_step < 10000; row_step *= 2) {
+	printf("===========================\n");
+	printf("row_step: %u\n", row_step);
+	for (unsigned i = 4; i < 16; ++i) {
+	SIZE_BUFFER_MAX = (unsigned) pow(2, i);
+	printf("SIZE_BUFFER_MAX: %u\n", SIZE_BUFFER_MAX);
+	//unsigned row_step = 256;
+	//SIZE_BUFFER_MAX = 4096;
+
+	if (side_length < row_step) {
+		fprintf(stderr, "Error: row step is too large.\n");
+		exit(3);
+	}
+	for (unsigned i = 6; i < run_count; ++i) {
+		NUM_THREADS = (unsigned) pow(2, i);
+#ifndef ONEDEBUG
+		//sleep(10);
+#endif
+		// Re-initializing
+		memset(h_graph_mask, 0, sizeof(int)*NNODES);
+		h_graph_mask[source] = 1;
+		memset(h_updating_graph_mask, 0, sizeof(int)*NNODES);
+		memset(h_graph_visited, 0, sizeof(int)*NNODES);
+		h_graph_visited[source] = 1;
+		for (unsigned i = 0; i < NNODES; ++i) {
+			h_cost[i] = -1;
+		}
+		h_cost[source] = 0;
+		memset(is_active_side, 0, sizeof(int) * side_length);
+		is_active_side[0] = 1;
+		memset(is_updating_active_side, 0, sizeof(int) * side_length);
+
+		BFS(\
+			h_graph_starts,\
+			h_graph_ends,\
+			h_graph_mask,\
+			h_updating_graph_mask,\
+			h_graph_visited,\
+			h_cost,\
+			tile_offsets,
+			tile_sizes,\
+			is_active_side,\
+			is_updating_active_side,\
+			side_length,\
+			num_tiles,\
+			row_step\
+			);
+		now = omp_get_wtime();
+		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
+#ifdef ONEDEBUG
+		printf("Thread %u finished.\n", NUM_THREADS);
+#endif
+	}
+	}
+	}
+	fclose(time_out);
+
+	//Store the result into a file
+
+#ifdef ONEDEBUG
+	NUM_THREADS = 64;
+	omp_set_num_threads(NUM_THREADS);
+	unsigned num_lines = NNODES / NUM_THREADS;
+#pragma omp parallel
+{
+	unsigned tid = omp_get_thread_num();
+	unsigned offset = tid * num_lines;
+	string file_prefix = "path/path";
+	string file_name = file_prefix + to_string(tid) + ".txt";
+	FILE *fpo = fopen(file_name.c_str(), "w");
+	if (!fpo) {
+		fprintf(stderr, "Error: cannot open file %s.\n", file_name.c_str());
+		exit(1);
+	}
+	unsigned bound_index;
+	if (tid != NUM_THREADS - 1) {
+		bound_index = offset + num_lines;
+	} else {
+		bound_index = NNODES;
+	}
+	for (unsigned index = offset; index < bound_index; ++index) {
+		fprintf(fpo, "%d) cost:%d\n", index, h_cost[index]);
+	}
+
+	fclose(fpo);
+}
+#endif
+
+	// cleanup memory
+	free( h_graph_starts);
+	free( h_graph_ends);
+	free( h_graph_mask);
+	free( h_updating_graph_mask);
+	free( h_graph_visited);
+	free( h_cost);
+	free( tile_offsets);
+	free( tile_sizes);
+	free( is_active_side);
+	free( is_updating_active_side);
+}
+///////////////////////////////////////////////////////////////////////////////
+// Main Program
+///////////////////////////////////////////////////////////////////////////////
+int main( int argc, char** argv) 
+{
+	start = omp_get_wtime();
+	input( argc, argv);
+}
+

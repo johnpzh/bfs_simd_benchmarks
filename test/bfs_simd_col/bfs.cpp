@@ -606,7 +606,7 @@ void input( int argc, char** argv)
 	SIZE_BUFFER_MAX = (unsigned) pow(2, i);
 	printf("SIZE_BUFFER_MAX: %u\n", SIZE_BUFFER_MAX);
 	//ROW_STEP = 16;
-	//SIZE_BUFFER_MAX = 2048;
+	//SIZE_BUFFER_MAX = 4096;
 
 	if (SIDE_LENGTH < ROW_STEP) {
 		fprintf(stderr, "Error: row step is too large.\n");
