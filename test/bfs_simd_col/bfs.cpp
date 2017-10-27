@@ -209,8 +209,8 @@ inline void scheduler(
 {
 	unsigned start_tile_id = start_row_index * SIDE_LENGTH;
 	unsigned end_tile_id = start_tile_id + tile_step * SIDE_LENGTH;
-//#pragma omp parallel for schedule(dynamic, 1)
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic, 1)
+//#pragma omp parallel for
 	for (unsigned tile_index = start_tile_id; tile_index < end_tile_id; tile_index += tile_step) {
 		unsigned bound_tile_id = tile_index + tile_step;
 		unsigned tid = omp_get_thread_num();
@@ -602,11 +602,12 @@ void input( int argc, char** argv)
 	// BFS
 	//for (unsigned ROW_STEP = 1; ROW_STEP < 10000; ROW_STEP *= 2) {
 	//printf("ROW_STEP: %u\n", ROW_STEP);
-	for (unsigned i = 4; i < 14; ++i) {
-	SIZE_BUFFER_MAX = (unsigned) pow(2, i);
-	printf("SIZE_BUFFER_MAX: %u\n", SIZE_BUFFER_MAX);
+	//for (unsigned i = 4; i < 14; ++i) {
+	//SIZE_BUFFER_MAX = (unsigned) pow(2, i);
+	//printf("SIZE_BUFFER_MAX: %u\n", SIZE_BUFFER_MAX);
 	//ROW_STEP = 16;
 	//SIZE_BUFFER_MAX = 4096;
+	SIZE_BUFFER_MAX = 1024;
 
 	if (SIDE_LENGTH < ROW_STEP) {
 		fprintf(stderr, "Error: row step is too large.\n");
@@ -648,7 +649,7 @@ void input( int argc, char** argv)
 		printf("Thread %u finished.\n", NUM_THREADS);
 #endif
 	}
-	}
+	//}
 	fclose(time_out);
 
 	//Store the result into a file
