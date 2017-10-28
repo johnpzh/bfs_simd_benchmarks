@@ -6,6 +6,7 @@
 #include <string>
 #include <unistd.h>
 #include <immintrin.h>
+#include <papi.h>
 
 using std::string;
 using std::to_string;
@@ -27,6 +28,23 @@ double now;
 FILE *time_out;
 char *time_file = "timeline.txt";
 
+static void test_fail(char *file, int line, char *call, int retval){
+	printf("%s\tFAILED\nLine # %d\n", file, line);
+	if ( retval == PAPI_ESYS ) {
+		char buf[128];
+		memset( buf, '\0', sizeof(buf) );
+		sprintf(buf, "System error in %s:", call );
+		perror(buf);
+	}
+	else if ( retval > 0 ) {
+		printf("Error calculating: %s\n", call );
+	}
+	else {
+		printf("Error in %s: %s\n", call, PAPI_strerror(retval) );
+	}
+	printf("\n");
+	exit(1);
+}
 
 inline void bfs_kernel(\
 		unsigned *heads_buffer,
@@ -292,6 +310,11 @@ void BFS(\
 	omp_set_num_threads(NUM_THREADS);
 	unsigned *heads_buffer = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS, ALIGNED_BYTES);
 	unsigned *ends_buffer = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS, ALIGNED_BYTES);
+	// PAPI
+	int events[2] = { PAPI_L2_TCA, PAPI_L2_TCM};
+	int retval;
+	if ((retval = PAPI_start_counters(events, 2)) < PAPI_OK)
+		test_fail(__FILE__, __LINE__, "PAPI_start_counters", retval);
 	double start_time = omp_get_wtime();
 	bool stop;
 	do
@@ -331,93 +354,6 @@ void BFS(\
 				is_updating_active_side,
 				side_id,
 				SIDE_LENGTH - side_id);
-		//for (unsigned side_id = 0; side_id < SIDE_LENGTH; ) {
-		//	//if (!is_active_side[side_id]) {
-		//	//	++side_id;
-		//	//	continue;
-		//	//}
-		//	if (side_id + ROW_STEP < SIDE_LENGTH) {
-		//		scheduler(\
-		//				side_id,\
-		//				side_id + ROW_STEP,\
-		//				h_graph_heads,\
-		//				h_graph_ends,\
-		//				heads_buffer,
-		//				ends_buffer,
-		//				h_graph_mask,\
-		//				h_updating_graph_mask,\
-		//				h_graph_visited,\
-		//				h_cost,\
-		//				tile_offsets,
-		//				tile_sizes,
-		//				SIDE_LENGTH,\
-		//				NUM_TILES,\
-		//				is_updating_active_side
-		//				);
-		//		side_id += ROW_STEP;
-		//	} else {
-		//		scheduler(\
-		//				side_id,\
-		//				SIDE_LENGTH,\
-		//				h_graph_heads,\
-		//				h_graph_ends,\
-		//				heads_buffer,
-		//				ends_buffer,
-		//				h_graph_mask,\
-		//				h_updating_graph_mask,\
-		//				h_graph_visited,\
-		//				h_cost,\
-		//				tile_offsets,
-		//				tile_sizes,
-		//				SIDE_LENGTH,\
-		//				NUM_TILES,\
-		//				is_updating_active_side
-		//				);
-		//		side_id = SIDE_LENGTH;
-		//	}
-		//}
-		//for (unsigned side_id = 0; side_id < SIDE_LENGTH; ++side_id) {
-		//	if (!is_active_side[side_id]) {
-		//		continue;
-		//	}
-		//	is_active_side[side_id] = 0;
-		//	unsigned start_tile_id = side_id * SIDE_LENGTH;
-		//	unsigned bound_tile_id = start_tile_id + SIDE_LENGTH;
-		//	for (unsigned tile_id = start_tile_id; \
-		//			tile_id < bound_tile_id;\
-		//			++tile_id) {
-		//		if (is_empty_tile[tile_id]) {
-		//			continue;
-		//		}
-		//		unsigned bound_edge_i;
-		//		if (NUM_TILES - 1 != tile_id) {
-		//			bound_edge_i = tile_offsets[tile_id + 1];
-		//		} else {
-		//			bound_edge_i = NEDGES;
-		//		}
-		//		for (unsigned edge_i = tile_offsets[tile_id]; \
-		//				edge_i < bound_edge_i; \
-		//				) {
-		//			unsigned head = h_graph_heads[edge_i];
-		//			if (0 == h_graph_mask[head]) {
-		//				edge_i++;
-		//				continue;
-		//			}
-		//			int passed_count = 0;
-		//			//unsigned i = edge_i;
-		//			while (h_graph_heads[edge_i] == head) {
-		//				unsigned end = h_graph_ends[edge_i];
-		//				if (!h_graph_visited[end]) {
-		//					h_cost[end] = h_cost[head] + 1;
-		//					h_updating_graph_mask[end] = 1;
-		//					is_updating_active_side[end/TILE_WIDTH] = 1;
-		//				}
-		//				edge_i++;
-		//			}
-		//		}
-
-		//	}
-		//}
 #pragma omp parallel for
 		//for(unsigned int nid=0; nid< NNODES ; nid++ )
 		//{
@@ -488,6 +424,12 @@ void BFS(\
 	}
 	while(!stop);
 	double end_time = omp_get_wtime();
+	// PAPI results
+	long long values[2];
+	if ((retval = PAPI_stop_counters(values, 2)) < PAPI_OK)
+		test_fail(__FILE__, __LINE__, "PAPI_stop_counters", retval);
+
+	printf("cache access: %lld, cache misses: %lld, miss rate: %.2f%%\n", values[0], values[1], 100.0* values[1]/values[0]);
 	printf("%d %lf\n", NUM_THREADS, (end_time - start_time));
 	_mm_free(heads_buffer);
 	_mm_free(ends_buffer);
