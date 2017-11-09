@@ -313,8 +313,9 @@ void BFS(\
 	// PAPI
 	int events[2] = { PAPI_L2_TCA, PAPI_L2_TCM};
 	int retval;
-	if ((retval = PAPI_start_counters(events, 2)) < PAPI_OK)
+	if ((retval = PAPI_start_counters(events, 2)) < PAPI_OK) {
 		test_fail(__FILE__, __LINE__, "PAPI_start_counters", retval);
+	}
 	double start_time = omp_get_wtime();
 	bool stop;
 	do
@@ -426,8 +427,9 @@ void BFS(\
 	double end_time = omp_get_wtime();
 	// PAPI results
 	long long values[2];
-	if ((retval = PAPI_stop_counters(values, 2)) < PAPI_OK)
+	if ((retval = PAPI_stop_counters(values, 2)) < PAPI_OK) {
 		test_fail(__FILE__, __LINE__, "PAPI_stop_counters", retval);
+	}
 
 	printf("cache access: %lld, cache misses: %lld, miss rate: %.2f%%\n", values[0], values[1], 100.0* values[1]/values[0]);
 	printf("%d %lf\n", NUM_THREADS, (end_time - start_time));

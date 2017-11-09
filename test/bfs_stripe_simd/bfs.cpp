@@ -6,6 +6,7 @@
 #include <string>
 #include <unistd.h>
 #include <immintrin.h>
+#include <papi.h>
 
 using std::string;
 using std::to_string;
@@ -25,23 +26,23 @@ FILE *time_out;
 char *time_file = "timeline.txt";
 
 
-void input(int argc, char** argv);
-void BFS(\
-		unsigned *h_graph_starts,\
-		unsigned *h_graph_ends,\
-		int *h_graph_mask,\
-		int *h_updating_graph_mask,\
-		int *h_graph_visited,\
-		int *h_cost,\
-		unsigned *tile_offsets,
-		unsigned *tile_sizes,
-		int *is_active_side,\
-		int *is_updating_active_side,\
-		unsigned side_length,\
-		unsigned num_tiles,\
-		unsigned row_step\
-		);
-
+static void test_fail(char *file, int line, char *call, int retval){
+	printf("%s\tFAILED\nLine # %d\n", file, line);
+	if ( retval == PAPI_ESYS ) {
+		char buf[128];
+		memset( buf, '\0', sizeof(buf) );
+		sprintf(buf, "System error in %s:", call );
+		perror(buf);
+	}
+	else if ( retval > 0 ) {
+		printf("Error calculating: %s\n", call );
+	}
+	else {
+		printf("Error in %s: %s\n", call, PAPI_strerror(retval) );
+	}
+	printf("\n");
+	exit(1);
+}
 inline void bfs_kernel(\
 		unsigned *heads_buffer,
 		unsigned *ends_buffer,
@@ -246,6 +247,12 @@ void BFS(\
 	omp_set_num_threads(NUM_THREADS);
 	unsigned *heads_buffer = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS, ALIGNED_BYTES);
 	unsigned *ends_buffer = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS, ALIGNED_BYTES);
+	// PAPI
+	int events[2] = { PAPI_L2_TCA, PAPI_L2_TCM};
+	int retval;
+	if ((retval = PAPI_start_counters(events, 2)) < PAPI_OK) {
+		test_fail(__FILE__, __LINE__, "PAPI_start_counters", retval);
+	}
 	double start_time = omp_get_wtime();
 	bool stop;
 	do
@@ -429,6 +436,13 @@ void BFS(\
 	}
 	while(!stop);
 	double end_time = omp_get_wtime();
+	// PAPI results
+	long long values[2];
+	if ((retval = PAPI_stop_counters(values, 2)) < PAPI_OK) {
+		test_fail(__FILE__, __LINE__, "PAPI_stop_counters", retval);
+	}
+
+	printf("cache access: %lld, cache misses: %lld, miss rate: %.2f%%\n", values[0], values[1], 100.0* values[1]/values[0]);
 	printf("%d %lf\n", NUM_THREADS, (end_time - start_time));
 	_mm_free(heads_buffer);
 	_mm_free(ends_buffer);
@@ -541,14 +555,14 @@ void input( int argc, char** argv)
 	unsigned run_count = 9;
 #endif
 	// BFS
-	for (unsigned row_step = 1; row_step < 10000; row_step *= 2) {
-	printf("===========================\n");
-	printf("row_step: %u\n", row_step);
-	for (unsigned i = 4; i < 16; ++i) {
-	SIZE_BUFFER_MAX = (unsigned) pow(2, i);
-	printf("SIZE_BUFFER_MAX: %u\n", SIZE_BUFFER_MAX);
-	//unsigned row_step = 256;
-	//SIZE_BUFFER_MAX = 4096;
+	//for (unsigned row_step = 1; row_step < 10000; row_step *= 2) {
+	//printf("===========================\n");
+	//printf("row_step: %u\n", row_step);
+	//for (unsigned i = 4; i < 16; ++i) {
+	//SIZE_BUFFER_MAX = (unsigned) pow(2, i);
+	//printf("SIZE_BUFFER_MAX: %u\n", SIZE_BUFFER_MAX);
+	unsigned row_step = 32;
+	SIZE_BUFFER_MAX = 4096;
 
 	if (side_length < row_step) {
 		fprintf(stderr, "Error: row step is too large.\n");
@@ -594,8 +608,8 @@ void input( int argc, char** argv)
 		printf("Thread %u finished.\n", NUM_THREADS);
 #endif
 	}
-	}
-	}
+	//}
+	//}
 	fclose(time_out);
 
 	//Store the result into a file
