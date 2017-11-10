@@ -317,6 +317,13 @@ inline void scheduler(\
 //	double end_time = omp_get_wtime();
 //	printf("%d %lf\n", NUM_THREADS, (end_time - start_time));
 //}
+double offset_time1 = 0;
+double offset_time2 = 0;
+double degree_time = 0;
+double frontier_tmp_time = 0;
+double refine_time = 0;
+double arrange_time = 0;
+double run_time = 0;
 unsigned *BFS_kernel(
 				unsigned *graph_vertices,
 				unsigned *graph_edges,
@@ -326,6 +333,7 @@ unsigned *BFS_kernel(
 				unsigned &frontier_size)
 {
 	// From frontier, get the degrees (para_for)
+	double time_now = omp_get_wtime(); 
 	unsigned *degrees = (unsigned *) malloc(sizeof(unsigned) *  frontier_size);
 	unsigned new_frontier_size = 0;
 //#pragma omp parallel for schedule(dynamic) reduction(+: new_frontier_size)
@@ -334,22 +342,31 @@ unsigned *BFS_kernel(
 		degrees[i] = h_graph_degrees[frontier[i]];
 		new_frontier_size += degrees[i];
 	}
+	if (0 == new_frontier_size) {
+		free(degrees);
+		frontier_size = 0;
+		return NULL;
+	}
+	degree_time += omp_get_wtime() - time_now;
 
 	// From degrees, get the offset (stored in degrees) (block_para_for)
 	// TODO: blocked parallel for
 	//unsigned *offsets = (unsigned *) malloc(sizeof(unsigned) * frontier_size);
+	time_now = omp_get_wtime();
 	unsigned offset_sum = 0;
 	for (unsigned i = 0; i < frontier_size; ++i) {
 		unsigned tmp = degrees[i];
 		degrees[i] = offset_sum;
 		offset_sum += tmp;
 	}
+	offset_time1 += omp_get_wtime() - time_now;
 	//offsets[0] = 0;
 	//for (unsigned i = 1; i < frontier_size; ++i) {
 	//	offsets[i] = offsets[i - 1] + degrees[i - 1];
 	//}
 
 	// From offset, get active vertices (para_for)
+	time_now = omp_get_wtime();
 	unsigned *new_frontier_tmp = (unsigned *) malloc(sizeof(unsigned) * new_frontier_size);
 	//unsigned *visited = (unsigned *) malloc(sizeof(unsigned) * new_frontier_size);
 //#pragma omp parallel for schedule(dynamic)
@@ -381,12 +398,15 @@ unsigned *BFS_kernel(
 			//++size;
 		}
 	}
+	frontier_tmp_time += omp_get_wtime() - time_now;
 
 
 	// Refine active vertices, removing visited and redundant (block_para_for)
 	//unsigned block_size = new_frontier_size / NUM_THREADS;
+	time_now = omp_get_wtime();
 	unsigned block_size = 1024 * 2;
-	unsigned num_blocks = new_frontier_size % block_size == 0 ? new_frontier_size/block_size : new_frontier_size/block_size + 1;
+	//unsigned num_blocks = new_frontier_size % block_size == 0 ? new_frontier_size/block_size : new_frontier_size/block_size + 1;
+	unsigned num_blocks = (new_frontier_size - 1)/block_size + 1;
 
 	unsigned *nums_in_blocks = NULL;
 	if (num_blocks > 1) {
@@ -429,6 +449,7 @@ unsigned *BFS_kernel(
 		}
 		new_frontier_size = base;
 	}
+	refine_time += omp_get_wtime() - time_now;
 //#pragma omp parallel
 //{
 //	int tid = omp_get_thread_num();
@@ -472,9 +493,11 @@ unsigned *BFS_kernel(
 	// Get the final new frontier
 	//unsigned *offsets_b = (unsigned *) malloc(sizeof(unsigned) * num_blocks);
 	//offsets_b[0] = 0;
+	time_now = omp_get_wtime();
 	unsigned *new_frontier = (unsigned *) malloc(sizeof(unsigned) * new_frontier_size);
 	if (num_blocks > 1) {
 	//TODO: blocked parallel for
+	double time_now = omp_get_wtime();
 	offset_sum = 0;
 	for (unsigned i = 0; i < num_blocks; ++i) {
 		unsigned tmp = nums_in_blocks[i];
@@ -482,6 +505,7 @@ unsigned *BFS_kernel(
 		offset_sum += tmp;
 		//offsets_b[i] = offsets_b[i - 1] + nums_in_blocks[i - 1];
 	}
+	offset_time2 += omp_get_wtime() - time_now;
 //#pragma omp parallel for schedule(dynamic)
 #pragma omp parallel for
 	for (unsigned block_i = 0; block_i < num_blocks; ++block_i) {
@@ -505,6 +529,7 @@ unsigned *BFS_kernel(
 			new_frontier[i] = new_frontier_tmp[base++];
 		}
 	}
+	arrange_time += omp_get_wtime() - time_now;
 //#pragma omp parallel
 //{
 //	int tid = omp_get_thread_num();
@@ -572,7 +597,7 @@ void BFS(
 
 	}
 	double end_time = omp_get_wtime();
-	printf("%d %lf\n", NUM_THREADS, (end_time - start_time));
+	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
 	//free(frontier);
 	free(parents);
 
@@ -823,12 +848,22 @@ void input( int argc, char** argv)
 		//	is_empty_tile,\
 		//	is_active_side,\
 		//	is_updating_active_side);
+		offset_time1 = offset_time2 = 0;
+		degree_time = 0;
+		frontier_tmp_time = 0;
+		refine_time = 0;
+		arrange_time = 0;
+		run_time = 0;
 		BFS(
 			graph_vertices,
 			graph_edges,
 			h_graph_degrees,
 			source,
 			h_cost);
+		auto percent = [] (double t) {return t/run_time*100;};
+		printf("offset_time1: %f\noffset_time2: %f, sum: %f (%.1f%%)\n", offset_time1, offset_time2, offset_time1+offset_time2, percent(offset_time1+offset_time2));
+		printf("degree_time: %f (%.1f%%)\n", degree_time, percent(degree_time));
+		printf("frontier_tmp_time: %f (%.1f%%)\nrefine_time: %f (%.1f%%)\narrange_time: %f (%.1f%%)\n", frontier_tmp_time, percent(frontier_tmp_time), refine_time, percent(refine_time), arrange_time, percent(arrange_time));
 
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
@@ -842,6 +877,12 @@ void input( int argc, char** argv)
 	//Store the result into a file
 
 #ifdef ONEDEBUG
+	FILE *foutput = fopen("path/path.txt", "w");
+	for (unsigned i = 0; i < NNODES; ++i) {
+		fprintf(foutput, "%d) cost:%d\n", i, h_cost[i]);
+	}
+	fclose(foutput);
+	exit(0);
 	NUM_THREADS = 64;
 	omp_set_num_threads(NUM_THREADS);
 	unsigned num_lines = NNODES / NUM_THREADS;
