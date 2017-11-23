@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <cilk/cilk.h>
 #include <cilk/cilk_api.h>
+#include <cilk/reducer_opadd.h>
 #include <omp.h>
 #include <string>
 #include <unistd.h>
@@ -23,12 +24,22 @@ struct Vertex {
 	}
 };
 
-void set_workers_num(int n)
+
+unsigned NNODES;
+unsigned NEDGES;
+unsigned NUM_THREADS;
+unsigned TILE_WIDTH;
+unsigned SIDE_LENGTH;
+unsigned NUM_TILES;
+unsigned ROW_STEP;
+
+void set_nworkers(int n)
 {
+	printf("@set_nworkers: ");
 	__cilkrts_end_cilk();
 	switch (__cilkrts_set_param("nworkers", to_string(NUM_THREADS).c_str())) {
 		case __CILKRTS_SET_PARAM_SUCCESS:
-			printf("set worker successfully.\n");
+			printf("set worker successfully to %d (%d).\n", n, __cilkrts_get_nworkers());
 			return;
 		case __CILKRTS_SET_PARAM_UNIMP:
 			printf("Unimplemented parameter.\n");
@@ -45,14 +56,6 @@ void set_workers_num(int n)
 	}
 	exit(1);
 }
-
-unsigned NNODES;
-unsigned NEDGES;
-unsigned NUM_THREADS;
-unsigned TILE_WIDTH;
-unsigned SIDE_LENGTH;
-unsigned NUM_TILES;
-unsigned ROW_STEP;
 
 double start;
 double now;
@@ -80,19 +83,18 @@ unsigned *BFS_kernel(
 	unsigned *degrees = (unsigned *) malloc(sizeof(unsigned) *  frontier_size);
 	Vertex *frontier_vertices = (Vertex *) malloc(sizeof(Vertex) * frontier_size);
 	unsigned new_frontier_size = 0;
+	cilk::reducer< cilk::op_add<unsigned> > parallel_size(0);
 //#pragma omp parallel for schedule(dynamic) reduction(+: new_frontier_size)
-#pragma omp parallel for reduction(+: new_frontier_size)
-	//for (unsigned i = 0; i < frontier_size; ++i) {
-	//	degrees[i] = h_graph_degrees[frontier[i]];
-	//	new_frontier_size += degrees[i];
-	//}
-	for (unsigned i = 0; i < frontier_size; ++i) {
+//#pragma omp parallel for reduction(+: new_frontier_size)
+	cilk_for (unsigned i = 0; i < frontier_size; ++i) {
 		unsigned start = frontier[i];
 		Vertex v = graph_vertices_info[start];
 		degrees[i] = v.get_out_degree();
-		new_frontier_size += degrees[i];
+		//new_frontier_size += degrees[i];
+		*parallel_size += degrees[i];
 		frontier_vertices[i] = v;
 	}
+	new_frontier_size = parallel_size.get_value();
 	if (0 == new_frontier_size) {
 		free(degrees);
 		frontier_size = 0;
@@ -122,15 +124,47 @@ unsigned *BFS_kernel(
 //#pragma omp parallel for schedule(dynamic)
 //#pragma omp parallel for
 //	for (unsigned i = 0; i < frontier_size; ++i) {}
+//#pragma omp parallel num_threads(NUM_THREADS)
+//{
+//#pragma omp single
 	cilk_for (unsigned i = 0; i < frontier_size; ++i) {
 		//printf("wid: %d\n", __cilkrts_get_worker_number());//test
 		Vertex start = frontier_vertices[i];
 		unsigned start_id = frontier[i];
 		unsigned offset = degrees[i];
-		unsigned size = 0;
+		//unsigned size = 0;
 		// no speedup
-		//for (unsigned i = 0; i < start.out_degree; ++i) {
-		//	unsigned end = start.get_out_neighbor(i);
+		unsigned out_degree = start.out_degree;
+		if (out_degree > 1000) {
+		cilk_for (unsigned i = 0; i < out_degree; ++i) {
+			unsigned end = start.get_out_neighbor(i);
+			bool unvisited = __sync_bool_compare_and_swap(parents + end, (unsigned) -1, start_id); //update parents
+			if (unvisited) {
+				//new_frontier_tmp[offset + size++] = end;
+				new_frontier_tmp[offset + i] = end;
+			} else {
+				new_frontier_tmp[offset + i] = (unsigned) -1;
+				//new_frontier_tmp[offset + size++] = (unsigned) -1;
+			}
+		}
+		} else {
+		for (unsigned i = 0; i < out_degree; ++i) {
+			unsigned end = start.get_out_neighbor(i);
+			bool unvisited = __sync_bool_compare_and_swap(parents + end, (unsigned) -1, start_id); //update parents
+			if (unvisited) {
+				//new_frontier_tmp[offset + size++] = end;
+				new_frontier_tmp[offset + i] = end;
+			} else {
+				new_frontier_tmp[offset + i] = (unsigned) -1;
+				//new_frontier_tmp[offset + size++] = (unsigned) -1;
+			}
+		}
+		}
+		// end no speedup
+		//unsigned *bound_edge_i = start.out_neighbors + start.out_degree;
+		//if (start.out_degree <= 1000) {
+		//for (unsigned *edge_i = start.out_neighbors; edge_i != bound_edge_i; ++edge_i) {
+		//	unsigned end = *edge_i;
 		//	bool unvisited = __sync_bool_compare_and_swap(parents + end, (unsigned) -1, start_id); //update parents
 		//	if (unvisited) {
 		//		new_frontier_tmp[offset + size++] = end;
@@ -138,18 +172,19 @@ unsigned *BFS_kernel(
 		//		new_frontier_tmp[offset + size++] = (unsigned) -1;
 		//	}
 		//}
-		// end no speedup
-		unsigned *bound_edge_i = start.out_neighbors + start.out_degree;
-		for (unsigned *edge_i = start.out_neighbors; edge_i != bound_edge_i; ++edge_i) {
-			unsigned end = *edge_i;
-			bool unvisited = __sync_bool_compare_and_swap(parents + end, (unsigned) -1, start_id); //update parents
-			if (unvisited) {
-				new_frontier_tmp[offset + size++] = end;
-			} else {
-				new_frontier_tmp[offset + size++] = (unsigned) -1;
-			}
-		}
+		//} else {
+		//cilk_for (unsigned *edge_i = start.out_neighbors; edge_i != bound_edge_i; ++edge_i) {
+		//	unsigned end = *edge_i;
+		//	bool unvisited = __sync_bool_compare_and_swap(parents + end, (unsigned) -1, start_id); //update parents
+		//	if (unvisited) {
+		//		new_frontier_tmp[offset + size++] = end;
+		//	} else {
+		//		new_frontier_tmp[offset + size++] = (unsigned) -1;
+		//	}
+		//}
+		//}
 	}
+//}
 //	for (unsigned i = 0; i < frontier_size; ++i) {
 //		unsigned start = frontier[i];
 //		//unsigned offset = offsets[i];
@@ -178,35 +213,38 @@ unsigned *BFS_kernel(
 
 	unsigned *nums_in_blocks = NULL;
 	if (num_blocks > 1) {
-	//unsigned *nums_in_blocks = (unsigned *) malloc(sizeof(unsigned) * NUM_THREADS);
-	nums_in_blocks = (unsigned *) malloc(sizeof(unsigned) * num_blocks);
-	unsigned new_frontier_size_tmp = 0;
+		//unsigned *nums_in_blocks = (unsigned *) malloc(sizeof(unsigned) * NUM_THREADS);
+		nums_in_blocks = (unsigned *) malloc(sizeof(unsigned) * num_blocks);
+		//unsigned new_frontier_size_tmp = 0;
+		parallel_size.set_value(0);
 //#pragma omp parallel for schedule(dynamic) reduction(+: new_frontier_size_tmp)
-#pragma omp parallel for reduction(+: new_frontier_size_tmp)
-	for (unsigned block_i = 0; block_i < num_blocks; ++block_i) {
-		unsigned offset = block_i * block_size;
-		unsigned bound;
-		if (num_blocks - 1 != block_i) {
-			bound = offset + block_size;
-		} else {
-			bound = new_frontier_size;
-		}
-		//unsigned size = 0;
-		unsigned base = offset;
-		for (unsigned end_i = offset; end_i < bound; ++end_i) {
-			if ((unsigned) - 1 != new_frontier_tmp[end_i]) {
-				new_frontier_tmp[base++] = new_frontier_tmp[end_i];
+//#pragma omp parallel for reduction(+: new_frontier_size_tmp)
+		cilk_for (unsigned block_i = 0; block_i < num_blocks; ++block_i) {
+			unsigned offset = block_i * block_size;
+			unsigned bound;
+			if (num_blocks - 1 != block_i) {
+				bound = offset + block_size;
+			} else {
+				bound = new_frontier_size;
 			}
-			//unsigned end = new_frontier_tmp[end_i];
-			//if (parents[end] == (unsigned) -1) {}
-			//	new_frontier_tmp[offset + size]  = end;
-			//	++size;
-			//}
+			//unsigned size = 0;
+			unsigned base = offset;
+			for (unsigned end_i = offset; end_i < bound; ++end_i) {
+				if ((unsigned) - 1 != new_frontier_tmp[end_i]) {
+					new_frontier_tmp[base++] = new_frontier_tmp[end_i];
+				}
+				//unsigned end = new_frontier_tmp[end_i];
+				//if (parents[end] == (unsigned) -1) {
+				//	new_frontier_tmp[offset + size]  = end;
+				//	++size;
+				//}
+			}
+			nums_in_blocks[block_i] = base - offset;
+			//new_frontier_size_tmp += nums_in_blocks[block_i];
+			*parallel_size += nums_in_blocks[block_i];
 		}
-		nums_in_blocks[block_i] = base - offset;
-		new_frontier_size_tmp += nums_in_blocks[block_i];
-	}
-	new_frontier_size = new_frontier_size_tmp;
+		//new_frontier_size = new_frontier_size_tmp;
+		new_frontier_size = parallel_size.get_value();
 	} else {
 		unsigned base = 0;
 		for (unsigned i = 0; i < new_frontier_size; ++i) {
@@ -236,33 +274,33 @@ unsigned *BFS_kernel(
 	time_now = omp_get_wtime();
 	unsigned *new_frontier = (unsigned *) malloc(sizeof(unsigned) * new_frontier_size);
 	if (num_blocks > 1) {
-	//TODO: blocked parallel for
-	double time_now = omp_get_wtime();
-	offset_sum = 0;
-	for (unsigned i = 0; i < num_blocks; ++i) {
-		unsigned tmp = nums_in_blocks[i];
-		nums_in_blocks[i] = offset_sum;
-		offset_sum += tmp;
-		//offsets_b[i] = offsets_b[i - 1] + nums_in_blocks[i - 1];
-	}
-	offset_time2 += omp_get_wtime() - time_now;
-//#pragma omp parallel for schedule(dynamic)
-#pragma omp parallel for
-	for (unsigned block_i = 0; block_i < num_blocks; ++block_i) {
-		//unsigned offset = offsets_b[block_i];
-		unsigned offset = nums_in_blocks[block_i];
-		unsigned bound;
-		if (num_blocks - 1 != block_i) {
-			bound = nums_in_blocks[block_i + 1];
-		} else {
-			bound = new_frontier_size;
+		//TODO: blocked parallel for
+		double time_now = omp_get_wtime();
+		offset_sum = 0;
+		for (unsigned i = 0; i < num_blocks; ++i) {
+			unsigned tmp = nums_in_blocks[i];
+			nums_in_blocks[i] = offset_sum;
+			offset_sum += tmp;
+			//offsets_b[i] = offsets_b[i - 1] + nums_in_blocks[i - 1];
 		}
-		//unsigned bound = offset + nums_in_blocks[block_i];
-		unsigned base = block_i * block_size;
-		for (unsigned i = offset; i < bound; ++i) {
-			new_frontier[i] = new_frontier_tmp[base++];
+		offset_time2 += omp_get_wtime() - time_now;
+		//#pragma omp parallel for schedule(dynamic)
+//#pragma omp parallel for
+		cilk_for (unsigned block_i = 0; block_i < num_blocks; ++block_i) {
+			//unsigned offset = offsets_b[block_i];
+			unsigned offset = nums_in_blocks[block_i];
+			unsigned bound;
+			if (num_blocks - 1 != block_i) {
+				bound = nums_in_blocks[block_i + 1];
+			} else {
+				bound = new_frontier_size;
+			}
+			//unsigned bound = offset + nums_in_blocks[block_i];
+			unsigned base = block_i * block_size;
+			for (unsigned i = offset; i < bound; ++i) {
+				new_frontier[i] = new_frontier_tmp[base++];
+			}
 		}
-	}
 	} else {
 		unsigned base = 0;
 		for (unsigned i = 0; i < new_frontier_size; ++i) {
@@ -294,33 +332,34 @@ void BFS(
 		int *h_cost)
 {
 
-	omp_set_num_threads(NUM_THREADS);
-	__cilkrts_end_cilk();
-	//__cilkrts_set_param("nworkers", to_string(NUM_THREADS).c_str());
-	switch (__cilkrts_set_param("nworkers", "128")) {
-		case __CILKRTS_SET_PARAM_SUCCESS:
-			printf("set worker successfully.\n");
-			break;
-		case __CILKRTS_SET_PARAM_UNIMP:
-			printf("Unimplemented parameter.\n");
-			break;
-		case __CILKRTS_SET_PARAM_XRANGE:
-			printf("Parameter value out of range.\n");
-			break;
-		case __CILKRTS_SET_PARAM_INVALID:
-			printf("Invalid parameter value.\n");
-			break;
-		case __CILKRTS_SET_PARAM_LATE:
-			printf("Too late to change parameter value.\n");
-			break;
-	}
-	printf("nworkers: %d\n", __cilkrts_get_nworkers());
+	//omp_set_num_threads(NUM_THREADS);
+	//set_nworkers(NUM_THREADS);
+	//__cilkrts_end_cilk();
+	////__cilkrts_set_param("nworkers", to_string(NUM_THREADS).c_str());
+	//switch (__cilkrts_set_param("nworkers", "128")) {
+	//	case __CILKRTS_SET_PARAM_SUCCESS:
+	//		printf("set worker successfully.\n");
+	//		break;
+	//	case __CILKRTS_SET_PARAM_UNIMP:
+	//		printf("Unimplemented parameter.\n");
+	//		break;
+	//	case __CILKRTS_SET_PARAM_XRANGE:
+	//		printf("Parameter value out of range.\n");
+	//		break;
+	//	case __CILKRTS_SET_PARAM_INVALID:
+	//		printf("Invalid parameter value.\n");
+	//		break;
+	//	case __CILKRTS_SET_PARAM_LATE:
+	//		printf("Too late to change parameter value.\n");
+	//		break;
+	//}
+	//printf("nworkers: %d\n", __cilkrts_get_nworkers());
 	unsigned frontier_size = 1;
 	unsigned *frontier = (unsigned *) malloc(sizeof(unsigned) * frontier_size);
 	frontier[0] = source;
 	unsigned *parents = (unsigned *) malloc(sizeof(unsigned) * NNODES);
-#pragma omp parallel for num_threads(256)
-	for (unsigned i = 0; i < NNODES; ++i) {
+//#pragma omp parallel for num_threads(256)
+	cilk_for (unsigned i = 0; i < NNODES; ++i) {
 		parents[i] = (unsigned) -1; // means unvisited yet
 	}
 	parents[source] = source;
@@ -339,8 +378,8 @@ void BFS(
 		frontier = new_frontier;
 
 		// Update distance and visited flag for new frontier
-#pragma omp parallel for
-		for (unsigned i = 0; i < frontier_size; ++i) {
+//#pragma omp parallel for
+		cilk_for (unsigned i = 0; i < frontier_size; ++i) {
 			unsigned end = frontier[i];
 			unsigned start = parents[end];
 			h_cost[end] = h_cost[start] + 1;
@@ -359,25 +398,25 @@ void BFS(
 ///////////////////////////////////////////////////////////////////////////////
 void input( int argc, char** argv) 
 {
-	__cilkrts_end_cilk();
-	switch (__cilkrts_set_param("nworkers", "256")) {
-		case __CILKRTS_SET_PARAM_SUCCESS:
-			printf("set worker successfully.\n");
-			break;
-		case __CILKRTS_SET_PARAM_UNIMP:
-			printf("Unimplemented parameter.\n");
-			break;
-		case __CILKRTS_SET_PARAM_XRANGE:
-			printf("Parameter value out of range.\n");
-			break;
-		case __CILKRTS_SET_PARAM_INVALID:
-			printf("Invalid parameter value.\n");
-			break;
-		case __CILKRTS_SET_PARAM_LATE:
-			printf("Too late to change parameter value.\n");
-			break;
-	}
-	printf("@input:357 : nworkers: %d\n", __cilkrts_get_nworkers());
+	//__cilkrts_end_cilk();
+	//switch (__cilkrts_set_param("nworkers", "256")) {
+	//	case __CILKRTS_SET_PARAM_SUCCESS:
+	//		printf("set worker successfully.\n");
+	//		break;
+	//	case __CILKRTS_SET_PARAM_UNIMP:
+	//		printf("Unimplemented parameter.\n");
+	//		break;
+	//	case __CILKRTS_SET_PARAM_XRANGE:
+	//		printf("Parameter value out of range.\n");
+	//		break;
+	//	case __CILKRTS_SET_PARAM_INVALID:
+	//		printf("Invalid parameter value.\n");
+	//		break;
+	//	case __CILKRTS_SET_PARAM_LATE:
+	//		printf("Too late to change parameter value.\n");
+	//		break;
+	//}
+	//printf("@input:357 : nworkers: %d\n", __cilkrts_get_nworkers());
 	char *input_f;
 	ROW_STEP = 16;
 	//ROW_STEP = 2;
@@ -440,74 +479,77 @@ void input( int argc, char** argv)
 
 	NUM_THREADS = 64;
 	unsigned edge_bound = NEDGES / NUM_THREADS;
-	__cilkrts_end_cilk();
-	switch (__cilkrts_set_param("nworkers", "256")) {
-		case __CILKRTS_SET_PARAM_SUCCESS:
-			printf("set worker successfully.\n");
-			break;
-		case __CILKRTS_SET_PARAM_UNIMP:
-			printf("Unimplemented parameter.\n");
-			break;
-		case __CILKRTS_SET_PARAM_XRANGE:
-			printf("Parameter value out of range.\n");
-			break;
-		case __CILKRTS_SET_PARAM_INVALID:
-			printf("Invalid parameter value.\n");
-			break;
-		case __CILKRTS_SET_PARAM_LATE:
-			printf("Too late to change parameter value.\n");
-			break;
-	}
-	printf("@input:418 : nworkers: %d\n", __cilkrts_get_nworkers());
-#pragma omp parallel num_threads(NUM_THREADS) private(fname, fin)
-{
-	unsigned tid = omp_get_thread_num();
-	unsigned offset = tid * edge_bound;
-	fname = prefix + "-" + to_string(tid);
-	fin = fopen(fname.c_str(), "r");
-	if (!fin) {
-		fprintf(stderr, "Error: cannot open file %s\n", fname.c_str());
-		exit(1);
-	}
-	if (0 == tid) {
-		fscanf(fin, "%u %u", &NNODES, &NEDGES);
-	}
-	unsigned bound_index;
-	if (NUM_THREADS - 1 != tid) {
-		bound_index = offset + edge_bound;
-	} else {
-		bound_index = NEDGES;
-	}
-	for (unsigned index = offset; index < bound_index; ++index) {
-		unsigned n1;
-		unsigned n2;
-		fscanf(fin, "%u %u", &n1, &n2);
-		n1--;
-		n2--;
-		h_graph_starts[index] = n1;
-		h_graph_ends[index] = n2;
+	//__cilkrts_end_cilk();
+	//switch (__cilkrts_set_param("nworkers", "256")) {
+	//	case __CILKRTS_SET_PARAM_SUCCESS:
+	//		printf("set worker successfully.\n");
+	//		break;
+	//	case __CILKRTS_SET_PARAM_UNIMP:
+	//		printf("Unimplemented parameter.\n");
+	//		break;
+	//	case __CILKRTS_SET_PARAM_XRANGE:
+	//		printf("Parameter value out of range.\n");
+	//		break;
+	//	case __CILKRTS_SET_PARAM_INVALID:
+	//		printf("Invalid parameter value.\n");
+	//		break;
+	//	case __CILKRTS_SET_PARAM_LATE:
+	//		printf("Too late to change parameter value.\n");
+	//		break;
+	//}
+	//printf("@input:418 : nworkers: %d\n", __cilkrts_get_nworkers());
+//#pragma omp parallel num_threads(NUM_THREADS) private(fname, fin)
+//{
+		//unsigned tid = omp_get_thread_num();
+	cilk_for (int tid = 0; tid < NUM_THREADS; ++tid) {
+		unsigned offset = tid * edge_bound;
+		string fname = prefix + "-" + to_string(tid);
+		FILE *fin = fopen(fname.c_str(), "r");
+		if (!fin) {
+			fprintf(stderr, "Error: cannot open file %s\n", fname.c_str());
+			exit(1);
+		}
+		if (0 == tid) {
+			fscanf(fin, "%u %u", &NNODES, &NEDGES);
+		}
+		unsigned bound_index;
+		if (NUM_THREADS - 1 != tid) {
+			bound_index = offset + edge_bound;
+		} else {
+			bound_index = NEDGES;
+		}
+		for (unsigned index = offset; index < bound_index; ++index) {
+			unsigned n1;
+			unsigned n2;
+			fscanf(fin, "%u %u", &n1, &n2);
+			n1--;
+			n2--;
+			h_graph_starts[index] = n1;
+			h_graph_ends[index] = n2;
+		}
+		fclose(fin);
 	}
 
-}
-	__cilkrts_end_cilk();
-	switch (__cilkrts_set_param("nworkers", "256")) {
-		case __CILKRTS_SET_PARAM_SUCCESS:
-			printf("set worker successfully.\n");
-			break;
-		case __CILKRTS_SET_PARAM_UNIMP:
-			printf("Unimplemented parameter.\n");
-			break;
-		case __CILKRTS_SET_PARAM_XRANGE:
-			printf("Parameter value out of range.\n");
-			break;
-		case __CILKRTS_SET_PARAM_INVALID:
-			printf("Invalid parameter value.\n");
-			break;
-		case __CILKRTS_SET_PARAM_LATE:
-			printf("Too late to change parameter value.\n");
-			break;
-	}
-	printf("@input:448 : nworkers: %d\n", __cilkrts_get_nworkers());
+//}
+	//__cilkrts_end_cilk();
+	//switch (__cilkrts_set_param("nworkers", "256")) {
+	//	case __CILKRTS_SET_PARAM_SUCCESS:
+	//		printf("set worker successfully.\n");
+	//		break;
+	//	case __CILKRTS_SET_PARAM_UNIMP:
+	//		printf("Unimplemented parameter.\n");
+	//		break;
+	//	case __CILKRTS_SET_PARAM_XRANGE:
+	//		printf("Parameter value out of range.\n");
+	//		break;
+	//	case __CILKRTS_SET_PARAM_INVALID:
+	//		printf("Invalid parameter value.\n");
+	//		break;
+	//	case __CILKRTS_SET_PARAM_LATE:
+	//		printf("Too late to change parameter value.\n");
+	//		break;
+	//}
+	//printf("@input:448 : nworkers: %d\n", __cilkrts_get_nworkers());
 	// CSR
 	Vertex *graph_vertices_info = (Vertex *) malloc(sizeof(Vertex) * NNODES);
 	//unsigned *graph_vertices = (unsigned *) malloc(sizeof(unsigned) * NNODES);
@@ -586,6 +628,7 @@ void input( int argc, char** argv)
 		refine_time = 0;
 		arrange_time = 0;
 		run_time = 0;
+		printf("nworkers: %d\n", __cilkrts_get_nworkers());
 		BFS(
 			//graph_vertices,
 			graph_vertices_info,
@@ -620,31 +663,33 @@ void input( int argc, char** argv)
 	//exit(0);
 	//////////////////////////////////////////////
 	NUM_THREADS = 64;
-	omp_set_num_threads(NUM_THREADS);
+	//omp_set_num_threads(NUM_THREADS);
 	unsigned num_lines = NNODES / NUM_THREADS;
-#pragma omp parallel
-{
-	unsigned tid = omp_get_thread_num();
-	unsigned offset = tid * num_lines;
-	string file_prefix = "path/path";
-	string file_name = file_prefix + to_string(tid) + ".txt";
-	FILE *fpo = fopen(file_name.c_str(), "w");
-	if (!fpo) {
-		fprintf(stderr, "Error: cannot open file %s.\n", file_name.c_str());
-		exit(1);
-	}
-	unsigned bound_index;
-	if (tid != NUM_THREADS - 1) {
-		bound_index = offset + num_lines;
-	} else {
-		bound_index = NNODES;
-	}
-	for (unsigned index = offset; index < bound_index; ++index) {
-		fprintf(fpo, "%d) cost:%d\n", index, h_cost[index]);
-	}
+//#pragma omp parallel
+//{
+	//unsigned tid = omp_get_thread_num();
+	cilk_for (int tid = 0; tid < NUM_THREADS; ++tid) {
+		unsigned offset = tid * num_lines;
+		string file_prefix = "path/path";
+		string file_name = file_prefix + to_string(tid) + ".txt";
+		FILE *fpo = fopen(file_name.c_str(), "w");
+		if (!fpo) {
+			fprintf(stderr, "Error: cannot open file %s.\n", file_name.c_str());
+			exit(1);
+		}
+		unsigned bound_index;
+		if (tid != NUM_THREADS - 1) {
+			bound_index = offset + num_lines;
+		} else {
+			bound_index = NNODES;
+		}
+		for (unsigned index = offset; index < bound_index; ++index) {
+			fprintf(fpo, "%d) cost:%d\n", index, h_cost[index]);
+		}
 
-	fclose(fpo);
-}
+		fclose(fpo);
+	}
+//}
 #endif
 
 	// cleanup memory
@@ -667,24 +712,24 @@ void input( int argc, char** argv)
 ///////////////////////////////////////////////////////////////////////////////
 int main( int argc, char** argv) 
 {
-	switch (__cilkrts_set_param("nworkers", "256")) {
-		case __CILKRTS_SET_PARAM_SUCCESS:
-			printf("set worker successfully.\n");
-			break;
-		case __CILKRTS_SET_PARAM_UNIMP:
-			printf("Unimplemented parameter.\n");
-			break;
-		case __CILKRTS_SET_PARAM_XRANGE:
-			printf("Parameter value out of range.\n");
-			break;
-		case __CILKRTS_SET_PARAM_INVALID:
-			printf("Invalid parameter value.\n");
-			break;
-		case __CILKRTS_SET_PARAM_LATE:
-			printf("Too late to change parameter value.\n");
-			break;
-	}
-	printf("@main: nworkers: %d\n", __cilkrts_get_nworkers());
+	//switch (__cilkrts_set_param("nworkers", "256")) {
+	//	case __CILKRTS_SET_PARAM_SUCCESS:
+	//		printf("set worker successfully.\n");
+	//		break;
+	//	case __CILKRTS_SET_PARAM_UNIMP:
+	//		printf("Unimplemented parameter.\n");
+	//		break;
+	//	case __CILKRTS_SET_PARAM_XRANGE:
+	//		printf("Parameter value out of range.\n");
+	//		break;
+	//	case __CILKRTS_SET_PARAM_INVALID:
+	//		printf("Invalid parameter value.\n");
+	//		break;
+	//	case __CILKRTS_SET_PARAM_LATE:
+	//		printf("Too late to change parameter value.\n");
+	//		break;
+	//}
+	//printf("@main: nworkers: %d\n", __cilkrts_get_nworkers());
 	start = omp_get_wtime();
 	input( argc, argv);
 }
