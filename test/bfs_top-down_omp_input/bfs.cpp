@@ -42,10 +42,10 @@ double refine_time = 0;
 double arrange_time = 0;
 double run_time = 0;
 unsigned *BFS_kernel(
-				//unsigned *graph_vertices,
-				Vertex *graph_vertices_info,
+				unsigned *graph_vertices,
+				//Vertex *graph_vertices_info,
 				unsigned *graph_edges,
-				//unsigned *h_graph_degrees,
+				unsigned *h_graph_degrees,
 				unsigned *parents,
 				unsigned *&frontier,
 				unsigned &frontier_size)
@@ -57,17 +57,17 @@ unsigned *BFS_kernel(
 	unsigned new_frontier_size = 0;
 //#pragma omp parallel for schedule(dynamic) reduction(+: new_frontier_size)
 #pragma omp parallel for reduction(+: new_frontier_size)
-	//for (unsigned i = 0; i < frontier_size; ++i) {
-	//	degrees[i] = h_graph_degrees[frontier[i]];
-	//	new_frontier_size += degrees[i];
-	//}
 	for (unsigned i = 0; i < frontier_size; ++i) {
-		unsigned start = frontier[i];
-		Vertex v = graph_vertices_info[start];
-		degrees[i] = v.get_out_degree();
+		degrees[i] = h_graph_degrees[frontier[i]];
 		new_frontier_size += degrees[i];
-		frontier_vertices[i] = v;
 	}
+	//for (unsigned i = 0; i < frontier_size; ++i) {
+	//	unsigned start = frontier[i];
+	//	Vertex v = graph_vertices_info[start];
+	//	degrees[i] = v.get_out_degree();
+	//	new_frontier_size += degrees[i];
+	//	frontier_vertices[i] = v;
+	//}
 	if (0 == new_frontier_size) {
 		free(degrees);
 		frontier_size = 0;
@@ -96,49 +96,61 @@ unsigned *BFS_kernel(
 	unsigned *new_frontier_tmp = (unsigned *) malloc(sizeof(unsigned) * new_frontier_size);
 //#pragma omp parallel for schedule(dynamic)
 #pragma omp parallel for
+	//for (unsigned i = 0; i < frontier_size; ++i) {
+	//	Vertex start = frontier_vertices[i];
+	//	unsigned start_id = frontier[i];
+	//	unsigned offset = degrees[i];
+	//	//unsigned size = 0;
+	//	// no speedup
+	//	unsigned out_degree = start.out_degree;
+	//	for (unsigned k = 0; k < out_degree; ++k) {
+	//		unsigned end = start.get_out_neighbor(k);
+	//		if ((unsigned) -1 == parents[end]) {
+	//			bool unvisited = __sync_bool_compare_and_swap(parents + end, (unsigned) -1, start_id); //update parents
+	//			if (unvisited) {
+	//				new_frontier_tmp[offset + k] = end;
+	//			} else {
+	//				new_frontier_tmp[offset + k] = (unsigned) -1;
+	//			}
+	//		} else {
+	//			new_frontier_tmp[offset + k] = (unsigned) -1;
+	//		}
+	//	}
+	//	// end no speedup
+	//	//unsigned *bound_edge_i = start.out_neighbors + start.out_degree;
+	//	//for (unsigned *edge_i = start.out_neighbors; edge_i != bound_edge_i; ++edge_i) {
+	//	//	unsigned end = *edge_i;
+	//	//	if ((unsigned) -1 == parents[end]) {
+	//	//		bool unvisited = __sync_bool_compare_and_swap(parents + end, (unsigned) -1, start_id); //update parents
+	//	//		if (unvisited) {
+	//	//			new_frontier_tmp[offset + size++] = end;
+	//	//		} else {
+	//	//			new_frontier_tmp[offset + size++] = (unsigned) -1;
+	//	//		}
+	//	//	} else {
+	//	//		new_frontier_tmp[offset + size++] = (unsigned) -1;
+	//	//	}
+	//	//}
+	//}
 	for (unsigned i = 0; i < frontier_size; ++i) {
-		Vertex start = frontier_vertices[i];
-		unsigned start_id = frontier[i];
+		unsigned start = frontier[i];
 		unsigned offset = degrees[i];
 		unsigned size = 0;
-		// no speedup
-		//for (unsigned i = 0; i < start.out_degree; ++i) {
-		//	unsigned end = start.get_out_neighbor(i);
-		//	bool unvisited = __sync_bool_compare_and_swap(parents + end, (unsigned) -1, start_id); //update parents
-		//	if (unvisited) {
-		//		new_frontier_tmp[offset + size++] = end;
-		//	} else {
-		//		new_frontier_tmp[offset + size++] = (unsigned) -1;
-		//	}
-		//}
-		// end no speedup
-		unsigned *bound_edge_i = start.out_neighbors + start.out_degree;
-		for (unsigned *edge_i = start.out_neighbors; edge_i != bound_edge_i; ++edge_i) {
-			unsigned end = *edge_i;
-			bool unvisited = __sync_bool_compare_and_swap(parents + end, (unsigned) -1, start_id); //update parents
-			if (unvisited) {
-				new_frontier_tmp[offset + size++] = end;
+		unsigned bound_edge_i = graph_vertices[start] + h_graph_degrees[start];
+		for (unsigned edge_i = graph_vertices[start]; edge_i < bound_edge_i; ++edge_i) {
+			unsigned end = graph_edges[edge_i];
+			if ((unsigned) -1 == parents[end]) {
+				bool unvisited = __sync_bool_compare_and_swap(parents + end, (unsigned) -1, start); //update parents
+				if (unvisited) {
+					new_frontier_tmp[offset + size++] = end;
+				} else {
+					new_frontier_tmp[offset + size++] = (unsigned) -1;
+				}
 			} else {
 				new_frontier_tmp[offset + size++] = (unsigned) -1;
 			}
 		}
 	}
-//	for (unsigned i = 0; i < frontier_size; ++i) {
-//		unsigned start = frontier[i];
-//		//unsigned offset = offsets[i];
-//		unsigned offset = degrees[i];
-//		unsigned size = 0;
-//		unsigned bound_edge_i = graph_vertices[start] + h_graph_degrees[start];
-//		for (unsigned edge_i = graph_vertices[start]; edge_i < bound_edge_i; ++edge_i) {
-//			unsigned end = graph_edges[edge_i];
-//			bool unvisited = __sync_bool_compare_and_swap(parents + end, (unsigned) -1, start); //update parents
-//			if (unvisited) {
-//				new_frontier_tmp[offset + size++] = end;
-//			} else {
-//				new_frontier_tmp[offset + size++] = (unsigned) -1;
-//			}
-//		}
-//	}
 	frontier_tmp_time += omp_get_wtime() - time_now;
 
 
@@ -259,8 +271,8 @@ unsigned *BFS_kernel(
 	return new_frontier;
 }
 void BFS(
-		//unsigned *graph_vertices,
-		Vertex *graph_vertices_info,
+		unsigned *graph_vertices,
+		//Vertex *graph_vertices_info,
 		unsigned *graph_edges,
 		unsigned *h_graph_degrees,
 		const unsigned &source,
@@ -281,10 +293,10 @@ void BFS(
 	while (frontier_size != 0) {
 		// BFS_Kernel get new frontier and size
 		unsigned *new_frontier = BFS_kernel(
-				//graph_vertices,
-				graph_vertices_info,
+				graph_vertices,
+				//graph_vertices_info,
 				graph_edges,
-				//h_graph_degrees,
+				h_graph_degrees,
 				parents,
 				frontier,
 				frontier_size);
@@ -328,37 +340,25 @@ void input( int argc, char** argv)
 	// Input real dataset
 	/////////////////////////////////////////////////////////////////////
 	string prefix = string(input_f) + "_untiled";
-	//string prefix = string(input_f) + "_coo-tiled-" + to_string(TILE_WIDTH);
-	//string prefix = string(input_f) + "_col-16-coo-tiled-" + to_string(TILE_WIDTH);
-	//string prefix = string(input_f) + "_col-2-coo-tiled-" + to_string(TILE_WIDTH);
 	string fname = prefix + "-0";
 	FILE *fin = fopen(fname.c_str(), "r");
+	//FILE *fin = fopen(input_f, "r");
 	fscanf(fin, "%u %u", &NNODES, &NEDGES);
 	fclose(fin);
-	//if (NNODES % TILE_WIDTH) {
-	//	SIDE_LENGTH = NNODES / TILE_WIDTH + 1;
-	//} else {
-	//	SIDE_LENGTH = NNODES / TILE_WIDTH;
-	//}
-	//NUM_TILES = SIDE_LENGTH * SIDE_LENGTH;
-	//// Read tile Offsets
-	//fname = prefix + "-offsets";
-	//fin = fopen(fname.c_str(), "r");
-	//if (!fin) {
-	//	fprintf(stderr, "cannot open file: %s\n", fname.c_str());
-	//	exit(1);
-	//}
-	//unsigned *tile_offsets = (unsigned *) malloc(NUM_TILES * sizeof(unsigned));
-	//for (unsigned i = 0; i < NUM_TILES; ++i) {
-	//	fscanf(fin, "%u", tile_offsets + i);
-	//}
-	//fclose(fin);
-	unsigned *h_graph_starts = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
+	//unsigned *h_graph_starts = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
 	unsigned *h_graph_ends = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
 	unsigned *h_graph_degrees = (unsigned *) malloc(sizeof(unsigned) * NNODES);
 	memset(h_graph_degrees, 0, sizeof(unsigned) * NNODES);
-	//int *is_empty_tile = (int *) malloc(sizeof(int) * NUM_TILES);
-	//memset(is_empty_tile, 0, sizeof(int) * NUM_TILES);
+	
+	//for (unsigned i = 0; i < NEDGES; ++i) {
+	//	unsigned n1;
+	//	unsigned n2;
+	//	fscanf(fin, "%u %u", &n1, &n2);
+	//	//n1--;
+	//	n2--;
+	//	//h_graph_starts[i] = n1;
+	//	h_graph_ends[i] = n2;
+	//}
 
 	// Read degrees
 	fname = prefix + "-nneibor";
@@ -397,38 +397,33 @@ void input( int argc, char** argv)
 		unsigned n1;
 		unsigned n2;
 		fscanf(fin, "%u %u", &n1, &n2);
-		n1--;
+		//n1--;
 		n2--;
-		h_graph_starts[index] = n1;
+		//h_graph_starts[index] = n1;
 		h_graph_ends[index] = n2;
 	}
 
 }
 	// CSR
-	Vertex *graph_vertices_info = (Vertex *) malloc(sizeof(Vertex) * NNODES);
-	//unsigned *graph_vertices = (unsigned *) malloc(sizeof(unsigned) * NNODES);
+	//Vertex *graph_vertices_info = (Vertex *) malloc(sizeof(Vertex) * NNODES);
+	unsigned *graph_vertices = (unsigned *) malloc(sizeof(unsigned) * NNODES);
 	unsigned *graph_edges = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
 	unsigned edge_start = 0;
 	for (unsigned i = 0; i < NNODES; ++i) {
-		//graph_vertices[i] = edge_start;
-		graph_vertices_info[i].out_neighbors = graph_edges + edge_start;
-		graph_vertices_info[i].out_degree = h_graph_degrees[i];
+		graph_vertices[i] = edge_start;
+		//graph_vertices_info[i].out_neighbors = graph_edges + edge_start;
+		//graph_vertices_info[i].out_degree = h_graph_degrees[i];
 		edge_start += h_graph_degrees[i];
 	}
 	memcpy(graph_edges, h_graph_ends, sizeof(unsigned) * NEDGES);
-	free(h_graph_starts);
+	//free(h_graph_starts);
 	free(h_graph_ends);
 
 
 	// End Input real dataset
 	/////////////////////////////////////////////////////////////////////
 
-	//int *h_graph_mask = (int*) malloc(sizeof(int)*NNODES);
-	//int *h_updating_graph_mask = (int*) malloc(sizeof(int)*NNODES);
-	//int *h_graph_visited = (int*) malloc(sizeof(int)*NNODES);
 	int *h_cost = (int*) malloc(sizeof(int)*NNODES);
-	//int *is_active_side = (int *) malloc(sizeof(int) * SIDE_LENGTH);
-	//int *is_updating_active_side = (int *) malloc(sizeof(int) * SIDE_LENGTH);
 	unsigned source = 0;
 
 	now = omp_get_wtime();
@@ -483,8 +478,8 @@ void input( int argc, char** argv)
 		arrange_time = 0;
 		run_time = 0;
 		BFS(
-			//graph_vertices,
-			graph_vertices_info,
+			graph_vertices,
+			//graph_vertices_info,
 			graph_edges,
 			h_graph_degrees,
 			source,
@@ -546,8 +541,8 @@ void input( int argc, char** argv)
 	// cleanup memory
 	//free( h_graph_starts);
 	//free( h_graph_ends);
-	//free( graph_vertices);
-	free( graph_vertices_info);
+	free( graph_vertices);
+	//free( graph_vertices_info);
 	free( graph_edges);
 	//free( h_graph_mask);
 	//free( h_updating_graph_mask);
