@@ -193,72 +193,72 @@ Begin optimization report for: BFS(unsigned int *, unsigned int *, int *, int *,
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at bfs.cpp(320,2)
+LOOP BEGIN at bfs.cpp(321,2)
    remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-   LOOP BEGIN at bfs.cpp(326,3)
+   LOOP BEGIN at bfs.cpp(327,3)
       remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(252,46) inlined into bfs.cpp(327,4)
+LOOP BEGIN at bfs.cpp(253,46) inlined into bfs.cpp(328,4)
    remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-   LOOP BEGIN at bfs.cpp(232,2) inlined into bfs.cpp(327,4)
+   LOOP BEGIN at bfs.cpp(233,2) inlined into bfs.cpp(328,4)
       remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-      LOOP BEGIN at bfs.cpp(239,3) inlined into bfs.cpp(327,4)
+      LOOP BEGIN at bfs.cpp(240,3) inlined into bfs.cpp(328,4)
          remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-         LOOP BEGIN at bfs.cpp(247,4) inlined into bfs.cpp(327,4)
+         LOOP BEGIN at bfs.cpp(248,4) inlined into bfs.cpp(328,4)
             remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-            LOOP BEGIN at bfs.cpp(81,2) inlined into bfs.cpp(327,4)
+            LOOP BEGIN at bfs.cpp(82,2) inlined into bfs.cpp(328,4)
                remark #15523: loop was not vectorized: loop control variable edge_i was found, but loop iteration count cannot be computed before executing the loop
             LOOP END
          LOOP END
       LOOP END
 
-      LOOP BEGIN at bfs.cpp(81,2) inlined into bfs.cpp(327,4)
+      LOOP BEGIN at bfs.cpp(82,2) inlined into bfs.cpp(328,4)
          remark #15523: loop was not vectorized: loop control variable edge_i was found, but loop iteration count cannot be computed before executing the loop
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(252,46) inlined into bfs.cpp(343,3)
+LOOP BEGIN at bfs.cpp(253,46) inlined into bfs.cpp(344,3)
    remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-   LOOP BEGIN at bfs.cpp(232,2) inlined into bfs.cpp(343,3)
+   LOOP BEGIN at bfs.cpp(233,2) inlined into bfs.cpp(344,3)
       remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-      LOOP BEGIN at bfs.cpp(239,3) inlined into bfs.cpp(343,3)
+      LOOP BEGIN at bfs.cpp(240,3) inlined into bfs.cpp(344,3)
          remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-         LOOP BEGIN at bfs.cpp(247,4) inlined into bfs.cpp(343,3)
+         LOOP BEGIN at bfs.cpp(248,4) inlined into bfs.cpp(344,3)
             remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-            LOOP BEGIN at bfs.cpp(81,2) inlined into bfs.cpp(343,3)
+            LOOP BEGIN at bfs.cpp(82,2) inlined into bfs.cpp(344,3)
                remark #15523: loop was not vectorized: loop control variable edge_i was found, but loop iteration count cannot be computed before executing the loop
             LOOP END
          LOOP END
       LOOP END
 
-      LOOP BEGIN at bfs.cpp(81,2) inlined into bfs.cpp(343,3)
+      LOOP BEGIN at bfs.cpp(82,2) inlined into bfs.cpp(344,3)
          remark #15523: loop was not vectorized: loop control variable edge_i was found, but loop iteration count cannot be computed before executing the loop
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(368,3)
-   remark #15382: vectorization support: call to function _mm512_mask_storeu_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ bfs.cpp(404,5) ]
-   remark #15382: vectorization support: call to function _mm512_mask_storeu_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ bfs.cpp(406,5) ]
-   remark #15382: vectorization support: call to function _mm512_mask_storeu_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ bfs.cpp(421,4) ]
-   remark #15382: vectorization support: call to function _mm512_mask_storeu_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ bfs.cpp(423,4) ]
+LOOP BEGIN at bfs.cpp(369,3)
+   remark #15382: vectorization support: call to function _mm512_mask_storeu_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ bfs.cpp(405,5) ]
+   remark #15382: vectorization support: call to function _mm512_mask_storeu_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ bfs.cpp(407,5) ]
+   remark #15382: vectorization support: call to function _mm512_mask_storeu_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ bfs.cpp(422,4) ]
+   remark #15382: vectorization support: call to function _mm512_mask_storeu_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ bfs.cpp(424,4) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between is_active_side[side_id] (370:5) and h_graph_mask[vertex_id] (422:4)
-   remark #15346: vector dependence: assumed OUTPUT dependence between h_graph_mask[vertex_id] (422:4) and is_active_side[side_id] (370:5)
+   remark #15346: vector dependence: assumed OUTPUT dependence between is_active_side[side_id] (371:5) and h_graph_mask[vertex_id] (423:4)
+   remark #15346: vector dependence: assumed OUTPUT dependence between h_graph_mask[vertex_id] (423:4) and is_active_side[side_id] (371:5)
 
-   LOOP BEGIN at bfs.cpp(396,4)
+   LOOP BEGIN at bfs.cpp(397,4)
       remark #15523: loop was not vectorized: loop control variable vertex_id was found, but loop iteration count cannot be computed before executing the loop
    LOOP END
 LOOP END

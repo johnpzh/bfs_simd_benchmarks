@@ -404,7 +404,7 @@ void BFS(
 		//unsigned *graph_vertices,
 		Vertex *graph_vertices_info,
 		unsigned *graph_edges,
-		unsigned *h_graph_degrees,
+		//unsigned *h_graph_degrees,
 		const unsigned &source,
 		int *h_cost)
 {
@@ -476,72 +476,27 @@ void BFS(
 ///////////////////////////////////////////////////////////////////////////////
 void input( int argc, char** argv) 
 {
-	//__cilkrts_end_cilk();
-	//switch (__cilkrts_set_param("nworkers", "256")) {
-	//	case __CILKRTS_SET_PARAM_SUCCESS:
-	//		printf("set worker successfully.\n");
-	//		break;
-	//	case __CILKRTS_SET_PARAM_UNIMP:
-	//		printf("Unimplemented parameter.\n");
-	//		break;
-	//	case __CILKRTS_SET_PARAM_XRANGE:
-	//		printf("Parameter value out of range.\n");
-	//		break;
-	//	case __CILKRTS_SET_PARAM_INVALID:
-	//		printf("Invalid parameter value.\n");
-	//		break;
-	//	case __CILKRTS_SET_PARAM_LATE:
-	//		printf("Too late to change parameter value.\n");
-	//		break;
-	//}
-	//printf("@input:357 : nworkers: %d\n", __cilkrts_get_nworkers());
 	char *input_f;
 	ROW_STEP = 16;
-	//ROW_STEP = 2;
 	
 	if(argc < 2){
 		input_f = "/home/zpeng/benchmarks/data/pokec/soc-pokec";
-		//TILE_WIDTH = 1024;
 	} else {
 		input_f = argv[1];
-		//TILE_WIDTH = strtoul(argv[2], NULL, 0);
 	}
 
 	/////////////////////////////////////////////////////////////////////
 	// Input real dataset
 	/////////////////////////////////////////////////////////////////////
 	string prefix = string(input_f) + "_untiled";
-	//string prefix = string(input_f) + "_coo-tiled-" + to_string(TILE_WIDTH);
-	//string prefix = string(input_f) + "_col-16-coo-tiled-" + to_string(TILE_WIDTH);
-	//string prefix = string(input_f) + "_col-2-coo-tiled-" + to_string(TILE_WIDTH);
 	string fname = prefix + "-0";
 	FILE *fin = fopen(fname.c_str(), "r");
 	fscanf(fin, "%u %u", &NNODES, &NEDGES);
 	fclose(fin);
-	//if (NNODES % TILE_WIDTH) {
-	//	SIDE_LENGTH = NNODES / TILE_WIDTH + 1;
-	//} else {
-	//	SIDE_LENGTH = NNODES / TILE_WIDTH;
-	//}
-	//NUM_TILES = SIDE_LENGTH * SIDE_LENGTH;
-	//// Read tile Offsets
-	//fname = prefix + "-offsets";
-	//fin = fopen(fname.c_str(), "r");
-	//if (!fin) {
-	//	fprintf(stderr, "cannot open file: %s\n", fname.c_str());
-	//	exit(1);
-	//}
-	//unsigned *tile_offsets = (unsigned *) malloc(NUM_TILES * sizeof(unsigned));
-	//for (unsigned i = 0; i < NUM_TILES; ++i) {
-	//	fscanf(fin, "%u", tile_offsets + i);
-	//}
-	//fclose(fin);
 	unsigned *h_graph_starts = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
 	unsigned *h_graph_ends = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
 	unsigned *h_graph_degrees = (unsigned *) malloc(sizeof(unsigned) * NNODES);
 	memset(h_graph_degrees, 0, sizeof(unsigned) * NNODES);
-	//int *is_empty_tile = (int *) malloc(sizeof(int) * NUM_TILES);
-	//memset(is_empty_tile, 0, sizeof(int) * NUM_TILES);
 
 	// Read degrees
 	fname = prefix + "-nneibor";
@@ -557,25 +512,6 @@ void input( int argc, char** argv)
 
 	NUM_THREADS = 64;
 	unsigned edge_bound = NEDGES / NUM_THREADS;
-	//__cilkrts_end_cilk();
-	//switch (__cilkrts_set_param("nworkers", "256")) {
-	//	case __CILKRTS_SET_PARAM_SUCCESS:
-	//		printf("set worker successfully.\n");
-	//		break;
-	//	case __CILKRTS_SET_PARAM_UNIMP:
-	//		printf("Unimplemented parameter.\n");
-	//		break;
-	//	case __CILKRTS_SET_PARAM_XRANGE:
-	//		printf("Parameter value out of range.\n");
-	//		break;
-	//	case __CILKRTS_SET_PARAM_INVALID:
-	//		printf("Invalid parameter value.\n");
-	//		break;
-	//	case __CILKRTS_SET_PARAM_LATE:
-	//		printf("Too late to change parameter value.\n");
-	//		break;
-	//}
-	//printf("@input:418 : nworkers: %d\n", __cilkrts_get_nworkers());
 //#pragma omp parallel num_threads(NUM_THREADS) private(fname, fin)
 //{
 		//unsigned tid = omp_get_thread_num();
@@ -609,25 +545,6 @@ void input( int argc, char** argv)
 	}
 
 //}
-	//__cilkrts_end_cilk();
-	//switch (__cilkrts_set_param("nworkers", "256")) {
-	//	case __CILKRTS_SET_PARAM_SUCCESS:
-	//		printf("set worker successfully.\n");
-	//		break;
-	//	case __CILKRTS_SET_PARAM_UNIMP:
-	//		printf("Unimplemented parameter.\n");
-	//		break;
-	//	case __CILKRTS_SET_PARAM_XRANGE:
-	//		printf("Parameter value out of range.\n");
-	//		break;
-	//	case __CILKRTS_SET_PARAM_INVALID:
-	//		printf("Invalid parameter value.\n");
-	//		break;
-	//	case __CILKRTS_SET_PARAM_LATE:
-	//		printf("Too late to change parameter value.\n");
-	//		break;
-	//}
-	//printf("@input:448 : nworkers: %d\n", __cilkrts_get_nworkers());
 	// CSR
 	Vertex *graph_vertices_info = (Vertex *) malloc(sizeof(Vertex) * NNODES);
 	//unsigned *graph_vertices = (unsigned *) malloc(sizeof(unsigned) * NNODES);
@@ -642,6 +559,31 @@ void input( int argc, char** argv)
 	memcpy(graph_edges, h_graph_ends, sizeof(unsigned) * NEDGES);
 	free(h_graph_starts);
 	free(h_graph_ends);
+
+
+	// AdjacentGraph
+//	string fname = string(input_f) + "_nohead.adj";
+//	FILE *fin = fopen(fname.c_str(), "r");
+//	fscanf(fin, "%*s %u %u", &NNODES, &NEDGES);
+//	Vertex *graph_vertices_info = (Vertex *) malloc(sizeof(Vertex) * NNODES);
+//	unsigned *graph_edges = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
+//	// Vertices
+//	for (unsigned i = 0; i < NNODES; ++i) {
+//		unsigned offset;
+//		fscanf(fin, "%u", &offset);
+//		graph_vertices_info[i].out_neighbors = graph_edges + offset;
+//		if (i != 0) {
+//			graph_vertices_info[i - 1].out_degree = 
+//				graph_vertices_info[i].out_neighbors 
+//				- graph_vertices_info[i - 1].out_neighbors;
+//		}
+//	}
+//	// Edges
+//	for (unsigned i = 0; i < NEDGES; ++i) {
+//		unsigned end;
+//		fscanf(fin, "%u", &end);
+//		graph_edges[i] = end;
+//	}
 
 
 	// End Input real dataset
@@ -711,7 +653,7 @@ void input( int argc, char** argv)
 			//graph_vertices,
 			graph_vertices_info,
 			graph_edges,
-			h_graph_degrees,
+			//h_graph_degrees,
 			source,
 			h_cost);
 		auto percent = [] (double t) {return t/run_time*100;};

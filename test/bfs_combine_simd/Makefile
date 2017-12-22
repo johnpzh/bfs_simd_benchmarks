@@ -1,0 +1,19 @@
+# C compiler
+ICPC = icpc
+
+ifeq (${debug}, 1)
+	CC_FLAGS = -Wall -Wextra -g -std=c++11 -qopenmp -DONEDEBUG
+else
+	CC_FLAGS = -Wall -Wextra -g -std=c++11 -qopenmp -O3 -xMIC-AVX512 -qopt-report=5 -qopt-report-phase=vec -inline-level=2 -inline-forceinline
+endif
+
+INCLUDE = -I/home/zpeng/lib/include
+LIB = /home/zpeng/lib/lib/libpapi.a
+
+.PHONY: clean
+
+bfs: bfs.cpp 
+	$(ICPC) $(CC_FLAGS) $(INCLUDE) -o $@ $^ $(LIB) 
+
+clean:
+	rm -f bfs

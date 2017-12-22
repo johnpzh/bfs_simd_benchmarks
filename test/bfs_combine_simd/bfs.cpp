@@ -28,24 +28,23 @@ double now;
 FILE *time_out;
 char *time_file = "timeline.txt";
 
-// PAPI test
-//static void test_fail(char *file, int line, char *call, int retval){
-//	printf("%s\tFAILED\nLine # %d\n", file, line);
-//	if ( retval == PAPI_ESYS ) {
-//		char buf[128];
-//		memset( buf, '\0', sizeof(buf) );
-//		sprintf(buf, "System error in %s:", call );
-//		perror(buf);
-//	}
-//	else if ( retval > 0 ) {
-//		printf("Error calculating: %s\n", call );
-//	}
-//	else {
-//		printf("Error in %s: %s\n", call, PAPI_strerror(retval) );
-//	}
-//	printf("\n");
-//	exit(1);
-//}
+static void test_fail(char *file, int line, char *call, int retval){
+	printf("%s\tFAILED\nLine # %d\n", file, line);
+	if ( retval == PAPI_ESYS ) {
+		char buf[128];
+		memset( buf, '\0', sizeof(buf) );
+		sprintf(buf, "System error in %s:", call );
+		perror(buf);
+	}
+	else if ( retval > 0 ) {
+		printf("Error calculating: %s\n", call );
+	}
+	else {
+		printf("Error in %s: %s\n", call, PAPI_strerror(retval) );
+	}
+	printf("\n");
+	exit(1);
+}
 
 inline void bfs_kernel(\
 		unsigned *heads_buffer,
@@ -311,12 +310,12 @@ void BFS(\
 	omp_set_num_threads(NUM_THREADS);
 	unsigned *heads_buffer = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS, ALIGNED_BYTES);
 	unsigned *ends_buffer = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS, ALIGNED_BYTES);
-	//// PAPI
-	//int events[2] = { PAPI_L2_TCA, PAPI_L2_TCM};
-	//int retval;
-	//if ((retval = PAPI_start_counters(events, 2)) < PAPI_OK) {
-	//	test_fail(__FILE__, __LINE__, "PAPI_start_counters", retval);
-	//}
+	// PAPI
+	int events[2] = { PAPI_L2_TCA, PAPI_L2_TCM};
+	int retval;
+	if ((retval = PAPI_start_counters(events, 2)) < PAPI_OK) {
+		test_fail(__FILE__, __LINE__, "PAPI_start_counters", retval);
+	}
 	double start_time = omp_get_wtime();
 	bool stop;
 	do
@@ -426,12 +425,13 @@ void BFS(\
 	}
 	while(!stop);
 	double end_time = omp_get_wtime();
-	//// PAPI results
-	//long long values[2];
-	//if ((retval = PAPI_stop_counters(values, 2)) < PAPI_OK) {
-	//	test_fail(__FILE__, __LINE__, "PAPI_stop_counters", retval);
-	//}
-	//printf("cache access: %lld, cache misses: %lld, miss rate: %.2f%%\n", values[0], values[1], 100.0* values[1]/values[0]);
+	// PAPI results
+	long long values[2];
+	if ((retval = PAPI_stop_counters(values, 2)) < PAPI_OK) {
+		test_fail(__FILE__, __LINE__, "PAPI_stop_counters", retval);
+	}
+
+	printf("cache access: %lld, cache misses: %lld, miss rate: %.2f%%\n", values[0], values[1], 100.0* values[1]/values[0]);
 	printf("%d %lf\n", NUM_THREADS, (end_time - start_time));
 	_mm_free(heads_buffer);
 	_mm_free(ends_buffer);
