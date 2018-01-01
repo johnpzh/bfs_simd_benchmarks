@@ -28,6 +28,7 @@ unsigned TILE_WIDTH;
 unsigned SIDE_LENGTH;
 unsigned NUM_TILES;
 unsigned ROW_STEP;
+unsigned CHUNK_SIZE;
 
 double start;
 double now;
@@ -94,8 +95,8 @@ unsigned *BFS_kernel(
 	// From offset, get active vertices (para_for)
 	time_now = omp_get_wtime();
 	unsigned *new_frontier_tmp = (unsigned *) malloc(sizeof(unsigned) * new_frontier_size);
-//#pragma omp parallel for schedule(dynamic)
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic, CHUNK_SIZE)
+//#pragma omp parallel for
 	for (unsigned i = 0; i < frontier_size; ++i) {
 		Vertex start = frontier_vertices[i];
 		unsigned start_id = frontier[i];
@@ -312,6 +313,7 @@ void BFS(
 	}
 	double end_time = omp_get_wtime();
 	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
+	//printf("%d %lf\n", CHUNK_SIZE, run_time = (end_time - start_time));
 	//free(frontier);
 	free(parents);
 
@@ -457,6 +459,10 @@ void input( int argc, char** argv)
 	//ROW_STEP = 2;//test
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
+		CHUNK_SIZE = 2048;
+	//for (unsigned i = 10; i < 16; ++i) {
+		//CHUNK_SIZE = (unsigned) pow(2, i);
+		//NUM_THREADS = 256;
 #ifndef ONEDEBUG
 		//sleep(10);
 #endif
@@ -466,6 +472,7 @@ void input( int argc, char** argv)
 		//memset(h_updating_graph_mask, 0, sizeof(int)*NNODES);
 		//memset(h_graph_visited, 0, sizeof(int)*NNODES);
 		//h_graph_visited[source] = 1;
+		for (unsigned k = 0; k < 3; ++k) {
 		for (unsigned i = 0; i < NNODES; ++i) {
 			h_cost[i] = -1;
 		}
@@ -508,6 +515,7 @@ void input( int argc, char** argv)
 #ifdef ONEDEBUG
 		printf("Thread %u finished.\n", NUM_THREADS);
 #endif
+	}
 	}
 	//}
 	fclose(time_out);

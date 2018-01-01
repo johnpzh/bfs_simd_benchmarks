@@ -9,11 +9,13 @@
 #include <string>
 #include <unistd.h>
 #include <tuple>
+#include <limits.h>
 
 using std::string;
 using std::to_string;
 using std::tuple;
 using std::make_tuple;
+using std::get;
 
 #define condi_for(_i, _start, _end, _cond, _body) { \
 	if (_cond) { \
@@ -49,6 +51,7 @@ struct Vertex {
 	template<typename G, typename F>
 	inline void put_children(unsigned start_id, unsigned offset, F &funs, G &g) 
 	{
+		unsigned d = this->get_out_degree();
 		// Fancy Define For Loop, Performance Even Worse
 		//condi_for(k, 0, this->out_degree, (this->out_degree > 1000), {
 		//	unsigned end = this->get_out_neighbor(k);
@@ -60,8 +63,8 @@ struct Vertex {
 		//	}
 		//}
 		//);
-		if (this->out_degree > 1000) {
-			cilk_for (unsigned k = 0; k < this->out_degree; ++k) {
+		if (d > 1000) {
+			cilk_for (unsigned k = 0; k < d; ++k) {
 				unsigned end = this->get_out_neighbor(k);
 				if (funs.cond_unvisited(end)) {
 					bool unvisited = funs.update_atomic(start_id, end);
@@ -77,7 +80,7 @@ struct Vertex {
 				//}
 			}
 		} else {
-			for (unsigned k = 0; k < this->out_degree; ++k) {
+			for (unsigned k = 0; k < d; ++k) {
 				unsigned end = this->get_out_neighbor(k);
 				if (funs.cond_unvisited(end)) {
 					bool unvisited = funs.update_atomic(start_id, end);
@@ -103,12 +106,14 @@ struct BFS_Funs {
 
 	inline bool update_atomic(unsigned start, unsigned end) 
 	{
-		return __sync_bool_compare_and_swap(this->parents + end, (unsigned) -1, start); //update parents
+		//return __sync_bool_compare_and_swap(this->parents + end, (unsigned) -1, start); //update parents
+		return __sync_bool_compare_and_swap(this->parents + end, UINT_MAX, start); //update parents
 	}
 
 	inline bool cond_unvisited(unsigned end) 
 	{
-		return this->parents[end] == (unsigned) -1;
+		//return this->parents[end] == (unsigned) -1;
+		return this->parents[end] == UINT_MAX;
 	}
 };
 
@@ -211,20 +216,15 @@ unsigned *BFS_kernel(
 	using S = tuple<unsigned, empty>;
 	time_now = omp_get_wtime();
 	//unsigned *new_frontier_tmp = (unsigned *) malloc(sizeof(unsigned) * new_frontier_size);
-	unsigned *new_frontier_tmp = new S[new_frontier_size];
-//#pragma omp parallel for schedule(dynamic)
-//#pragma omp parallel for
-//	for (unsigned i = 0; i < frontier_size; ++i) {}
-//#pragma omp parallel num_threads(NUM_THREADS)
-//{
-//#pragma omp single
+	S *new_frontier_tmp = (S *) malloc(new_frontier_size * sizeof(S));
 	auto g = [&] (unsigned neighb, unsigned offset, bool unvisited=false) {
 		if (unvisited) {
 			//new_frontier_tmp[offset] = neighb;
 			new_frontier_tmp[offset] = make_tuple(neighb, empty());
 		} else {
 			//new_frontier_tmp[offset] = (unsigned) -1;
-			new_frontier_tmp[offset] = make_tuple((unsigned) -1, empty());
+			//new_frontier_tmp[offset] = make_tuple((unsigned) -1, empty());
+			new_frontier_tmp[offset] = make_tuple(UINT_MAX, empty());
 		}
 	};
 	cilk_for (unsigned i = 0; i < frontier_size; ++i) {
@@ -234,59 +234,7 @@ unsigned *BFS_kernel(
 		Vertex start = frontier_vertices[i];
 		//unsigned size = 0;
 		start.put_children(start_id, offset, funs, g);
-		// no speedup
-		//unsigned out_degree = start.out_degree;
-		//if (out_degree > 1000) {
-		//	cilk_for (unsigned k = 0; k < out_degree; ++k) {
-		//		unsigned end = start.get_out_neighbor(k);
-		//		if ((unsigned)-1 == parents[end]) {
-		//			bool unvisited = __sync_bool_compare_and_swap(parents + end, (unsigned) -1, start_id); //update parents
-		//			if (unvisited) {
-		//				//new_frontier_tmp[offset + size++] = end;
-		//				new_frontier_tmp[offset + k] = end;
-		//			} else {
-		//				new_frontier_tmp[offset + k] = (unsigned) -1;
-		//				//new_frontier_tmp[offset + size++] = (unsigned) -1;
-		//			}
-		//		} else {
-		//			new_frontier_tmp[offset + k] = (unsigned) -1;
-		//		}
-		//	}
-		//} else {
-		//	for (unsigned k = 0; k < out_degree; ++k) {
-		//		unsigned end = start.get_out_neighbor(k);
-		//		if ((unsigned)-1 == parents[end]) {
-		//			bool unvisited = __sync_bool_compare_and_swap(parents + end, (unsigned) -1, start_id); //update parents
-		//			if (unvisited) {
-		//				//new_frontier_tmp[offset + size++] = end;
-		//				new_frontier_tmp[offset + k] = end;
-		//			} else {
-		//				new_frontier_tmp[offset + k] = (unsigned) -1;
-		//				//new_frontier_tmp[offset + size++] = (unsigned) -1;
-		//			}
-		//		} else {
-		//			new_frontier_tmp[offset + k] = (unsigned) -1;
-		//		}
-		//	}
-		//}
 	}
-//}
-//	for (unsigned i = 0; i < frontier_size; ++i) {
-//		unsigned start = frontier[i];
-//		//unsigned offset = offsets[i];
-//		unsigned offset = degrees[i];
-//		unsigned size = 0;
-//		unsigned bound_edge_i = graph_vertices[start] + h_graph_degrees[start];
-//		for (unsigned edge_i = graph_vertices[start]; edge_i < bound_edge_i; ++edge_i) {
-//			unsigned end = graph_edges[edge_i];
-//			bool unvisited = __sync_bool_compare_and_swap(parents + end, (unsigned) -1, start); //update parents
-//			if (unvisited) {
-//				new_frontier_tmp[offset + size++] = end;
-//			} else {
-//				new_frontier_tmp[offset + size++] = (unsigned) -1;
-//			}
-//		}
-//	}
 	frontier_tmp_time += omp_get_wtime() - time_now;
 
 
@@ -316,14 +264,12 @@ unsigned *BFS_kernel(
 			//unsigned size = 0;
 			unsigned base = offset;
 			for (unsigned end_i = offset; end_i < bound; ++end_i) {
-				if ((unsigned) - 1 != new_frontier_tmp[end_i]) {
+				//if ((unsigned) - 1 != new_frontier_tmp[end_i]) {
+				//	new_frontier_tmp[base++] = new_frontier_tmp[end_i];
+				//}
+				if ((unsigned) - 1 != get<0>(new_frontier_tmp[end_i])) {
 					new_frontier_tmp[base++] = new_frontier_tmp[end_i];
 				}
-				//unsigned end = new_frontier_tmp[end_i];
-				//if (parents[end] == (unsigned) -1) {
-				//	new_frontier_tmp[offset + size]  = end;
-				//	++size;
-				//}
 			}
 			nums_in_blocks[block_i] = base - offset;
 			//new_frontier_size_tmp += nums_in_blocks[block_i];
@@ -334,7 +280,10 @@ unsigned *BFS_kernel(
 	} else {
 		unsigned base = 0;
 		for (unsigned i = 0; i < new_frontier_size; ++i) {
-			if ((unsigned) -1 != new_frontier_tmp[i]) {
+			//if ((unsigned) -1 != new_frontier_tmp[i]) {
+			//	new_frontier_tmp[base++] = new_frontier_tmp[i];
+			//}
+			if (UINT_MAX != get<0>(new_frontier_tmp[i])) {
 				new_frontier_tmp[base++] = new_frontier_tmp[i];
 			}
 		}
@@ -347,6 +296,7 @@ unsigned *BFS_kernel(
 		free(frontier_vertices);
 		free(degrees);
 		free(new_frontier_tmp);
+		//delete [] new_frontier_tmp;
 		if (nums_in_blocks) {
 			free(nums_in_blocks);
 		}
@@ -384,13 +334,15 @@ unsigned *BFS_kernel(
 			//unsigned bound = offset + nums_in_blocks[block_i];
 			unsigned base = block_i * block_size;
 			for (unsigned i = offset; i < bound; ++i) {
-				new_frontier[i] = new_frontier_tmp[base++];
+				//new_frontier[i] = new_frontier_tmp[base++];
+				new_frontier[i] = get<0>(new_frontier_tmp[base++]);
 			}
 		}
 	} else {
 		unsigned base = 0;
 		for (unsigned i = 0; i < new_frontier_size; ++i) {
-			new_frontier[i] = new_frontier_tmp[base++];
+			//new_frontier[i] = new_frontier_tmp[base++];
+			new_frontier[i] = get<0>(new_frontier_tmp[base++]);
 		}
 	}
 	arrange_time += omp_get_wtime() - time_now;
@@ -401,6 +353,7 @@ unsigned *BFS_kernel(
 	free(frontier_vertices);
 	free(degrees);
 	free(new_frontier_tmp);
+	//delete [] new_frontier_tmp;
 	if (nums_in_blocks) {
 		free(nums_in_blocks);
 	}
@@ -446,7 +399,8 @@ void BFS(
 	unsigned *parents = (unsigned *) malloc(sizeof(unsigned) * NNODES);
 //#pragma omp parallel for num_threads(256)
 	cilk_for (unsigned i = 0; i < NNODES; ++i) {
-		parents[i] = (unsigned) -1; // means unvisited yet
+		//parents[i] = (unsigned) -1; // means unvisited yet
+		parents[i] = UINT_MAX; // means unvisited yet
 	}
 	parents[source] = source;
 	double start_time = omp_get_wtime();
