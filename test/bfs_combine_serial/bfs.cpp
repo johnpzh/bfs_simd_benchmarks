@@ -623,7 +623,26 @@ void BFS_sparse(
 // End Sparse (top-down)
 ///////////////////////////////////////////////////////////////////////////////
 
-void graph_prepare()
+// TODO List:
+// graph_edges should be changed to h_graph_ends
+// h_graph_visited should be changed to h_graph_parents
+// h_graph_parents initilization should moved before graph_prepare, and then passed to graph_prepare
+
+void graph_prepare(
+		//unsigned *graph_vertices,
+		Vertex *graph_vertices_info,
+		unsigned *h_graph_heads,
+		unsigned *h_graph_ends, // graph_edges
+		unsigned *h_graph_degrees,
+		unsigned *h_graph_parents, // h_graph_visited
+		unsigned *tile_offsets,
+		const unsigned &source,
+		int *h_graph_mask,
+		int *h_updating_graph_mask,
+		int *h_cost,
+		int *is_empty_tile,
+		int *is_active_side,
+		int *is_updating_active_side)
 {
 	// The first time, running the Sparse
 	omp_set_num_threads(NUM_THREADS);
@@ -639,25 +658,16 @@ void graph_prepare()
 	double start_time = omp_get_wtime();
 	//while (frontier_size != 0) {
 		// BFS_Kernel get new frontier and size
-		unsigned *new_frontier = BFS_kernel(
-				//graph_vertices,
-				graph_vertices_info,
-				graph_edges,
-				//h_graph_degrees,
-				parents,
-				frontier,
-				frontier_size);
-		free(frontier);
-		frontier = new_frontier;
-
-		// Update distance and visited flag for new frontier
-#pragma omp parallel for
-		for (unsigned i = 0; i < frontier_size; ++i) {
-			unsigned end = frontier[i];
-			unsigned start = parents[end];
-			h_cost[end] = h_cost[start] + 1;
-		}
-
+	unsigned *new_frontier = BFS_kernel(
+			//graph_vertices,
+			graph_vertices_info,
+			graph_edges,
+			//h_graph_degrees,
+			parents,
+			frontier,
+			frontier_size);
+	free(frontier);
+	frontier = new_frontier;
 
 	//}
 	double end_time = omp_get_wtime();
@@ -667,7 +677,32 @@ void graph_prepare()
 	free(parents);
 
 	// When update the parents, get the sum of the number of active nodes and their out degree.
+	// Update distance and visited flag for new frontier
+	unsigned out_degree = 0;
+#pragma omp parallel for reduction(+: out_degree)
+	for (unsigned i = 0; i < frontier_size; ++i) {
+		unsigned end = frontier[i];
+		unsigned start = parents[end];
+		h_cost[end] = h_cost[start] + 1;
+		out_degree += h_graph_degrees[end];
+	}
 	// According the sum, determine to run Sparse or Dense, and then change the last_is_dense.
+	unsigned bfs_threshold = NEDGES / 20; // Determined according to Ligra
+	bool last_is_dense = false;
+	if (frontier_size + out_degree > bfs_threshold) {
+		BFS_dense(
+				h_graph_heads,
+				h_graph_ends,
+				h_graph_mask,
+				h_updating_graph_mask,
+				//h_graph_visited,
+				h_graph_parents,
+				h_cost,
+				tile_offsets,
+				is_empty_tile,
+				is_active_side,
+				is_updating_active_side);
+	}
 	// Update the parents, also get the sum again.
 	// If the last_is_dense is true, and the Sparse need to run this time, run to_sparse.
 	// If the last_is_dense is false, and the Dense need to run this time, run to_dense.
