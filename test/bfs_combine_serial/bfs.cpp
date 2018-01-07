@@ -37,33 +37,42 @@ char *time_file = "timeline.txt";
 
 //////////////////////////////////////////////////////////////////
 // Dense (bottom-up)
-inline void bfs_kernel_dense(\
-		const unsigned &start_edge_i,\
-		const unsigned &bound_edge_i,\
-		unsigned *h_graph_heads,\
-		unsigned *h_graph_ends,\
-		int *h_graph_mask,\
-		int *h_updating_graph_mask,\
-		int *h_graph_visited,\
-		int *h_cost,\
-		int *is_updating_active_side\
-		)
+inline void bfs_kernel_dense(
+		const unsigned &start_edge_i,
+		const unsigned &bound_edge_i,
+		unsigned *h_graph_heads,
+		unsigned *h_graph_tails,
+		int *h_graph_mask,
+		int *h_updating_graph_mask,
+		//int *h_graph_visited,
+		unsigned *h_graph_parents,
+		int *h_cost,
+		int *is_updating_active_side)
 {
-	for (unsigned edge_i = start_edge_i; edge_i < bound_edge_i; ) {
+	for (unsigned edge_i = start_edge_i; edge_i < bound_edge_i; ++edge_i) {
 		unsigned head = h_graph_heads[edge_i];
 		if (0 == h_graph_mask[head]) {
-			++edge_i;
+			//++edge_i;
 			continue;
 		}
-		while (h_graph_heads[edge_i] == head) {
-			unsigned end = h_graph_ends[edge_i];
-			if (!h_graph_visited[end]) {
-				h_cost[end] = h_cost[head] + 1;
-				h_updating_graph_mask[end] = 1;
-				is_updating_active_side[end/TILE_WIDTH] = 1;
-			}
-			++edge_i;
+		unsigned end = h_graph_tails[edge_i];
+		//if (!h_graph_visited[end]) {}
+		if ((unsigned) -1 == h_graph_parents[end]) {
+			h_cost[end] = h_cost[head] + 1;
+			h_updating_graph_mask[end] = 1;
+			is_updating_active_side[end/TILE_WIDTH] = 1;
+			h_graph_parents[end] = head; // addition
 		}
+		//while (h_graph_heads[edge_i] == head) {
+		//	unsigned end = h_graph_tails[edge_i];
+		//	//if (!h_graph_visited[end]) {}
+		//	if ((unsigned) -1 == h_graph_parents[end]) {
+		//		h_cost[end] = h_cost[head] + 1;
+		//		h_updating_graph_mask[end] = 1;
+		//		is_updating_active_side[end/TILE_WIDTH] = 1;
+		//	}
+		//	++edge_i;
+		//}
 	}
 }
 
@@ -72,7 +81,7 @@ inline void bfs_kernel_dense(\
 //		const unsigned &end_tile_id,\
 //		const unsigned &tile_step,
 //		unsigned *h_graph_heads,\
-//		unsigned *h_graph_ends,\
+//		unsigned *h_graph_tails,\
 //		int *h_graph_mask,\
 //		int *h_updating_graph_mask,\
 //		int *h_graph_visited,\
@@ -121,7 +130,7 @@ inline void bfs_kernel_dense(\
 //					tile_offsets[tile_id],\
 //					bound_edge_i,\
 //					h_graph_heads,\
-//					h_graph_ends,\
+//					h_graph_tails,\
 //					h_graph_mask,\
 //					h_updating_graph_mask,\
 //					h_graph_visited,\
@@ -135,7 +144,7 @@ inline void bfs_kernel_dense(\
 //			//		continue;
 //			//	}
 //			//	while (h_graph_heads[edge_i] == head) {
-//			//		unsigned end = h_graph_ends[edge_i];
+//			//		unsigned end = h_graph_tails[edge_i];
 //			//		if (!h_graph_visited[end]) {
 //			//			h_cost[end] = h_cost[head] + 1;
 //			//			h_updating_graph_mask[end] = 1;
@@ -151,7 +160,7 @@ inline void bfs_kernel_dense(\
 //		const unsigned &start_row_index,\
 //		const unsigned &tile_step,
 //		unsigned *h_graph_heads,\
-//		unsigned *h_graph_ends,\
+//		unsigned *h_graph_tails,\
 //		int *h_graph_mask,\
 //		int *h_updating_graph_mask,\
 //		int *h_graph_visited,\
@@ -182,7 +191,7 @@ inline void bfs_kernel_dense(\
 //					tile_offsets[tile_id],\
 //					bound_edge_i,\
 //					h_graph_heads,\
-//					h_graph_ends,\
+//					h_graph_tails,\
 //					h_graph_mask,\
 //					h_updating_graph_mask,\
 //					h_graph_visited,\
@@ -192,17 +201,18 @@ inline void bfs_kernel_dense(\
 //		}
 //	}
 //}
-inline void scheduler_dense(\
-		const unsigned &start_row_index,\
+inline void scheduler_dense(
+		const unsigned &start_row_index,
 		const unsigned &tile_step,
-		unsigned *h_graph_heads,\
-		unsigned *h_graph_ends,\
-		int *h_graph_mask,\
-		int *h_updating_graph_mask,\
-		int *h_graph_visited,\
-		int *h_cost,\
+		unsigned *h_graph_heads,
+		unsigned *h_graph_tails,
+		int *h_graph_mask,
+		int *h_updating_graph_mask,
+		//int *h_graph_visited,
+		unsigned *h_graph_parents,
+		int *h_cost,
 		unsigned *tile_offsets,
-		int *is_empty_tile,\
+		int *is_empty_tile,
 		int *is_active_side,
 		int *is_updating_active_side)
 {
@@ -224,113 +234,117 @@ inline void scheduler_dense(\
 			} else {
 				bound_edge_i = NEDGES;
 			}
-			bfs_kernel(\
-					tile_offsets[tile_id],\
-					bound_edge_i,\
-					h_graph_heads,\
-					h_graph_ends,\
-					h_graph_mask,\
-					h_updating_graph_mask,\
-					h_graph_visited,\
-					h_cost,\
-					is_updating_active_side\
+			bfs_kernel_dense(
+					tile_offsets[tile_id],
+					bound_edge_i,
+					h_graph_heads,
+					h_graph_tails,
+					h_graph_mask,
+					h_updating_graph_mask,
+					//h_graph_visited,
+					h_graph_parents,
+					h_cost,
+					is_updating_active_side
 					);
 		}
 
 	}
 }
 
-void BFS_dense(\
-		unsigned *h_graph_heads,\
-		unsigned *h_graph_ends,\
-		int *h_graph_mask,\
-		int *h_updating_graph_mask,\
-		int *h_graph_visited,\
-		int *h_cost,\
+void BFS_dense(
+		unsigned *h_graph_heads,
+		unsigned *h_graph_tails,
+		int *h_graph_mask,
+		int *h_updating_graph_mask,
+		//int *h_graph_visited,
+		unsigned *h_graph_parents,
+		int *h_cost,
 		unsigned *tile_offsets,
-		int *is_empty_tile,\
-		int *is_active_side,\
+		int *is_empty_tile,
+		int *is_active_side,
 		int *is_updating_active_side)
 {
 
 	//printf("Start traversing the tree\n");
-	omp_set_num_threads(NUM_THREADS);
-	double start_time = omp_get_wtime();
-	bool stop;
-	do
-	{
-		//if no thread changes this value then the loop stops
-		stop = true;
-		unsigned side_id;
-		for (side_id = 0; side_id + ROW_STEP <= SIDE_LENGTH; side_id += ROW_STEP) {
-			scheduler(\
-					//side_id * SIDE_LENGTH,\
-					//(side_id + ROW_STEP) * SIDE_LENGTH,
-					side_id,
-					ROW_STEP,
-					h_graph_heads,\
-					h_graph_ends,\
-					h_graph_mask,\
-					h_updating_graph_mask,\
-					h_graph_visited,\
-					h_cost,\
-					tile_offsets,
-					is_empty_tile,\
-					is_active_side,
-					is_updating_active_side);
-		}
-		scheduler(\
+//	omp_set_num_threads(NUM_THREADS);
+//	double start_time = omp_get_wtime();
+//	bool stop;
+//	do
+//	{
+//		//if no thread changes this value then the loop stops
+//		stop = true;
+	unsigned side_id;
+	for (side_id = 0; side_id + ROW_STEP <= SIDE_LENGTH; side_id += ROW_STEP) {
+		scheduler_dense(
 				//side_id * SIDE_LENGTH,\
-				//NUM_TILES,
+				//(side_id + ROW_STEP) * SIDE_LENGTH,
 				side_id,
-				SIDE_LENGTH - side_id,
-				h_graph_heads,\
-				h_graph_ends,\
-				h_graph_mask,\
-				h_updating_graph_mask,\
-				h_graph_visited,\
-				h_cost,\
+				ROW_STEP,
+				h_graph_heads,
+				h_graph_tails,
+				h_graph_mask,
+				h_updating_graph_mask,
+				//h_graph_visited,
+				h_graph_parents,
+				h_cost,
 				tile_offsets,
-				is_empty_tile,\
+				is_empty_tile,
 				is_active_side,
 				is_updating_active_side);
-
-#pragma omp parallel for
-		//for(unsigned int nid=0; nid< NNODES ; nid++ )
-		//{
-		//	if (h_updating_graph_mask[nid] == 1) {
-		//		h_graph_mask[nid]=1;
-		//		h_graph_visited[nid]=1;
-		//		stop = false;
-		//		h_updating_graph_mask[nid]=0;
-		//	}
-		//}
-		for (unsigned side_id = 0; side_id < SIDE_LENGTH; ++side_id) {
-			if (!is_updating_active_side[side_id]) {
-				is_active_side[side_id] = 0;
-				continue;
-			}
-			is_updating_active_side[side_id] = 0;
-			is_active_side[side_id] = 1;
-			stop = false;
-			for (unsigned i = 0; i < TILE_WIDTH; ++i) {
-				unsigned vertex_id = i + side_id * TILE_WIDTH;
-				if (vertex_id == NNODES) {
-					break;
-				}
-				if (1 == h_updating_graph_mask[vertex_id]) {
-					h_updating_graph_mask[vertex_id] = 0;
-					h_graph_mask[vertex_id] = 1;
-					h_graph_visited[vertex_id] = 1;
-				} else {
-					h_graph_mask[vertex_id] = 0;
-				}
-			}
-		}
 	}
-	while(!stop);
-	double end_time = omp_get_wtime();
-	printf("%d %lf\n", NUM_THREADS, (end_time - start_time));
+	scheduler_dense(
+			//side_id * SIDE_LENGTH,\
+			//NUM_TILES,
+			side_id,
+			SIDE_LENGTH - side_id,
+			h_graph_heads,
+			h_graph_tails,
+			h_graph_mask,
+			h_updating_graph_mask,
+			//h_graph_visited,
+			h_graph_parents,
+			h_cost,
+			tile_offsets,
+			is_empty_tile,
+			is_active_side,
+			is_updating_active_side);
+
+//#pragma omp parallel for
+//		//for(unsigned int nid=0; nid< NNODES ; nid++ )
+//		//{
+//		//	if (h_updating_graph_mask[nid] == 1) {
+//		//		h_graph_mask[nid]=1;
+//		//		h_graph_visited[nid]=1;
+//		//		stop = false;
+//		//		h_updating_graph_mask[nid]=0;
+//		//	}
+//		//}
+//		for (unsigned side_id = 0; side_id < SIDE_LENGTH; ++side_id) {
+//			if (!is_updating_active_side[side_id]) {
+//				is_active_side[side_id] = 0;
+//				continue;
+//			}
+//			is_updating_active_side[side_id] = 0;
+//			is_active_side[side_id] = 1;
+//			stop = false;
+//			for (unsigned i = 0; i < TILE_WIDTH; ++i) {
+//				unsigned vertex_id = i + side_id * TILE_WIDTH;
+//				if (vertex_id == NNODES) {
+//					break;
+//				}
+//				if (1 == h_updating_graph_mask[vertex_id]) {
+//					h_updating_graph_mask[vertex_id] = 0;
+//					h_graph_mask[vertex_id] = 1;
+//					h_graph_visited[vertex_id] = 1;
+//				} else {
+//					h_graph_mask[vertex_id] = 0;
+//				}
+//			}
+//		}
+//	}
+//	while(!stop);
+//	double end_time = omp_get_wtime();
+//	printf("%d %lf\n", NUM_THREADS, (end_time - start_time));
 }
 // End Dense (bottom-up)
 ///////////////////////////////////////////////////////////////
@@ -347,9 +361,9 @@ double run_time = 0;
 unsigned *BFS_kernel_sparse(
 				//unsigned *graph_vertices,
 				Vertex *graph_vertices_info,
-				unsigned *graph_edges,
+				//unsigned *graph_edges,
 				//unsigned *h_graph_degrees,
-				unsigned *parents,
+				unsigned *h_graph_parents,
 				unsigned *&frontier,
 				unsigned &frontier_size)
 {
@@ -408,8 +422,8 @@ unsigned *BFS_kernel_sparse(
 		unsigned out_degree = start.out_degree;
 		for (unsigned k = 0; k < out_degree; ++k) {
 			unsigned end = start.get_out_neighbor(k);
-			if ((unsigned) -1 == parents[end]) {
-				bool unvisited = __sync_bool_compare_and_swap(parents + end, (unsigned) -1, start_id); //update parents
+			if ((unsigned) -1 == h_graph_parents[end]) {
+				bool unvisited = __sync_bool_compare_and_swap(h_graph_parents + end, (unsigned) -1, start_id); //update h_graph_parents
 				if (unvisited) {
 					new_frontier_tmp[offset + k] = end;
 				} else {
@@ -423,8 +437,8 @@ unsigned *BFS_kernel_sparse(
 		//unsigned *bound_edge_i = start.out_neighbors + start.out_degree;
 		//for (unsigned *edge_i = start.out_neighbors; edge_i != bound_edge_i; ++edge_i) {
 		//	unsigned end = *edge_i;
-		//	if ((unsigned) -1 == parents[end]) {
-		//		bool unvisited = __sync_bool_compare_and_swap(parents + end, (unsigned) -1, start_id); //update parents
+		//	if ((unsigned) -1 == h_graph_parents[end]) {
+		//		bool unvisited = __sync_bool_compare_and_swap(h_graph_parents + end, (unsigned) -1, start_id); //update h_graph_parents
 		//		if (unvisited) {
 		//			new_frontier_tmp[offset + size++] = end;
 		//		} else {
@@ -443,7 +457,7 @@ unsigned *BFS_kernel_sparse(
 //		unsigned bound_edge_i = graph_vertices[start] + h_graph_degrees[start];
 //		for (unsigned edge_i = graph_vertices[start]; edge_i < bound_edge_i; ++edge_i) {
 //			unsigned end = graph_edges[edge_i];
-//			bool unvisited = __sync_bool_compare_and_swap(parents + end, (unsigned) -1, start); //update parents
+//			bool unvisited = __sync_bool_compare_and_swap(h_graph_parents + end, (unsigned) -1, start); //update h_graph_parents
 //			if (unvisited) {
 //				new_frontier_tmp[offset + size++] = end;
 //			} else {
@@ -483,7 +497,7 @@ unsigned *BFS_kernel_sparse(
 				new_frontier_tmp[base++] = new_frontier_tmp[end_i];
 			}
 			//unsigned end = new_frontier_tmp[end_i];
-			//if (parents[end] == (unsigned) -1) {
+			//if (h_graph_parents[end] == (unsigned) -1) {
 			//	new_frontier_tmp[offset + size]  = end;
 			//	++size;
 			//}
@@ -573,66 +587,142 @@ unsigned *BFS_kernel_sparse(
 void BFS_sparse(
 		//unsigned *graph_vertices,
 		Vertex *graph_vertices_info,
-		unsigned *graph_edges,
+		unsigned *&frontier,
+		unsigned *h_graph_parents,
+		//unsigned *graph_edges,
 		unsigned *h_graph_degrees,
-		const unsigned &source,
-		int *h_cost)
+		//const unsigned &source,
+		unsigned &frontier_size)
+		//int *h_cost)
 {
 
-	omp_set_num_threads(NUM_THREADS);
-	unsigned frontier_size = 1;
-	unsigned *frontier = (unsigned *) malloc(sizeof(unsigned) * frontier_size);
-	frontier[0] = source;
-	unsigned *parents = (unsigned *) malloc(sizeof(unsigned) * NNODES);
-#pragma omp parallel for num_threads(256)
-	for (unsigned i = 0; i < NNODES; ++i) {
-		parents[i] = (unsigned) -1; // means unvisited yet
-	}
-	parents[source] = source;
-	double start_time = omp_get_wtime();
-	while (frontier_size != 0) {
-		// BFS_Kernel get new frontier and size
-		unsigned *new_frontier = BFS_kernel(
-				//graph_vertices,
-				graph_vertices_info,
-				graph_edges,
-				//h_graph_degrees,
-				parents,
-				frontier,
-				frontier_size);
-		free(frontier);
-		frontier = new_frontier;
+//	omp_set_num_threads(NUM_THREADS);
+//	unsigned *frontier = (unsigned *) malloc(sizeof(unsigned) * frontier_size);
+//	double start_time = omp_get_wtime();
+//	while (frontier_size != 0) {
+// BFS_Kernel get new frontier and size
+	unsigned *new_frontier = BFS_kernel_sparse(
+			//graph_vertices,
+			graph_vertices_info,
+			//graph_edges,
+			//h_graph_degrees,
+			h_graph_parents,
+			frontier,
+			frontier_size);
+	free(frontier);
+	frontier = new_frontier;
 
 		// Update distance and visited flag for new frontier
-#pragma omp parallel for
-		for (unsigned i = 0; i < frontier_size; ++i) {
-			unsigned end = frontier[i];
-			unsigned start = parents[end];
-			h_cost[end] = h_cost[start] + 1;
-		}
+//#pragma omp parallel for
+//		for (unsigned i = 0; i < frontier_size; ++i) {
+//			unsigned end = frontier[i];
+//			unsigned start = h_graph_parents[end];
+//			h_cost[end] = h_cost[start] + 1;
+//		}
 
 
-	}
-	double end_time = omp_get_wtime();
-	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
+//	}
+//	double end_time = omp_get_wtime();
+//	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
 	//printf("%d %lf\n", CHUNK_SIZE, run_time = (end_time - start_time));
 	//free(frontier);
-	free(parents);
 
 }
 // End Sparse (top-down)
 ///////////////////////////////////////////////////////////////////////////////
 
 // TODO List:
-// graph_edges should be changed to h_graph_ends
-// h_graph_visited should be changed to h_graph_parents
-// h_graph_parents initilization should moved before graph_prepare, and then passed to graph_prepare
+// [x] graph_edges should be changed to h_graph_tails
+// [x] h_graph_visited should be changed to h_graph_parents
+// [x] h_graph_parents initilization should moved before graph_prepare, and then passed to graph_prepare
+// [x] bfs_dense and bfs_sparse should not have loop
+// [x] frontier_size should be passed to bfs_sparse
+
+void to_dense(
+		int *h_graph_mask,
+		int *is_active_side,
+		unsigned *frontier,
+		const unsigned &frontier_size)
+{
+#pragma omp parallel for
+	for (unsigned i = 0; i < frontier_size; ++i) {
+		unsigned vertex_id = frontier[i];
+		h_graph_mask[vertex_id] = 1;
+		is_active_side[vertex_id / TILE_WIDTH] = 1;
+	}
+}
+
+void to_sparse(
+		unsigned *&frontier,
+		const unsigned &frontier_size,
+		int *h_graph_mask)
+{
+	free(frontier);
+	frontier = (unsigned *) malloc(frontier_size * sizeof(unsigned));
+
+	const unsigned block_size = 1 << 12;
+	unsigned num_blocks = (NNODES - 1)/block_size + 1;
+	unsigned *nums_in_blocks = nullptr;
+	
+	if (num_blocks > 1) {
+		nums_in_blocks = (unsigned *) malloc(num_blocks * sizeof(unsigned));
+		memset(nums_in_blocks, 0, num_blocks * sizeof(unsigned));
+		// The start locations where the vertices are put in the frontier.
+#pragma omp parallel for
+		for (unsigned block_i = 0; block_i < num_blocks; ++block_i) {
+			unsigned offset = block_i * block_size;
+			unsigned bound;
+			if (num_blocks - 1 != block_i) {
+				bound = offset + block_size;
+			} else {
+				bound = NNODES;
+			}
+			for (unsigned vertex_i = offset; vertex_i < bound; ++vertex_i) {
+				if (h_graph_mask[vertex_i]) {
+					nums_in_blocks[block_i]++;
+				}
+			}
+		}
+		//TODO: blocked parallel for
+		// Scan to get the offsets as start locations.
+		unsigned offset_sum = 0;
+		for (unsigned block_i = 0; block_i < num_blocks; ++block_i) {
+			unsigned tmp = nums_in_blocks[block_i];
+			nums_in_blocks[block_i] = offset_sum;
+			offset_sum += tmp;
+		}
+		// Put vertices into the frontier
+#pragma omp parallel for
+		for (unsigned block_i = 0; block_i < num_blocks; ++block_i) {
+			unsigned base = nums_in_blocks[block_i];
+			unsigned offset = block_i * block_size;
+			unsigned bound;
+			if (num_blocks - 1 != block_i) {
+				bound = offset + block_size;
+			} else {
+				bound = NNODES;
+			}
+			for (unsigned vertex_i = offset; vertex_i < bound; ++vertex_i) {
+				if (h_graph_mask[vertex_i]) {
+					frontier[base++] = vertex_i;
+				}
+			}
+		}
+	} else {
+		unsigned k = 0;
+		for (unsigned i = 0; i < NNODES; ++i) {
+			if (h_graph_mask[i]) {
+				frontier[k++] = i;
+			}
+		}
+	}
+}
 
 void graph_prepare(
 		//unsigned *graph_vertices,
 		Vertex *graph_vertices_info,
 		unsigned *h_graph_heads,
-		unsigned *h_graph_ends, // graph_edges
+		unsigned *h_graph_tails, // graph_edges
 		unsigned *h_graph_degrees,
 		unsigned *h_graph_parents, // h_graph_visited
 		unsigned *tile_offsets,
@@ -649,65 +739,111 @@ void graph_prepare(
 	unsigned frontier_size = 1;
 	unsigned *frontier = (unsigned *) malloc(sizeof(unsigned) * frontier_size);
 	frontier[0] = source;
-	unsigned *parents = (unsigned *) malloc(sizeof(unsigned) * NNODES);
-#pragma omp parallel for num_threads(256)
-	for (unsigned i = 0; i < NNODES; ++i) {
-		parents[i] = (unsigned) -1; // means unvisited yet
-	}
-	parents[source] = source;
 	double start_time = omp_get_wtime();
-	//while (frontier_size != 0) {
-		// BFS_Kernel get new frontier and size
-	unsigned *new_frontier = BFS_kernel(
-			//graph_vertices,
-			graph_vertices_info,
-			graph_edges,
-			//h_graph_degrees,
-			parents,
-			frontier,
-			frontier_size);
-	free(frontier);
-	frontier = new_frontier;
-
-	//}
-	double end_time = omp_get_wtime();
-	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
+	BFS_sparse(
+		//unsigned *graph_vertices,
+		graph_vertices_info,
+		frontier,
+		h_graph_parents,
+		//unsigned *graph_edges,
+		h_graph_degrees,
+		//const unsigned &source,
+		frontier_size);
 	//printf("%d %lf\n", CHUNK_SIZE, run_time = (end_time - start_time));
 	//free(frontier);
-	free(parents);
 
 	// When update the parents, get the sum of the number of active nodes and their out degree.
-	// Update distance and visited flag for new frontier
 	unsigned out_degree = 0;
 #pragma omp parallel for reduction(+: out_degree)
 	for (unsigned i = 0; i < frontier_size; ++i) {
 		unsigned end = frontier[i];
-		unsigned start = parents[end];
+		unsigned start = h_graph_parents[end];
 		h_cost[end] = h_cost[start] + 1;
 		out_degree += h_graph_degrees[end];
 	}
 	// According the sum, determine to run Sparse or Dense, and then change the last_is_dense.
 	unsigned bfs_threshold = NEDGES / 20; // Determined according to Ligra
 	bool last_is_dense = false;
-	if (frontier_size + out_degree > bfs_threshold) {
-		BFS_dense(
-				h_graph_heads,
-				h_graph_ends,
-				h_graph_mask,
-				h_updating_graph_mask,
-				//h_graph_visited,
-				h_graph_parents,
-				h_cost,
-				tile_offsets,
-				is_empty_tile,
-				is_active_side,
-				is_updating_active_side);
+	while (frontier_size != 0) {
+		if (frontier_size + out_degree > bfs_threshold) {
+			if (!last_is_dense) {
+				to_dense(h_graph_mask, is_active_side, frontier, frontier_size);
+			}
+			BFS_dense(
+					h_graph_heads,
+					h_graph_tails,
+					h_graph_mask,
+					h_updating_graph_mask,
+					//h_graph_visited,
+					h_graph_parents,
+					h_cost,
+					tile_offsets,
+					is_empty_tile,
+					is_active_side,
+					is_updating_active_side);
+			last_is_dense = true;
+		} else {
+			if (last_is_dense) {
+				to_sparse(
+					frontier,
+					frontier_size,
+					h_graph_mask);
+			}
+			BFS_sparse(
+					//unsigned *graph_vertices,
+					graph_vertices_info,
+					frontier,
+					h_graph_parents,
+					//graph_edges,
+					h_graph_degrees,
+					//source,
+					frontier_size);
+			last_is_dense = false;
+		}
+		// Update the parents, also get the sum again.
+		if (last_is_dense) {
+			frontier_size = 0;
+			out_degree = 0;
+#pragma omp parallel for reduction(+: frontier_size, out_degree)
+			for (unsigned side_id = 0; side_id < SIDE_LENGTH; ++side_id) {
+				if (!is_updating_active_side[side_id]) {
+					is_active_side[side_id] = 0;
+					continue;
+				}
+				is_updating_active_side[side_id] = 0;
+				is_active_side[side_id] = 1;
+				unsigned bound_vertex_id;
+				if (SIDE_LENGTH - 1 != side_id) {
+					bound_vertex_id = side_id * TILE_WIDTH + TILE_WIDTH;
+				} else {
+					bound_vertex_id = NNODES;
+				}
+				for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++ vertex_id) {
+					if (1 == h_updating_graph_mask[vertex_id]) {
+						h_updating_graph_mask[vertex_id] = 0;
+						h_graph_mask[vertex_id] = 1;
+						//h_graph_visited[vertex_id] = 1;
+						frontier_size++;
+						out_degree += h_graph_degrees[vertex_id];
+					} else {
+						h_graph_mask[vertex_id] = 0;
+					}
+				}
+			}
+		} else {
+			out_degree = 0;
+#pragma omp parallel for reduction(+: out_degree)
+			for (unsigned i = 0; i < frontier_size; ++i) {
+				unsigned end = frontier[i];
+				unsigned start = h_graph_parents[end];
+				h_cost[end] = h_cost[start] + 1;
+				out_degree += h_graph_degrees[end];
+			}
+		}
 	}
-	// Update the parents, also get the sum again.
-	// If the last_is_dense is true, and the Sparse need to run this time, run to_sparse.
-	// If the last_is_dense is false, and the Dense need to run this time, run to_dense.
-	// According to the sum, run Sparse or Dense.
-	// Repeat, until the number of active nodes is zero.
+	double end_time = omp_get_wtime();
+	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
+	free(frontier);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -716,15 +852,16 @@ void graph_prepare(
 void input( int argc, char** argv) 
 {
 	char *input_f;
-	ROW_STEP = 16;
 	//ROW_STEP = 2;
 	
-	if(argc < 3){
+	if(argc < 4){
 		input_f = "/home/zpeng/benchmarks/data/pokec/coo_tiled_bak/soc-pokec";
 		TILE_WIDTH = 1024;
+		ROW_STEP = 16;
 	} else {
 		input_f = argv[1];
 		TILE_WIDTH = strtoul(argv[2], NULL, 0);
+		ROW_STEP = strtoul(argv[3], NULL, 0);
 	}
 
 	/////////////////////////////////////////////////////////////////////
@@ -732,7 +869,7 @@ void input( int argc, char** argv)
 	/////////////////////////////////////////////////////////////////////
 	//string prefix = string(input_f) + "_untiled";
 	//string prefix = string(input_f) + "_coo-tiled-" + to_string(TILE_WIDTH);
-	string prefix = string(input_f) + "_col-16-coo-tiled-" + to_string(TILE_WIDTH);
+	string prefix = string(input_f) + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH);
 	//string prefix = string(input_f) + "_col-2-coo-tiled-" + to_string(TILE_WIDTH);
 	string fname = prefix + "-0";
 	FILE *fin = fopen(fname.c_str(), "r");
@@ -756,10 +893,25 @@ void input( int argc, char** argv)
 		fscanf(fin, "%u", tile_offsets + i);
 	}
 	fclose(fin);
-	unsigned *h_graph_starts = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
-	unsigned *h_graph_ends = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
+	unsigned *h_graph_heads = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
+	unsigned *h_graph_tails = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
+	unsigned *h_graph_degrees = (unsigned *) malloc(sizeof(unsigned) * NNODES);
+	memset(h_graph_degrees, 0, NNODES * sizeof(unsigned));
 	int *is_empty_tile = (int *) malloc(sizeof(int) * NUM_TILES);
 	memset(is_empty_tile, 0, sizeof(int) * NUM_TILES);
+
+	// Read degrees
+	fname = prefix + "-nneibor";
+	fin = fopen(fname.c_str(), "r");
+	if (!fin) {
+		fprintf(stderr, "cannot open file: %s\n", fname.c_str());
+		exit(1);
+	}
+	for (unsigned i = 0; i < NNODES; ++i) {
+		fscanf(fin, "%u", h_graph_degrees + i);
+	}
+	fclose(fin);
+
 	NUM_THREADS = 64;
 	unsigned edge_bound = NEDGES / NUM_THREADS;
 #pragma omp parallel num_threads(NUM_THREADS) private(fname, fin)
@@ -787,8 +939,8 @@ void input( int argc, char** argv)
 		fscanf(fin, "%u %u", &n1, &n2);
 		n1--;
 		n2--;
-		h_graph_starts[index] = n1;
-		h_graph_ends[index] = n2;
+		h_graph_heads[index] = n1;
+		h_graph_tails[index] = n2;
 	}
 
 }
@@ -801,22 +953,22 @@ void input( int argc, char** argv)
 	for (unsigned i = 0; i < NNODES; ++i) {
 		//graph_vertices[i] = edge_start;
 		//graph_vertices_info[i].out_neighbors = graph_edges + edge_start;
-		graph_vertices_info[i].out_neighbors = h_graph_ends + edge_start;
+		graph_vertices_info[i].out_neighbors = h_graph_tails + edge_start;
 		graph_vertices_info[i].out_degree = h_graph_degrees[i];
 		edge_start += h_graph_degrees[i];
 	}
-	//memcpy(graph_edges, h_graph_ends, sizeof(unsigned) * NEDGES);
-	//free(h_graph_starts);
-	//free(h_graph_ends);
+	//memcpy(graph_edges, h_graph_tails, sizeof(unsigned) * NEDGES);
+	//free(h_graph_heads);
+	//free(h_graph_tails);
 	// End Input real dataset
 	/////////////////////////////////////////////////////////////////////
 
 	int *h_graph_mask = (int*) malloc(sizeof(int)*NNODES);
 	int *h_updating_graph_mask = (int*) malloc(sizeof(int)*NNODES);
-	int *h_graph_visited = (int*) malloc(sizeof(int)*NNODES);
-	int* h_cost = (int*) malloc(sizeof(int)*NNODES);
+	int *h_cost = (int*) malloc(sizeof(int)*NNODES);
 	int *is_active_side = (int *) malloc(sizeof(int) * SIDE_LENGTH);
 	int *is_updating_active_side = (int *) malloc(sizeof(int) * SIDE_LENGTH);
+	unsigned *h_graph_parents = (unsigned *) malloc(sizeof(unsigned) * NNODES);
 	unsigned source = 0;
 
 	now = omp_get_wtime();
@@ -843,8 +995,6 @@ void input( int argc, char** argv)
 		memset(h_graph_mask, 0, sizeof(int)*NNODES);
 		h_graph_mask[source] = 1;
 		memset(h_updating_graph_mask, 0, sizeof(int)*NNODES);
-		memset(h_graph_visited, 0, sizeof(int)*NNODES);
-		h_graph_visited[source] = 1;
 		for (unsigned i = 0; i < NNODES; ++i) {
 			h_cost[i] = -1;
 		}
@@ -852,18 +1002,38 @@ void input( int argc, char** argv)
 		memset(is_active_side, 0, sizeof(int) * SIDE_LENGTH);
 		is_active_side[0] = 1;
 		memset(is_updating_active_side, 0, sizeof(int) * SIDE_LENGTH);
+#pragma omp parallel for num_threads(256)
+		for (unsigned i = 0; i < NNODES; ++i) {
+			h_graph_parents[i] = (unsigned) -1; // means unvisited yet
+		}
+		h_graph_parents[source] = source;
 
-		BFS(\
-			h_graph_starts,\
-			h_graph_ends,\
-			h_graph_mask,\
-			h_updating_graph_mask,\
-			h_graph_visited,\
-			h_cost,\
-			tile_offsets,
-			is_empty_tile,\
-			is_active_side,\
-			is_updating_active_side);
+		//BFS(\
+		//	h_graph_heads,\
+		//	h_graph_tails,\
+		//	h_graph_mask,\
+		//	h_updating_graph_mask,\
+		//	h_graph_visited,\
+		//	h_cost,\
+		//	tile_offsets,
+		//	is_empty_tile,\
+		//	is_active_side,\
+		//	is_updating_active_side);
+		graph_prepare(
+				//unsigned *graph_vertices,
+				graph_vertices_info,
+				h_graph_heads,
+				h_graph_tails, // graph_edges
+				h_graph_degrees,
+				h_graph_parents, // h_graph_visited
+				tile_offsets,
+				source,
+				h_graph_mask,
+				h_updating_graph_mask,
+				h_cost,
+				is_empty_tile,
+				is_active_side,
+				is_updating_active_side);
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 #ifdef ONEDEBUG
@@ -905,11 +1075,12 @@ void input( int argc, char** argv)
 #endif
 
 	// cleanup memory
-	free( h_graph_starts);
-	free( h_graph_ends);
+	free( h_graph_heads);
+	free( h_graph_tails);
+	free( h_graph_degrees);
 	free( h_graph_mask);
 	free( h_updating_graph_mask);
-	free( h_graph_visited);
+	free( h_graph_parents);
 	free( h_cost);
 	free( tile_offsets);
 	free( is_empty_tile);

@@ -308,8 +308,6 @@ void BFS(
 			unsigned start = parents[end];
 			h_cost[end] = h_cost[start] + 1;
 		}
-
-
 	}
 	double end_time = omp_get_wtime();
 	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
@@ -566,6 +564,7 @@ void input( int argc, char** argv)
 	//free( graph_vertices);
 	free( graph_vertices_info);
 	free( graph_edges);
+	free( h_graph_degrees);
 	//free( h_graph_mask);
 	//free( h_updating_graph_mask);
 	//free( h_graph_visited);

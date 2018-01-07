@@ -39,6 +39,7 @@ void input(
 		unsigned *&graph_heads, 
 		unsigned *&graph_ends, 
 		unsigned *&tile_offsets,
+		unsigned *&nneibor,
 		int *&is_empty_tile) 
 {
 	//printf("data: %s\n", filename);
@@ -73,6 +74,19 @@ void input(
 		tile_offsets[i] = offset;
 	}
 	fclose(fin);
+	// Read degrees
+	fname = prefix + "-nneibor";
+	fin = fopen(fname.c_str(), "r");
+	if (!fin) {
+		fprintf(stderr, "cannot open file: %s\n", fname.c_str());
+		exit(1);
+	}
+	nneibor = (unsigned *) malloc(NNODES * sizeof(unsigned));
+	for (unsigned i = 0; i < NNODES; ++i) {
+		fscanf(fin, "%u", nneibor + i);
+	}
+	fclose(fin);
+
 	graph_heads = (unsigned *) malloc(NEDGES * sizeof(unsigned));
 	graph_ends = (unsigned *) malloc(NEDGES * sizeof(unsigned));
 	is_empty_tile = (int *) malloc(sizeof(int) * NUM_TILES);
@@ -150,7 +164,8 @@ void convert_to_col_major(
 						char *filename,
 						unsigned *graph_heads, 
 						unsigned *graph_ends, 
-						unsigned *tile_offsets)
+						unsigned *tile_offsets,
+						unsigned *nneibor)
 {
 	unsigned *new_heads = (unsigned *) malloc(NEDGES * sizeof(unsigned));
 	unsigned *new_ends = (unsigned *) malloc(NEDGES * sizeof(unsigned));
@@ -235,14 +250,20 @@ void convert_to_col_major(
 		fprintf(fout, "%u\n", new_offsets[i]);//Format: offset
 	}
 	fclose(fout);
-
-	// test
-	fout = fopen("output.txt", "w");
-	fprintf(fout, "%u %u\n", NNODES, NEDGES);
-	for (unsigned i = 0; i < NEDGES; ++i) {
-		fprintf(fout, "%u %u\n", new_heads[i], new_ends[i]);
+	fname = prefix + "-nneibor";
+	fout = fopen(fname.c_str(), "w");
+	for (unsigned i = 0; i < NNODES; ++i) {
+		fprintf(fout, "%u\n", nneibor[i]);
 	}
-	fclose(fout);
+	printf("Done.\n");
+
+	//// test
+	//fout = fopen("output.txt", "w");
+	//fprintf(fout, "%u %u\n", NNODES, NEDGES);
+	//for (unsigned i = 0; i < NEDGES; ++i) {
+	//	fprintf(fout, "%u %u\n", new_heads[i], new_ends[i]);
+	//}
+	//fclose(fout);
 
 	free(new_heads);
 	free(new_ends);
@@ -266,6 +287,7 @@ int main(int argc, char *argv[])
 	unsigned *graph_heads;
 	unsigned *graph_ends;
 	unsigned *tile_offsets;
+	unsigned *nneibor;
 	int *is_empty_tile;
 #ifdef ONESERIAL
 	input_serial("/home/zpeng/benchmarks/data/zebra/out.zebra", graph_heads, graph_ends);
@@ -275,13 +297,15 @@ int main(int argc, char *argv[])
 		graph_heads, 
 		graph_ends, 
 		tile_offsets,
+		nneibor,
 		is_empty_tile);
 #endif
 	convert_to_col_major(
 						filename,
 						graph_heads, 
 						graph_ends, 
-						tile_offsets);
+						tile_offsets,
+						nneibor);
 
 
 	// Free memory

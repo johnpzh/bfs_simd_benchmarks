@@ -6,50 +6,54 @@ Intel(R) C++ Intel(R) 64 Compiler for applications running on Intel(R) 64, Versi
 
 Compiler options: -Wall -Wextra -g -std=c++11 -qopenmp -O3 -qopt-report=5 -qopt-report-phase=vec -o kcore
 
-Begin optimization report for: input(char *, unsigned int *&, unsigned int *&, unsigned int *&, int *&)
+Begin optimization report for: input(char *, unsigned int *&, unsigned int *&, unsigned int *&, unsigned int *&, int *&)
 
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at kcore.cpp(69,2)
+LOOP BEGIN at kcore.cpp(70,2)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 
-LOOP BEGIN at kcore.cpp(80,2)
+LOOP BEGIN at kcore.cpp(85,2)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 
-LOOP BEGIN at kcore.cpp(112,2)
-   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ kcore.cpp(115,3) ]
+LOOP BEGIN at kcore.cpp(94,2)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at kcore.cpp(126,2)
+   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ kcore.cpp(129,3) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (115:3) and n2 (117:3)
-   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (117:3) and n2 (115:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (129:3) and n2 (131:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (131:3) and n2 (129:3)
 LOOP END
 ===========================================================================
 
-Begin optimization report for: convert_to_col_major(char *, unsigned int *, unsigned int *, unsigned int *)
+Begin optimization report for: convert_to_col_major(char *, unsigned int *, unsigned int *, unsigned int *, unsigned int *)
 
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at kcore.cpp(166,2)
+LOOP BEGIN at kcore.cpp(181,2)
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at kcore.cpp(167,3)
+   LOOP BEGIN at kcore.cpp(182,3)
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at kcore.cpp(168,4)
+      LOOP BEGIN at kcore.cpp(183,4)
          remark #15542: loop was not vectorized: inner loop was already vectorized
 
-         LOOP BEGIN at kcore.cpp(177,5)
+         LOOP BEGIN at kcore.cpp(192,5)
          <Peeled loop for vectorization>
          LOOP END
 
-         LOOP BEGIN at kcore.cpp(177,5)
-            remark #15388: vectorization support: reference new_heads[edge_index] has aligned access   [ kcore.cpp(178,6) ]
-            remark #15389: vectorization support: reference graph_heads[edge_i] has unaligned access   [ kcore.cpp(178,30) ]
-            remark #15388: vectorization support: reference new_ends[edge_index] has aligned access   [ kcore.cpp(179,6) ]
-            remark #15389: vectorization support: reference graph_ends[edge_i] has unaligned access   [ kcore.cpp(179,29) ]
+         LOOP BEGIN at kcore.cpp(192,5)
+            remark #15388: vectorization support: reference new_heads[edge_index] has aligned access   [ kcore.cpp(193,6) ]
+            remark #15389: vectorization support: reference graph_heads[edge_i] has unaligned access   [ kcore.cpp(193,30) ]
+            remark #15388: vectorization support: reference new_ends[edge_index] has aligned access   [ kcore.cpp(194,6) ]
+            remark #15389: vectorization support: reference graph_ends[edge_i] has unaligned access   [ kcore.cpp(194,29) ]
             remark #15381: vectorization support: unaligned access used inside loop body
             remark #15305: vectorization support: vector length 4
             remark #15309: vectorization support: normalized vectorization overhead 1.533
@@ -64,32 +68,32 @@ LOOP BEGIN at kcore.cpp(166,2)
             remark #15488: --- end vector cost summary ---
          LOOP END
 
-         LOOP BEGIN at kcore.cpp(177,5)
+         LOOP BEGIN at kcore.cpp(192,5)
          <Alternate Alignment Vectorized Loop>
          LOOP END
 
-         LOOP BEGIN at kcore.cpp(177,5)
+         LOOP BEGIN at kcore.cpp(192,5)
          <Remainder loop for vectorization>
          LOOP END
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at kcore.cpp(186,3)
+LOOP BEGIN at kcore.cpp(201,3)
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at kcore.cpp(187,4)
+   LOOP BEGIN at kcore.cpp(202,4)
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at kcore.cpp(196,5)
+      LOOP BEGIN at kcore.cpp(211,5)
       <Peeled loop for vectorization>
       LOOP END
 
-      LOOP BEGIN at kcore.cpp(196,5)
-         remark #15388: vectorization support: reference new_heads[edge_index] has aligned access   [ kcore.cpp(197,6) ]
-         remark #15389: vectorization support: reference graph_heads[edge_i] has unaligned access   [ kcore.cpp(197,30) ]
-         remark #15388: vectorization support: reference new_ends[edge_index] has aligned access   [ kcore.cpp(198,6) ]
-         remark #15389: vectorization support: reference graph_ends[edge_i] has unaligned access   [ kcore.cpp(198,29) ]
+      LOOP BEGIN at kcore.cpp(211,5)
+         remark #15388: vectorization support: reference new_heads[edge_index] has aligned access   [ kcore.cpp(212,6) ]
+         remark #15389: vectorization support: reference graph_heads[edge_i] has unaligned access   [ kcore.cpp(212,30) ]
+         remark #15388: vectorization support: reference new_ends[edge_index] has aligned access   [ kcore.cpp(213,6) ]
+         remark #15389: vectorization support: reference graph_ends[edge_i] has unaligned access   [ kcore.cpp(213,29) ]
          remark #15381: vectorization support: unaligned access used inside loop body
          remark #15305: vectorization support: vector length 4
          remark #15309: vectorization support: normalized vectorization overhead 1.533
@@ -104,26 +108,26 @@ LOOP BEGIN at kcore.cpp(186,3)
          remark #15488: --- end vector cost summary ---
       LOOP END
 
-      LOOP BEGIN at kcore.cpp(196,5)
+      LOOP BEGIN at kcore.cpp(211,5)
       <Alternate Alignment Vectorized Loop>
       LOOP END
 
-      LOOP BEGIN at kcore.cpp(196,5)
+      LOOP BEGIN at kcore.cpp(211,5)
       <Remainder loop for vectorization>
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at kcore.cpp(234,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ kcore.cpp(235,3) ]
+LOOP BEGIN at kcore.cpp(249,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ kcore.cpp(250,3) ]
 LOOP END
 
-LOOP BEGIN at kcore.cpp(242,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ kcore.cpp(243,3) ]
+LOOP BEGIN at kcore.cpp(255,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ kcore.cpp(256,3) ]
 LOOP END
 
-LOOP BEGIN at kcore.cpp(225,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ kcore.cpp(226,3) ]
+LOOP BEGIN at kcore.cpp(240,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ kcore.cpp(241,3) ]
 LOOP END
 ===========================================================================
 
@@ -132,7 +136,7 @@ Begin optimization report for: input_serial(char *, unsigned int *&, unsigned in
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at kcore.cpp(137,2)
+LOOP BEGIN at kcore.cpp(151,2)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 ===========================================================================
