@@ -534,7 +534,7 @@ void BFS_kernel_sparse(
 		//return NULL;
 		return;
 	}
-	printf("@537\n");//test
+	//printf("@537\n");//test
 
 	// Get the final new frontier
 	//unsigned *offsets_b = (unsigned *) malloc(sizeof(unsigned) * num_blocks);
@@ -597,7 +597,7 @@ void BFS_sparse(
 		unsigned *&frontier,
 		unsigned *h_graph_parents,
 		//unsigned *graph_edges,
-		unsigned *h_graph_degrees,
+		//unsigned *h_graph_degrees,
 		//const unsigned &source,
 		unsigned &frontier_size)
 		//int *h_cost)
@@ -619,7 +619,7 @@ void BFS_sparse(
 			frontier_size);
 	//free(frontier);
 	//frontier = new_frontier;
-	printf("@614\n");
+	//printf("@614\n");
 
 		// Update distance and visited flag for new frontier
 //#pragma omp parallel for
@@ -737,7 +737,7 @@ void graph_prepare(
 		//unsigned *graph_vertices,
 		Vertex *graph_vertices_info,
 		unsigned *h_graph_heads,
-		unsigned *h_graph_tails, // graph_edges
+		unsigned *h_graph_tails,
 		unsigned *h_graph_degrees,
 		unsigned *h_graph_parents, // h_graph_visited
 		unsigned *tile_offsets,
@@ -761,7 +761,7 @@ void graph_prepare(
 		frontier,
 		h_graph_parents,
 		//unsigned *graph_edges,
-		h_graph_degrees,
+		//h_graph_degrees,
 		//const unsigned &source,
 		frontier_size);
 	//printf("%d %lf\n", CHUNK_SIZE, run_time = (end_time - start_time));
@@ -781,52 +781,53 @@ void graph_prepare(
 	bool last_is_dense = false;
 	while (frontier_size != 0) {
 		printf("@768 frontier_size = %u\n", frontier_size);//test
-		if (frontier_size + out_degree > bfs_threshold) {
-			printf("@770 Dense\n");//test
-			if (!last_is_dense) {
-				printf("@772 to_dense\n");//test
-				to_dense(
-					h_graph_mask, 
-					is_active_side, 
-					frontier, 
-					frontier_size);
-			}
-			printf("@779 Do Dense\n");//test
-			BFS_dense(
-					h_graph_heads,
-					h_graph_tails,
-					h_graph_mask,
-					h_updating_graph_mask,
-					//h_graph_visited,
-					h_graph_parents,
-					h_cost,
-					tile_offsets,
-					is_empty_tile,
-					is_active_side,
-					is_updating_active_side);
-			last_is_dense = true;
-		} else {
-			printf("@792 Sparse\n");//test
+		//if (frontier_size + out_degree > bfs_threshold) {
+		//	//printf("@770 Dense\n");//test
+		//	if (!last_is_dense) {
+		//		//printf("@772 to_dense\n");//test
+		//		to_dense(
+		//			h_graph_mask, 
+		//			is_active_side, 
+		//			frontier, 
+		//			frontier_size);
+		//	}
+		//	//printf("@779 Do Dense\n");//test
+		//	BFS_dense(
+		//			h_graph_heads,
+		//			h_graph_tails,
+		//			h_graph_mask,
+		//			h_updating_graph_mask,
+		//			//h_graph_visited,
+		//			h_graph_parents,
+		//			h_cost,
+		//			tile_offsets,
+		//			is_empty_tile,
+		//			is_active_side,
+		//			is_updating_active_side);
+		//	last_is_dense = true;
+		//} else {
+			// Sparse
+			//printf("@792 Sparse\n");//test
 			if (last_is_dense) {
-				printf("@796 to_sparse\n");//test
+				//printf("@796 to_sparse\n");//test
 				to_sparse(
 					frontier,
 					frontier_size,
 					h_graph_mask);
 			}
-			printf("@802 Do Sparse\n");//test
+			//printf("@802 Do Sparse\n");//test
 			BFS_sparse(
 					//unsigned *graph_vertices,
 					graph_vertices_info,
 					frontier,
 					h_graph_parents,
 					//graph_edges,
-					h_graph_degrees,
+					//h_graph_degrees,
 					//source,
 					frontier_size);
 			last_is_dense = false;
-		}
-		printf("@808\n");//test
+		//}
+		//printf("@808\n");//test
 		// Update the parents, also get the sum again.
 		if (last_is_dense) {
 			frontier_size = 0;
@@ -882,7 +883,7 @@ void input( int argc, char** argv)
 	//ROW_STEP = 2;
 	
 	if(argc < 4){
-		input_f = "/home/zpeng/benchmarks/data/pokec/coo_tiled_bak/soc-pokec";
+		input_f = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
 		TILE_WIDTH = 1024;
 		ROW_STEP = 16;
 	} else {
@@ -922,22 +923,8 @@ void input( int argc, char** argv)
 	fclose(fin);
 	unsigned *h_graph_heads = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
 	unsigned *h_graph_tails = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
-	unsigned *h_graph_degrees = (unsigned *) malloc(sizeof(unsigned) * NNODES);
-	memset(h_graph_degrees, 0, NNODES * sizeof(unsigned));
 	int *is_empty_tile = (int *) malloc(sizeof(int) * NUM_TILES);
 	memset(is_empty_tile, 0, sizeof(int) * NUM_TILES);
-
-	// Read degrees
-	fname = prefix + "-nneibor";
-	fin = fopen(fname.c_str(), "r");
-	if (!fin) {
-		fprintf(stderr, "cannot open file: %s\n", fname.c_str());
-		exit(1);
-	}
-	for (unsigned i = 0; i < NNODES; ++i) {
-		fscanf(fin, "%u", h_graph_degrees + i);
-	}
-	fclose(fin);
 
 	NUM_THREADS = 64;
 	unsigned edge_bound = NEDGES / NUM_THREADS;
@@ -972,6 +959,56 @@ void input( int argc, char** argv)
 
 }
 
+
+	// For Sparse
+	prefix = string(input_f) + "_untiled";
+	unsigned *h_graph_edges = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
+	unsigned *h_graph_degrees = (unsigned *) malloc(sizeof(unsigned) * NNODES);
+	memset(h_graph_degrees, 0, sizeof(unsigned) * NNODES);
+
+	// Read degrees
+	fname = prefix + "-nneibor";
+	fin = fopen(fname.c_str(), "r");
+	if (!fin) {
+		fprintf(stderr, "cannot open file: %s\n", fname.c_str());
+		exit(1);
+	}
+	for (unsigned i = 0; i < NNODES; ++i) {
+		fscanf(fin, "%u", h_graph_degrees + i);
+	}
+	fclose(fin);
+
+	NUM_THREADS = 64;
+	edge_bound = NEDGES / NUM_THREADS;
+#pragma omp parallel num_threads(NUM_THREADS) private(fname, fin)
+{
+	unsigned tid = omp_get_thread_num();
+	unsigned offset = tid * edge_bound;
+	fname = prefix + "-" + to_string(tid);
+	fin = fopen(fname.c_str(), "r");
+	if (!fin) {
+		fprintf(stderr, "Error: cannot open file %s\n", fname.c_str());
+		exit(1);
+	}
+	if (0 == tid) {
+		fscanf(fin, "%u %u", &NNODES, &NEDGES);
+	}
+	unsigned bound_index;
+	if (NUM_THREADS - 1 != tid) {
+		bound_index = offset + edge_bound;
+	} else {
+		bound_index = NEDGES;
+	}
+	for (unsigned index = offset; index < bound_index; ++index) {
+		unsigned n1;
+		unsigned n2;
+		fscanf(fin, "%u %u", &n1, &n2);
+		n1--;
+		n2--;
+		h_graph_edges[index] = n2;
+	}
+
+}
 	// CSR
 	Vertex *graph_vertices_info = (Vertex *) malloc(sizeof(Vertex) * NNODES);
 	//unsigned *graph_vertices = (unsigned *) malloc(sizeof(unsigned) * NNODES);
@@ -980,7 +1017,7 @@ void input( int argc, char** argv)
 	for (unsigned i = 0; i < NNODES; ++i) {
 		//graph_vertices[i] = edge_start;
 		//graph_vertices_info[i].out_neighbors = graph_edges + edge_start;
-		graph_vertices_info[i].out_neighbors = h_graph_tails + edge_start;
+		graph_vertices_info[i].out_neighbors = h_graph_edges + edge_start;
 		graph_vertices_info[i].out_degree = h_graph_degrees[i];
 		edge_start += h_graph_degrees[i];
 	}
@@ -1035,22 +1072,11 @@ void input( int argc, char** argv)
 		}
 		h_graph_parents[source] = source;
 
-		//BFS(\
-		//	h_graph_heads,\
-		//	h_graph_tails,\
-		//	h_graph_mask,\
-		//	h_updating_graph_mask,\
-		//	h_graph_visited,\
-		//	h_cost,\
-		//	tile_offsets,
-		//	is_empty_tile,\
-		//	is_active_side,\
-		//	is_updating_active_side);
 		graph_prepare(
 				//unsigned *graph_vertices,
 				graph_vertices_info,
 				h_graph_heads,
-				h_graph_tails, // graph_edges
+				h_graph_tails, 
 				h_graph_degrees,
 				h_graph_parents, // h_graph_visited
 				tile_offsets,
@@ -1104,6 +1130,7 @@ void input( int argc, char** argv)
 	// cleanup memory
 	free( h_graph_heads);
 	free( h_graph_tails);
+	free( h_graph_edges);
 	free( h_graph_degrees);
 	free( h_graph_mask);
 	free( h_updating_graph_mask);
