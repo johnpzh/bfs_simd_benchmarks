@@ -682,6 +682,24 @@ unsigned *to_sparse(
 			new_frontier[k++] = i;
 		}
 	}
+	/////////
+	//for (unsigned side_id = 0; side_id < SIDE_LENGTH; ++side_id) {
+	//	if (!is_active_side[side_id]) {
+	//		continue;
+	//	}
+	//	unsigned bound_vertex_id;
+	//	if (SIDE_LENGTH - 1 != side_id) {
+	//		bound_vertex_id = side_id * TILE_WIDTH + TILE_WIDTH;
+	//	} else {
+	//		bound_vertex_id = NNODES;
+	//	}
+	//	for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++vertex_id) {
+	//		if (1 == h_graph_mask[vertex_id]) {
+	//			new_frontier[k++] = vertex_id;
+	//		}
+	//	}
+	//}
+	printf("@685 but k: %u\n", k);//test
 	return new_frontier;
 }
 
@@ -783,6 +801,7 @@ void graph_prepare(
 	// According the sum, determine to run Sparse or Dense, and then change the last_is_dense.
 	unsigned bfs_threshold = NEDGES / 20; // Determined according to Ligra
 	while (frontier_size != 0) {
+		printf("==============================================\n");//test
 		printf("@768 frontier_size = %u\n", frontier_size);//test
 		if (frontier_size + out_degree > bfs_threshold) {
 			if (!last_is_dense) {
@@ -841,6 +860,7 @@ void graph_prepare(
 			for (unsigned side_id = 0; side_id < SIDE_LENGTH; ++side_id) {
 				if (!is_updating_active_side[side_id]) {
 					is_active_side[side_id] = 0;
+					memset(h_graph_mask + side_id * TILE_WIDTH, 0, TILE_WIDTH * sizeof(unsigned));
 					continue;
 				}
 				is_updating_active_side[side_id] = 0;
@@ -863,6 +883,19 @@ void graph_prepare(
 					}
 				}
 			}
+
+			/////////////////////////////////////////////////////
+			// Test
+			unsigned test_sum = 0;
+#pragma omp parallel for reduction(+: test_sum)
+			for (unsigned i = 0; i < NNODES; ++i) {
+				if (h_graph_mask[i]) {
+					test_sum++;
+				}
+			}
+			printf("test_sum: %u\n", test_sum);
+			// End Test
+			/////////////////////////////////////////////////////
 		} else {
 			out_degree = 0;
 #pragma omp parallel for reduction(+: out_degree)
@@ -873,6 +906,7 @@ void graph_prepare(
 				out_degree += h_graph_degrees[end];
 			}
 		}
+		printf("@867 Update: frontier_size: %u\n", frontier_size);//test
 	}
 	double end_time = omp_get_wtime();
 	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
@@ -888,8 +922,8 @@ void input( int argc, char** argv)
 	//ROW_STEP = 2;
 	
 	if(argc < 4){
-		input_f = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
-		//input_f = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
+		//input_f = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
+		input_f = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
 		TILE_WIDTH = 1024;
 		ROW_STEP = 16;
 	} else {
