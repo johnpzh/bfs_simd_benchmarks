@@ -831,7 +831,7 @@ void graph_prepare(
 			free(frontier);
 			frontier = new_frontier;
 			last_is_dense = false;
-		//}
+		}
 		//printf("@808\n");//test
 		// Update the parents, also get the sum again.
 		if (last_is_dense) {
@@ -888,8 +888,8 @@ void input( int argc, char** argv)
 	//ROW_STEP = 2;
 	
 	if(argc < 4){
-		//input_f = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
-		input_f = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
+		input_f = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
+		//input_f = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
 		TILE_WIDTH = 1024;
 		ROW_STEP = 16;
 	} else {

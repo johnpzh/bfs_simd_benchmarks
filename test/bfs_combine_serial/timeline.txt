@@ -1,4 +1,0 @@
-input end: 1.272789
-Thread 64 end: 1.735103
-Thread 128 end: 1.954404
-Thread 256 end: 2.171655
