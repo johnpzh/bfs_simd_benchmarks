@@ -922,8 +922,8 @@ void input( int argc, char** argv)
 	//ROW_STEP = 2;
 	
 	if(argc < 4){
-		//input_f = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
-		input_f = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
+		input_f = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
+		//input_f = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
 		TILE_WIDTH = 1024;
 		ROW_STEP = 16;
 	} else {
