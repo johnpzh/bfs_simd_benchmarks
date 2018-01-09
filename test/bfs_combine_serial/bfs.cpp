@@ -497,11 +497,6 @@ unsigned *BFS_kernel_sparse(
 			if ((unsigned) - 1 != new_frontier_tmp[end_i]) {
 				new_frontier_tmp[base++] = new_frontier_tmp[end_i];
 			}
-			//unsigned end = new_frontier_tmp[end_i];
-			//if (h_graph_parents[end] == (unsigned) -1) {
-			//	new_frontier_tmp[offset + size]  = end;
-			//	++size;
-			//}
 		}
 		nums_in_blocks[block_i] = base - offset;
 		new_frontier_size_tmp += nums_in_blocks[block_i];
@@ -532,8 +527,6 @@ unsigned *BFS_kernel_sparse(
 	//printf("@537\n");//test
 
 	// Get the final new frontier
-	//unsigned *offsets_b = (unsigned *) malloc(sizeof(unsigned) * num_blocks);
-	//offsets_b[0] = 0;
 	time_now = omp_get_wtime();
 	unsigned *new_frontier = (unsigned *) malloc(sizeof(unsigned) * new_frontier_size);
 	if (num_blocks > 1) {
@@ -573,8 +566,6 @@ unsigned *BFS_kernel_sparse(
 	arrange_time += omp_get_wtime() - time_now;
 
 	// Return the results
-	//free(offsets);
-	//free(offsets_b);
 	free(frontier_vertices);
 	free(degrees);
 	free(new_frontier_tmp);
@@ -596,12 +587,6 @@ unsigned *BFS_sparse(
 		//int *h_cost)
 {
 
-//	omp_set_num_threads(NUM_THREADS);
-//	unsigned *frontier = (unsigned *) malloc(sizeof(unsigned) * frontier_size);
-//	double start_time = omp_get_wtime();
-//	while (frontier_size != 0) {
-// BFS_Kernel get new frontier and size
-	//unsigned *new_frontier = BFS_kernel_sparse()
 	return BFS_kernel_sparse(
 			//graph_vertices,
 			graph_vertices_info,
@@ -611,32 +596,9 @@ unsigned *BFS_sparse(
 			frontier,
 			frontier_size);
 	//printf("@614\n");
-
-		// Update distance and visited flag for new frontier
-//#pragma omp parallel for
-//		for (unsigned i = 0; i < frontier_size; ++i) {
-//			unsigned end = frontier[i];
-//			unsigned start = h_graph_parents[end];
-//			h_cost[end] = h_cost[start] + 1;
-//		}
-
-
-//	}
-//	double end_time = omp_get_wtime();
-//	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
-	//printf("%d %lf\n", CHUNK_SIZE, run_time = (end_time - start_time));
-
 }
 // End Sparse (top-down)
 ///////////////////////////////////////////////////////////////////////////////
-
-// TODO List:
-// [x] graph_edges should be changed to h_graph_tails
-// [x] h_graph_visited should be changed to h_graph_parents
-// [x] h_graph_parents initilization should moved before graph_prepare, and then passed to graph_prepare
-// [x] bfs_dense and bfs_sparse should not have loop
-// [x] frontier_size should be passed to bfs_sparse
-
 void to_dense(
 		int *h_graph_mask,
 		int *is_active_side,
@@ -767,40 +729,88 @@ void graph_prepare(
 		h_cost[end] = h_cost[start] + 1;
 		out_degree += h_graph_degrees[end];
 	}
+	bool last_is_dense = false;
+//	//////////////////////////////////////////////////////
+//	// Test
+//	to_dense(
+//			h_graph_mask, 
+//			is_active_side, 
+//			frontier, 
+//			frontier_size);
+//	BFS_dense(
+//			h_graph_heads,
+//			h_graph_tails,
+//			h_graph_mask,
+//			h_updating_graph_mask,
+//			//h_graph_visited,
+//			h_graph_parents,
+//			h_cost,
+//			tile_offsets,
+//			is_empty_tile,
+//			is_active_side,
+//			is_updating_active_side);
+//	last_is_dense = true;
+//	frontier_size = 0;
+//	out_degree = 0;
+//#pragma omp parallel for reduction(+: frontier_size, out_degree)
+//	for (unsigned side_id = 0; side_id < SIDE_LENGTH; ++side_id) {
+//		if (!is_updating_active_side[side_id]) {
+//			is_active_side[side_id] = 0;
+//			continue;
+//		}
+//		is_updating_active_side[side_id] = 0;
+//		is_active_side[side_id] = 1;
+//		unsigned bound_vertex_id;
+//		if (SIDE_LENGTH - 1 != side_id) {
+//			bound_vertex_id = side_id * TILE_WIDTH + TILE_WIDTH;
+//		} else {
+//			bound_vertex_id = NNODES;
+//		}
+//		for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++ vertex_id) {
+//			if (1 == h_updating_graph_mask[vertex_id]) {
+//				h_updating_graph_mask[vertex_id] = 0;
+//				h_graph_mask[vertex_id] = 1;
+//				//h_graph_visited[vertex_id] = 1;
+//				frontier_size++;
+//				out_degree += h_graph_degrees[vertex_id];
+//			} else {
+//				h_graph_mask[vertex_id] = 0;
+//			}
+//		}
+//	}
+//	// End Test
+//	//////////////////////////////////////////////////////
 	// According the sum, determine to run Sparse or Dense, and then change the last_is_dense.
 	unsigned bfs_threshold = NEDGES / 20; // Determined according to Ligra
-	bool last_is_dense = false;
 	while (frontier_size != 0) {
 		printf("@768 frontier_size = %u\n", frontier_size);//test
-		//if (frontier_size + out_degree > bfs_threshold) {
-		//	//printf("@770 Dense\n");//test
+		if (frontier_size + out_degree > bfs_threshold) {
 			if (!last_is_dense) {
-				//printf("@772 to_dense\n");//test
+				printf("@772 to_dense\n");//test
 				to_dense(
 					h_graph_mask, 
 					is_active_side, 
 					frontier, 
 					frontier_size);
 			}
-			//printf("@779 Do Dense\n");//test
-			//BFS_dense(
-			//		h_graph_heads,
-			//		h_graph_tails,
-			//		h_graph_mask,
-			//		h_updating_graph_mask,
-			//		//h_graph_visited,
-			//		h_graph_parents,
-			//		h_cost,
-			//		tile_offsets,
-			//		is_empty_tile,
-			//		is_active_side,
-			//		is_updating_active_side);
+			printf("@779 Do Dense\n");//test
+			BFS_dense(
+					h_graph_heads,
+					h_graph_tails,
+					h_graph_mask,
+					h_updating_graph_mask,
+					//h_graph_visited,
+					h_graph_parents,
+					h_cost,
+					tile_offsets,
+					is_empty_tile,
+					is_active_side,
+					is_updating_active_side);
 			last_is_dense = true;
-		//} else {
+		} else {
 			// Sparse
-			//printf("@792 Sparse\n");//test
 			if (last_is_dense) {
-				//printf("@796 to_sparse\n");//test
+				printf("@796 to_sparse\n");//test
 				new_frontier = to_sparse(
 					frontier,
 					frontier_size,
@@ -808,7 +818,7 @@ void graph_prepare(
 				free(frontier);
 				frontier = new_frontier;
 			}
-			//printf("@802 Do Sparse\n");//test
+			printf("@802 Do Sparse\n");//test
 			new_frontier = BFS_sparse(
 					//unsigned *graph_vertices,
 					graph_vertices_info,
