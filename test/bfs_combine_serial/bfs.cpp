@@ -358,14 +358,13 @@ double frontier_tmp_time = 0;
 double refine_time = 0;
 double arrange_time = 0;
 double run_time = 0;
-//unsigned *BFS_kernel_sparse()
-void BFS_kernel_sparse(
+unsigned *BFS_kernel_sparse(
 				//unsigned *graph_vertices,
 				Vertex *graph_vertices_info,
 				//unsigned *graph_edges,
 				//unsigned *h_graph_degrees,
 				unsigned *h_graph_parents,
-				unsigned *&frontier,
+				unsigned *frontier,
 				unsigned &frontier_size)
 {
 	// From frontier, get the degrees (para_for)
@@ -389,9 +388,8 @@ void BFS_kernel_sparse(
 	if (0 == new_frontier_size) {
 		free(degrees);
 		frontier_size = 0;
-		frontier = nullptr;
-		return;
-		//return NULL;
+		//frontier = nullptr;
+		return nullptr;
 	}
 	degree_time += omp_get_wtime() - time_now;
 
@@ -528,11 +526,8 @@ void BFS_kernel_sparse(
 		if (nums_in_blocks) {
 			free(nums_in_blocks);
 		}
-		free(frontier);
-		frontier = nullptr;
-		frontier_size = new_frontier_size;
-		//return NULL;
-		return;
+		frontier_size = 0;
+		return nullptr;
 	}
 	//printf("@537\n");//test
 
@@ -586,15 +581,13 @@ void BFS_kernel_sparse(
 	if (nums_in_blocks) {
 		free(nums_in_blocks);
 	}
-	free(frontier);
-	frontier = new_frontier;
 	frontier_size = new_frontier_size;
-	//return new_frontier;
+	return new_frontier;
 }
-void BFS_sparse(
+unsigned *BFS_sparse(
 		//unsigned *graph_vertices,
 		Vertex *graph_vertices_info,
-		unsigned *&frontier,
+		unsigned *frontier,
 		unsigned *h_graph_parents,
 		//unsigned *graph_edges,
 		//unsigned *h_graph_degrees,
@@ -609,7 +602,7 @@ void BFS_sparse(
 //	while (frontier_size != 0) {
 // BFS_Kernel get new frontier and size
 	//unsigned *new_frontier = BFS_kernel_sparse()
-	BFS_kernel_sparse(
+	return BFS_kernel_sparse(
 			//graph_vertices,
 			graph_vertices_info,
 			//graph_edges,
@@ -617,8 +610,6 @@ void BFS_sparse(
 			h_graph_parents,
 			frontier,
 			frontier_size);
-	//free(frontier);
-	//frontier = new_frontier;
 	//printf("@614\n");
 
 		// Update distance and visited flag for new frontier
@@ -634,7 +625,6 @@ void BFS_sparse(
 //	double end_time = omp_get_wtime();
 //	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
 	//printf("%d %lf\n", CHUNK_SIZE, run_time = (end_time - start_time));
-	//free(frontier);
 
 }
 // End Sparse (top-down)
@@ -661,13 +651,12 @@ void to_dense(
 	}
 }
 
-void to_sparse(
-		unsigned *&frontier,
+unsigned *to_sparse(
+		unsigned *frontier,
 		const unsigned &frontier_size,
 		int *h_graph_mask)
 {
-	free(frontier);
-	frontier = (unsigned *) malloc(frontier_size * sizeof(unsigned));
+	unsigned *new_frontier = (unsigned *) malloc(frontier_size * sizeof(unsigned));
 
 //	const unsigned block_size = 1 << 12;
 //	unsigned num_blocks = (NNODES - 1)/block_size + 1;
@@ -713,7 +702,7 @@ void to_sparse(
 //			}
 //			for (unsigned vertex_i = offset; vertex_i < bound; ++vertex_i) {
 //				if (h_graph_mask[vertex_i]) {
-//					frontier[base++] = vertex_i;
+//					new_frontier[base++] = vertex_i;
 //				}
 //			}
 //		}
@@ -721,16 +710,17 @@ void to_sparse(
 //		unsigned k = 0;
 //		for (unsigned i = 0; i < NNODES; ++i) {
 //			if (h_graph_mask[i]) {
-//				frontier[k++] = i;
+//				new_frontier[k++] = i;
 //			}
 //		}
 //	}
-		unsigned k = 0;
-		for (unsigned i = 0; i < NNODES; ++i) {
-			if (h_graph_mask[i]) {
-				frontier[k++] = i;
-			}
+	unsigned k = 0;
+	for (unsigned i = 0; i < NNODES; ++i) {
+		if (h_graph_mask[i]) {
+			new_frontier[k++] = i;
 		}
+	}
+	return new_frontier;
 }
 
 void graph_prepare(
@@ -755,7 +745,7 @@ void graph_prepare(
 	unsigned *frontier = (unsigned *) malloc(sizeof(unsigned) * frontier_size);
 	frontier[0] = source;
 	double start_time = omp_get_wtime();
-	BFS_sparse(
+	unsigned *new_frontier = BFS_sparse(
 		//unsigned *graph_vertices,
 		graph_vertices_info,
 		frontier,
@@ -764,8 +754,9 @@ void graph_prepare(
 		//h_graph_degrees,
 		//const unsigned &source,
 		frontier_size);
+	free(frontier);
+	frontier = new_frontier;
 	//printf("%d %lf\n", CHUNK_SIZE, run_time = (end_time - start_time));
-	//free(frontier);
 
 	// When update the parents, get the sum of the number of active nodes and their out degree.
 	unsigned out_degree = 0;
@@ -783,40 +774,42 @@ void graph_prepare(
 		printf("@768 frontier_size = %u\n", frontier_size);//test
 		//if (frontier_size + out_degree > bfs_threshold) {
 		//	//printf("@770 Dense\n");//test
-		//	if (!last_is_dense) {
-		//		//printf("@772 to_dense\n");//test
-		//		to_dense(
-		//			h_graph_mask, 
-		//			is_active_side, 
-		//			frontier, 
-		//			frontier_size);
-		//	}
-		//	//printf("@779 Do Dense\n");//test
-		//	BFS_dense(
-		//			h_graph_heads,
-		//			h_graph_tails,
-		//			h_graph_mask,
-		//			h_updating_graph_mask,
-		//			//h_graph_visited,
-		//			h_graph_parents,
-		//			h_cost,
-		//			tile_offsets,
-		//			is_empty_tile,
-		//			is_active_side,
-		//			is_updating_active_side);
-		//	last_is_dense = true;
+			if (!last_is_dense) {
+				//printf("@772 to_dense\n");//test
+				to_dense(
+					h_graph_mask, 
+					is_active_side, 
+					frontier, 
+					frontier_size);
+			}
+			//printf("@779 Do Dense\n");//test
+			//BFS_dense(
+			//		h_graph_heads,
+			//		h_graph_tails,
+			//		h_graph_mask,
+			//		h_updating_graph_mask,
+			//		//h_graph_visited,
+			//		h_graph_parents,
+			//		h_cost,
+			//		tile_offsets,
+			//		is_empty_tile,
+			//		is_active_side,
+			//		is_updating_active_side);
+			last_is_dense = true;
 		//} else {
 			// Sparse
 			//printf("@792 Sparse\n");//test
 			if (last_is_dense) {
 				//printf("@796 to_sparse\n");//test
-				to_sparse(
+				new_frontier = to_sparse(
 					frontier,
 					frontier_size,
 					h_graph_mask);
+				free(frontier);
+				frontier = new_frontier;
 			}
 			//printf("@802 Do Sparse\n");//test
-			BFS_sparse(
+			new_frontier = BFS_sparse(
 					//unsigned *graph_vertices,
 					graph_vertices_info,
 					frontier,
@@ -825,6 +818,8 @@ void graph_prepare(
 					//h_graph_degrees,
 					//source,
 					frontier_size);
+			free(frontier);
+			frontier = new_frontier;
 			last_is_dense = false;
 		//}
 		//printf("@808\n");//test
@@ -883,7 +878,8 @@ void input( int argc, char** argv)
 	//ROW_STEP = 2;
 	
 	if(argc < 4){
-		input_f = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
+		//input_f = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
+		input_f = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
 		TILE_WIDTH = 1024;
 		ROW_STEP = 16;
 	} else {
@@ -1057,14 +1053,14 @@ void input( int argc, char** argv)
 #endif
 		// Re-initializing
 		memset(h_graph_mask, 0, sizeof(int)*NNODES);
-		h_graph_mask[source] = 1;
+		//h_graph_mask[source] = 1;
 		memset(h_updating_graph_mask, 0, sizeof(int)*NNODES);
 		for (unsigned i = 0; i < NNODES; ++i) {
 			h_cost[i] = -1;
 		}
 		h_cost[source] = 0;
 		memset(is_active_side, 0, sizeof(int) * SIDE_LENGTH);
-		is_active_side[0] = 1;
+		//is_active_side[0] = 1;
 		memset(is_updating_active_side, 0, sizeof(int) * SIDE_LENGTH);
 #pragma omp parallel for num_threads(256)
 		for (unsigned i = 0; i < NNODES; ++i) {
