@@ -180,9 +180,11 @@ double arrange_time = 0;
 double run_time = 0;
 unsigned *BFS_kernel_sparse(
 				//unsigned *graph_vertices,
-				Vertex *graph_vertices_info,
+				//Vertex *graph_vertices_info,
 				//unsigned *graph_edges,
-				//unsigned *h_graph_degrees,
+				unsigned *h_graph_vertices,
+				unsigned *h_graph_edges,
+				unsigned *h_graph_degrees,
 				unsigned *h_graph_parents,
 				unsigned *frontier,
 				unsigned &frontier_size)
@@ -194,17 +196,17 @@ unsigned *BFS_kernel_sparse(
 	unsigned new_frontier_size = 0;
 //#pragma omp parallel for schedule(dynamic) reduction(+: new_frontier_size)
 #pragma omp parallel for reduction(+: new_frontier_size)
-	//for (unsigned i = 0; i < frontier_size; ++i) {
-	//	degrees[i] = h_graph_degrees[frontier[i]];
-	//	new_frontier_size += degrees[i];
-	//}
 	for (unsigned i = 0; i < frontier_size; ++i) {
-		unsigned start = frontier[i];
-		Vertex v = graph_vertices_info[start];
-		degrees[i] = v.get_out_degree();
+		degrees[i] = h_graph_degrees[frontier[i]];
 		new_frontier_size += degrees[i];
-		frontier_vertices[i] = v;
 	}
+	//for (unsigned i = 0; i < frontier_size; ++i) {
+	//	unsigned start = frontier[i];
+	//	Vertex v = graph_vertices_info[start];
+	//	degrees[i] = v.get_out_degree();
+	//	new_frontier_size += degrees[i];
+	//	frontier_vertices[i] = v;
+	//}
 	if (0 == new_frontier_size) {
 		free(degrees);
 		frontier_size = 0;
@@ -234,42 +236,42 @@ unsigned *BFS_kernel_sparse(
 	unsigned *new_frontier_tmp = (unsigned *) malloc(sizeof(unsigned) * new_frontier_size);
 #pragma omp parallel for schedule(dynamic, CHUNK_SIZE)
 //#pragma omp parallel for
-	for (unsigned i = 0; i < frontier_size; ++i) {
-		Vertex start = frontier_vertices[i];
-		unsigned start_id = frontier[i];
-		unsigned offset = degrees[i];
-		//unsigned size = 0;
-		// no speedup
-		unsigned out_degree = start.out_degree;
-		for (unsigned k = 0; k < out_degree; ++k) {
-			unsigned end = start.get_out_neighbor(k);
-			if ((unsigned) -1 == h_graph_parents[end]) {
-				bool unvisited = __sync_bool_compare_and_swap(h_graph_parents + end, (unsigned) -1, start_id); //update h_graph_parents
-				if (unvisited) {
-					new_frontier_tmp[offset + k] = end;
-				} else {
-					new_frontier_tmp[offset + k] = (unsigned) -1;
-				}
-			} else {
-				new_frontier_tmp[offset + k] = (unsigned) -1;
-			}
-		}
-		// end no speedup
-		//unsigned *bound_edge_i = start.out_neighbors + start.out_degree;
-		//for (unsigned *edge_i = start.out_neighbors; edge_i != bound_edge_i; ++edge_i) {
-		//	unsigned end = *edge_i;
-		//	if ((unsigned) -1 == h_graph_parents[end]) {
-		//		bool unvisited = __sync_bool_compare_and_swap(h_graph_parents + end, (unsigned) -1, start_id); //update h_graph_parents
-		//		if (unvisited) {
-		//			new_frontier_tmp[offset + size++] = end;
-		//		} else {
-		//			new_frontier_tmp[offset + size++] = (unsigned) -1;
-		//		}
-		//	} else {
-		//		new_frontier_tmp[offset + size++] = (unsigned) -1;
-		//	}
-		//}
-	}
+//	for (unsigned i = 0; i < frontier_size; ++i) {
+//		Vertex start = frontier_vertices[i];
+//		unsigned start_id = frontier[i];
+//		unsigned offset = degrees[i];
+//		//unsigned size = 0;
+//		// no speedup
+//		unsigned out_degree = start.out_degree;
+//		for (unsigned k = 0; k < out_degree; ++k) {
+//			unsigned end = start.get_out_neighbor(k);
+//			if ((unsigned) -1 == h_graph_parents[end]) {
+//				bool unvisited = __sync_bool_compare_and_swap(h_graph_parents + end, (unsigned) -1, start_id); //update h_graph_parents
+//				if (unvisited) {
+//					new_frontier_tmp[offset + k] = end;
+//				} else {
+//					new_frontier_tmp[offset + k] = (unsigned) -1;
+//				}
+//			} else {
+//				new_frontier_tmp[offset + k] = (unsigned) -1;
+//			}
+//		}
+//		// end no speedup
+//		//unsigned *bound_edge_i = start.out_neighbors + start.out_degree;
+//		//for (unsigned *edge_i = start.out_neighbors; edge_i != bound_edge_i; ++edge_i) {
+//		//	unsigned end = *edge_i;
+//		//	if ((unsigned) -1 == h_graph_parents[end]) {
+//		//		bool unvisited = __sync_bool_compare_and_swap(h_graph_parents + end, (unsigned) -1, start_id); //update h_graph_parents
+//		//		if (unvisited) {
+//		//			new_frontier_tmp[offset + size++] = end;
+//		//		} else {
+//		//			new_frontier_tmp[offset + size++] = (unsigned) -1;
+//		//		}
+//		//	} else {
+//		//		new_frontier_tmp[offset + size++] = (unsigned) -1;
+//		//	}
+//		//}
+//	}
 //	for (unsigned i = 0; i < frontier_size; ++i) {
 //		unsigned start = frontier[i];
 //		//unsigned offset = offsets[i];
@@ -286,6 +288,25 @@ unsigned *BFS_kernel_sparse(
 //			}
 //		}
 //	}
+	for (unsigned i = 0; i < frontier_size; ++i) {
+		unsigned start = frontier[i];
+		unsigned offset = degrees[i];
+		unsigned out_degree = h_graph_degrees[start];
+		unsigned base = h_graph_vertices[start];
+		for (unsigned k = 0; k < out_degree; ++k) {
+			unsigned end = h_graph_edges[base + k];
+			if ((unsigned) -1 == h_graph_parents[end]) {
+				bool unvisited = __sync_bool_compare_and_swap(h_graph_parents + end, (unsigned) -1, start); //update h_graph_parents
+				if (unvisited) {
+					new_frontier_tmp[offset + k] = end;
+				} else {
+					new_frontier_tmp[offset + k] = (unsigned) -1;
+				}
+			} else {
+				new_frontier_tmp[offset + k] = (unsigned) -1;
+			}
+		}
+	}
 	frontier_tmp_time += omp_get_wtime() - time_now;
 
 
@@ -396,8 +417,11 @@ unsigned *BFS_kernel_sparse(
 }
 unsigned *BFS_sparse(
 		//unsigned *graph_vertices,
-		Vertex *graph_vertices_info,
+		//Vertex *graph_vertices_info,
 		unsigned *frontier,
+		unsigned *h_graph_vertices,
+		unsigned *h_graph_edges,
+		unsigned *h_graph_degrees,
 		unsigned *h_graph_parents,
 		//unsigned *graph_edges,
 		//unsigned *h_graph_degrees,
@@ -406,14 +430,24 @@ unsigned *BFS_sparse(
 		//int *h_cost)
 {
 
+	//return BFS_kernel_sparse(
+	//		//graph_vertices,
+	//		graph_vertices_info,
+	//		//graph_edges,
+	//		//h_graph_degrees,
+	//		h_graph_parents,
+	//		frontier,
+	//		frontier_size);
 	return BFS_kernel_sparse(
-			//graph_vertices,
-			graph_vertices_info,
-			//graph_edges,
-			//h_graph_degrees,
-			h_graph_parents,
-			frontier,
-			frontier_size);
+				//unsigned *graph_vertices,
+				//Vertex *graph_vertices_info,
+				//unsigned *graph_edges,
+				h_graph_vertices,
+				h_graph_edges,
+				h_graph_degrees,
+				h_graph_parents,
+				frontier,
+				frontier_size);
 	//printf("@614\n");
 }
 // End Sparse (top-down)
@@ -500,7 +534,9 @@ unsigned *to_sparse(
 
 void graph_prepare(
 		//unsigned *graph_vertices,
-		Vertex *graph_vertices_info,
+		//Vertex *graph_vertices_info,
+		unsigned *h_graph_vertices,
+		unsigned *h_graph_edges,
 		unsigned *h_graph_heads,
 		unsigned *h_graph_tails,
 		unsigned *h_graph_degrees,
@@ -520,15 +556,22 @@ void graph_prepare(
 	unsigned *frontier = (unsigned *) malloc(sizeof(unsigned) * frontier_size);
 	frontier[0] = source;
 	double start_time = omp_get_wtime();
+	//unsigned *new_frontier = BFS_sparse(
+	//	//unsigned *graph_vertices,
+	//	graph_vertices_info,
+	//	frontier,
+	//	h_graph_parents,
+	//	//unsigned *graph_edges,
+	//	//h_graph_degrees,
+	//	//const unsigned &source,
+	//	frontier_size);
 	unsigned *new_frontier = BFS_sparse(
-		//unsigned *graph_vertices,
-		graph_vertices_info,
-		frontier,
-		h_graph_parents,
-		//unsigned *graph_edges,
-		//h_graph_degrees,
-		//const unsigned &source,
-		frontier_size);
+								frontier,
+								h_graph_vertices,
+								h_graph_edges,
+								h_graph_degrees,
+								h_graph_parents,
+								frontier_size);
 	free(frontier);
 	frontier = new_frontier;
 	//printf("%d %lf\n", CHUNK_SIZE, run_time = (end_time - start_time));
@@ -549,7 +592,11 @@ void graph_prepare(
 		/////////////
 		//Test
 		printf("@731 frontier_size: %u\n", frontier_size);
-		printf("graph_vertices_info[1]: {%lu, %u}\n", graph_vertices_info[1].out_neighbors, graph_vertices_info[1].out_degree);
+		printf("h_graph_vertices[2]: %u\n", h_graph_vertices[2]);
+		if (h_graph_vertices[2] == 0) {
+			exit(1);
+		}
+		//printf("graph_vertices_info[1]: {%lu, %u}\n", graph_vertices_info[1].out_neighbors, graph_vertices_info[1].out_degree);
 		//End Test
 		/////////////
 		if (frontier_size + out_degree > bfs_threshold) {
@@ -584,20 +631,20 @@ void graph_prepare(
 				frontier = new_frontier;
 			}
 			new_frontier = BFS_sparse(
-					//unsigned *graph_vertices,
-					graph_vertices_info,
-					frontier,
-					h_graph_parents,
-					//graph_edges,
-					//h_graph_degrees,
-					//source,
-					frontier_size);
+								frontier,
+								h_graph_vertices,
+								h_graph_edges,
+								h_graph_degrees,
+								h_graph_parents,
+								frontier_size);
 			free(frontier);
 			frontier = new_frontier;
 			last_is_dense = false;
 		}
 		// Update the parents, also get the sum again.
 		if (last_is_dense) {
+			//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			// Bug from Here
 			frontier_size = 0;
 			out_degree = 0;
 //#pragma omp parallel for reduction(+: frontier_size, out_degree)
@@ -615,24 +662,20 @@ void graph_prepare(
 				} else {
 					bound_vertex_id = NNODES;
 				}
-				for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++vertex_id) {
-					if (1 == h_updating_graph_mask[vertex_id]) {
-						h_updating_graph_mask[vertex_id] = 0;
-						h_graph_mask[vertex_id] = 1;
-						//h_graph_visited[vertex_id] = 1;
-						frontier_size++;
-						out_degree += h_graph_degrees[vertex_id];
-					} else {
-						h_graph_mask[vertex_id] = 0;
-					}
-				}
+				//for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++vertex_id) {
+				//	if (1 == h_updating_graph_mask[vertex_id]) {
+				//		h_updating_graph_mask[vertex_id] = 0;
+				//		h_graph_mask[vertex_id] = 1;
+				//		//h_graph_visited[vertex_id] = 1;
+				//		frontier_size++;
+				//		out_degree += h_graph_degrees[vertex_id];
+				//	} else {
+				//		h_graph_mask[vertex_id] = 0;
+				//	}
+				//}
 			}
-			/////////////
-			//Test
-			printf("@812 graph_vertices_info[1]: {%lu, %u}\n", graph_vertices_info[1].out_neighbors, graph_vertices_info[1].out_degree);
-			//End Test
-			/////////////
-
+			// End Bug
+			//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		} else {
 			out_degree = 0;
 #pragma omp parallel for reduction(+: out_degree)
@@ -786,16 +829,15 @@ void input( int argc, char** argv)
 
 }
 	// CSR
-	Vertex *graph_vertices_info = (Vertex *) malloc(sizeof(Vertex) * NNODES);
-	//unsigned *graph_vertices = (unsigned *) malloc(sizeof(unsigned) * NNODES);
-	//unsigned *graph_edges = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
+	//Vertex *graph_vertices_info = (Vertex *) malloc(sizeof(Vertex) * NNODES);
+	unsigned *h_graph_vertices = (unsigned *) malloc(sizeof(unsigned) * NNODES);
 	unsigned edge_start = 0;
 	for (unsigned i = 0; i < NNODES; ++i) {
-		//graph_vertices[i] = edge_start;
-		//graph_vertices_info[i].out_neighbors = graph_edges + edge_start;
-		graph_vertices_info[i].out_neighbors = h_graph_edges + edge_start;
-		graph_vertices_info[i].out_degree = h_graph_degrees[i];
+		h_graph_vertices[i] = edge_start;
 		edge_start += h_graph_degrees[i];
+		//graph_vertices_info[i].out_neighbors = graph_edges + edge_start;
+		//graph_vertices_info[i].out_neighbors = h_graph_edges + edge_start;
+		//graph_vertices_info[i].out_degree = h_graph_degrees[i];
 	}
 	//memcpy(graph_edges, h_graph_tails, sizeof(unsigned) * NEDGES);
 	//free(h_graph_heads);
@@ -831,22 +873,24 @@ void input( int argc, char** argv)
 		//h_graph_mask[source] = 1;
 		memset(h_updating_graph_mask, 0, sizeof(int)*NNODES);
 #pragma omp parallel for num_threads(64)
-		for (unsigned i = 0; i < NNODES; ++i) {
-			h_cost[i] = -1;
+		for (unsigned j = 0; j < NNODES; ++j) {
+			h_cost[j] = -1;
 		}
 		h_cost[source] = 0;
 		memset(is_active_side, 0, sizeof(int) * SIDE_LENGTH);
 		//is_active_side[0] = 1;
 		memset(is_updating_active_side, 0, sizeof(int) * SIDE_LENGTH);
 #pragma omp parallel for num_threads(64)
-		for (unsigned i = 0; i < NNODES; ++i) {
-			h_graph_parents[i] = (unsigned) -1; // means unvisited yet
+		for (unsigned j = 0; j < NNODES; ++j) {
+			h_graph_parents[j] = (unsigned) -1; // means unvisited yet
 		}
 		h_graph_parents[source] = source;
 
 		graph_prepare(
 				//unsigned *graph_vertices,
-				graph_vertices_info,
+				//graph_vertices_info,
+				h_graph_vertices,
+				h_graph_edges,
 				h_graph_heads,
 				h_graph_tails, 
 				h_graph_degrees,
@@ -902,8 +946,10 @@ void input( int argc, char** argv)
 	// cleanup memory
 	free( h_graph_heads);
 	free( h_graph_tails);
+	//free( h_graph_vertices);
 	free( h_graph_edges);
 	free( h_graph_degrees);
+	free( h_graph_vertices);
 	free( h_graph_mask);
 	free( h_updating_graph_mask);
 	free( h_graph_parents);

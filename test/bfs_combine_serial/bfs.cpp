@@ -531,7 +531,6 @@ void graph_prepare(
 		frontier_size);
 	free(frontier);
 	frontier = new_frontier;
-	//printf("%d %lf\n", CHUNK_SIZE, run_time = (end_time - start_time));
 
 	// When update the parents, get the sum of the number of active nodes and their out degree.
 	unsigned out_degree = 0;
@@ -548,8 +547,8 @@ void graph_prepare(
 	while (frontier_size != 0) {
 		/////////////
 		//Test
-		printf("@731 frontier_size: %u\n", frontier_size);
-		printf("graph_vertices_info[1]: {%lu, %u}\n", graph_vertices_info[1].out_neighbors, graph_vertices_info[1].out_degree);
+		//printf("@550 frontier_size: %u\n", frontier_size);
+		//printf("graph_vertices_info[1]: {%lu, %u}\n", graph_vertices_info[1].out_neighbors, graph_vertices_info[1].out_degree);
 		//End Test
 		/////////////
 		if (frontier_size + out_degree > bfs_threshold) {
@@ -600,8 +599,27 @@ void graph_prepare(
 		if (last_is_dense) {
 			frontier_size = 0;
 			out_degree = 0;
+			/////////////
+			//Test
+			//if (graph_vertices_info[1].out_degree == 0) {
+			//	printf("What? \n");
+			//	exit(1);
+			//} else {
+			//	printf("@608\n");
+			//	//exit(1);
+			//}
+			//End Test
+			/////////////
 //#pragma omp parallel for reduction(+: frontier_size, out_degree)
 			for (unsigned side_id = 0; side_id < SIDE_LENGTH; ++side_id) {
+				/////////////
+				//Test
+				//if (graph_vertices_info[1].out_degree == 0) {
+				//	printf("@618! side_id: %u\n", side_id);
+				//	exit(1);
+				//}
+				//End Test
+				/////////////
 				if (!is_updating_active_side[side_id]) {
 					is_active_side[side_id] = 0;
 					memset(h_graph_mask + side_id * TILE_WIDTH, 0, TILE_WIDTH * sizeof(unsigned));
@@ -625,14 +643,38 @@ void graph_prepare(
 					} else {
 						h_graph_mask[vertex_id] = 0;
 					}
+					/////////////
+					//Test
+					//if (graph_vertices_info[1].out_degree == 0) {
+					//	printf("Crazy! vertex_id: %u\n", vertex_id);
+					//	exit(1);
+					//} else {
+					//	//printf("@633\n");
+					//	//exit(1);
+					//}
+					//End Test
+					/////////////
 				}
+				/////////////
+				//Test
+				//if (graph_vertices_info[1].out_degree == 0) {
+				//	printf("661! side_id: %u\n", side_id);
+				//	exit(1);
+				//}
+				//End Test
+				/////////////
 			}
 			/////////////
 			//Test
-			printf("@812 graph_vertices_info[1]: {%lu, %u}\n", graph_vertices_info[1].out_neighbors, graph_vertices_info[1].out_degree);
+			//if (graph_vertices_info[1].out_degree == 0) {
+			//	printf("@670 graph_vertices_info[1]: {%lu, %u}\n", graph_vertices_info[1].out_neighbors, graph_vertices_info[1].out_degree); 
+			//	exit(1);//test
+			//} else {
+			//	//printf("@673 \n");
+			//	//exit(1);
+			//}
 			//End Test
 			/////////////
-
 		} else {
 			out_degree = 0;
 #pragma omp parallel for reduction(+: out_degree)
@@ -900,6 +942,7 @@ void input( int argc, char** argv)
 #endif
 
 	// cleanup memory
+	free( graph_vertices_info);
 	free( h_graph_heads);
 	free( h_graph_tails);
 	free( h_graph_edges);
