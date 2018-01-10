@@ -524,7 +524,6 @@ unsigned *BFS_kernel_sparse(
 		frontier_size = 0;
 		return nullptr;
 	}
-	//printf("@537\n");//test
 
 	// Get the final new frontier
 	time_now = omp_get_wtime();
@@ -620,86 +619,62 @@ unsigned *to_sparse(
 {
 	unsigned *new_frontier = (unsigned *) malloc(frontier_size * sizeof(unsigned));
 
-//	const unsigned block_size = 1 << 12;
-//	unsigned num_blocks = (NNODES - 1)/block_size + 1;
-//	unsigned *nums_in_blocks = nullptr;
-//	
-//	if (num_blocks > 1) {
-//		nums_in_blocks = (unsigned *) malloc(num_blocks * sizeof(unsigned));
-//		memset(nums_in_blocks, 0, num_blocks * sizeof(unsigned));
-//		// The start locations where the vertices are put in the frontier.
-//#pragma omp parallel for
-//		for (unsigned block_i = 0; block_i < num_blocks; ++block_i) {
-//			unsigned offset = block_i * block_size;
-//			unsigned bound;
-//			if (num_blocks - 1 != block_i) {
-//				bound = offset + block_size;
-//			} else {
-//				bound = NNODES;
-//			}
-//			for (unsigned vertex_i = offset; vertex_i < bound; ++vertex_i) {
-//				if (h_graph_mask[vertex_i]) {
-//					nums_in_blocks[block_i]++;
-//				}
-//			}
-//		}
-//		//TODO: blocked parallel for
-//		// Scan to get the offsets as start locations.
-//		unsigned offset_sum = 0;
-//		for (unsigned block_i = 0; block_i < num_blocks; ++block_i) {
-//			unsigned tmp = nums_in_blocks[block_i];
-//			nums_in_blocks[block_i] = offset_sum;
-//			offset_sum += tmp;
-//		}
-//		// Put vertices into the frontier
-//#pragma omp parallel for
-//		for (unsigned block_i = 0; block_i < num_blocks; ++block_i) {
-//			unsigned base = nums_in_blocks[block_i];
-//			unsigned offset = block_i * block_size;
-//			unsigned bound;
-//			if (num_blocks - 1 != block_i) {
-//				bound = offset + block_size;
-//			} else {
-//				bound = NNODES;
-//			}
-//			for (unsigned vertex_i = offset; vertex_i < bound; ++vertex_i) {
-//				if (h_graph_mask[vertex_i]) {
-//					new_frontier[base++] = vertex_i;
-//				}
-//			}
-//		}
-//	} else {
-//		unsigned k = 0;
-//		for (unsigned i = 0; i < NNODES; ++i) {
-//			if (h_graph_mask[i]) {
-//				new_frontier[k++] = i;
-//			}
-//		}
-//	}
-	unsigned k = 0;
-	for (unsigned i = 0; i < NNODES; ++i) {
-		if (h_graph_mask[i]) {
-			new_frontier[k++] = i;
+	const unsigned block_size = 1 << 12;
+	unsigned num_blocks = (NNODES - 1)/block_size + 1;
+	unsigned *nums_in_blocks = nullptr;
+	
+	if (num_blocks > 1) {
+		nums_in_blocks = (unsigned *) malloc(num_blocks * sizeof(unsigned));
+		memset(nums_in_blocks, 0, num_blocks * sizeof(unsigned));
+		// The start locations where the vertices are put in the frontier.
+#pragma omp parallel for
+		for (unsigned block_i = 0; block_i < num_blocks; ++block_i) {
+			unsigned offset = block_i * block_size;
+			unsigned bound;
+			if (num_blocks - 1 != block_i) {
+				bound = offset + block_size;
+			} else {
+				bound = NNODES;
+			}
+			for (unsigned vertex_i = offset; vertex_i < bound; ++vertex_i) {
+				if (h_graph_mask[vertex_i]) {
+					nums_in_blocks[block_i]++;
+				}
+			}
+		}
+		//TODO: blocked parallel for
+		// Scan to get the offsets as start locations.
+		unsigned offset_sum = 0;
+		for (unsigned block_i = 0; block_i < num_blocks; ++block_i) {
+			unsigned tmp = nums_in_blocks[block_i];
+			nums_in_blocks[block_i] = offset_sum;
+			offset_sum += tmp;
+		}
+		// Put vertices into the frontier
+#pragma omp parallel for
+		for (unsigned block_i = 0; block_i < num_blocks; ++block_i) {
+			unsigned base = nums_in_blocks[block_i];
+			unsigned offset = block_i * block_size;
+			unsigned bound;
+			if (num_blocks - 1 != block_i) {
+				bound = offset + block_size;
+			} else {
+				bound = NNODES;
+			}
+			for (unsigned vertex_i = offset; vertex_i < bound; ++vertex_i) {
+				if (h_graph_mask[vertex_i]) {
+					new_frontier[base++] = vertex_i;
+				}
+			}
+		}
+	} else {
+		unsigned k = 0;
+		for (unsigned i = 0; i < NNODES; ++i) {
+			if (h_graph_mask[i]) {
+				new_frontier[k++] = i;
+			}
 		}
 	}
-	/////////
-	//for (unsigned side_id = 0; side_id < SIDE_LENGTH; ++side_id) {
-	//	if (!is_active_side[side_id]) {
-	//		continue;
-	//	}
-	//	unsigned bound_vertex_id;
-	//	if (SIDE_LENGTH - 1 != side_id) {
-	//		bound_vertex_id = side_id * TILE_WIDTH + TILE_WIDTH;
-	//	} else {
-	//		bound_vertex_id = NNODES;
-	//	}
-	//	for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++vertex_id) {
-	//		if (1 == h_graph_mask[vertex_id]) {
-	//			new_frontier[k++] = vertex_id;
-	//		}
-	//	}
-	//}
-	printf("@685 but k: %u\n", k);//test
 	return new_frontier;
 }
 
@@ -748,71 +723,23 @@ void graph_prepare(
 		out_degree += h_graph_degrees[end];
 	}
 	bool last_is_dense = false;
-//	//////////////////////////////////////////////////////
-//	// Test
-//	to_dense(
-//			h_graph_mask, 
-//			is_active_side, 
-//			frontier, 
-//			frontier_size);
-//	BFS_dense(
-//			h_graph_heads,
-//			h_graph_tails,
-//			h_graph_mask,
-//			h_updating_graph_mask,
-//			//h_graph_visited,
-//			h_graph_parents,
-//			h_cost,
-//			tile_offsets,
-//			is_empty_tile,
-//			is_active_side,
-//			is_updating_active_side);
-//	last_is_dense = true;
-//	frontier_size = 0;
-//	out_degree = 0;
-//#pragma omp parallel for reduction(+: frontier_size, out_degree)
-//	for (unsigned side_id = 0; side_id < SIDE_LENGTH; ++side_id) {
-//		if (!is_updating_active_side[side_id]) {
-//			is_active_side[side_id] = 0;
-//			continue;
-//		}
-//		is_updating_active_side[side_id] = 0;
-//		is_active_side[side_id] = 1;
-//		unsigned bound_vertex_id;
-//		if (SIDE_LENGTH - 1 != side_id) {
-//			bound_vertex_id = side_id * TILE_WIDTH + TILE_WIDTH;
-//		} else {
-//			bound_vertex_id = NNODES;
-//		}
-//		for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++ vertex_id) {
-//			if (1 == h_updating_graph_mask[vertex_id]) {
-//				h_updating_graph_mask[vertex_id] = 0;
-//				h_graph_mask[vertex_id] = 1;
-//				//h_graph_visited[vertex_id] = 1;
-//				frontier_size++;
-//				out_degree += h_graph_degrees[vertex_id];
-//			} else {
-//				h_graph_mask[vertex_id] = 0;
-//			}
-//		}
-//	}
-//	// End Test
-//	//////////////////////////////////////////////////////
 	// According the sum, determine to run Sparse or Dense, and then change the last_is_dense.
 	unsigned bfs_threshold = NEDGES / 20; // Determined according to Ligra
 	while (frontier_size != 0) {
-		printf("==============================================\n");//test
-		printf("@768 frontier_size = %u\n", frontier_size);//test
+		/////////////
+		//Test
+		printf("@731 frontier_size: %u\n", frontier_size);
+		printf("graph_vertices_info[1]: {%lu, %u}\n", graph_vertices_info[1].out_neighbors, graph_vertices_info[1].out_degree);
+		//End Test
+		/////////////
 		if (frontier_size + out_degree > bfs_threshold) {
 			if (!last_is_dense) {
-				printf("@772 to_dense\n");//test
 				to_dense(
 					h_graph_mask, 
 					is_active_side, 
 					frontier, 
 					frontier_size);
 			}
-			printf("@779 Do Dense\n");//test
 			BFS_dense(
 					h_graph_heads,
 					h_graph_tails,
@@ -829,7 +756,6 @@ void graph_prepare(
 		} else {
 			// Sparse
 			if (last_is_dense) {
-				printf("@796 to_sparse\n");//test
 				new_frontier = to_sparse(
 					frontier,
 					frontier_size,
@@ -837,7 +763,6 @@ void graph_prepare(
 				free(frontier);
 				frontier = new_frontier;
 			}
-			printf("@802 Do Sparse\n");//test
 			new_frontier = BFS_sparse(
 					//unsigned *graph_vertices,
 					graph_vertices_info,
@@ -851,12 +776,11 @@ void graph_prepare(
 			frontier = new_frontier;
 			last_is_dense = false;
 		}
-		//printf("@808\n");//test
 		// Update the parents, also get the sum again.
 		if (last_is_dense) {
 			frontier_size = 0;
 			out_degree = 0;
-#pragma omp parallel for reduction(+: frontier_size, out_degree)
+//#pragma omp parallel for reduction(+: frontier_size, out_degree)
 			for (unsigned side_id = 0; side_id < SIDE_LENGTH; ++side_id) {
 				if (!is_updating_active_side[side_id]) {
 					is_active_side[side_id] = 0;
@@ -871,7 +795,7 @@ void graph_prepare(
 				} else {
 					bound_vertex_id = NNODES;
 				}
-				for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++ vertex_id) {
+				for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++vertex_id) {
 					if (1 == h_updating_graph_mask[vertex_id]) {
 						h_updating_graph_mask[vertex_id] = 0;
 						h_graph_mask[vertex_id] = 1;
@@ -884,18 +808,6 @@ void graph_prepare(
 				}
 			}
 
-			/////////////////////////////////////////////////////
-			// Test
-			unsigned test_sum = 0;
-#pragma omp parallel for reduction(+: test_sum)
-			for (unsigned i = 0; i < NNODES; ++i) {
-				if (h_graph_mask[i]) {
-					test_sum++;
-				}
-			}
-			printf("test_sum: %u\n", test_sum);
-			// End Test
-			/////////////////////////////////////////////////////
 		} else {
 			out_degree = 0;
 #pragma omp parallel for reduction(+: out_degree)
@@ -906,7 +818,6 @@ void graph_prepare(
 				out_degree += h_graph_degrees[end];
 			}
 		}
-		printf("@867 Update: frontier_size: %u\n", frontier_size);//test
 	}
 	double end_time = omp_get_wtime();
 	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
@@ -1089,7 +1000,6 @@ void input( int argc, char** argv)
 	//printf("ROW_STEP: %u\n", ROW_STEP);
 	//unsigned ROW_STEP = 16;
 	//ROW_STEP = 16;
-	//ROW_STEP = 2;//test
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
@@ -1099,6 +1009,7 @@ void input( int argc, char** argv)
 		memset(h_graph_mask, 0, sizeof(int)*NNODES);
 		//h_graph_mask[source] = 1;
 		memset(h_updating_graph_mask, 0, sizeof(int)*NNODES);
+#pragma omp parallel for num_threads(256)
 		for (unsigned i = 0; i < NNODES; ++i) {
 			h_cost[i] = -1;
 		}

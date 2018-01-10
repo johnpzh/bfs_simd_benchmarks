@@ -2,7 +2,7 @@ Intel(R) Advisor can now assist with vectorization and show optimization
   report messages with your source code.
 See "https://software.intel.com/en-us/intel-advisor-xe" for details.
 
-Intel(R) C++ Intel(R) 64 Compiler for applications running on Intel(R) 64, Version 17.0.0.098 Build 20160721
+Intel(R) C++ Intel(R) 64 Compiler for applications running on Intel(R) 64, Version 17.0.1.132 Build 20161005
 
 Compiler options: -Wall -Wextra -g -std=c++14 -qopenmp -O3 -xMIC-AVX512 -qopt-report=5 -qopt-report-phase=vec -inline-level=2 -inline-forceinline -o bfs
 
@@ -11,82 +11,77 @@ Begin optimization report for: main(int, char **)
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at bfs.cpp(921,2) inlined into bfs.cpp(1151,2)
+LOOP BEGIN at bfs.cpp(865,2) inlined into bfs.cpp(1095,2)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 
-LOOP BEGIN at bfs.cpp(977,2) inlined into bfs.cpp(1151,2)
+LOOP BEGIN at bfs.cpp(921,2) inlined into bfs.cpp(1095,2)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 
-LOOP BEGIN at bfs.cpp(1018,2) inlined into bfs.cpp(1151,2)
+LOOP BEGIN at bfs.cpp(962,2) inlined into bfs.cpp(1095,2)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between edge_start (1023:3) and edge_start (1021:3)
-   remark #15346: vector dependence: assumed ANTI dependence between edge_start (1021:3) and edge_start (1023:3)
-   remark #15346: vector dependence: assumed ANTI dependence between edge_start (1021:3) and edge_start (1023:3)
-   remark #15346: vector dependence: assumed FLOW dependence between edge_start (1023:3) and edge_start (1021:3)
+   remark #15346: vector dependence: assumed FLOW dependence between edge_start (967:3) and edge_start (965:3)
+   remark #15346: vector dependence: assumed ANTI dependence between edge_start (965:3) and edge_start (967:3)
+   remark #15346: vector dependence: assumed ANTI dependence between edge_start (965:3) and edge_start (967:3)
+   remark #15346: vector dependence: assumed FLOW dependence between edge_start (967:3) and edge_start (965:3)
 LOOP END
 
-LOOP BEGIN at bfs.cpp(1018,2) inlined into bfs.cpp(1151,2)
+LOOP BEGIN at bfs.cpp(962,2) inlined into bfs.cpp(1095,2)
 <Remainder>
 LOOP END
 
-LOOP BEGIN at bfs.cpp(1054,2) inlined into bfs.cpp(1151,2)
-   remark #15542: loop was not vectorized: inner loop was already vectorized
+LOOP BEGIN at bfs.cpp(997,2) inlined into bfs.cpp(1095,2)
+   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ bfs.cpp(1020,3) ]
+LOOP END
 
-   LOOP BEGIN at bfs.cpp(1063,3) inlined into bfs.cpp(1151,2)
-      remark #15542: loop was not vectorized: inner loop was already vectorized
+LOOP BEGIN at bfs.cpp(895,2) inlined into bfs.cpp(1095,2)
+   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(898,3) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (898:3) and n2 (900:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (900:3) and n2 (898:3)
+LOOP END
 
-      LOOP BEGIN at bfs.cpp(1063,3) inlined into bfs.cpp(1151,2)
-         remark #15389: vectorization support: reference h_cost[i] has unaligned access   [ bfs.cpp(1064,4) ]
-         remark #15381: vectorization support: unaligned access used inside loop body
-         remark #15305: vectorization support: vector length 16
-         remark #15309: vectorization support: normalized vectorization overhead 0.600
-         remark #15300: LOOP WAS VECTORIZED
-         remark #15451: unmasked unaligned unit stride stores: 1 
-         remark #15475: --- begin vector cost summary ---
-         remark #15476: scalar cost: 3 
-         remark #15477: vector cost: 0.310 
-         remark #15478: estimated potential speedup: 4.000 
-         remark #15488: --- end vector cost summary ---
-      LOOP END
+LOOP BEGIN at bfs.cpp(947,2) inlined into bfs.cpp(1095,2)
+   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(950,3) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (950:3) and n2 (952:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (952:3) and n2 (950:3)
+LOOP END
 
-      LOOP BEGIN at bfs.cpp(1063,3) inlined into bfs.cpp(1151,2)
-      <Remainder loop for vectorization>
-         remark #15389: vectorization support: reference h_cost[i] has unaligned access   [ bfs.cpp(1064,4) ]
-         remark #15381: vectorization support: unaligned access used inside loop body
-         remark #15305: vectorization support: vector length 16
-         remark #15309: vectorization support: normalized vectorization overhead 1.364
-         remark #15301: REMAINDER LOOP WAS VECTORIZED
-      LOOP END
+LOOP BEGIN at bfs.cpp(1006,1) inlined into bfs.cpp(1095,2)
+   remark #15398: loop was not vectorized: loop was transformed to memset or memcpy
+
+   LOOP BEGIN at bfs.cpp(1006,1) inlined into bfs.cpp(1095,2)
+      remark #15389: vectorization support: reference h_cost has unaligned access   [ bfs.cpp(1008,4) ]
+      remark #15381: vectorization support: unaligned access used inside loop body
+      remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
+      remark #15305: vectorization support: vector length 4
+      remark #15309: vectorization support: normalized vectorization overhead 0.500
+      remark #15451: unmasked unaligned unit stride stores: 1 
+      remark #15475: --- begin vector cost summary ---
+      remark #15476: scalar cost: 3 
+      remark #15477: vector cost: 1.500 
+      remark #15478: estimated potential speedup: 1.410 
+      remark #15488: --- end vector cost summary ---
+   LOOP END
+
+   LOOP BEGIN at bfs.cpp(1006,1) inlined into bfs.cpp(1095,2)
+   <Remainder>
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(951,2) inlined into bfs.cpp(1151,2)
-   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(954,3) ]
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (954:3) and n2 (956:3)
-   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (956:3) and n2 (954:3)
-LOOP END
-
-LOOP BEGIN at bfs.cpp(1003,2) inlined into bfs.cpp(1151,2)
-   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(1006,3) ]
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (1006:3) and n2 (1008:3)
-   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (1008:3) and n2 (1006:3)
-LOOP END
-
-LOOP BEGIN at bfs.cpp(1070,1) inlined into bfs.cpp(1151,2)
+LOOP BEGIN at bfs.cpp(1014,1) inlined into bfs.cpp(1095,2)
 <Peeled loop for vectorization>
-   remark #15389: vectorization support: reference h_graph_parents has unaligned access   [ bfs.cpp(1072,4) ]
+   remark #15389: vectorization support: reference h_graph_parents has unaligned access   [ bfs.cpp(1016,4) ]
    remark #15381: vectorization support: unaligned access used inside loop body
    remark #15335: peel loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
    remark #15305: vectorization support: vector length 4
    remark #15309: vectorization support: normalized vectorization overhead 1.250
 LOOP END
 
-LOOP BEGIN at bfs.cpp(1070,1) inlined into bfs.cpp(1151,2)
-   remark #15389: vectorization support: reference h_graph_parents has unaligned access   [ bfs.cpp(1072,4) ]
+LOOP BEGIN at bfs.cpp(1014,1) inlined into bfs.cpp(1095,2)
+   remark #15389: vectorization support: reference h_graph_parents has unaligned access   [ bfs.cpp(1016,4) ]
    remark #15381: vectorization support: unaligned access used inside loop body
    remark #15305: vectorization support: vector length 16
    remark #15309: vectorization support: normalized vectorization overhead 3.333
@@ -100,9 +95,9 @@ LOOP BEGIN at bfs.cpp(1070,1) inlined into bfs.cpp(1151,2)
    remark #15488: --- end vector cost summary ---
 LOOP END
 
-LOOP BEGIN at bfs.cpp(1070,1) inlined into bfs.cpp(1151,2)
+LOOP BEGIN at bfs.cpp(1014,1) inlined into bfs.cpp(1095,2)
 <Remainder loop for vectorization>
-   remark #15389: vectorization support: reference h_graph_parents has unaligned access   [ bfs.cpp(1072,4) ]
+   remark #15389: vectorization support: reference h_graph_parents has unaligned access   [ bfs.cpp(1016,4) ]
    remark #15381: vectorization support: unaligned access used inside loop body
    remark #15305: vectorization support: vector length 16
    remark #15309: vectorization support: normalized vectorization overhead 1.364
@@ -162,58 +157,58 @@ LOOP BEGIN at bfs.cpp(247,6) inlined into bfs.cpp(295,2)
 LOOP END
 ===========================================================================
 
-Begin optimization report for: BFS_kernel_sparse(Vertex *, unsigned int *, unsigned int *&, unsigned int &)
+Begin optimization report for: BFS_sparse(Vertex *, unsigned int *, unsigned int *, unsigned int &)
 
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at bfs.cpp(403,2)
+LOOP BEGIN at bfs.cpp(401,2) inlined into bfs.cpp(589,9)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between offset_sum (406:3) and offset_sum (405:3)
-   remark #15346: vector dependence: assumed ANTI dependence between offset_sum (405:3) and offset_sum (406:3)
+   remark #15346: vector dependence: assumed FLOW dependence between offset_sum (404:3) and offset_sum (403:3)
+   remark #15346: vector dependence: assumed ANTI dependence between offset_sum (403:3) and offset_sum (404:3)
 LOOP END
 
-LOOP BEGIN at bfs.cpp(403,2)
+LOOP BEGIN at bfs.cpp(401,2) inlined into bfs.cpp(589,9)
 <Remainder>
 LOOP END
 
-LOOP BEGIN at bfs.cpp(514,3)
+LOOP BEGIN at bfs.cpp(507,3) inlined into bfs.cpp(589,9)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between base (516:22) and base (516:5)
-   remark #15346: vector dependence: assumed ANTI dependence between base (516:5) and base (516:22)
+   remark #15346: vector dependence: assumed FLOW dependence between base (509:22) and base (509:5)
+   remark #15346: vector dependence: assumed ANTI dependence between base (509:5) and base (509:22)
 LOOP END
 
-LOOP BEGIN at bfs.cpp(514,3)
+LOOP BEGIN at bfs.cpp(507,3) inlined into bfs.cpp(589,9)
 <Remainder>
 LOOP END
 
-LOOP BEGIN at bfs.cpp(548,2)
+LOOP BEGIN at bfs.cpp(535,2) inlined into bfs.cpp(589,9)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between offset_sum (551:3) and offset_sum (550:3)
-   remark #15346: vector dependence: assumed ANTI dependence between offset_sum (550:3) and offset_sum (551:3)
+   remark #15346: vector dependence: assumed FLOW dependence between offset_sum (538:3) and offset_sum (537:3)
+   remark #15346: vector dependence: assumed ANTI dependence between offset_sum (537:3) and offset_sum (538:3)
 LOOP END
 
-LOOP BEGIN at bfs.cpp(548,2)
+LOOP BEGIN at bfs.cpp(535,2) inlined into bfs.cpp(589,9)
 <Remainder>
 LOOP END
 
-LOOP BEGIN at bfs.cpp(574,3)
+LOOP BEGIN at bfs.cpp(561,3) inlined into bfs.cpp(589,9)
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at bfs.cpp(574,3)
+   LOOP BEGIN at bfs.cpp(561,3) inlined into bfs.cpp(589,9)
    <Peeled loop for vectorization, Multiversioned v2>
-      remark #15389: vectorization support: reference new_frontier[i] has unaligned access   [ bfs.cpp(575,4) ]
-      remark #15389: vectorization support: reference new_frontier_tmp[base] has unaligned access   [ bfs.cpp(575,22) ]
+      remark #15389: vectorization support: reference new_frontier[i] has unaligned access   [ bfs.cpp(562,4) ]
+      remark #15389: vectorization support: reference new_frontier_tmp[base] has unaligned access   [ bfs.cpp(562,22) ]
       remark #15381: vectorization support: unaligned access used inside loop body
       remark #15305: vectorization support: vector length 16
       remark #15309: vectorization support: normalized vectorization overhead 1.385
       remark #15301: PEEL LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(574,3)
+   LOOP BEGIN at bfs.cpp(561,3) inlined into bfs.cpp(589,9)
    <Multiversioned v2>
-      remark #15389: vectorization support: reference new_frontier[i] has unaligned access   [ bfs.cpp(575,4) ]
-      remark #15389: vectorization support: reference new_frontier_tmp[base] has unaligned access   [ bfs.cpp(575,22) ]
+      remark #15389: vectorization support: reference new_frontier[i] has unaligned access   [ bfs.cpp(562,4) ]
+      remark #15389: vectorization support: reference new_frontier_tmp[base] has unaligned access   [ bfs.cpp(562,22) ]
       remark #15381: vectorization support: unaligned access used inside loop body
       remark #15305: vectorization support: vector length 16
       remark #15309: vectorization support: normalized vectorization overhead 3.250
@@ -228,61 +223,61 @@ LOOP BEGIN at bfs.cpp(574,3)
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(574,3)
+   LOOP BEGIN at bfs.cpp(561,3) inlined into bfs.cpp(589,9)
    <Remainder loop for vectorization, Multiversioned v2>
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(377,1)
+LOOP BEGIN at bfs.cpp(376,1) inlined into bfs.cpp(589,9)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between v (384:14) and v (387:26)
-   remark #15346: vector dependence: assumed ANTI dependence between v (387:26) and v (384:14)
+   remark #15346: vector dependence: assumed FLOW dependence between v (383:14) and v (386:26)
+   remark #15346: vector dependence: assumed ANTI dependence between v (386:26) and v (383:14)
 LOOP END
 
-LOOP BEGIN at bfs.cpp(377,1)
+LOOP BEGIN at bfs.cpp(376,1) inlined into bfs.cpp(589,9)
 <Remainder>
 LOOP END
 
-LOOP BEGIN at bfs.cpp(431,6)
+LOOP BEGIN at bfs.cpp(429,6) inlined into bfs.cpp(589,9)
    remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
 
-   LOOP BEGIN at bfs.cpp(419,2)
-      remark #15382: vectorization support: call to function __sync_bool_compare_and_swap_4(volatile void *, unsigned int, unsigned int) cannot be vectorized   [ bfs.cpp(429,22) ]
+   LOOP BEGIN at bfs.cpp(417,2) inlined into bfs.cpp(589,9)
+      remark #15382: vectorization support: call to function __sync_bool_compare_and_swap_4(volatile void *, unsigned int, unsigned int) cannot be vectorized   [ bfs.cpp(427,22) ]
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed FLOW dependence between start (420:18) and start.start (425:25)
-      remark #15346: vector dependence: assumed ANTI dependence between start.start (425:25) and start (420:18)
+      remark #15346: vector dependence: assumed FLOW dependence between start (418:18) and start.start (423:25)
+      remark #15346: vector dependence: assumed ANTI dependence between start.start (423:25) and start (418:18)
 
-      LOOP BEGIN at bfs.cpp(426,3)
+      LOOP BEGIN at bfs.cpp(424,3) inlined into bfs.cpp(589,9)
          remark #15523: loop was not vectorized: loop control variable k was found, but loop iteration count cannot be computed before executing the loop
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(488,2)
+LOOP BEGIN at bfs.cpp(486,2) inlined into bfs.cpp(589,9)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (500:5) and new_frontier_tmp (500:5)
-   remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (500:5) and new_frontier_tmp (500:5)
+   remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (498:5) and new_frontier_tmp (498:5)
+   remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (498:5) and new_frontier_tmp (498:5)
 
-   LOOP BEGIN at bfs.cpp(498,3)
+   LOOP BEGIN at bfs.cpp(496,3) inlined into bfs.cpp(589,9)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed FLOW dependence between new_frontier_tmp (500:5) and new_frontier_tmp (500:5)
-      remark #15346: vector dependence: assumed ANTI dependence between new_frontier_tmp (500:5) and new_frontier_tmp (500:5)
+      remark #15346: vector dependence: assumed FLOW dependence between new_frontier_tmp (498:5) and new_frontier_tmp (498:5)
+      remark #15346: vector dependence: assumed ANTI dependence between new_frontier_tmp (498:5) and new_frontier_tmp (498:5)
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(498,3)
+   LOOP BEGIN at bfs.cpp(496,3) inlined into bfs.cpp(589,9)
    <Remainder>
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(557,2)
+LOOP BEGIN at bfs.cpp(544,2) inlined into bfs.cpp(589,9)
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at bfs.cpp(568,3)
+   LOOP BEGIN at bfs.cpp(555,3) inlined into bfs.cpp(589,9)
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at bfs.cpp(568,3)
-         remark #15389: vectorization support: reference new_frontier has unaligned access   [ bfs.cpp(569,4) ]
-         remark #15389: vectorization support: reference new_frontier_tmp has unaligned access   [ bfs.cpp(569,22) ]
+      LOOP BEGIN at bfs.cpp(555,3) inlined into bfs.cpp(589,9)
+         remark #15389: vectorization support: reference new_frontier has unaligned access   [ bfs.cpp(556,4) ]
+         remark #15389: vectorization support: reference new_frontier_tmp has unaligned access   [ bfs.cpp(556,22) ]
          remark #15381: vectorization support: unaligned access used inside loop body
          remark #15305: vectorization support: vector length 16
          remark #15309: vectorization support: normalized vectorization overhead 1.000
@@ -296,157 +291,10 @@ LOOP BEGIN at bfs.cpp(557,2)
          remark #15488: --- end vector cost summary ---
       LOOP END
 
-      LOOP BEGIN at bfs.cpp(568,3)
+      LOOP BEGIN at bfs.cpp(555,3) inlined into bfs.cpp(589,9)
       <Remainder loop for vectorization>
-         remark #15389: vectorization support: reference new_frontier has unaligned access   [ bfs.cpp(569,4) ]
-         remark #15389: vectorization support: reference new_frontier_tmp has unaligned access   [ bfs.cpp(569,22) ]
-         remark #15381: vectorization support: unaligned access used inside loop body
-         remark #15305: vectorization support: vector length 16
-         remark #15309: vectorization support: normalized vectorization overhead 1.385
-         remark #15301: REMAINDER LOOP WAS VECTORIZED
-      LOOP END
-   LOOP END
-LOOP END
-===========================================================================
-
-Begin optimization report for: BFS_sparse(Vertex *, unsigned int *&, unsigned int *, unsigned int &)
-
-    Report from: Vector optimizations [vec]
-
-
-LOOP BEGIN at bfs.cpp(403,2) inlined into bfs.cpp(612,2)
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between offset_sum (406:3) and offset_sum (405:3)
-   remark #15346: vector dependence: assumed ANTI dependence between offset_sum (405:3) and offset_sum (406:3)
-LOOP END
-
-LOOP BEGIN at bfs.cpp(403,2) inlined into bfs.cpp(612,2)
-<Remainder>
-LOOP END
-
-LOOP BEGIN at bfs.cpp(514,3) inlined into bfs.cpp(612,2)
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between base (516:22) and base (516:5)
-   remark #15346: vector dependence: assumed ANTI dependence between base (516:5) and base (516:22)
-LOOP END
-
-LOOP BEGIN at bfs.cpp(514,3) inlined into bfs.cpp(612,2)
-<Remainder>
-LOOP END
-
-LOOP BEGIN at bfs.cpp(548,2) inlined into bfs.cpp(612,2)
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between offset_sum (551:3) and offset_sum (550:3)
-   remark #15346: vector dependence: assumed ANTI dependence between offset_sum (550:3) and offset_sum (551:3)
-LOOP END
-
-LOOP BEGIN at bfs.cpp(548,2) inlined into bfs.cpp(612,2)
-<Remainder>
-LOOP END
-
-LOOP BEGIN at bfs.cpp(574,3) inlined into bfs.cpp(612,2)
-   remark #15542: loop was not vectorized: inner loop was already vectorized
-
-   LOOP BEGIN at bfs.cpp(574,3) inlined into bfs.cpp(612,2)
-   <Peeled loop for vectorization, Multiversioned v2>
-      remark #15389: vectorization support: reference new_frontier[i] has unaligned access   [ bfs.cpp(575,4) ]
-      remark #15389: vectorization support: reference new_frontier_tmp[base] has unaligned access   [ bfs.cpp(575,22) ]
-      remark #15381: vectorization support: unaligned access used inside loop body
-      remark #15305: vectorization support: vector length 16
-      remark #15309: vectorization support: normalized vectorization overhead 1.385
-      remark #15301: PEEL LOOP WAS VECTORIZED
-   LOOP END
-
-   LOOP BEGIN at bfs.cpp(574,3) inlined into bfs.cpp(612,2)
-   <Multiversioned v2>
-      remark #15389: vectorization support: reference new_frontier[i] has unaligned access   [ bfs.cpp(575,4) ]
-      remark #15389: vectorization support: reference new_frontier_tmp[base] has unaligned access   [ bfs.cpp(575,22) ]
-      remark #15381: vectorization support: unaligned access used inside loop body
-      remark #15305: vectorization support: vector length 16
-      remark #15309: vectorization support: normalized vectorization overhead 3.250
-      remark #15300: LOOP WAS VECTORIZED
-      remark #15442: entire loop may be executed in remainder
-      remark #15450: unmasked unaligned unit stride loads: 1 
-      remark #15451: unmasked unaligned unit stride stores: 1 
-      remark #15475: --- begin vector cost summary ---
-      remark #15476: scalar cost: 5 
-      remark #15477: vector cost: 0.250 
-      remark #15478: estimated potential speedup: 15.460 
-      remark #15488: --- end vector cost summary ---
-   LOOP END
-
-   LOOP BEGIN at bfs.cpp(574,3) inlined into bfs.cpp(612,2)
-   <Remainder loop for vectorization, Multiversioned v2>
-   LOOP END
-LOOP END
-
-LOOP BEGIN at bfs.cpp(377,1) inlined into bfs.cpp(612,2)
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between v (384:14) and v (387:26)
-   remark #15346: vector dependence: assumed ANTI dependence between v (387:26) and v (384:14)
-LOOP END
-
-LOOP BEGIN at bfs.cpp(377,1) inlined into bfs.cpp(612,2)
-<Remainder>
-LOOP END
-
-LOOP BEGIN at bfs.cpp(431,6) inlined into bfs.cpp(612,2)
-   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
-
-   LOOP BEGIN at bfs.cpp(419,2) inlined into bfs.cpp(612,2)
-      remark #15382: vectorization support: call to function __sync_bool_compare_and_swap_4(volatile void *, unsigned int, unsigned int) cannot be vectorized   [ bfs.cpp(429,22) ]
-      remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed FLOW dependence between start (420:18) and start.start (425:25)
-      remark #15346: vector dependence: assumed ANTI dependence between start.start (425:25) and start (420:18)
-
-      LOOP BEGIN at bfs.cpp(426,3) inlined into bfs.cpp(612,2)
-         remark #15523: loop was not vectorized: loop control variable k was found, but loop iteration count cannot be computed before executing the loop
-      LOOP END
-   LOOP END
-LOOP END
-
-LOOP BEGIN at bfs.cpp(488,2) inlined into bfs.cpp(612,2)
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (500:5) and new_frontier_tmp (500:5)
-   remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (500:5) and new_frontier_tmp (500:5)
-
-   LOOP BEGIN at bfs.cpp(498,3) inlined into bfs.cpp(612,2)
-      remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed FLOW dependence between new_frontier_tmp (500:5) and new_frontier_tmp (500:5)
-      remark #15346: vector dependence: assumed ANTI dependence between new_frontier_tmp (500:5) and new_frontier_tmp (500:5)
-   LOOP END
-
-   LOOP BEGIN at bfs.cpp(498,3) inlined into bfs.cpp(612,2)
-   <Remainder>
-   LOOP END
-LOOP END
-
-LOOP BEGIN at bfs.cpp(557,2) inlined into bfs.cpp(612,2)
-   remark #15542: loop was not vectorized: inner loop was already vectorized
-
-   LOOP BEGIN at bfs.cpp(568,3) inlined into bfs.cpp(612,2)
-      remark #15542: loop was not vectorized: inner loop was already vectorized
-
-      LOOP BEGIN at bfs.cpp(568,3) inlined into bfs.cpp(612,2)
-         remark #15389: vectorization support: reference new_frontier has unaligned access   [ bfs.cpp(569,4) ]
-         remark #15389: vectorization support: reference new_frontier_tmp has unaligned access   [ bfs.cpp(569,22) ]
-         remark #15381: vectorization support: unaligned access used inside loop body
-         remark #15305: vectorization support: vector length 16
-         remark #15309: vectorization support: normalized vectorization overhead 1.000
-         remark #15300: LOOP WAS VECTORIZED
-         remark #15450: unmasked unaligned unit stride loads: 1 
-         remark #15451: unmasked unaligned unit stride stores: 1 
-         remark #15475: --- begin vector cost summary ---
-         remark #15476: scalar cost: 5 
-         remark #15477: vector cost: 0.370 
-         remark #15478: estimated potential speedup: 5.000 
-         remark #15488: --- end vector cost summary ---
-      LOOP END
-
-      LOOP BEGIN at bfs.cpp(568,3) inlined into bfs.cpp(612,2)
-      <Remainder loop for vectorization>
-         remark #15389: vectorization support: reference new_frontier has unaligned access   [ bfs.cpp(569,4) ]
-         remark #15389: vectorization support: reference new_frontier_tmp has unaligned access   [ bfs.cpp(569,22) ]
+         remark #15389: vectorization support: reference new_frontier has unaligned access   [ bfs.cpp(556,4) ]
+         remark #15389: vectorization support: reference new_frontier_tmp has unaligned access   [ bfs.cpp(556,22) ]
          remark #15381: vectorization support: unaligned access used inside loop body
          remark #15305: vectorization support: vector length 16
          remark #15309: vectorization support: normalized vectorization overhead 1.385
@@ -461,209 +309,80 @@ Begin optimization report for: to_dense(int *, int *, unsigned int *, const unsi
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at bfs.cpp(656,1)
+LOOP BEGIN at bfs.cpp(607,1)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed ANTI dependence between frontier[i] (658:24) and is_active_side[vertex_id/TILE_WIDTH] (660:3)
-   remark #15346: vector dependence: assumed FLOW dependence between is_active_side[vertex_id/TILE_WIDTH] (660:3) and frontier[i] (658:24)
+   remark #15346: vector dependence: assumed ANTI dependence between frontier[i] (609:24) and is_active_side[vertex_id/TILE_WIDTH] (611:3)
+   remark #15346: vector dependence: assumed FLOW dependence between is_active_side[vertex_id/TILE_WIDTH] (611:3) and frontier[i] (609:24)
 LOOP END
 ===========================================================================
 
-Begin optimization report for: to_sparse(unsigned int *&, const unsigned int &, int *)
+Begin optimization report for: to_sparse(unsigned int *, const unsigned int &, int *)
 
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at bfs.cpp(729,3)
-   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
-LOOP END
-===========================================================================
-
-Begin optimization report for: input(int, char **)
-
-    Report from: Vector optimizations [vec]
-
-
-LOOP BEGIN at bfs.cpp(921,2)
-   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
-LOOP END
-
-LOOP BEGIN at bfs.cpp(977,2)
-   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
-LOOP END
-
-LOOP BEGIN at bfs.cpp(1018,2)
+LOOP BEGIN at bfs.cpp(648,3)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between edge_start (1023:3) and edge_start (1021:3)
-   remark #15346: vector dependence: assumed ANTI dependence between edge_start (1021:3) and edge_start (1023:3)
-   remark #15346: vector dependence: assumed ANTI dependence between edge_start (1021:3) and edge_start (1023:3)
-   remark #15346: vector dependence: assumed FLOW dependence between edge_start (1023:3) and edge_start (1021:3)
+   remark #15346: vector dependence: assumed FLOW dependence between offset_sum (651:4) and offset_sum (650:4)
+   remark #15346: vector dependence: assumed ANTI dependence between offset_sum (650:4) and offset_sum (651:4)
 LOOP END
 
-LOOP BEGIN at bfs.cpp(1018,2)
+LOOP BEGIN at bfs.cpp(648,3)
 <Remainder>
 LOOP END
 
-LOOP BEGIN at bfs.cpp(1054,2)
-   remark #15542: loop was not vectorized: inner loop was already vectorized
-
-   LOOP BEGIN at bfs.cpp(1063,3)
-      remark #15542: loop was not vectorized: inner loop was already vectorized
-
-      LOOP BEGIN at bfs.cpp(1063,3)
-         remark #15389: vectorization support: reference h_cost[i] has unaligned access   [ bfs.cpp(1064,4) ]
-         remark #15381: vectorization support: unaligned access used inside loop body
-         remark #15305: vectorization support: vector length 16
-         remark #15309: vectorization support: normalized vectorization overhead 0.600
-         remark #15300: LOOP WAS VECTORIZED
-         remark #15451: unmasked unaligned unit stride stores: 1 
-         remark #15475: --- begin vector cost summary ---
-         remark #15476: scalar cost: 3 
-         remark #15477: vector cost: 0.310 
-         remark #15478: estimated potential speedup: 4.000 
-         remark #15488: --- end vector cost summary ---
-      LOOP END
-
-      LOOP BEGIN at bfs.cpp(1063,3)
-      <Remainder loop for vectorization>
-         remark #15389: vectorization support: reference h_cost[i] has unaligned access   [ bfs.cpp(1064,4) ]
-         remark #15381: vectorization support: unaligned access used inside loop body
-         remark #15305: vectorization support: vector length 16
-         remark #15309: vectorization support: normalized vectorization overhead 1.364
-         remark #15301: REMAINDER LOOP WAS VECTORIZED
-      LOOP END
-   LOOP END
-LOOP END
-
-LOOP BEGIN at bfs.cpp(951,2)
-   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(954,3) ]
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (954:3) and n2 (956:3)
-   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (956:3) and n2 (954:3)
-LOOP END
-
-LOOP BEGIN at bfs.cpp(1003,2)
-   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(1006,3) ]
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (1006:3) and n2 (1008:3)
-   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (1008:3) and n2 (1006:3)
-LOOP END
-
-LOOP BEGIN at bfs.cpp(1070,1)
+LOOP BEGIN at bfs.cpp(672,3)
 <Peeled loop for vectorization>
-   remark #15389: vectorization support: reference h_graph_parents has unaligned access   [ bfs.cpp(1072,4) ]
-   remark #15381: vectorization support: unaligned access used inside loop body
-   remark #15335: peel loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
-   remark #15305: vectorization support: vector length 4
-   remark #15309: vectorization support: normalized vectorization overhead 1.250
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 0.826
+   remark #15301: PEEL LOOP WAS VECTORIZED
 LOOP END
 
-LOOP BEGIN at bfs.cpp(1070,1)
-   remark #15389: vectorization support: reference h_graph_parents has unaligned access   [ bfs.cpp(1072,4) ]
-   remark #15381: vectorization support: unaligned access used inside loop body
+LOOP BEGIN at bfs.cpp(672,3)
    remark #15305: vectorization support: vector length 16
-   remark #15309: vectorization support: normalized vectorization overhead 3.333
+   remark #15309: vectorization support: normalized vectorization overhead 1.000
    remark #15300: LOOP WAS VECTORIZED
    remark #15442: entire loop may be executed in remainder
-   remark #15451: unmasked unaligned unit stride stores: 1 
+   remark #15450: unmasked unaligned unit stride loads: 1 
+   remark #15457: masked unaligned unit stride stores: 1 
    remark #15475: --- begin vector cost summary ---
-   remark #15476: scalar cost: 3 
-   remark #15477: vector cost: 0.180 
-   remark #15478: estimated potential speedup: 12.320 
+   remark #15476: scalar cost: 13 
+   remark #15477: vector cost: 0.870 
+   remark #15478: estimated potential speedup: 12.660 
    remark #15488: --- end vector cost summary ---
+   remark #15497: vector compress: 1 
 LOOP END
 
-LOOP BEGIN at bfs.cpp(1070,1)
+LOOP BEGIN at bfs.cpp(672,3)
 <Remainder loop for vectorization>
-   remark #15389: vectorization support: reference h_graph_parents has unaligned access   [ bfs.cpp(1072,4) ]
-   remark #15381: vectorization support: unaligned access used inside loop body
    remark #15305: vectorization support: vector length 16
-   remark #15309: vectorization support: normalized vectorization overhead 1.364
+   remark #15309: vectorization support: normalized vectorization overhead 0.826
    remark #15301: REMAINDER LOOP WAS VECTORIZED
 LOOP END
-===========================================================================
 
-Begin optimization report for: graph_prepare(Vertex *, unsigned int *, unsigned int *, unsigned int *, unsigned int *, unsigned int *, const unsigned int &, int *, int *, int *, int *, int *, int *)
+LOOP BEGIN at bfs.cpp(631,3)
+   remark #15541: outer loop was not auto-vectorized: consider using SIMD directive   [ bfs.cpp(639,4) ]
 
-    Report from: Vector optimizations [vec]
+   LOOP BEGIN at bfs.cpp(639,4)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization   [ bfs.cpp(640,5) ]
+   LOOP END
 
-
-LOOP BEGIN at bfs.cpp(403,2) inlined into bfs.cpp(758,2)
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between offset_sum (406:3) and offset_sum (405:3)
-   remark #15346: vector dependence: assumed ANTI dependence between offset_sum (405:3) and offset_sum (406:3)
+   LOOP BEGIN at bfs.cpp(639,4)
+   <Remainder>
+   LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(403,2) inlined into bfs.cpp(758,2)
-<Remainder>
-LOOP END
-
-LOOP BEGIN at bfs.cpp(514,3) inlined into bfs.cpp(758,2)
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between base (516:22) and base (516:5)
-   remark #15346: vector dependence: assumed ANTI dependence between base (516:5) and base (516:22)
-LOOP END
-
-LOOP BEGIN at bfs.cpp(514,3) inlined into bfs.cpp(758,2)
-<Remainder>
-LOOP END
-
-LOOP BEGIN at bfs.cpp(548,2) inlined into bfs.cpp(758,2)
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between offset_sum (551:3) and offset_sum (550:3)
-   remark #15346: vector dependence: assumed ANTI dependence between offset_sum (550:3) and offset_sum (551:3)
-LOOP END
-
-LOOP BEGIN at bfs.cpp(548,2) inlined into bfs.cpp(758,2)
-<Remainder>
-LOOP END
-
-LOOP BEGIN at bfs.cpp(574,3) inlined into bfs.cpp(758,2)
+LOOP BEGIN at bfs.cpp(655,3)
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at bfs.cpp(574,3) inlined into bfs.cpp(758,2)
-   <Peeled loop for vectorization, Multiversioned v2>
-      remark #15389: vectorization support: reference new_frontier[i] has unaligned access   [ bfs.cpp(575,4) ]
-      remark #15389: vectorization support: reference new_frontier_tmp[base] has unaligned access   [ bfs.cpp(575,22) ]
-      remark #15381: vectorization support: unaligned access used inside loop body
-      remark #15305: vectorization support: vector length 16
-      remark #15309: vectorization support: normalized vectorization overhead 1.385
-      remark #15301: PEEL LOOP WAS VECTORIZED
-   LOOP END
-
-   LOOP BEGIN at bfs.cpp(574,3) inlined into bfs.cpp(758,2)
-   <Multiversioned v2>
-      remark #15389: vectorization support: reference new_frontier[i] has unaligned access   [ bfs.cpp(575,4) ]
-      remark #15389: vectorization support: reference new_frontier_tmp[base] has unaligned access   [ bfs.cpp(575,22) ]
-      remark #15381: vectorization support: unaligned access used inside loop body
-      remark #15305: vectorization support: vector length 16
-      remark #15309: vectorization support: normalized vectorization overhead 3.250
-      remark #15300: LOOP WAS VECTORIZED
-      remark #15442: entire loop may be executed in remainder
-      remark #15450: unmasked unaligned unit stride loads: 1 
-      remark #15451: unmasked unaligned unit stride stores: 1 
-      remark #15475: --- begin vector cost summary ---
-      remark #15476: scalar cost: 5 
-      remark #15477: vector cost: 0.250 
-      remark #15478: estimated potential speedup: 15.460 
-      remark #15488: --- end vector cost summary ---
-   LOOP END
-
-   LOOP BEGIN at bfs.cpp(574,3) inlined into bfs.cpp(758,2)
-   <Remainder loop for vectorization, Multiversioned v2>
-   LOOP END
-LOOP END
-
-LOOP BEGIN at bfs.cpp(782,2)
-   remark #15542: loop was not vectorized: inner loop was already vectorized
-
-   LOOP BEGIN at bfs.cpp(729,3) inlined into bfs.cpp(813,5)
+   LOOP BEGIN at bfs.cpp(664,4)
    <Peeled loop for vectorization>
       remark #15305: vectorization support: vector length 16
       remark #15309: vectorization support: normalized vectorization overhead 0.826
       remark #15301: PEEL LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(729,3) inlined into bfs.cpp(813,5)
+   LOOP BEGIN at bfs.cpp(664,4)
       remark #15305: vectorization support: vector length 16
       remark #15309: vectorization support: normalized vectorization overhead 1.000
       remark #15300: LOOP WAS VECTORIZED
@@ -678,64 +397,220 @@ LOOP BEGIN at bfs.cpp(782,2)
       remark #15497: vector compress: 1 
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(729,3) inlined into bfs.cpp(813,5)
+   LOOP BEGIN at bfs.cpp(664,4)
+   <Remainder loop for vectorization>
+      remark #15305: vectorization support: vector length 16
+      remark #15309: vectorization support: normalized vectorization overhead 0.826
+      remark #15301: REMAINDER LOOP WAS VECTORIZED
+   LOOP END
+LOOP END
+===========================================================================
+
+Begin optimization report for: input(int, char **)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at bfs.cpp(865,2)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at bfs.cpp(921,2)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at bfs.cpp(962,2)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between edge_start (967:3) and edge_start (965:3)
+   remark #15346: vector dependence: assumed ANTI dependence between edge_start (965:3) and edge_start (967:3)
+   remark #15346: vector dependence: assumed ANTI dependence between edge_start (965:3) and edge_start (967:3)
+   remark #15346: vector dependence: assumed FLOW dependence between edge_start (967:3) and edge_start (965:3)
+LOOP END
+
+LOOP BEGIN at bfs.cpp(962,2)
+<Remainder>
+LOOP END
+
+LOOP BEGIN at bfs.cpp(997,2)
+   remark #15333: loop was not vectorized: exception handling for a call prevents vectorization   [ bfs.cpp(1020,3) ]
+LOOP END
+
+LOOP BEGIN at bfs.cpp(895,2)
+   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(898,3) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (898:3) and n2 (900:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (900:3) and n2 (898:3)
+LOOP END
+
+LOOP BEGIN at bfs.cpp(947,2)
+   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ bfs.cpp(950,3) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (950:3) and n2 (952:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (952:3) and n2 (950:3)
+LOOP END
+
+LOOP BEGIN at bfs.cpp(1006,1)
+   remark #15398: loop was not vectorized: loop was transformed to memset or memcpy
+
+   LOOP BEGIN at bfs.cpp(1006,1)
+      remark #15389: vectorization support: reference h_cost has unaligned access   [ bfs.cpp(1008,4) ]
+      remark #15381: vectorization support: unaligned access used inside loop body
+      remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
+      remark #15305: vectorization support: vector length 4
+      remark #15309: vectorization support: normalized vectorization overhead 0.500
+      remark #15451: unmasked unaligned unit stride stores: 1 
+      remark #15475: --- begin vector cost summary ---
+      remark #15476: scalar cost: 3 
+      remark #15477: vector cost: 1.500 
+      remark #15478: estimated potential speedup: 1.410 
+      remark #15488: --- end vector cost summary ---
+   LOOP END
+
+   LOOP BEGIN at bfs.cpp(1006,1)
+   <Remainder>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at bfs.cpp(1014,1)
+<Peeled loop for vectorization>
+   remark #15389: vectorization support: reference h_graph_parents has unaligned access   [ bfs.cpp(1016,4) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15335: peel loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or -vec-threshold0 to override 
+   remark #15305: vectorization support: vector length 4
+   remark #15309: vectorization support: normalized vectorization overhead 1.250
+LOOP END
+
+LOOP BEGIN at bfs.cpp(1014,1)
+   remark #15389: vectorization support: reference h_graph_parents has unaligned access   [ bfs.cpp(1016,4) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 3.333
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15442: entire loop may be executed in remainder
+   remark #15451: unmasked unaligned unit stride stores: 1 
+   remark #15475: --- begin vector cost summary ---
+   remark #15476: scalar cost: 3 
+   remark #15477: vector cost: 0.180 
+   remark #15478: estimated potential speedup: 12.320 
+   remark #15488: --- end vector cost summary ---
+LOOP END
+
+LOOP BEGIN at bfs.cpp(1014,1)
+<Remainder loop for vectorization>
+   remark #15389: vectorization support: reference h_graph_parents has unaligned access   [ bfs.cpp(1016,4) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 1.364
+   remark #15301: REMAINDER LOOP WAS VECTORIZED
+LOOP END
+===========================================================================
+
+Begin optimization report for: graph_prepare(Vertex *, unsigned int *, unsigned int *, unsigned int *, unsigned int *, unsigned int *, const unsigned int &, int *, int *, int *, int *, int *, int *)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at bfs.cpp(728,2)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at bfs.cpp(277,2) inlined into bfs.cpp(737,4)
+      remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+   LOOP END
+
+   LOOP BEGIN at bfs.cpp(648,3) inlined into bfs.cpp(753,20)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed FLOW dependence between offset_sum (651:4) and offset_sum (650:4)
+      remark #15346: vector dependence: assumed ANTI dependence between offset_sum (650:4) and offset_sum (651:4)
+      remark #15346: vector dependence: assumed ANTI dependence between offset_sum (650:4) and offset_sum (651:4)
+      remark #15346: vector dependence: assumed FLOW dependence between offset_sum (651:4) and offset_sum (650:4)
+   LOOP END
+
+   LOOP BEGIN at bfs.cpp(648,3) inlined into bfs.cpp(753,20)
+   <Remainder>
+   LOOP END
+
+   LOOP BEGIN at bfs.cpp(672,3) inlined into bfs.cpp(753,20)
+   <Peeled loop for vectorization>
+      remark #15305: vectorization support: vector length 16
+      remark #15309: vectorization support: normalized vectorization overhead 0.826
+      remark #15301: PEEL LOOP WAS VECTORIZED
+   LOOP END
+
+   LOOP BEGIN at bfs.cpp(672,3) inlined into bfs.cpp(753,20)
+      remark #15305: vectorization support: vector length 16
+      remark #15309: vectorization support: normalized vectorization overhead 1.000
+      remark #15300: LOOP WAS VECTORIZED
+      remark #15442: entire loop may be executed in remainder
+      remark #15450: unmasked unaligned unit stride loads: 1 
+      remark #15457: masked unaligned unit stride stores: 1 
+      remark #15475: --- begin vector cost summary ---
+      remark #15476: scalar cost: 13 
+      remark #15477: vector cost: 0.870 
+      remark #15478: estimated potential speedup: 12.660 
+      remark #15488: --- end vector cost summary ---
+      remark #15497: vector compress: 1 
+   LOOP END
+
+   LOOP BEGIN at bfs.cpp(672,3) inlined into bfs.cpp(753,20)
    <Remainder loop for vectorization>
       remark #15305: vectorization support: vector length 16
       remark #15309: vectorization support: normalized vectorization overhead 0.826
       remark #15301: REMAINDER LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(403,2) inlined into bfs.cpp(819,4)
+   LOOP BEGIN at bfs.cpp(401,2) inlined into bfs.cpp(760,19)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed FLOW dependence between offset_sum (406:3) and offset_sum (405:3)
-      remark #15346: vector dependence: assumed ANTI dependence between offset_sum (405:3) and offset_sum (406:3)
-      remark #15346: vector dependence: assumed ANTI dependence between offset_sum (405:3) and offset_sum (406:3)
-      remark #15346: vector dependence: assumed FLOW dependence between offset_sum (406:3) and offset_sum (405:3)
+      remark #15346: vector dependence: assumed FLOW dependence between offset_sum (404:3) and offset_sum (403:3)
+      remark #15346: vector dependence: assumed ANTI dependence between offset_sum (403:3) and offset_sum (404:3)
+      remark #15346: vector dependence: assumed ANTI dependence between offset_sum (403:3) and offset_sum (404:3)
+      remark #15346: vector dependence: assumed FLOW dependence between offset_sum (404:3) and offset_sum (403:3)
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(403,2) inlined into bfs.cpp(819,4)
+   LOOP BEGIN at bfs.cpp(401,2) inlined into bfs.cpp(760,19)
    <Remainder>
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(514,3) inlined into bfs.cpp(819,4)
+   LOOP BEGIN at bfs.cpp(507,3) inlined into bfs.cpp(760,19)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed FLOW dependence between base (516:22) and base (516:5)
-      remark #15346: vector dependence: assumed ANTI dependence between base (516:5) and base (516:22)
+      remark #15346: vector dependence: assumed FLOW dependence between base (509:22) and base (509:5)
+      remark #15346: vector dependence: assumed ANTI dependence between base (509:5) and base (509:22)
+      remark #15346: vector dependence: assumed ANTI dependence between base (509:5) and base (509:22)
+      remark #15346: vector dependence: assumed FLOW dependence between base (509:22) and base (509:5)
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(514,3) inlined into bfs.cpp(819,4)
+   LOOP BEGIN at bfs.cpp(507,3) inlined into bfs.cpp(760,19)
    <Remainder>
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(548,2) inlined into bfs.cpp(819,4)
+   LOOP BEGIN at bfs.cpp(535,2) inlined into bfs.cpp(760,19)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed FLOW dependence between offset_sum (551:3) and offset_sum (550:3)
-      remark #15346: vector dependence: assumed ANTI dependence between offset_sum (550:3) and offset_sum (551:3)
-      remark #15346: vector dependence: assumed ANTI dependence between offset_sum (550:3) and offset_sum (551:3)
-      remark #15346: vector dependence: assumed FLOW dependence between offset_sum (551:3) and offset_sum (550:3)
+      remark #15346: vector dependence: assumed FLOW dependence between offset_sum (538:3) and offset_sum (537:3)
+      remark #15346: vector dependence: assumed ANTI dependence between offset_sum (537:3) and offset_sum (538:3)
+      remark #15346: vector dependence: assumed ANTI dependence between offset_sum (537:3) and offset_sum (538:3)
+      remark #15346: vector dependence: assumed FLOW dependence between offset_sum (538:3) and offset_sum (537:3)
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(548,2) inlined into bfs.cpp(819,4)
+   LOOP BEGIN at bfs.cpp(535,2) inlined into bfs.cpp(760,19)
    <Remainder>
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(574,3) inlined into bfs.cpp(819,4)
+   LOOP BEGIN at bfs.cpp(561,3) inlined into bfs.cpp(760,19)
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at bfs.cpp(574,3) inlined into bfs.cpp(819,4)
+      LOOP BEGIN at bfs.cpp(561,3) inlined into bfs.cpp(760,19)
       <Peeled loop for vectorization, Multiversioned v2>
-         remark #15389: vectorization support: reference new_frontier[i] has unaligned access   [ bfs.cpp(575,4) ]
-         remark #15389: vectorization support: reference new_frontier_tmp[base] has unaligned access   [ bfs.cpp(575,22) ]
+         remark #15389: vectorization support: reference new_frontier[i] has unaligned access   [ bfs.cpp(562,4) ]
+         remark #15389: vectorization support: reference new_frontier_tmp[base] has unaligned access   [ bfs.cpp(562,22) ]
          remark #15381: vectorization support: unaligned access used inside loop body
          remark #15305: vectorization support: vector length 16
          remark #15309: vectorization support: normalized vectorization overhead 1.385
          remark #15301: PEEL LOOP WAS VECTORIZED
       LOOP END
 
-      LOOP BEGIN at bfs.cpp(574,3) inlined into bfs.cpp(819,4)
+      LOOP BEGIN at bfs.cpp(561,3) inlined into bfs.cpp(760,19)
       <Multiversioned v2>
-         remark #15389: vectorization support: reference new_frontier[i] has unaligned access   [ bfs.cpp(575,4) ]
-         remark #15389: vectorization support: reference new_frontier_tmp[base] has unaligned access   [ bfs.cpp(575,22) ]
+         remark #15389: vectorization support: reference new_frontier[i] has unaligned access   [ bfs.cpp(562,4) ]
+         remark #15389: vectorization support: reference new_frontier_tmp[base] has unaligned access   [ bfs.cpp(562,22) ]
          remark #15381: vectorization support: unaligned access used inside loop body
          remark #15305: vectorization support: vector length 16
          remark #15309: vectorization support: normalized vectorization overhead 3.250
@@ -750,62 +625,117 @@ LOOP BEGIN at bfs.cpp(782,2)
          remark #15488: --- end vector cost summary ---
       LOOP END
 
-      LOOP BEGIN at bfs.cpp(574,3) inlined into bfs.cpp(819,4)
+      LOOP BEGIN at bfs.cpp(561,3) inlined into bfs.cpp(760,19)
       <Remainder loop for vectorization, Multiversioned v2>
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(377,1) inlined into bfs.cpp(758,2)
+LOOP BEGIN at bfs.cpp(718,1)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between v (384:14) and v (387:26)
-   remark #15346: vector dependence: assumed ANTI dependence between v (387:26) and v (384:14)
+   remark #15346: vector dependence: assumed FLOW dependence between h_cost[end] (722:3) and h_graph_degrees[end] (723:3)
+   remark #15346: vector dependence: assumed ANTI dependence between h_graph_degrees[end] (723:3) and h_cost[end] (722:3)
 LOOP END
 
-LOOP BEGIN at bfs.cpp(377,1) inlined into bfs.cpp(758,2)
+LOOP BEGIN at bfs.cpp(718,1)
 <Remainder>
 LOOP END
 
-LOOP BEGIN at bfs.cpp(431,6) inlined into bfs.cpp(758,2)
+LOOP BEGIN at bfs.cpp(631,3) inlined into bfs.cpp(753,20)
+   remark #15541: outer loop was not auto-vectorized: consider using SIMD directive   [ bfs.cpp(639,4) ]
+
+   LOOP BEGIN at bfs.cpp(639,4) inlined into bfs.cpp(753,20)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization   [ bfs.cpp(640,5) ]
+   LOOP END
+
+   LOOP BEGIN at bfs.cpp(639,4) inlined into bfs.cpp(753,20)
+   <Remainder>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at bfs.cpp(655,3) inlined into bfs.cpp(753,20)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at bfs.cpp(664,4) inlined into bfs.cpp(753,20)
+   <Peeled loop for vectorization>
+      remark #15305: vectorization support: vector length 16
+      remark #15309: vectorization support: normalized vectorization overhead 0.826
+      remark #15301: PEEL LOOP WAS VECTORIZED
+   LOOP END
+
+   LOOP BEGIN at bfs.cpp(664,4) inlined into bfs.cpp(753,20)
+      remark #15305: vectorization support: vector length 16
+      remark #15309: vectorization support: normalized vectorization overhead 1.000
+      remark #15300: LOOP WAS VECTORIZED
+      remark #15442: entire loop may be executed in remainder
+      remark #15450: unmasked unaligned unit stride loads: 1 
+      remark #15457: masked unaligned unit stride stores: 1 
+      remark #15475: --- begin vector cost summary ---
+      remark #15476: scalar cost: 13 
+      remark #15477: vector cost: 0.870 
+      remark #15478: estimated potential speedup: 12.660 
+      remark #15488: --- end vector cost summary ---
+      remark #15497: vector compress: 1 
+   LOOP END
+
+   LOOP BEGIN at bfs.cpp(664,4) inlined into bfs.cpp(753,20)
+   <Remainder loop for vectorization>
+      remark #15305: vectorization support: vector length 16
+      remark #15309: vectorization support: normalized vectorization overhead 0.826
+      remark #15301: REMAINDER LOOP WAS VECTORIZED
+   LOOP END
+LOOP END
+
+LOOP BEGIN at bfs.cpp(376,1) inlined into bfs.cpp(760,19)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between v (383:14) and v (386:26)
+   remark #15346: vector dependence: assumed ANTI dependence between v (386:26) and v (383:14)
+LOOP END
+
+LOOP BEGIN at bfs.cpp(376,1) inlined into bfs.cpp(760,19)
+<Remainder>
+LOOP END
+
+LOOP BEGIN at bfs.cpp(429,6) inlined into bfs.cpp(760,19)
    remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
 
-   LOOP BEGIN at bfs.cpp(419,2) inlined into bfs.cpp(758,2)
-      remark #15382: vectorization support: call to function __sync_bool_compare_and_swap_4(volatile void *, unsigned int, unsigned int) cannot be vectorized   [ bfs.cpp(429,22) ]
+   LOOP BEGIN at bfs.cpp(417,2) inlined into bfs.cpp(760,19)
+      remark #15382: vectorization support: call to function __sync_bool_compare_and_swap_4(volatile void *, unsigned int, unsigned int) cannot be vectorized   [ bfs.cpp(427,22) ]
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed FLOW dependence between start (420:18) and start.start (425:25)
-      remark #15346: vector dependence: assumed ANTI dependence between start.start (425:25) and start (420:18)
+      remark #15346: vector dependence: assumed FLOW dependence between start (418:18) and start.start (423:25)
+      remark #15346: vector dependence: assumed ANTI dependence between start.start (423:25) and start (418:18)
 
-      LOOP BEGIN at bfs.cpp(426,3) inlined into bfs.cpp(758,2)
+      LOOP BEGIN at bfs.cpp(424,3) inlined into bfs.cpp(760,19)
          remark #15523: loop was not vectorized: loop control variable k was found, but loop iteration count cannot be computed before executing the loop
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(488,2) inlined into bfs.cpp(758,2)
+LOOP BEGIN at bfs.cpp(486,2) inlined into bfs.cpp(760,19)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (500:5) and new_frontier_tmp (500:5)
-   remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (500:5) and new_frontier_tmp (500:5)
+   remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (498:5) and new_frontier_tmp (498:5)
+   remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (498:5) and new_frontier_tmp (498:5)
 
-   LOOP BEGIN at bfs.cpp(498,3) inlined into bfs.cpp(758,2)
+   LOOP BEGIN at bfs.cpp(496,3) inlined into bfs.cpp(760,19)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed FLOW dependence between new_frontier_tmp (500:5) and new_frontier_tmp (500:5)
-      remark #15346: vector dependence: assumed ANTI dependence between new_frontier_tmp (500:5) and new_frontier_tmp (500:5)
+      remark #15346: vector dependence: assumed FLOW dependence between new_frontier_tmp (498:5) and new_frontier_tmp (498:5)
+      remark #15346: vector dependence: assumed ANTI dependence between new_frontier_tmp (498:5) and new_frontier_tmp (498:5)
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(498,3) inlined into bfs.cpp(758,2)
+   LOOP BEGIN at bfs.cpp(496,3) inlined into bfs.cpp(760,19)
    <Remainder>
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(557,2) inlined into bfs.cpp(758,2)
+LOOP BEGIN at bfs.cpp(544,2) inlined into bfs.cpp(760,19)
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at bfs.cpp(568,3) inlined into bfs.cpp(758,2)
+   LOOP BEGIN at bfs.cpp(555,3) inlined into bfs.cpp(760,19)
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at bfs.cpp(568,3) inlined into bfs.cpp(758,2)
-         remark #15389: vectorization support: reference new_frontier has unaligned access   [ bfs.cpp(569,4) ]
-         remark #15389: vectorization support: reference new_frontier_tmp has unaligned access   [ bfs.cpp(569,22) ]
+      LOOP BEGIN at bfs.cpp(555,3) inlined into bfs.cpp(760,19)
+         remark #15389: vectorization support: reference new_frontier has unaligned access   [ bfs.cpp(556,4) ]
+         remark #15389: vectorization support: reference new_frontier_tmp has unaligned access   [ bfs.cpp(556,22) ]
          remark #15381: vectorization support: unaligned access used inside loop body
          remark #15305: vectorization support: vector length 16
          remark #15309: vectorization support: normalized vectorization overhead 1.000
@@ -819,10 +749,10 @@ LOOP BEGIN at bfs.cpp(557,2) inlined into bfs.cpp(758,2)
          remark #15488: --- end vector cost summary ---
       LOOP END
 
-      LOOP BEGIN at bfs.cpp(568,3) inlined into bfs.cpp(758,2)
+      LOOP BEGIN at bfs.cpp(555,3) inlined into bfs.cpp(760,19)
       <Remainder loop for vectorization>
-         remark #15389: vectorization support: reference new_frontier has unaligned access   [ bfs.cpp(569,4) ]
-         remark #15389: vectorization support: reference new_frontier_tmp has unaligned access   [ bfs.cpp(569,22) ]
+         remark #15389: vectorization support: reference new_frontier has unaligned access   [ bfs.cpp(556,4) ]
+         remark #15389: vectorization support: reference new_frontier_tmp has unaligned access   [ bfs.cpp(556,22) ]
          remark #15381: vectorization support: unaligned access used inside loop body
          remark #15305: vectorization support: vector length 16
          remark #15309: vectorization support: normalized vectorization overhead 1.385
@@ -831,72 +761,203 @@ LOOP BEGIN at bfs.cpp(557,2) inlined into bfs.cpp(758,2)
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(772,1)
+LOOP BEGIN at bfs.cpp(607,1) inlined into bfs.cpp(731,5)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between h_cost[end] (776:3) and h_graph_degrees[end] (777:3)
-   remark #15346: vector dependence: assumed ANTI dependence between h_graph_degrees[end] (777:3) and h_cost[end] (776:3)
+   remark #15346: vector dependence: assumed ANTI dependence between frontier (609:24) and is_active_side (611:3)
+   remark #15346: vector dependence: assumed FLOW dependence between is_active_side (611:3) and frontier (609:24)
 LOOP END
 
-LOOP BEGIN at bfs.cpp(772,1)
-<Remainder>
-LOOP END
-
-LOOP BEGIN at bfs.cpp(656,1) inlined into bfs.cpp(788,5)
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between h_graph_mask (659:3) and TILE_WIDTH (660:3)
-   remark #15346: vector dependence: assumed ANTI dependence between TILE_WIDTH (660:3) and h_graph_mask (659:3)
-LOOP END
-
-LOOP BEGIN at bfs.cpp(377,1) inlined into bfs.cpp(819,4)
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between v (384:14) and v (387:26)
-   remark #15346: vector dependence: assumed ANTI dependence between v (387:26) and v (384:14)
-LOOP END
-
-LOOP BEGIN at bfs.cpp(377,1) inlined into bfs.cpp(819,4)
-<Remainder>
-LOOP END
-
-LOOP BEGIN at bfs.cpp(431,6) inlined into bfs.cpp(819,4)
+LOOP BEGIN at bfs.cpp(247,6) inlined into bfs.cpp(737,4)
    remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
 
-   LOOP BEGIN at bfs.cpp(419,2) inlined into bfs.cpp(819,4)
-      remark #15382: vectorization support: call to function __sync_bool_compare_and_swap_4(volatile void *, unsigned int, unsigned int) cannot be vectorized   [ bfs.cpp(429,22) ]
-      remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed FLOW dependence between start (420:18) and start.start (425:25)
-      remark #15346: vector dependence: assumed ANTI dependence between start.start (425:25) and start (420:18)
+   LOOP BEGIN at bfs.cpp(223,2) inlined into bfs.cpp(737,4)
+      remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
 
-      LOOP BEGIN at bfs.cpp(426,3) inlined into bfs.cpp(819,4)
+      LOOP BEGIN at bfs.cpp(225,3) inlined into bfs.cpp(737,4)
+         remark #15344: loop was not vectorized: vector dependence prevents vectorization
+         remark #15346: vector dependence: assumed ANTI dependence between tile_offsets (233:5) and h_graph_parents (64:4)
+         remark #15346: vector dependence: assumed FLOW dependence between h_graph_parents (64:4) and tile_offsets (233:5)
+
+         LOOP BEGIN at bfs.cpp(52,2) inlined into bfs.cpp(737,4)
+            remark #15344: loop was not vectorized: vector dependence prevents vectorization
+            remark #15346: vector dependence: assumed ANTI dependence between h_graph_heads (53:19) and h_graph_parents (64:4)
+            remark #15346: vector dependence: assumed FLOW dependence between h_graph_parents (64:4) and h_graph_heads (53:19)
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at bfs.cpp(247,6) inlined into bfs.cpp(737,4)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+
+   LOOP BEGIN at bfs.cpp(223,2) inlined into bfs.cpp(737,4)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed ANTI dependence between tile_offsets (233:5) and h_graph_parents (64:4)
+      remark #15346: vector dependence: assumed FLOW dependence between h_graph_parents (64:4) and tile_offsets (233:5)
+
+      LOOP BEGIN at bfs.cpp(225,3) inlined into bfs.cpp(737,4)
+         remark #15344: loop was not vectorized: vector dependence prevents vectorization
+         remark #15346: vector dependence: assumed ANTI dependence between tile_offsets (233:5) and h_graph_parents (64:4)
+         remark #15346: vector dependence: assumed FLOW dependence between h_graph_parents (64:4) and tile_offsets (233:5)
+
+         LOOP BEGIN at bfs.cpp(52,2) inlined into bfs.cpp(737,4)
+            remark #15344: loop was not vectorized: vector dependence prevents vectorization
+            remark #15346: vector dependence: assumed ANTI dependence between h_graph_heads (53:19) and h_graph_parents (64:4)
+            remark #15346: vector dependence: assumed FLOW dependence between h_graph_parents (64:4) and h_graph_heads (53:19)
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at bfs.cpp(807,1)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed ANTI dependence between *frontier[i] (809:20) and h_cost[end] (811:5)
+   remark #15346: vector dependence: assumed FLOW dependence between h_cost[end] (811:5) and *frontier[i] (809:20)
+LOOP END
+
+LOOP BEGIN at bfs.cpp(807,1)
+<Remainder>
+LOOP END
+
+LOOP BEGIN at bfs.cpp(778,4)
+   remark #15382: vectorization support: call to function memset(void *, int, size_t) cannot be vectorized   [ bfs.cpp(781,6) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed OUTPUT dependence between is_active_side[side_id] (780:6) and h_graph_mask[vertex_id] (800:7)
+   remark #15346: vector dependence: assumed OUTPUT dependence between h_graph_mask[vertex_id] (800:7) and is_active_side[side_id] (780:6)
+
+   LOOP BEGIN at bfs.cpp(792,5)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed OUTPUT dependence between h_updating_graph_mask[vertex_id] (794:7) and h_graph_mask[vertex_id] (800:7)
+      remark #15346: vector dependence: assumed OUTPUT dependence between h_graph_mask[vertex_id] (800:7) and h_updating_graph_mask[vertex_id] (794:7)
+   LOOP END
+
+   LOOP BEGIN at bfs.cpp(792,5)
+   <Remainder>
+   LOOP END
+LOOP END
+===========================================================================
+
+Begin optimization report for: BFS_kernel_sparse(Vertex *, unsigned int *, unsigned int *, unsigned int &)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at bfs.cpp(401,2)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between offset_sum (404:3) and offset_sum (403:3)
+   remark #15346: vector dependence: assumed ANTI dependence between offset_sum (403:3) and offset_sum (404:3)
+LOOP END
+
+LOOP BEGIN at bfs.cpp(401,2)
+<Remainder>
+LOOP END
+
+LOOP BEGIN at bfs.cpp(507,3)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between base (509:22) and base (509:5)
+   remark #15346: vector dependence: assumed ANTI dependence between base (509:5) and base (509:22)
+LOOP END
+
+LOOP BEGIN at bfs.cpp(507,3)
+<Remainder>
+LOOP END
+
+LOOP BEGIN at bfs.cpp(535,2)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between offset_sum (538:3) and offset_sum (537:3)
+   remark #15346: vector dependence: assumed ANTI dependence between offset_sum (537:3) and offset_sum (538:3)
+LOOP END
+
+LOOP BEGIN at bfs.cpp(535,2)
+<Remainder>
+LOOP END
+
+LOOP BEGIN at bfs.cpp(561,3)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at bfs.cpp(561,3)
+   <Peeled loop for vectorization, Multiversioned v2>
+      remark #15389: vectorization support: reference new_frontier[i] has unaligned access   [ bfs.cpp(562,4) ]
+      remark #15389: vectorization support: reference new_frontier_tmp[base] has unaligned access   [ bfs.cpp(562,22) ]
+      remark #15381: vectorization support: unaligned access used inside loop body
+      remark #15305: vectorization support: vector length 16
+      remark #15309: vectorization support: normalized vectorization overhead 1.385
+      remark #15301: PEEL LOOP WAS VECTORIZED
+   LOOP END
+
+   LOOP BEGIN at bfs.cpp(561,3)
+   <Multiversioned v2>
+      remark #15389: vectorization support: reference new_frontier[i] has unaligned access   [ bfs.cpp(562,4) ]
+      remark #15389: vectorization support: reference new_frontier_tmp[base] has unaligned access   [ bfs.cpp(562,22) ]
+      remark #15381: vectorization support: unaligned access used inside loop body
+      remark #15305: vectorization support: vector length 16
+      remark #15309: vectorization support: normalized vectorization overhead 3.250
+      remark #15300: LOOP WAS VECTORIZED
+      remark #15442: entire loop may be executed in remainder
+      remark #15450: unmasked unaligned unit stride loads: 1 
+      remark #15451: unmasked unaligned unit stride stores: 1 
+      remark #15475: --- begin vector cost summary ---
+      remark #15476: scalar cost: 5 
+      remark #15477: vector cost: 0.250 
+      remark #15478: estimated potential speedup: 15.460 
+      remark #15488: --- end vector cost summary ---
+   LOOP END
+
+   LOOP BEGIN at bfs.cpp(561,3)
+   <Remainder loop for vectorization, Multiversioned v2>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at bfs.cpp(376,1)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between v (383:14) and v (386:26)
+   remark #15346: vector dependence: assumed ANTI dependence between v (386:26) and v (383:14)
+LOOP END
+
+LOOP BEGIN at bfs.cpp(376,1)
+<Remainder>
+LOOP END
+
+LOOP BEGIN at bfs.cpp(429,6)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+
+   LOOP BEGIN at bfs.cpp(417,2)
+      remark #15382: vectorization support: call to function __sync_bool_compare_and_swap_4(volatile void *, unsigned int, unsigned int) cannot be vectorized   [ bfs.cpp(427,22) ]
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed FLOW dependence between start (418:18) and start.start (423:25)
+      remark #15346: vector dependence: assumed ANTI dependence between start.start (423:25) and start (418:18)
+
+      LOOP BEGIN at bfs.cpp(424,3)
          remark #15523: loop was not vectorized: loop control variable k was found, but loop iteration count cannot be computed before executing the loop
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(488,2) inlined into bfs.cpp(819,4)
+LOOP BEGIN at bfs.cpp(486,2)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (500:5) and new_frontier_tmp (500:5)
-   remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (500:5) and new_frontier_tmp (500:5)
+   remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (498:5) and new_frontier_tmp (498:5)
+   remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (498:5) and new_frontier_tmp (498:5)
 
-   LOOP BEGIN at bfs.cpp(498,3) inlined into bfs.cpp(819,4)
+   LOOP BEGIN at bfs.cpp(496,3)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed FLOW dependence between new_frontier_tmp (500:5) and new_frontier_tmp (500:5)
-      remark #15346: vector dependence: assumed ANTI dependence between new_frontier_tmp (500:5) and new_frontier_tmp (500:5)
+      remark #15346: vector dependence: assumed FLOW dependence between new_frontier_tmp (498:5) and new_frontier_tmp (498:5)
+      remark #15346: vector dependence: assumed ANTI dependence between new_frontier_tmp (498:5) and new_frontier_tmp (498:5)
    LOOP END
 
-   LOOP BEGIN at bfs.cpp(498,3) inlined into bfs.cpp(819,4)
+   LOOP BEGIN at bfs.cpp(496,3)
    <Remainder>
    LOOP END
 LOOP END
 
-LOOP BEGIN at bfs.cpp(557,2) inlined into bfs.cpp(819,4)
+LOOP BEGIN at bfs.cpp(544,2)
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at bfs.cpp(568,3) inlined into bfs.cpp(819,4)
+   LOOP BEGIN at bfs.cpp(555,3)
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at bfs.cpp(568,3) inlined into bfs.cpp(819,4)
-         remark #15389: vectorization support: reference new_frontier has unaligned access   [ bfs.cpp(569,4) ]
-         remark #15389: vectorization support: reference new_frontier_tmp has unaligned access   [ bfs.cpp(569,22) ]
+      LOOP BEGIN at bfs.cpp(555,3)
+         remark #15389: vectorization support: reference new_frontier has unaligned access   [ bfs.cpp(556,4) ]
+         remark #15389: vectorization support: reference new_frontier_tmp has unaligned access   [ bfs.cpp(556,22) ]
          remark #15381: vectorization support: unaligned access used inside loop body
          remark #15305: vectorization support: vector length 16
          remark #15309: vectorization support: normalized vectorization overhead 1.000
@@ -910,10 +971,10 @@ LOOP BEGIN at bfs.cpp(557,2) inlined into bfs.cpp(819,4)
          remark #15488: --- end vector cost summary ---
       LOOP END
 
-      LOOP BEGIN at bfs.cpp(568,3) inlined into bfs.cpp(819,4)
+      LOOP BEGIN at bfs.cpp(555,3)
       <Remainder loop for vectorization>
-         remark #15389: vectorization support: reference new_frontier has unaligned access   [ bfs.cpp(569,4) ]
-         remark #15389: vectorization support: reference new_frontier_tmp has unaligned access   [ bfs.cpp(569,22) ]
+         remark #15389: vectorization support: reference new_frontier has unaligned access   [ bfs.cpp(556,4) ]
+         remark #15389: vectorization support: reference new_frontier_tmp has unaligned access   [ bfs.cpp(556,22) ]
          remark #15381: vectorization support: unaligned access used inside loop body
          remark #15305: vectorization support: vector length 16
          remark #15309: vectorization support: normalized vectorization overhead 1.385
@@ -921,29 +982,4 @@ LOOP BEGIN at bfs.cpp(557,2) inlined into bfs.cpp(819,4)
       LOOP END
    LOOP END
 LOOP END
-
-LOOP BEGIN at bfs.cpp(863,1)
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between h_cost[end] (867:5) and h_graph_degrees[end] (868:5)
-   remark #15346: vector dependence: assumed ANTI dependence between h_graph_degrees[end] (868:5) and h_cost[end] (867:5)
-LOOP END
-
-LOOP BEGIN at bfs.cpp(863,1)
-<Remainder>
-LOOP END
-
-LOOP BEGIN at bfs.cpp(836,4)
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between is_active_side[side_id] (838:6) and h_graph_mask[vertex_id] (857:7)
-   remark #15346: vector dependence: assumed OUTPUT dependence between h_graph_mask[vertex_id] (857:7) and is_active_side[side_id] (838:6)
-
-   LOOP BEGIN at bfs.cpp(849,5)
-      remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed OUTPUT dependence between h_updating_graph_mask[vertex_id] (851:7) and h_graph_mask[vertex_id] (857:7)
-      remark #15346: vector dependence: assumed OUTPUT dependence between h_graph_mask[vertex_id] (857:7) and h_updating_graph_mask[vertex_id] (851:7)
-   LOOP END
-
-   LOOP BEGIN at bfs.cpp(849,5)
-   <Remainder>
-   LOOP END
-LOOP END
+===========================================================================
