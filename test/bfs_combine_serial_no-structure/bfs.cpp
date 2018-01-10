@@ -591,11 +591,11 @@ void graph_prepare(
 	while (frontier_size != 0) {
 		/////////////
 		//Test
-		printf("@731 frontier_size: %u\n", frontier_size);
-		printf("h_graph_vertices[2]: %u\n", h_graph_vertices[2]);
-		if (h_graph_vertices[2] == 0) {
-			exit(1);
-		}
+		//printf("@731 frontier_size: %u\n", frontier_size);
+		//printf("h_graph_vertices[2]: %u\n", h_graph_vertices[2]);
+		//if (h_graph_vertices[2] == 0) {
+		//	exit(1);
+		//}
 		//printf("graph_vertices_info[1]: {%lu, %u}\n", graph_vertices_info[1].out_neighbors, graph_vertices_info[1].out_degree);
 		//End Test
 		/////////////
@@ -662,17 +662,16 @@ void graph_prepare(
 				} else {
 					bound_vertex_id = NNODES;
 				}
-				//for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++vertex_id) {
-				//	if (1 == h_updating_graph_mask[vertex_id]) {
-				//		h_updating_graph_mask[vertex_id] = 0;
-				//		h_graph_mask[vertex_id] = 1;
-				//		//h_graph_visited[vertex_id] = 1;
-				//		frontier_size++;
-				//		out_degree += h_graph_degrees[vertex_id];
-				//	} else {
-				//		h_graph_mask[vertex_id] = 0;
-				//	}
-				//}
+				for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++vertex_id) {
+					if (1 == h_updating_graph_mask[vertex_id]) {
+						h_updating_graph_mask[vertex_id] = 0;
+						h_graph_mask[vertex_id] = 1;
+						frontier_size++;
+						out_degree += h_graph_degrees[vertex_id];
+					} else {
+						h_graph_mask[vertex_id] = 0;
+					}
+				}
 			}
 			// End Bug
 			//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
