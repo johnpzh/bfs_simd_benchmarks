@@ -807,6 +807,11 @@ void graph_prepare(
 					}
 				}
 			}
+			/////////////
+			//Test
+			printf("@812 graph_vertices_info[1]: {%lu, %u}\n", graph_vertices_info[1].out_neighbors, graph_vertices_info[1].out_degree);
+			//End Test
+			/////////////
 
 		} else {
 			out_degree = 0;
@@ -1009,7 +1014,7 @@ void input( int argc, char** argv)
 		memset(h_graph_mask, 0, sizeof(int)*NNODES);
 		//h_graph_mask[source] = 1;
 		memset(h_updating_graph_mask, 0, sizeof(int)*NNODES);
-#pragma omp parallel for num_threads(256)
+#pragma omp parallel for num_threads(64)
 		for (unsigned i = 0; i < NNODES; ++i) {
 			h_cost[i] = -1;
 		}
@@ -1017,7 +1022,7 @@ void input( int argc, char** argv)
 		memset(is_active_side, 0, sizeof(int) * SIDE_LENGTH);
 		//is_active_side[0] = 1;
 		memset(is_updating_active_side, 0, sizeof(int) * SIDE_LENGTH);
-#pragma omp parallel for num_threads(256)
+#pragma omp parallel for num_threads(64)
 		for (unsigned i = 0; i < NNODES; ++i) {
 			h_graph_parents[i] = (unsigned) -1; // means unvisited yet
 		}
