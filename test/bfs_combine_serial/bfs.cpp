@@ -206,6 +206,7 @@ unsigned *BFS_kernel_sparse(
 		frontier_vertices[i] = v;
 	}
 	if (0 == new_frontier_size) {
+		free(frontier_vertices);
 		free(degrees);
 		frontier_size = 0;
 		//frontier = nullptr;
@@ -487,6 +488,7 @@ unsigned *to_sparse(
 				}
 			}
 		}
+		free(nums_in_blocks);
 	} else {
 		unsigned k = 0;
 		for (unsigned i = 0; i < NNODES; ++i) {
@@ -547,8 +549,8 @@ void graph_prepare(
 	while (frontier_size != 0) {
 		/////////////
 		//Test
-		//printf("@550 frontier_size: %u\n", frontier_size);
-		//printf("graph_vertices_info[1]: {%lu, %u}\n", graph_vertices_info[1].out_neighbors, graph_vertices_info[1].out_degree);
+		printf("@550 frontier_size: %u\n", frontier_size);
+		printf("graph_vertices_info[1]: {%lu, %u}\n", graph_vertices_info[1].out_neighbors, graph_vertices_info[1].out_degree);
 		//End Test
 		/////////////
 		if (frontier_size + out_degree > bfs_threshold) {
@@ -610,7 +612,7 @@ void graph_prepare(
 			//}
 			//End Test
 			/////////////
-//#pragma omp parallel for reduction(+: frontier_size, out_degree)
+#pragma omp parallel for reduction(+: frontier_size, out_degree)
 			for (unsigned side_id = 0; side_id < SIDE_LENGTH; ++side_id) {
 				/////////////
 				//Test
@@ -622,7 +624,13 @@ void graph_prepare(
 				/////////////
 				if (!is_updating_active_side[side_id]) {
 					is_active_side[side_id] = 0;
-					memset(h_graph_mask + side_id * TILE_WIDTH, 0, TILE_WIDTH * sizeof(unsigned));
+					unsigned width;
+					if (SIDE_LENGTH - 1 != side_id) {
+						width = TILE_WIDTH;
+					} else {
+						width = NNODES - side_id * TILE_WIDTH;
+					}
+					memset(h_graph_mask + side_id * TILE_WIDTH, 0, width * sizeof(unsigned));
 					continue;
 				}
 				is_updating_active_side[side_id] = 0;

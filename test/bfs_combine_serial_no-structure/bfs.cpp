@@ -192,7 +192,7 @@ unsigned *BFS_kernel_sparse(
 	// From frontier, get the degrees (para_for)
 	double time_now = omp_get_wtime(); 
 	unsigned *degrees = (unsigned *) malloc(sizeof(unsigned) *  frontier_size);
-	Vertex *frontier_vertices = (Vertex *) malloc(sizeof(Vertex) * frontier_size);
+	//Vertex *frontier_vertices = (Vertex *) malloc(sizeof(Vertex) * frontier_size);
 	unsigned new_frontier_size = 0;
 //#pragma omp parallel for schedule(dynamic) reduction(+: new_frontier_size)
 #pragma omp parallel for reduction(+: new_frontier_size)
@@ -356,7 +356,7 @@ unsigned *BFS_kernel_sparse(
 	
 	if (0 == new_frontier_size) {
 		//free(offsets);
-		free(frontier_vertices);
+		//free(frontier_vertices);
 		free(degrees);
 		free(new_frontier_tmp);
 		if (nums_in_blocks) {
@@ -406,7 +406,7 @@ unsigned *BFS_kernel_sparse(
 	arrange_time += omp_get_wtime() - time_now;
 
 	// Return the results
-	free(frontier_vertices);
+	//free(frontier_vertices);
 	free(degrees);
 	free(new_frontier_tmp);
 	if (nums_in_blocks) {
@@ -521,6 +521,7 @@ unsigned *to_sparse(
 				}
 			}
 		}
+		free(nums_in_blocks);
 	} else {
 		unsigned k = 0;
 		for (unsigned i = 0; i < NNODES; ++i) {
@@ -591,12 +592,9 @@ void graph_prepare(
 	while (frontier_size != 0) {
 		/////////////
 		//Test
-		//printf("@731 frontier_size: %u\n", frontier_size);
-		//printf("h_graph_vertices[2]: %u\n", h_graph_vertices[2]);
-		//if (h_graph_vertices[2] == 0) {
-		//	exit(1);
-		//}
-		//printf("graph_vertices_info[1]: {%lu, %u}\n", graph_vertices_info[1].out_neighbors, graph_vertices_info[1].out_degree);
+		printf("@731 frontier_size: %u\n", frontier_size);
+		printf("h_graph_edges[2]: %u\n", h_graph_edges[2]);
+		printf("h_graph_vertices[2]: %u\n", h_graph_vertices[2]);
 		//End Test
 		/////////////
 		if (frontier_size + out_degree > bfs_threshold) {
@@ -643,15 +641,22 @@ void graph_prepare(
 		}
 		// Update the parents, also get the sum again.
 		if (last_is_dense) {
-			//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			// Bug from Here
 			frontier_size = 0;
 			out_degree = 0;
-//#pragma omp parallel for reduction(+: frontier_size, out_degree)
+#pragma omp parallel for reduction(+: frontier_size, out_degree)
 			for (unsigned side_id = 0; side_id < SIDE_LENGTH; ++side_id) {
 				if (!is_updating_active_side[side_id]) {
 					is_active_side[side_id] = 0;
-					memset(h_graph_mask + side_id * TILE_WIDTH, 0, TILE_WIDTH * sizeof(unsigned));
+					unsigned width;
+				// Think about this bug. How did you find it? And, more importantly,
+				// how to avoid it in the future?
+				//	memset(h_graph_mask + side_id * TILE_WIDTH, 0, TILE_WIDTH * sizeof(unsigned));
+					if (SIDE_LENGTH - 1 != side_id) {
+						width = TILE_WIDTH;
+					} else {
+						width = NNODES - side_id * TILE_WIDTH;
+					}
+					memset(h_graph_mask + side_id * TILE_WIDTH, 0, width * sizeof(unsigned));
 					continue;
 				}
 				is_updating_active_side[side_id] = 0;
@@ -673,8 +678,6 @@ void graph_prepare(
 					}
 				}
 			}
-			// End Bug
-			//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		} else {
 			out_degree = 0;
 #pragma omp parallel for reduction(+: out_degree)
@@ -685,6 +688,15 @@ void graph_prepare(
 				out_degree += h_graph_degrees[end];
 			}
 		}
+		/////////////
+		//Test
+		printf("Then, \nh_graph_edges[2]: %u\n", h_graph_edges[2]);
+		printf("h_graph_vertices[2]: %u\n", h_graph_vertices[2]);
+		if (h_graph_vertices[2] == 0) {
+			exit(1);
+		}
+		//End Test
+		/////////////
 	}
 	double end_time = omp_get_wtime();
 	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
