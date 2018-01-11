@@ -547,12 +547,6 @@ void graph_prepare(
 	// According the sum, determine to run Sparse or Dense, and then change the last_is_dense.
 	unsigned bfs_threshold = NEDGES / 20; // Determined according to Ligra
 	while (frontier_size != 0) {
-		/////////////
-		//Test
-		printf("@550 frontier_size: %u\n", frontier_size);
-		printf("graph_vertices_info[1]: {%lu, %u}\n", graph_vertices_info[1].out_neighbors, graph_vertices_info[1].out_degree);
-		//End Test
-		/////////////
 		if (frontier_size + out_degree > bfs_threshold) {
 			if (!last_is_dense) {
 				to_dense(
@@ -601,27 +595,8 @@ void graph_prepare(
 		if (last_is_dense) {
 			frontier_size = 0;
 			out_degree = 0;
-			/////////////
-			//Test
-			//if (graph_vertices_info[1].out_degree == 0) {
-			//	printf("What? \n");
-			//	exit(1);
-			//} else {
-			//	printf("@608\n");
-			//	//exit(1);
-			//}
-			//End Test
-			/////////////
 #pragma omp parallel for reduction(+: frontier_size, out_degree)
 			for (unsigned side_id = 0; side_id < SIDE_LENGTH; ++side_id) {
-				/////////////
-				//Test
-				//if (graph_vertices_info[1].out_degree == 0) {
-				//	printf("@618! side_id: %u\n", side_id);
-				//	exit(1);
-				//}
-				//End Test
-				/////////////
 				if (!is_updating_active_side[side_id]) {
 					is_active_side[side_id] = 0;
 					unsigned width;
@@ -651,38 +626,8 @@ void graph_prepare(
 					} else {
 						h_graph_mask[vertex_id] = 0;
 					}
-					/////////////
-					//Test
-					//if (graph_vertices_info[1].out_degree == 0) {
-					//	printf("Crazy! vertex_id: %u\n", vertex_id);
-					//	exit(1);
-					//} else {
-					//	//printf("@633\n");
-					//	//exit(1);
-					//}
-					//End Test
-					/////////////
 				}
-				/////////////
-				//Test
-				//if (graph_vertices_info[1].out_degree == 0) {
-				//	printf("661! side_id: %u\n", side_id);
-				//	exit(1);
-				//}
-				//End Test
-				/////////////
 			}
-			/////////////
-			//Test
-			//if (graph_vertices_info[1].out_degree == 0) {
-			//	printf("@670 graph_vertices_info[1]: {%lu, %u}\n", graph_vertices_info[1].out_neighbors, graph_vertices_info[1].out_degree); 
-			//	exit(1);//test
-			//} else {
-			//	//printf("@673 \n");
-			//	//exit(1);
-			//}
-			//End Test
-			/////////////
 		} else {
 			out_degree = 0;
 #pragma omp parallel for reduction(+: out_degree)
@@ -877,6 +822,7 @@ void input( int argc, char** argv)
 		//sleep(10);
 #endif
 		// Re-initializing
+		for (unsigned k = 0; k < 3; ++k) {
 		memset(h_graph_mask, 0, sizeof(int)*NNODES);
 		//h_graph_mask[source] = 1;
 		memset(h_updating_graph_mask, 0, sizeof(int)*NNODES);
@@ -914,6 +860,7 @@ void input( int argc, char** argv)
 #ifdef ONEDEBUG
 		printf("Thread %u finished.\n", NUM_THREADS);
 #endif
+	}
 	}
 	//}
 	fclose(time_out);

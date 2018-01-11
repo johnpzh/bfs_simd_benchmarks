@@ -590,13 +590,6 @@ void graph_prepare(
 	// According the sum, determine to run Sparse or Dense, and then change the last_is_dense.
 	unsigned bfs_threshold = NEDGES / 20; // Determined according to Ligra
 	while (frontier_size != 0) {
-		/////////////
-		//Test
-		printf("@731 frontier_size: %u\n", frontier_size);
-		printf("h_graph_edges[2]: %u\n", h_graph_edges[2]);
-		printf("h_graph_vertices[2]: %u\n", h_graph_vertices[2]);
-		//End Test
-		/////////////
 		if (frontier_size + out_degree > bfs_threshold) {
 			if (!last_is_dense) {
 				to_dense(
@@ -688,15 +681,6 @@ void graph_prepare(
 				out_degree += h_graph_degrees[end];
 			}
 		}
-		/////////////
-		//Test
-		printf("Then, \nh_graph_edges[2]: %u\n", h_graph_edges[2]);
-		printf("h_graph_vertices[2]: %u\n", h_graph_vertices[2]);
-		if (h_graph_vertices[2] == 0) {
-			exit(1);
-		}
-		//End Test
-		/////////////
 	}
 	double end_time = omp_get_wtime();
 	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
@@ -880,6 +864,7 @@ void input( int argc, char** argv)
 		//sleep(10);
 #endif
 		// Re-initializing
+		for (unsigned k = 0; k < 3; ++k) {
 		memset(h_graph_mask, 0, sizeof(int)*NNODES);
 		//h_graph_mask[source] = 1;
 		memset(h_updating_graph_mask, 0, sizeof(int)*NNODES);
@@ -920,6 +905,7 @@ void input( int argc, char** argv)
 		printf("Thread %u finished.\n", NUM_THREADS);
 #endif
 	}
+	}
 	//}
 	fclose(time_out);
 
@@ -957,7 +943,6 @@ void input( int argc, char** argv)
 	// cleanup memory
 	free( h_graph_heads);
 	free( h_graph_tails);
-	//free( h_graph_vertices);
 	free( h_graph_edges);
 	free( h_graph_degrees);
 	free( h_graph_vertices);
