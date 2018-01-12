@@ -530,6 +530,7 @@ unsigned *to_sparse(
 	return new_frontier;
 }
 
+
 void graph_prepare(
 		unsigned *h_graph_vertices,
 		unsigned *h_graph_edges,
@@ -576,7 +577,6 @@ void graph_prepare(
 	// According the sum, determine to run Sparse or Dense, and then change the last_is_dense.
 	unsigned bfs_threshold = NEDGES / 20; // Determined according to Ligra
 	while (frontier_size != 0) {
-		printf("frontier_size: %u\n", frontier_size);//test
 		if (frontier_size + out_degree > bfs_threshold) {
 			if (!last_is_dense) {
 				to_dense(
@@ -598,7 +598,6 @@ void graph_prepare(
 					is_active_side,
 					is_updating_active_side);
 			last_is_dense = true;
-			printf("Dense\n");//test
 		} else {
 			// Sparse
 			if (last_is_dense) {
@@ -619,7 +618,6 @@ void graph_prepare(
 			free(frontier);
 			frontier = new_frontier;
 			last_is_dense = false;
-			printf("Sparse\n");//test
 		}
 		// Update the parents, also get the sum again.
 		if (last_is_dense) {
@@ -643,21 +641,23 @@ void graph_prepare(
 				}
 				is_updating_active_side[side_id] = 0;
 				is_active_side[side_id] = 1;
+				unsigned start_vertex_id = side_id * TILE_WIDTH;
 				unsigned bound_vertex_id;
 				if (SIDE_LENGTH - 1 != side_id) {
-					bound_vertex_id = side_id * TILE_WIDTH + TILE_WIDTH;
+					bound_vertex_id = start_vertex_id + TILE_WIDTH;
 				} else {
 					bound_vertex_id = NNODES;
 				}
-				unsigned remainder = bound_vertex_id % NUM_P_INT;
+				unsigned remainder = (bound_vertex_id - start_vertex_id) % NUM_P_INT;
 				bound_vertex_id -= remainder;
 				unsigned vertex_id;
-				for (vertex_id = side_id * TILE_WIDTH; 
+				for (vertex_id = start_vertex_id; 
 						vertex_id < bound_vertex_id; 
 						vertex_id += NUM_P_INT) {
 					__m512i updating_flag_v = _mm512_loadu_si512(h_updating_graph_mask + vertex_id);
 					__mmask16 is_updating_m = _mm512_test_epi32_mask(updating_flag_v, _mm512_set1_epi32(1));
 					if (!is_updating_m) {
+						_mm512_storeu_si512(h_graph_mask + vertex_id, _mm512_set1_epi32(0));
 						continue;
 					}
 					_mm512_mask_storeu_epi32(h_updating_graph_mask + vertex_id, is_updating_m, _mm512_set1_epi32(0));
@@ -884,6 +884,7 @@ void input( int argc, char** argv)
 	unsigned run_count = 9;
 #endif
 	// BFS
+	SIZE_BUFFER_MAX = 1024;
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
