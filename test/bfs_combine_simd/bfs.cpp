@@ -538,12 +538,12 @@ void print_time()
 {
 	auto percent = [=] (double t) {
 		return t/run_time * 100.0;
-	}
-	printf("dense_time: %.2f (%.2f)\n", dense_time, percent(dense_time));
-	printf("to_dense_time: %.2f (%.2f)\n", to_dense_time, percent(to_dense_time));
-	printf("sparse_time: %.2f (%.2f)\n", sparse_time, percent(sparse_time));
-	printf("to_sparse_time: %.2f (%.2f)\n", to_sparse_time, percent(to_sparse_time));
-	printf("update_time: %.2f (%.2f)\n", update_time, percent(update_time));
+	};
+	printf("dense_time: %f (%.2f%%)\n", dense_time, percent(dense_time));
+	printf("to_dense_time: %f (%.2f%%)\n", to_dense_time, percent(to_dense_time));
+	printf("sparse_time: %f (%.2f%%)\n", sparse_time, percent(sparse_time));
+	printf("to_sparse_time: %f (%.2f%%)\n", to_sparse_time, percent(to_sparse_time));
+	printf("update_time: %f (%.2f%%)\n", update_time, percent(update_time));
 }
 
 void graph_prepare(
@@ -736,8 +736,8 @@ void graph_prepare(
 		update_time += omp_get_wtime() - last_time;
 	}
 	double end_time = omp_get_wtime();
-	print_time();//test
 	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
+	print_time();//test
 	free(frontier);
 }
 
@@ -921,13 +921,13 @@ void input( int argc, char** argv)
 #endif
 	// BFS
 	SIZE_BUFFER_MAX = 1024;
-	for (unsigned i = 6; i < run_count; ++i) {
+	for (unsigned i = 0; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
 		//sleep(10);
 #endif
 		// Re-initializing
-		for (unsigned k = 0; k < 3; ++k) {
+		for (unsigned k = 0; k < 1; ++k) {
 		memset(h_graph_mask, 0, sizeof(int)*NNODES);
 		//h_graph_mask[source] = 1;
 		memset(h_updating_graph_mask, 0, sizeof(int)*NNODES);
@@ -968,7 +968,7 @@ void input( int argc, char** argv)
 #ifdef ONEDEBUG
 		printf("Thread %u finished.\n", NUM_THREADS);
 #endif
-	}
+		}
 	}
 	//}
 	fclose(time_out);
