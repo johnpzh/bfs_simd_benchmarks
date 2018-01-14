@@ -6,6 +6,8 @@
 #include <string>
 #include <unistd.h>
 #include <immintrin.h>
+#include <hbwmalloc.h>
+
 
 using std::string;
 using std::to_string;
@@ -207,8 +209,12 @@ void BFS_dense(
 		int *is_active_side,
 		int *is_updating_active_side)
 {
-	unsigned *heads_buffer = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS, ALIGNED_BYTES);
-	unsigned *tails_buffer = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS, ALIGNED_BYTES);
+	//unsigned *heads_buffer = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS, ALIGNED_BYTES);
+	//unsigned *tails_buffer = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS, ALIGNED_BYTES);
+	unsigned *heads_buffer;
+	hbw_posix_memalign((void **) &heads_buffer, ALIGNED_BYTES, NEDGES * sizeof(unsigned));
+	unsigned *tails_buffer;
+	hbw_posix_memalign((void **) &tails_buffer, ALIGNED_BYTES, NEDGES * sizeof(unsigned));
 
 	unsigned remainder = SIDE_LENGTH % ROW_STEP;
 	unsigned bound_side_id = SIDE_LENGTH - remainder;
@@ -245,8 +251,10 @@ void BFS_dense(
 				is_updating_active_side,
 				side_id,
 				remainder);
-	_mm_free(heads_buffer);
-	_mm_free(tails_buffer);
+	//_mm_free(heads_buffer);
+	//_mm_free(tails_buffer);
+	hbw_free(heads_buffer);
+	hbw_free(tails_buffer);
 }
 // End Dense (bottom-up)
 ///////////////////////////////////////////////////////////////
@@ -799,9 +807,11 @@ void input( int argc, char** argv)
 		}
 	}
 	unsigned *h_graph_heads = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
-	unsigned *h_graph_tails = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
-	//int *is_empty_tile = (int *) malloc(sizeof(int) * NUM_TILES);
-	//memset(is_empty_tile, 0, sizeof(int) * NUM_TILES);
+	//unsigned *h_graph_tails = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
+	//unsigned *h_graph_heads;
+	//hbw_posix_memalign((void **) &h_graph_heads, ALIGNED_BYTES, NEDGES * sizeof(unsigned));
+	unsigned *h_graph_tails;
+	hbw_posix_memalign((void **) &h_graph_tails, ALIGNED_BYTES, NEDGES * sizeof(unsigned));
 
 	NUM_THREADS = 64;
 	unsigned edge_bound = NEDGES / NUM_THREADS;
@@ -839,8 +849,12 @@ void input( int argc, char** argv)
 
 	// For Sparse
 	prefix = string(input_f) + "_untiled";
-	unsigned *h_graph_edges = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
-	unsigned *h_graph_degrees = (unsigned *) malloc(sizeof(unsigned) * NNODES);
+	//unsigned *h_graph_edges = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
+	//unsigned *h_graph_degrees = (unsigned *) malloc(sizeof(unsigned) * NNODES);
+	unsigned *h_graph_edges;
+	hbw_posix_memalign((void **) &h_graph_edges, ALIGNED_BYTES, NEDGES * sizeof(unsigned));
+	unsigned *h_graph_degrees;
+	hbw_posix_memalign((void **) &h_graph_degrees, ALIGNED_BYTES, NNODES * sizeof(unsigned));
 	memset(h_graph_degrees, 0, sizeof(unsigned) * NNODES);
 
 	// Read degrees
@@ -888,7 +902,9 @@ void input( int argc, char** argv)
 }
 	// CSR
 	//Vertex *graph_vertices_info = (Vertex *) malloc(sizeof(Vertex) * NNODES);
-	unsigned *h_graph_vertices = (unsigned *) malloc(sizeof(unsigned) * NNODES);
+	//unsigned *h_graph_vertices = (unsigned *) malloc(sizeof(unsigned) * NNODES);
+	unsigned *h_graph_vertices;
+	hbw_posix_memalign((void **) &h_graph_vertices, ALIGNED_BYTES, NNODES * sizeof(unsigned));
 	unsigned edge_start = 0;
 	for (unsigned i = 0; i < NNODES; ++i) {
 		h_graph_vertices[i] = edge_start;
@@ -908,7 +924,9 @@ void input( int argc, char** argv)
 	int *h_cost = (int*) malloc(sizeof(int)*NNODES);
 	int *is_active_side = (int *) malloc(sizeof(int) * SIDE_LENGTH);
 	int *is_updating_active_side = (int *) malloc(sizeof(int) * SIDE_LENGTH);
-	unsigned *h_graph_parents = (unsigned *) malloc(sizeof(unsigned) * NNODES);
+	//unsigned *h_graph_parents = (unsigned *) malloc(sizeof(unsigned) * NNODES);
+	unsigned *h_graph_parents;
+	hbw_posix_memalign((void **) &h_graph_parents, ALIGNED_BYTES, NNODES * sizeof(unsigned));
 	unsigned source = 0;
 
 	now = omp_get_wtime();
@@ -1007,19 +1025,26 @@ void input( int argc, char** argv)
 
 	// cleanup memory
 	free( h_graph_heads);
-	free( h_graph_tails);
-	free( h_graph_edges);
-	free( h_graph_degrees);
-	free( h_graph_vertices);
+	//free( h_graph_tails);
+	//free( h_graph_edges);
+	//free( h_graph_degrees);
+	//free( h_graph_vertices);
+	//free( h_graph_parents);
 	free( h_graph_mask);
 	free( h_updating_graph_mask);
-	free( h_graph_parents);
 	free( h_cost);
 	free( tile_offsets);
 	free( tile_sizes);
 	//free( is_empty_tile);
 	free( is_active_side);
 	free( is_updating_active_side);
+
+	//hbw_free( h_graph_heads);
+	hbw_free( h_graph_tails);
+	hbw_free( h_graph_edges);
+	hbw_free( h_graph_degrees);
+	hbw_free( h_graph_vertices);
+	hbw_free( h_graph_parents);
 }
 ///////////////////////////////////////////////////////////////////////////////
 // Main Program
