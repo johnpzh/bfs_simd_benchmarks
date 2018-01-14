@@ -136,37 +136,29 @@ unsigned *BFS_kernel(
 		// no speedup
 		unsigned out_degree = start.out_degree;
 		if (out_degree > 1000) {
-			cilk_for (unsigned k = 0; k < out_degree; ++k) {
-				unsigned end = start.get_out_neighbor(k);
-				if ((unsigned)-1 == parents[end]) {
-					bool unvisited = __sync_bool_compare_and_swap(parents + end, (unsigned) -1, start_id); //update parents
-					if (unvisited) {
-						//new_frontier_tmp[offset + size++] = end;
-						new_frontier_tmp[offset + k] = end;
-					} else {
-						new_frontier_tmp[offset + k] = (unsigned) -1;
-						//new_frontier_tmp[offset + size++] = (unsigned) -1;
-					}
-				} else {
-					new_frontier_tmp[offset + k] = (unsigned) -1;
-				}
+		cilk_for (unsigned i = 0; i < out_degree; ++i) {
+			unsigned end = start.get_out_neighbor(i);
+			bool unvisited = __sync_bool_compare_and_swap(parents + end, (unsigned) -1, start_id); //update parents
+			if (unvisited) {
+				//new_frontier_tmp[offset + size++] = end;
+				new_frontier_tmp[offset + i] = end;
+			} else {
+				new_frontier_tmp[offset + i] = (unsigned) -1;
+				//new_frontier_tmp[offset + size++] = (unsigned) -1;
 			}
+		}
 		} else {
-			for (unsigned k = 0; k < out_degree; ++k) {
-				unsigned end = start.get_out_neighbor(k);
-				if ((unsigned)-1 == parents[end]) {
-					bool unvisited = __sync_bool_compare_and_swap(parents + end, (unsigned) -1, start_id); //update parents
-					if (unvisited) {
-						//new_frontier_tmp[offset + size++] = end;
-						new_frontier_tmp[offset + k] = end;
-					} else {
-						new_frontier_tmp[offset + k] = (unsigned) -1;
-						//new_frontier_tmp[offset + size++] = (unsigned) -1;
-					}
-				} else {
-					new_frontier_tmp[offset + k] = (unsigned) -1;
-				}
+		for (unsigned i = 0; i < out_degree; ++i) {
+			unsigned end = start.get_out_neighbor(i);
+			bool unvisited = __sync_bool_compare_and_swap(parents + end, (unsigned) -1, start_id); //update parents
+			if (unvisited) {
+				//new_frontier_tmp[offset + size++] = end;
+				new_frontier_tmp[offset + i] = end;
+			} else {
+				new_frontier_tmp[offset + i] = (unsigned) -1;
+				//new_frontier_tmp[offset + size++] = (unsigned) -1;
 			}
+		}
 		}
 		// end no speedup
 		//unsigned *bound_edge_i = start.out_neighbors + start.out_degree;
