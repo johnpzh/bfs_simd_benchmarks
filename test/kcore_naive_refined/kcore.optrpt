@@ -1,0 +1,182 @@
+Intel(R) Advisor can now assist with vectorization and show optimization
+  report messages with your source code.
+See "https://software.intel.com/en-us/intel-advisor-xe" for details.
+
+Intel(R) C++ Intel(R) 64 Compiler for applications running on Intel(R) 64, Version 17.0.1.132 Build 20161005
+
+Compiler options: -Wall -Wextra -g -std=c++11 -qopenmp -O3 -qopt-report=5 -qopt-report-phase=vec -o kcore
+
+Begin optimization report for: main(int, char **)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at kcore.cpp(332,2)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at kcore.cpp(335,3)
+   <Peeled loop for vectorization>
+   LOOP END
+
+   LOOP BEGIN at kcore.cpp(335,3)
+      remark #15388: vectorization support: reference graph_remain_mask[k] has aligned access   [ kcore.cpp(336,4) ]
+      remark #15388: vectorization support: reference graph_cores[k] has aligned access   [ kcore.cpp(337,4) ]
+      remark #15305: vectorization support: vector length 4
+      remark #15309: vectorization support: normalized vectorization overhead 2.333
+      remark #15300: LOOP WAS VECTORIZED
+      remark #15442: entire loop may be executed in remainder
+      remark #15449: unmasked aligned unit stride stores: 2 
+      remark #15475: --- begin vector cost summary ---
+      remark #15476: scalar cost: 5 
+      remark #15477: vector cost: 1.500 
+      remark #15478: estimated potential speedup: 3.130 
+      remark #15488: --- end vector cost summary ---
+   LOOP END
+
+   LOOP BEGIN at kcore.cpp(335,3)
+   <Alternate Alignment Vectorized Loop>
+   LOOP END
+
+   LOOP BEGIN at kcore.cpp(335,3)
+   <Remainder loop for vectorization>
+   LOOP END
+
+   LOOP BEGIN at kcore.cpp(239,2) inlined into kcore.cpp(342,3)
+      remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+
+      LOOP BEGIN at kcore.cpp(203,1) inlined into kcore.cpp(342,3)
+         remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at kcore.cpp(254,6) inlined into kcore.cpp(342,3)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+
+   LOOP BEGIN at kcore.cpp(244,1) inlined into kcore.cpp(342,3)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed FLOW dependence between graph_degrees (253:6) and K_CORE (254:6)
+      remark #15346: vector dependence: assumed ANTI dependence between K_CORE (254:6) and graph_degrees (253:6)
+   LOOP END
+
+   LOOP BEGIN at kcore.cpp(244,1) inlined into kcore.cpp(342,3)
+   <Remainder>
+   LOOP END
+LOOP END
+
+
+Non-optimizable loops:
+
+
+LOOP BEGIN at kcore.cpp(204,2) inlined into kcore.cpp(342,3)
+   remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ kcore.cpp(213,33) ]
+
+   LOOP BEGIN at kcore.cpp(204,2) inlined into kcore.cpp(342,3)
+      remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ kcore.cpp(213,33) ]
+
+      LOOP BEGIN at kcore.cpp(209,3) inlined into kcore.cpp(342,3)
+         remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ kcore.cpp(213,33) ]
+
+         LOOP BEGIN at kcore.cpp(215,5) inlined into kcore.cpp(342,3)
+            remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ kcore.cpp(216,6) ]
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+===========================================================================
+
+Begin optimization report for: input(char *, unsigned int *&, unsigned int *&, unsigned int *&, unsigned int *&, unsigned int *&)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at kcore.cpp(67,2)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at kcore.cpp(108,2)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at kcore.cpp(93,2)
+   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ kcore.cpp(96,3) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (96:3) and n2 (98:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (98:3) and n2 (96:3)
+LOOP END
+===========================================================================
+
+Begin optimization report for: input_serial(char *, unsigned int *&, unsigned int *&, unsigned int *&, unsigned int *&)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at kcore.cpp(136,2)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at kcore.cpp(152,2)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+===========================================================================
+
+Begin optimization report for: print(unsigned int *)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at kcore.cpp(161,2)
+   remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ kcore.cpp(162,3) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed ANTI dependence between kc (163:3) and kc (163:3)
+   remark #15346: vector dependence: assumed FLOW dependence between kc (163:3) and kc (163:3)
+LOOP END
+===========================================================================
+
+Begin optimization report for: kcore(unsigned int *, unsigned int *, unsigned int *, unsigned int *, unsigned int *, unsigned int *, int *, int *, unsigned int *)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at kcore.cpp(239,2)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+
+   LOOP BEGIN at kcore.cpp(203,1) inlined into kcore.cpp(261,4)
+      remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+   LOOP END
+LOOP END
+
+LOOP BEGIN at kcore.cpp(244,1)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+
+   LOOP BEGIN at kcore.cpp(244,1)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed OUTPUT dependence between graph_updating_active[i] (251:6) and graph_cores[i] (254:6)
+      remark #15346: vector dependence: assumed OUTPUT dependence between graph_cores[i] (254:6) and graph_updating_active[i] (251:6)
+   LOOP END
+
+   LOOP BEGIN at kcore.cpp(244,1)
+   <Remainder>
+   LOOP END
+LOOP END
+
+
+Non-optimizable loops:
+
+
+LOOP BEGIN at kcore.cpp(204,2) inlined into kcore.cpp(261,4)
+   remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ kcore.cpp(213,33) ]
+
+   LOOP BEGIN at kcore.cpp(204,2) inlined into kcore.cpp(261,4)
+      remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ kcore.cpp(213,33) ]
+
+      LOOP BEGIN at kcore.cpp(209,3) inlined into kcore.cpp(261,4)
+         remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ kcore.cpp(213,33) ]
+
+         LOOP BEGIN at kcore.cpp(215,5) inlined into kcore.cpp(261,4)
+            remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ kcore.cpp(216,6) ]
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+===========================================================================
