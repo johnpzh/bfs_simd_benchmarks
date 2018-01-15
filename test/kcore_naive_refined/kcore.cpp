@@ -32,11 +32,11 @@ char *time_file = "timeline.txt";
 //void input(char filename[], unsigned *&graph_heads, unsigned *&graph_tails, unsigned *&nneibor) 
 void input(
 		char filename[], 
-		unsigned *graph_heads, 
-		unsigned *graph_tails, 
-		unsigned *graph_vertices,
-		unsigned *graph_edges,
-		unsigned *graph_degrees)
+		unsigned *&graph_heads, 
+		unsigned *&graph_tails, 
+		unsigned *&graph_vertices,
+		unsigned *&graph_edges,
+		unsigned *&graph_degrees)
 		//unsigned *&graph_adj_indices)
 		//(vector<vector<unsigned>> &graph_neighbors) 
 {
@@ -50,6 +50,12 @@ void input(
 	}
 	fscanf(fin, "%u %u", &NNODES, &NEDGES);
 	fclose(fin);
+
+	graph_heads = (unsigned *) malloc(NEDGES * sizeof(unsigned));
+	graph_tails = (unsigned *) malloc(NEDGES * sizeof(unsigned));
+	graph_vertices = (unsigned *) malloc(NNODES * sizeof(unsigned));
+	graph_edges = (unsigned *) malloc(NEDGES * sizeof(unsigned));
+	graph_degrees = (unsigned *) malloc(NNODES * sizeof(unsigned));
 
 	// Read degrees
 	fname = prefix + "-nneibor";
@@ -76,7 +82,7 @@ void input(
 		exit(1);
 	}
 	if (0 == tid) {
-		fscanf(fin, "%u %u\n", &NNODES, &NEDGES);
+		fscanf(fin, "%u %u", &NNODES, &NEDGES);
 	}
 	unsigned bound_index;
 	if (NUM_THREADS - 1 != tid) {
@@ -193,6 +199,7 @@ void kcore_kernel(
 		int *graph_updating_active,
 		unsigned *graph_cores)
 {
+//#pragma omp parallel for schedule(dynamic)
 	for (unsigned h_id = 0; h_id < NNODES; ++h_id) {
 		if (!graph_updating_active[h_id]) {
 			continue;
@@ -207,6 +214,7 @@ void kcore_kernel(
 		graph_updating_active[h_id] = 0;
 	}
 }
+unsigned test_count = 0;
 void kcore(
 		unsigned *graph_heads, 
 		unsigned *graph_tails, 
@@ -224,9 +232,10 @@ void kcore(
 	while (!stop) {
 		stop = 1;
 		K_CORE++;
+		printf("K_Core: %u\n", K_CORE);//test
 		while (true) {
 			bool has_remove = false;
-//#pragma omp parallel for
+//#pragma omp parallel for schedule(dynamic)
 			for (unsigned i = 0; i < NNODES; ++i) {
 				if (!graph_remain_mask[i]) {
 					continue;
@@ -238,6 +247,7 @@ void kcore(
 					graph_degrees[i] = 0;
 					graph_cores[i] = K_CORE - 1;
 					has_remove = true;
+					test_count++;
 				}
 			}
 			if (!has_remove) {
@@ -251,29 +261,8 @@ void kcore(
 					graph_degrees,
 					graph_updating_active,
 					graph_cores);
-////#pragma omp parallel for
-//			for (unsigned vertex_i = 0; vertex_i < NNODES; ++vertex_i) {
-//				if (!graph_updating_active[vertex_i]) {
-//					continue;
-//				}
-//				unsigned bound_edge_i;
-//				if (NNODES - 1 != vertex_i) {
-//					bound_edge_i = graph_adj_indices[vertex_i + 1];
-//				} else {
-//					bound_edge_i = NEDGES;
-//				}
-//				kcore_kernel(
-//						graph_heads, 
-//						graph_tails, 
-//						graph_degrees,
-//						graph_adj_indices,
-//						graph_updating_active, 
-//						graph_adj_indices[vertex_i], 
-//						bound_edge_i,
-//						graph_cores);
-//			}
-//			memset(graph_updating_active, 0, NNODES * sizeof(int));
 		}
+		printf("test_count: %u\n", test_count);
 	}
 	K_CORE -= 2;
 
@@ -293,11 +282,11 @@ int main(int argc, char *argv[])
 		filename = "/home/zpeng/benchmarks/data/skitter/out.skitter";
 	}
 	// Input
-	unsigned *graph_heads = (unsigned *) malloc(NEDGES * sizeof(unsigned));
-	unsigned *graph_tails = (unsigned *) malloc(NEDGES * sizeof(unsigned));
-	unsigned *graph_vertices = (unsigned *) malloc(NNODES * sizeof(unsigned));
-	unsigned *graph_edges = (unsigned *) malloc(NEDGES * sizeof(unsigned));
-	unsigned *graph_degrees = (unsigned *) malloc(NNODES * sizeof(unsigned));
+	unsigned *graph_heads;
+	unsigned *graph_tails;
+	unsigned *graph_vertices;
+	unsigned *graph_edges;
+	unsigned *graph_degrees;
 #ifdef ONESERIAL
 	//input_serial("/home/zpeng/benchmarks/data/fake/data.txt", graph_heads, graph_tails, graph_degrees);
 	//input_serial("/home/zpeng/benchmarks/data/fake/mun_twitter", graph_heads, graph_tails,graph_degrees);
