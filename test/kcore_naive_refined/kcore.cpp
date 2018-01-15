@@ -196,6 +196,7 @@ void kcore_kernel(
 		unsigned *graph_vertices,
 		unsigned *graph_edges,
 		unsigned *graph_degrees,
+		unsigned *graph_degrees_bak,
 		int *graph_updating_active,
 		unsigned *graph_cores)
 {
@@ -204,7 +205,7 @@ void kcore_kernel(
 		if (!graph_updating_active[h_id]) {
 			continue;
 		}
-		unsigned bound_edge_i = graph_degrees[h_id];
+		unsigned bound_edge_i = graph_vertices[h_id] + graph_degrees_bak[h_id];
 		for (unsigned edge_i = graph_vertices[h_id]; edge_i < bound_edge_i; ++edge_i) {
 			unsigned tail_id = graph_edges[edge_i];
 			if (graph_degrees[tail_id] > 0) {
@@ -214,13 +215,13 @@ void kcore_kernel(
 		graph_updating_active[h_id] = 0;
 	}
 }
-unsigned test_count = 0;
 void kcore(
 		unsigned *graph_heads, 
 		unsigned *graph_tails, 
 		unsigned *graph_vertices,
 		unsigned *graph_edges,
 		unsigned *graph_degrees,
+		unsigned *graph_degrees_bak,
 		//unsigned *graph_adj_indices,
 		int *graph_remain_mask,
 		int *graph_updating_active,
@@ -232,7 +233,6 @@ void kcore(
 	while (!stop) {
 		stop = 1;
 		K_CORE++;
-		printf("K_Core: %u\n", K_CORE);//test
 		while (true) {
 			bool has_remove = false;
 //#pragma omp parallel for schedule(dynamic)
@@ -247,7 +247,6 @@ void kcore(
 					graph_degrees[i] = 0;
 					graph_cores[i] = K_CORE - 1;
 					has_remove = true;
-					test_count++;
 				}
 			}
 			if (!has_remove) {
@@ -259,10 +258,11 @@ void kcore(
 					graph_vertices,
 					graph_edges,
 					graph_degrees,
+					graph_degrees_bak,
 					graph_updating_active,
 					graph_cores);
+			//printf("kernel\n");//test
 		}
-		printf("test_count: %u\n", test_count);
 	}
 	K_CORE -= 2;
 
@@ -279,7 +279,9 @@ int main(int argc, char *argv[])
 		filename = argv[1];
 	} else {
 		//filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec";
-		filename = "/home/zpeng/benchmarks/data/skitter/out.skitter";
+		//filename = "/home/zpeng/benchmarks/data/skitter/out.skitter";
+		filename = "/sciclone/scr-mlt/zpeng01/skitter/out.skitter";
+
 	}
 	// Input
 	unsigned *graph_heads;
@@ -338,6 +340,7 @@ int main(int argc, char *argv[])
 			graph_vertices,
 			graph_edges,
 			graph_degrees,
+			graph_degrees_bak,
 			graph_remain_mask,
 			graph_updating_active,
 			graph_cores);
