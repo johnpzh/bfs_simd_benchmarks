@@ -190,7 +190,7 @@ void print(unsigned *graph_cores) {
 //		}
 //	}
 //}
-void kcore_kernel(
+inline void kcore_kernel(
 		unsigned *graph_heads,
 		unsigned *graph_tails,
 		unsigned *graph_vertices,
@@ -200,7 +200,7 @@ void kcore_kernel(
 		int *graph_updating_active,
 		unsigned *graph_cores)
 {
-//#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(dynamic, 128)
 	for (unsigned h_id = 0; h_id < NNODES; ++h_id) {
 		if (!graph_updating_active[h_id]) {
 			continue;
@@ -209,7 +209,13 @@ void kcore_kernel(
 		for (unsigned edge_i = graph_vertices[h_id]; edge_i < bound_edge_i; ++edge_i) {
 			unsigned tail_id = graph_edges[edge_i];
 			if (graph_degrees[tail_id] > 0) {
-				--graph_degrees[tail_id];
+				//--graph_degrees[tail_id];
+				volatile unsigned old_val = graph_degrees[tail_id];
+				volatile unsigned new_val = old_val - 1;
+				while (!__sync_bool_compare_and_swap(graph_degrees + tail_id, old_val, new_val)) {
+					old_val = graph_degrees[tail_id];
+					new_val = old_val - 1;
+				}
 			}
 		}
 		graph_updating_active[h_id] = 0;
@@ -235,7 +241,7 @@ void kcore(
 		K_CORE++;
 		while (true) {
 			bool has_remove = false;
-//#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(dynamic, 128)
 			for (unsigned i = 0; i < NNODES; ++i) {
 				if (!graph_remain_mask[i]) {
 					continue;
@@ -261,8 +267,8 @@ void kcore(
 					graph_degrees_bak,
 					graph_updating_active,
 					graph_cores);
-			//printf("kernel\n");//test
 		}
+		printf("K_CORE: %u\n", K_CORE);//test
 	}
 	K_CORE -= 2;
 
@@ -319,12 +325,12 @@ int main(int argc, char *argv[])
 	time_out = fopen(time_file, "w");
 	fprintf(time_out, "input end: %lf\n", now - start);
 #ifdef ONEDEBUG
-	unsigned run_count = 1;
+	unsigned run_count = 9;
 	printf("Start K-core...\n");
 #else
-	unsigned run_count = 1;
+	unsigned run_count = 9;
 #endif
-	for (unsigned i = 0; i < run_count; ++i) {
+	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 		memset(graph_updating_active, 0, NNODES * sizeof(int));
 		for (unsigned k = 0; k < NNODES; ++k) {
