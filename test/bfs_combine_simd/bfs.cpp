@@ -547,6 +547,7 @@ void print_time()
 	printf("==========================\n");
 }
 
+unsigned T_RATIO;
 void graph_prepare(
 		unsigned *h_graph_vertices,
 		unsigned *h_graph_edges,
@@ -601,7 +602,8 @@ void graph_prepare(
 	update_time += omp_get_wtime() - last_time;
 	bool last_is_dense = false;
 	// According the sum, determine to run Sparse or Dense, and then change the last_is_dense.
-	unsigned bfs_threshold = NEDGES / 20; // Determined according to Ligra
+	//unsigned bfs_threshold = NEDGES / 20 / T_RATIO; // Determined according to Ligra
+	unsigned bfs_threshold = NEDGES / T_RATIO; // Determined according to Ligra
 	while (frontier_size != 0) {
 		if (frontier_size + out_degree > bfs_threshold) {
 			if (!last_is_dense) {
@@ -738,7 +740,7 @@ void graph_prepare(
 	}
 	double end_time = omp_get_wtime();
 	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
-	print_time();//test
+	//print_time();//test
 	free(frontier);
 }
 
@@ -921,14 +923,18 @@ void input( int argc, char** argv)
 	unsigned run_count = 9;
 #endif
 	// BFS
-	SIZE_BUFFER_MAX = 1024;
+	//SIZE_BUFFER_MAX = 1024;
+	SIZE_BUFFER_MAX = 512;
 	for (unsigned i = 0; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
 		//sleep(10);
 #endif
+		//for (T_RATIO = 100; T_RATIO < 200; T_RATIO *= 2) {}
+		//printf("T_RATIO: %u\n", T_RATIO);//test
+		T_RATIO = 100;
 		// Re-initializing
-		for (unsigned k = 0; k < 1; ++k) {
+		for (unsigned k = 0; k < 3; ++k) {
 		memset(h_graph_mask, 0, sizeof(int)*NNODES);
 		//h_graph_mask[source] = 1;
 		memset(h_updating_graph_mask, 0, sizeof(int)*NNODES);
@@ -970,6 +976,7 @@ void input( int argc, char** argv)
 		printf("Thread %u finished.\n", NUM_THREADS);
 #endif
 		}
+		//}
 	}
 	//}
 	fclose(time_out);
