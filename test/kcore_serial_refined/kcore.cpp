@@ -25,6 +25,7 @@ unsigned TILE_WIDTH; // Width of tile
 unsigned SIDE_LENGTH; // Number of rows of tiles
 unsigned NUM_TILES; // Number of tiles
 unsigned ROW_STEP; // Number of rows of tiles in a Group
+unsigned CHUNK_SIZE;
 
 unsigned K_CORE;
 
@@ -191,7 +192,7 @@ inline void scheduler(
 					const unsigned &start_row_index,
 					const unsigned &bound_row_index)
 {
-#pragma omp parallel for schedule(dynamic, 1)
+#pragma omp parallel for schedule(dynamic, CHUNK_SIZE)
 	for (unsigned col_id = 0; col_id < SIDE_LENGTH; ++col_id) {
 		for (unsigned row_id = start_row_index; row_id < bound_row_index; ++row_id) {
 			if (!is_updating_active_side[row_id]) {
@@ -311,7 +312,8 @@ int main(int argc, char *argv[])
 		TILE_WIDTH = strtoul(argv[2], NULL, 0);
 	} else {
 		//filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec";
-		filename = "/home/zpeng/benchmarks/data/skitter/out.skitter";
+		//filename = "/home/zpeng/benchmarks/data/skitter/out.skitter";
+		filename = "/sciclone/scr-mlt/zpeng01/skitter/out.skitter";
 		TILE_WIDTH = 1024;
 	}
 	// Input
@@ -349,6 +351,7 @@ int main(int argc, char *argv[])
 	//for (unsigned s = 1; s < 2048; s *= 2) {
 	//ROW_STEP = s;
 	//printf("ROW_STEP: %u\n", ROW_STEP);
+	for (CHUNK_SIZE = 4; CHUNK_SIZE < 128; CHUNK_SIZE *=2) {
 	ROW_STEP = 16;
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
@@ -374,6 +377,7 @@ int main(int argc, char *argv[])
 			graph_cores);
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
+	}
 	}
 	//}
 	fclose(time_out);
