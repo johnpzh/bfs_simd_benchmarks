@@ -36,6 +36,7 @@ unsigned NUM_TILES;
 unsigned ROW_STEP;
 unsigned CHUNK_SIZE;
 unsigned SIZE_BUFFER_MAX;
+unsigned T_RATIO;
 
 double start;
 double now;
@@ -609,7 +610,8 @@ void graph_prepare(
 	update_time += omp_get_wtime() - last_time;
 	bool last_is_dense = false;
 	// According the sum, determine to run Sparse or Dense, and then change the last_is_dense.
-	unsigned bfs_threshold = NEDGES / 20; // Determined according to Ligra
+	//unsigned bfs_threshold = NEDGES / 20; // Determined according to Ligra
+	unsigned bfs_threshold = NEDGES / T_RATIO; // Determined according to Ligra
 	while (frontier_size != 0) {
 		if (frontier_size + out_degree > bfs_threshold) {
 			if (!last_is_dense) {
@@ -939,14 +941,16 @@ void input( int argc, char** argv)
 	unsigned run_count = 9;
 #endif
 	// BFS
-	SIZE_BUFFER_MAX = 1024;
+	//SIZE_BUFFER_MAX = 1024;
+	SIZE_BUFFER_MAX = 512;
+	T_RATIO = 100;
 	for (unsigned i = 0; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
 		//sleep(10);
 #endif
 		// Re-initializing
-		for (unsigned k = 0; k < 1; ++k) {
+		for (unsigned k = 0; k < 3; ++k) {
 		memset(h_graph_mask, 0, sizeof(int)*NNODES);
 		//h_graph_mask[source] = 1;
 		memset(h_updating_graph_mask, 0, sizeof(int)*NNODES);

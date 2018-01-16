@@ -29,6 +29,7 @@ unsigned SIDE_LENGTH;
 unsigned NUM_TILES;
 unsigned ROW_STEP;
 unsigned CHUNK_SIZE;
+unsigned T_RATIO;
 
 double start;
 double now;
@@ -588,7 +589,8 @@ void graph_prepare(
 	}
 	bool last_is_dense = false;
 	// According the sum, determine to run Sparse or Dense, and then change the last_is_dense.
-	unsigned bfs_threshold = NEDGES / 20; // Determined according to Ligra
+	//unsigned bfs_threshold = NEDGES / 20; // Determined according to Ligra
+	unsigned bfs_threshold = NEDGES / T_RATIO; // Determined according to Ligra
 	while (frontier_size != 0) {
 		if (frontier_size + out_degree > bfs_threshold) {
 			if (!last_is_dense) {
@@ -858,6 +860,7 @@ void input( int argc, char** argv)
 	unsigned run_count = 9;
 #endif
 	// BFS
+	T_RATIO = 100;
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
