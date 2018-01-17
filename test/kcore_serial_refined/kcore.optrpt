@@ -2,7 +2,7 @@ Intel(R) Advisor can now assist with vectorization and show optimization
   report messages with your source code.
 See "https://software.intel.com/en-us/intel-advisor-xe" for details.
 
-Intel(R) C++ Intel(R) 64 Compiler for applications running on Intel(R) 64, Version 17.0.0.098 Build 20160721
+Intel(R) C++ Intel(R) 64 Compiler for applications running on Intel(R) 64, Version 17.0.1.132 Build 20161005
 
 Compiler options: -Wall -Wextra -g -std=c++11 -qopenmp -O3 -qopt-report=5 -qopt-report-phase=vec -o kcore
 
@@ -14,16 +14,16 @@ Begin optimization report for: main(int, char **)
 LOOP BEGIN at kcore.cpp(354,2)
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at kcore.cpp(356,2)
+   LOOP BEGIN at kcore.cpp(357,2)
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at kcore.cpp(360,3)
+      LOOP BEGIN at kcore.cpp(361,3)
       <Peeled loop for vectorization>
       LOOP END
 
-      LOOP BEGIN at kcore.cpp(360,3)
-         remark #15388: vectorization support: reference graph_remain_mask[k] has aligned access   [ kcore.cpp(361,4) ]
-         remark #15388: vectorization support: reference graph_cores[k] has aligned access   [ kcore.cpp(362,4) ]
+      LOOP BEGIN at kcore.cpp(361,3)
+         remark #15388: vectorization support: reference graph_remain_mask[k] has aligned access   [ kcore.cpp(362,4) ]
+         remark #15388: vectorization support: reference graph_cores[k] has aligned access   [ kcore.cpp(363,4) ]
          remark #15305: vectorization support: vector length 4
          remark #15309: vectorization support: normalized vectorization overhead 2.333
          remark #15300: LOOP WAS VECTORIZED
@@ -36,11 +36,11 @@ LOOP BEGIN at kcore.cpp(354,2)
          remark #15488: --- end vector cost summary ---
       LOOP END
 
-      LOOP BEGIN at kcore.cpp(360,3)
+      LOOP BEGIN at kcore.cpp(361,3)
       <Alternate Alignment Vectorized Loop>
       LOOP END
 
-      LOOP BEGIN at kcore.cpp(360,3)
+      LOOP BEGIN at kcore.cpp(361,3)
       <Remainder loop for vectorization>
       LOOP END
    LOOP END

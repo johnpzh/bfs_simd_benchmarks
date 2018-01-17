@@ -312,8 +312,8 @@ int main(int argc, char *argv[])
 		TILE_WIDTH = strtoul(argv[2], NULL, 0);
 	} else {
 		//filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec";
-		//filename = "/home/zpeng/benchmarks/data/skitter/out.skitter";
-		filename = "/sciclone/scr-mlt/zpeng01/skitter/out.skitter";
+		filename = "/home/zpeng/benchmarks/data/skitter/out.skitter";
+		//filename = "/sciclone/scr-mlt/zpeng01/skitter/out.skitter";
 		TILE_WIDTH = 1024;
 	}
 	// Input
@@ -352,6 +352,7 @@ int main(int argc, char *argv[])
 	//ROW_STEP = s;
 	//printf("ROW_STEP: %u\n", ROW_STEP);
 	for (CHUNK_SIZE = 4; CHUNK_SIZE < 128; CHUNK_SIZE *=2) {
+	printf("CHUNK_SIZE: %u\n", CHUNK_SIZE);
 	ROW_STEP = 16;
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
