@@ -110,7 +110,10 @@ void input(
 		graph_heads[index] = n1;
 		graph_tails[index] = n2;
 		graph_edges[index] = n2;
+#pragma omp critical
+		{
 		graph_heads_reverse_bucket[n2].push_back(n1);
+		}
 	}
 
 	fclose(fin);
@@ -190,25 +193,42 @@ void input(
 //	double end_time = omp_get_wtime();
 //	printf("%d %lf\n", NUM_THREADS, (end_time - start_time));
 //}
-int *BFS_kernel(
+
+inline unsigned update_visited(
+		int *h_graph_mask,
+		int *h_graph_visited)
+{
+	unsigned count = 0;
+#pragma omp parallel for reduction(+: count)
+	for (unsigned i = 0; i < NNODES; ++i) {
+		if (h_graph_mask[i]) {
+			h_graph_visited[i] = 1;
+			++count;
+		}
+	}
+	return count;
+}
+
+inline int *BFS_kernel(
 		unsigned *graph_vertices,
 		unsigned *graph_edges,
 		unsigned *graph_degrees,
 		int *h_graph_mask,
 		int *h_graph_visited,
-		unsigned &frontier_size,
-		float num_paths)
+		const unsigned &frontier_size,
+		unsigned *num_paths)
 {
 	int *new_frontier = (int *) calloc(NNODES, sizeof(int));
-	unsigned new_frontier_size = 0;
+	//unsigned new_frontier_size = 0;
 
-#pragma omp parallel for schedule(dynamic, 512) reduction(+: new_frontier_size)
+//#pragma omp parallel for schedule(dynamic, 512) reduction(+: new_frontier_size)
+#pragma omp parallel for schedule(dynamic, 512)
 	for(unsigned int head_id = 0; head_id < NNODES; head_id++ )
 	{
 		if (!h_graph_mask[head_id]) {
 			continue;
 		}
-		float num_paths_head = num_paths[head_id];
+		//unsigned num_paths_head = num_paths[head_id];
 		unsigned bound_edge_i = graph_vertices[head_id] + graph_degrees[head_id];
 		for (unsigned edge_i = graph_vertices[head_id]; edge_i < bound_edge_i; ++edge_i) {
 			unsigned tail_id = graph_edges[edge_i];
@@ -216,22 +236,25 @@ int *BFS_kernel(
 				continue;
 			}
 			// Change in new_frontier
-			bool is_changed = __sync_bool_compare_and_swap(h_graph_visited + tail_id, 0, 1);
-			if (is_changed) {
+			if (!new_frontier[tail_id]) {
 				new_frontier[tail_id] = 1;
-				new_frontier_size++;
 			}
+			//bool is_changed = __sync_bool_compare_and_swap(h_graph_visited + tail_id, 0, 1);
+			//if (is_changed) {
+			//	new_frontier[tail_id] = 1;
+			//	new_frontier_size++;
+			//}
 			// Update num_paths
-			volatile float old_val = num_paths[tail_id];
-			volatile float new_val = old_val + num_paths_head;
+			volatile unsigned old_val = num_paths[tail_id];
+			volatile unsigned new_val = old_val + num_paths[head_id];
 			while (!__sync_bool_compare_and_swap(num_paths + tail_id, old_val, new_val)) {
 				old_val = num_paths[tail_id];
-				new_val = old_val + num_paths_head;
+				new_val = old_val + num_paths[head_id];
 			}
 		}
 	}
 
-	frontier_size = new_frontier_size;
+	//frontier_size = new_frontier_size;
 	return new_frontier;
 }
 
@@ -247,16 +270,17 @@ void BC(
 		const unsigned &source)
 {
 	omp_set_num_threads(NUM_THREADS);
-	float *num_paths = (float *) calloc(NNODES, sizeof(float));
+	unsigned *num_paths = (unsigned *) calloc(NNODES, sizeof(unsigned));
 	int *h_graph_visited = (int *) calloc(NNODES, sizeof(int));
 	int *h_graph_mask = (int *) calloc(NNODES, sizeof(int));
 	vector<int *> frontiers;
 	vector<unsigned> frontiers_sizes;
-	unsigned frontier_size = 0;
+	unsigned frontier_size;
 
-	num_paths[source] = 1.0;
+	num_paths[source] = 1;
 	h_graph_visited[source] = 1;
 	h_graph_mask[source] = 1;
+	frontier_size = 1;
 
 	frontiers.push_back(h_graph_mask);
 	frontiers_sizes.push_back(frontier_size);
@@ -274,20 +298,32 @@ void BC(
 								num_paths);
 		h_graph_mask = new_frontier;
 		frontiers.push_back(h_graph_mask);
+		frontier_size = update_visited(h_graph_mask, h_graph_visited);
 		frontiers_sizes.push_back(frontier_size);
+		printf("frontier_size: %u\n", frontier_size);
 	}
-	unsigned level_count = frontiers.size() - 1;
-	free(frontiers[level_count]);
-
+	//Test
+	for (unsigned i = 0; i < NNODES; ++i) {
+		printf("num_paths[%u]: %u\n", i, num_paths[i]);
+	}
+	//End Test
+	int level_count = frontiers.size() - 1;
 	float *dependencies = (float *) calloc(NNODES, sizeof(float));
-	memset(h_graph_visited, 0, NNODES * sizeof(int));
-
-	for (unsigned lc = level_count - 1; lc >= 0; --lc) {
-		h_graph_mask = frontiers[lc];
-		BFS_kernel_reverse();
-		free(h_graph_mask);
+#pragma omp parallel for num_threads(64)
+	for (unsigned i = 0; i < NNODES; ++i) {
+		h_graph_visited[i] = 0;
 	}
 
+	for (int lc = level_count - 1; lc >= 0; --lc) {
+		h_graph_mask = frontiers[lc];
+		//undate_visited();
+		//BFS_kernel_reverse();
+	}
+
+	// Free memory
+	for (auto f = frontiers.begin(); f != frontiers.end(); ++f) {
+		free(*f);
+	}
 	free(num_paths);
 	free(h_graph_visited);
 	free(dependencies);
@@ -312,6 +348,7 @@ int main(int argc, char *argv[])
 
 	unsigned *graph_vertices_reverse;
 	unsigned *graph_edges_reverse;
+	unsigned *graph_degrees_reverse;
 
 	input(
 		filename, 
