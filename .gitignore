@@ -14,6 +14,13 @@ graph16M_d16.txt
 graph16M_d32.txt
 graph16M_d64.txt
 
+# Ignore vectorization report files
+*.optrpt
+
+# Ignore vim swp files
+*.cpp.swp
+*.cpp.swo
+
 # Ignore those useless result files
 path/
 0path/
