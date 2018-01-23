@@ -209,13 +209,24 @@ inline unsigned update_visited(
 	return count;
 }
 
+inline void update_visited_reverse(
+		int *h_graph_mask,
+		int *h_graph_visited)
+{
+#pragma omp parallel for 
+	for (unsigned i = 0; i < NNODES; ++i) {
+		if (h_graph_mask[i]) {
+			h_graph_visited[i] = 1;
+		}
+	}
+}
+
 inline int *BFS_kernel(
 		unsigned *graph_vertices,
 		unsigned *graph_edges,
 		unsigned *graph_degrees,
 		int *h_graph_mask,
 		int *h_graph_visited,
-		const unsigned &frontier_size,
 		unsigned *num_paths)
 {
 	int *new_frontier = (int *) calloc(NNODES, sizeof(int));
@@ -258,6 +269,48 @@ inline int *BFS_kernel(
 	return new_frontier;
 }
 
+void BFS_kernel_reverse(
+			unsigned *graph_vertices_reverse,
+			unsigned *graph_edges_reverse,
+			unsigned *graph_degrees_reverse,
+			int *h_graph_mask,
+			int *h_graph_visited,
+			unsigned *num_paths,
+			float *dependencies)
+
+{
+#pragma omp parallel for schedule(dynamic, 512)
+	for(unsigned int head_id = 0; head_id < NNODES; head_id++ )
+	{
+		if (!h_graph_mask[head_id]) {
+			continue;
+		}
+		unsigned bound_edge_i = graph_vertices_reverse[head_id] + graph_degrees_reverse[head_id];
+		for (unsigned edge_i = graph_vertices_reverse[head_id]; edge_i < bound_edge_i; ++edge_i) {
+			unsigned tail_id = graph_edges_reverse[edge_i];
+			if (h_graph_visited[tail_id]) {
+				continue;
+			}
+			//volatile unsigned old_val = num_paths[tail_id];
+			//volatile unsigned new_val = old_val + num_paths[head_id];
+			//while (!__sync_bool_compare_and_swap(num_paths + tail_id, old_val, new_val)) {
+			//	old_val = num_paths[tail_id];
+			//	new_val = old_val + num_paths[head_id];
+			//}
+			volatile float old_val = dependencies[tail_id];
+			volatile float new_val = old_val + num_paths[tail_id] / num_paths[head_id] * (1.0 + dependencies[head_id]);
+			while (!__sync_bool_compare_and_swap(
+											(int *) (dependencies + tail_id), 
+											*((int *) &old_val), 
+											*((int *) &new_val))) {
+				old_val = dependencies[tail_id];
+				new_val = old_val + num_paths[tail_id] / num_paths[head_id] * (1.0 + dependencies[head_id]);
+			}
+		}
+	}
+}
+
+
 void BC(
 		unsigned *graph_heads, 
 		unsigned *graph_tails, 
@@ -294,7 +347,6 @@ void BC(
 								graph_degrees,
 								h_graph_mask,
 								h_graph_visited,
-								frontier_size,
 								num_paths);
 		h_graph_mask = new_frontier;
 		frontiers.push_back(h_graph_mask);
@@ -317,7 +369,16 @@ void BC(
 	for (int lc = level_count - 1; lc >= 0; --lc) {
 		h_graph_mask = frontiers[lc];
 		//undate_visited();
+		update_visited_reverse(h_graph_mask, h_graph_visited);
 		//BFS_kernel_reverse();
+		BFS_kernel_reverse(
+					graph_vertices_reverse,
+					graph_edges_reverse,
+					graph_degrees_reverse,
+					h_graph_mask,
+					h_graph_visited,
+					num_paths,
+					dependencies);
 	}
 
 	// Free memory
