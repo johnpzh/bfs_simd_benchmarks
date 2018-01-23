@@ -352,7 +352,7 @@ void BC(
 		frontiers.push_back(h_graph_mask);
 		frontier_size = update_visited(h_graph_mask, h_graph_visited);
 		frontiers_sizes.push_back(frontier_size);
-		printf("frontier_size: %u\n", frontier_size);
+		printf("frontier_size: %u\n", frontier_size);//test
 	}
 	//Test
 	for (unsigned i = 0; i < NNODES; ++i) {
@@ -381,6 +381,12 @@ void BC(
 					dependencies);
 	}
 
+	//Test
+	for (unsigned i = 0; i < NNODES; ++i) {
+		printf("dependencies[%u]: %f\n", i, dependencies[i]);
+	}
+	//End Test
+	
 	// Free memory
 	for (auto f = frontiers.begin(); f != frontiers.end(); ++f) {
 		free(*f);
