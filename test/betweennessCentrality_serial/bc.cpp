@@ -141,58 +141,6 @@ void input(
 }
 
 
-//void BFS_kernel(
-//		Node *h_graph_nodes,
-//		int *h_graph_mask,
-//		int *h_updating_graph_mask,
-//		int *h_graph_visited,
-//		unsigned *graph_edges,
-//		int *h_cost)
-//{
-//
-//	double start_time = omp_get_wtime();
-//	bool stop;
-//	do
-//	{
-//		//if no thread changes this value then the loop stops
-//		stop = true;
-//
-//		omp_set_num_threads(NUM_THREADS);
-//#pragma omp parallel for schedule(dynamic, 512)
-//		for(unsigned int tid = 0; tid < NNODES; tid++ )
-//		{
-//			if (h_graph_mask[tid] == true) {
-//				h_graph_mask[tid]=false;
-//				int next_starting = h_graph_nodes[tid].starting + h_graph_nodes[tid].num_of_edges;
-//				for(int i = h_graph_nodes[tid].starting; 
-//						i < next_starting; 
-//						i++)
-//				{
-//					int id = graph_edges[i];
-//					if(!h_graph_visited[id])
-//					{
-//						h_cost[id]=h_cost[tid]+1;
-//						h_updating_graph_mask[id]=true;
-//					}
-//				}
-//			}
-//		}
-//
-//#pragma omp parallel for schedule(dynamic, 512)
-//		for(unsigned int tid=0; tid< NNODES ; tid++ )
-//		{
-//			if (h_updating_graph_mask[tid] == true) {
-//				h_graph_mask[tid]=true;
-//				h_graph_visited[tid]=true;
-//				stop = false;
-//				h_updating_graph_mask[tid]=false;
-//			}
-//		}
-//	}
-//	while(!stop);
-//	double end_time = omp_get_wtime();
-//	printf("%d %lf\n", NUM_THREADS, (end_time - start_time));
-//}
 
 inline unsigned update_visited(
 		int *h_graph_mask,
@@ -250,12 +198,6 @@ inline int *BFS_kernel(
 			if (!new_frontier[tail_id]) {
 				new_frontier[tail_id] = 1;
 			}
-			//bool is_changed = __sync_bool_compare_and_swap(h_graph_visited + tail_id, 0, 1);
-			//if (is_changed) {
-			//	new_frontier[tail_id] = 1;
-			//	new_frontier_size++;
-			//}
-			// Update num_paths
 			volatile unsigned old_val = num_paths[tail_id];
 			volatile unsigned new_val = old_val + num_paths[head_id];
 			while (!__sync_bool_compare_and_swap(num_paths + tail_id, old_val, new_val)) {
@@ -291,12 +233,6 @@ void BFS_kernel_reverse(
 			if (h_graph_visited[tail_id]) {
 				continue;
 			}
-			//volatile unsigned old_val = num_paths[tail_id];
-			//volatile unsigned new_val = old_val + num_paths[head_id];
-			//while (!__sync_bool_compare_and_swap(num_paths + tail_id, old_val, new_val)) {
-			//	old_val = num_paths[tail_id];
-			//	new_val = old_val + num_paths[head_id];
-			//}
 			volatile float old_val = dependencies[tail_id];
 			volatile float new_val = old_val + 1.0 * num_paths[tail_id] / num_paths[head_id] * (1.0 + dependencies[head_id]);
 			while (!__sync_bool_compare_and_swap(
@@ -419,18 +355,7 @@ int main(int argc, char *argv[])
 		graph_edges_reverse,
 		graph_degrees_reverse);
 
-	//Node* h_graph_nodes = (Node*) malloc(sizeof(Node)*NNODES);
-	//int *h_graph_mask = (int*) malloc(sizeof(int)*NNODES);
-	//int *h_updating_graph_mask = (int*) malloc(sizeof(int)*NNODES);
-	//int *h_graph_visited = (int*) malloc(sizeof(int)*NNODES);
-	//int* h_cost = (int*) malloc(sizeof(int)*NNODES);
 	unsigned source = 0;
-	//unsigned edge_start = 0;
-	//for (unsigned i = 0; i < NNODES; ++i) {
-	//	h_graph_nodes[i].starting = edge_start;
-	//	h_graph_nodes[i].num_of_edges = graph_degrees[i];
-	//	edge_start += graph_degrees[i];
-	//}
 
 	now = omp_get_wtime();
 	time_out = fopen(time_file, "w");
@@ -457,24 +382,6 @@ int main(int argc, char *argv[])
 			graph_edges_reverse,
 			graph_degrees_reverse,
 			source);
-		//// Re-initializing
-		//memset(h_graph_mask, 0, sizeof(int)*NNODES);
-		//h_graph_mask[source] = 1;
-		//memset(h_updating_graph_mask, 0, sizeof(int)*NNODES);
-		//memset(h_graph_visited, 0, sizeof(int)*NNODES);
-		//h_graph_visited[source] = 1;
-		//for (unsigned i = 0; i < NNODES; ++i) {
-		//	h_cost[i] = -1;
-		//}
-		//h_cost[source] = 0;
-
-		//BFS_kernel(
-		//		h_graph_nodes,
-		//		h_graph_mask,
-		//		h_updating_graph_mask,
-		//		h_graph_visited,
-		//		graph_edges,
-		//		h_cost);
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 	}
@@ -519,11 +426,6 @@ int main(int argc, char *argv[])
 	free(graph_vertices_reverse);
 	free(graph_edges_reverse);
 	free(graph_degrees_reverse);
-	//free(h_graph_nodes);
-	//free(h_graph_mask);
-	//free(h_updating_graph_mask);
-	//free(h_graph_visited);
-	//free(h_cost);
 
 	return 0;
 }
