@@ -772,6 +772,7 @@ void input( int argc, char** argv)
 		h_graph_heads[index] = n1;
 		h_graph_tails[index] = n2;
 	}
+	fclose(fin);
 
 }
 
@@ -823,6 +824,7 @@ void input( int argc, char** argv)
 		n2--;
 		h_graph_edges[index] = n2;
 	}
+	fclose(fin);
 
 }
 	// CSR

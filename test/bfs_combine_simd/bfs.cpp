@@ -34,6 +34,7 @@ unsigned NUM_TILES;
 unsigned ROW_STEP;
 unsigned CHUNK_SIZE;
 unsigned SIZE_BUFFER_MAX;
+unsigned T_RATIO;
 
 double start;
 double now;
@@ -259,7 +260,7 @@ void BFS_dense(
 //double frontier_tmp_time = 0;
 //double refine_time = 0;
 //double arrange_time = 0;
-unsigned *BFS_kernel_sparse(
+inline unsigned *BFS_kernel_sparse(
 				unsigned *h_graph_vertices,
 				unsigned *h_graph_edges,
 				unsigned *h_graph_degrees,
@@ -427,7 +428,7 @@ unsigned *BFS_kernel_sparse(
 	frontier_size = new_frontier_size;
 	return new_frontier;
 }
-unsigned *BFS_sparse(
+inline unsigned *BFS_sparse(
 		unsigned *frontier,
 		unsigned *h_graph_vertices,
 		unsigned *h_graph_edges,
@@ -547,7 +548,6 @@ void print_time()
 	printf("==========================\n");
 }
 
-unsigned T_RATIO;
 void graph_prepare(
 		unsigned *h_graph_vertices,
 		unsigned *h_graph_edges,
@@ -835,6 +835,7 @@ void input( int argc, char** argv)
 		h_graph_heads[index] = n1;
 		h_graph_tails[index] = n2;
 	}
+	fclose(fin);
 
 }
 
@@ -886,7 +887,7 @@ void input( int argc, char** argv)
 		n2--;
 		h_graph_edges[index] = n2;
 	}
-
+	fclose(fin);
 }
 	// CSR
 	//Vertex *graph_vertices_info = (Vertex *) malloc(sizeof(Vertex) * NNODES);
