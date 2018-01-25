@@ -211,12 +211,15 @@ inline unsigned update_visited(
 
 inline void update_visited_reverse(
 		int *h_graph_mask,
-		int *h_graph_visited)
+		int *h_graph_visited,
+		float *dependencies,
+		float *inverse_num_paths)
 {
 #pragma omp parallel for 
 	for (unsigned i = 0; i < NNODES; ++i) {
 		if (h_graph_mask[i]) {
 			h_graph_visited[i] = 1;
+			dependencies[i] += inverse_num_paths[i];
 		}
 	}
 }
@@ -291,21 +294,23 @@ void BFS_kernel_reverse(
 			if (h_graph_visited[tail_id]) {
 				continue;
 			}
-			//volatile unsigned old_val = num_paths[tail_id];
-			//volatile unsigned new_val = old_val + num_paths[head_id];
-			//while (!__sync_bool_compare_and_swap(num_paths + tail_id, old_val, new_val)) {
-			//	old_val = num_paths[tail_id];
-			//	new_val = old_val + num_paths[head_id];
-			//}
-			volatile float old_val = dependencies[tail_id];
-			volatile float new_val = old_val + 1.0 * num_paths[tail_id] / num_paths[head_id] * (1.0 + dependencies[head_id]);
-			while (!__sync_bool_compare_and_swap(
+			//volatile float old_val = dependencies[tail_id];
+			//volatile float new_val = old_val + 1.0 * num_paths[tail_id] / num_paths[head_id] * (1.0 + dependencies[head_id]);
+			//while (!__sync_bool_compare_and_swap(
+			//								(int *) (dependencies + tail_id), 
+			//								*((int *) &old_val), 
+			//								*((int *) &new_val))) {
+			//	old_val = dependencies[tail_id];
+			//	new_val = old_val + 1.0 * num_paths[tail_id] / num_paths[head_id] * (1.0 + dependencies[head_id]);
+			volatile float old_val;
+			volatile float new_val;
+			do {
+				old_val = dependencies[tail_id];
+				new_val = old_val + dependencies[head_id];
+			} while (!__sync_bool_compare_and_swap(
 											(int *) (dependencies + tail_id), 
 											*((int *) &old_val), 
-											*((int *) &new_val))) {
-				old_val = dependencies[tail_id];
-				new_val = old_val + 1.0 * num_paths[tail_id] / num_paths[head_id] * (1.0 + dependencies[head_id]);
-			}
+											*((int *) &new_val)));
 		}
 	}
 }
@@ -326,6 +331,7 @@ void BC(
 	unsigned *num_paths = (unsigned *) calloc(NNODES, sizeof(unsigned));
 	int *h_graph_visited = (int *) calloc(NNODES, sizeof(int));
 	int *h_graph_mask = (int *) calloc(NNODES, sizeof(int));
+	float *dependencies = (float *) calloc(NNODES, sizeof(float));
 	vector<int *> frontiers;
 	vector<unsigned> frontiers_sizes;
 	unsigned frontier_size;
@@ -355,8 +361,16 @@ void BC(
 		frontiers_sizes.push_back(frontier_size);
 	}
 	int level_count = frontiers.size() - 1;
-	float *dependencies = (float *) calloc(NNODES, sizeof(float));
-#pragma omp parallel for num_threads(64)
+	float *inverse_num_paths = (float *) malloc(NNODES * sizeof(float));
+#pragma omp parallel for num_threads(NUM_THREADS)
+	for (unsigned i = 0; i < NNODES; ++i) {
+		if (num_paths[i] == 0) {
+			inverse_num_paths[i] = 0.0;
+		} else {
+			inverse_num_paths[i] = 1/ (1.0 * num_paths[i]);
+		}
+	}
+#pragma omp parallel for num_threads(NUM_THREADS)
 	for (unsigned i = 0; i < NNODES; ++i) {
 		h_graph_visited[i] = 0;
 	}
@@ -364,8 +378,11 @@ void BC(
 	for (int lc = level_count - 1; lc >= 0; --lc) {
 		h_graph_mask = frontiers[lc];
 		//undate_visited();
-		update_visited_reverse(h_graph_mask, h_graph_visited);
-		//BFS_kernel_reverse();
+		update_visited_reverse(
+						h_graph_mask, 
+						h_graph_visited,
+						dependencies,
+						inverse_num_paths);
 		BFS_kernel_reverse(
 					graph_vertices_reverse,
 					graph_edges_reverse,
@@ -374,6 +391,15 @@ void BC(
 					h_graph_visited,
 					num_paths,
 					dependencies);
+	}
+
+#pragma omp parallel for num_threads(NUM_THREADS)
+	for (unsigned i = 0; i < NNODES; ++i) {
+		if (inverse_num_paths[i] == 0.0) {
+			dependencies[i] = 0.0;
+		} else {
+			dependencies[i] = (dependencies[i] - inverse_num_paths[i]) / inverse_num_paths[i];
+		}
 	}
 
 	////Test
