@@ -393,6 +393,12 @@ inline void update_visited_reverse(
 //		}
 //	}
 //}
+unsigned *to_dense(
+		int *is_active_side, 
+		unsigned *h_graph_queue, 
+		unsigned frontier_size)
+{
+}
 
 inline unsigned *BFS_kernel_sparse(
 				unsigned *graph_vertices,
@@ -672,16 +678,20 @@ void BC(
 				free(frontier);
 				frontier = new_frontier;
 			}
-			new_frontier = BFS_sparse(
+			unsigned *new_queue = BFS_sparse(
 								frontier,
 								h_graph_vertices,
 								h_graph_edges,
 								h_graph_degrees,
 								h_graph_parents,
 								frontier_size);
-			free(frontier);
+			if (last_is_dense) {
+				free(frontier);
+			}
 			frontier = new_frontier;
 			last_is_dense = false;
+			frontiers.push_back(h_graph_queue);
+			is_dense_frontier.push_back(last_is_dense);
 		}
 		// Update the parents, also get the sum again.
 		if (last_is_dense) {
