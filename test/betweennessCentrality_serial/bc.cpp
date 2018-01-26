@@ -962,6 +962,7 @@ void BC(
 				out_degree += graph_degrees[end];
 			}
 		}
+		printf("frontier_size: %u\n", frontier_size);
 	}
 
 		
@@ -1095,28 +1096,30 @@ int main(int argc, char *argv[])
 #else
 	unsigned run_count = 9;
 #endif
+	T_RATIO = 100;
+	CHUNK_SIZE = 2048;
 	// BFS
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
 		//sleep(10);
 #endif
-	BC(
-		graph_heads, 
-		graph_tails, 
-		graph_vertices,
-		graph_edges,
-		graph_degrees,
-		tile_offsets,
-		tile_sizes,
-		graph_heads_reverse, 
-		graph_tails_reverse, 
-		graph_vertices_reverse,
-		graph_edges_reverse,
-		graph_degrees_reverse,
-		tile_offsets_reverse,
-		tile_sizes_reverse,
-		source);
+		BC(
+			graph_heads, 
+			graph_tails, 
+			graph_vertices,
+			graph_edges,
+			graph_degrees,
+			tile_offsets,
+			tile_sizes,
+			graph_heads_reverse, 
+			graph_tails_reverse, 
+			graph_vertices_reverse,
+			graph_edges_reverse,
+			graph_degrees_reverse,
+			tile_offsets_reverse,
+			tile_sizes_reverse,
+			source);
 		//// Re-initializing
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);

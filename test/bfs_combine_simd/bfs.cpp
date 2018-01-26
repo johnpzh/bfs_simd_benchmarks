@@ -926,6 +926,8 @@ void input( int argc, char** argv)
 	// BFS
 	//SIZE_BUFFER_MAX = 1024;
 	SIZE_BUFFER_MAX = 512;
+	T_RATIO = 100;
+	CHUNK_SIZE = 2048;
 	for (unsigned i = 0; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
@@ -933,7 +935,6 @@ void input( int argc, char** argv)
 #endif
 		//for (T_RATIO = 100; T_RATIO < 200; T_RATIO *= 2) {}
 		//printf("T_RATIO: %u\n", T_RATIO);//test
-		T_RATIO = 100;
 		// Re-initializing
 		for (unsigned k = 0; k < 3; ++k) {
 		memset(h_graph_mask, 0, sizeof(int)*NNODES);

@@ -863,6 +863,7 @@ void input( int argc, char** argv)
 #endif
 	// BFS
 	T_RATIO = 100;
+	CHUNK_SIZE = 2048;
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
