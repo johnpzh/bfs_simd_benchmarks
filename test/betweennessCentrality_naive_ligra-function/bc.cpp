@@ -425,6 +425,7 @@ void BC(
 	free(num_paths);
 	free(h_graph_visited);
 	free(dependencies);
+	free(inverse_num_paths);
 }
 
 int main(int argc, char *argv[]) 

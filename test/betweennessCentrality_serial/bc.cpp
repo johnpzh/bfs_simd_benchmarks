@@ -511,7 +511,7 @@ inline unsigned *BFS_kernel_sparse(
 
 	// From offset, get active vertices (para_for)
 	unsigned *new_frontier_tmp = (unsigned *) malloc(sizeof(unsigned) * new_queue_size);
-//#pragma omp parallel for schedule(dynamic, CHUNK_SIZE)
+#pragma omp parallel for schedule(dynamic, CHUNK_SIZE)
 	for (unsigned i = 0; i < queue_size; ++i) {
 		unsigned start = h_graph_queue[i];
 		unsigned offset = degrees[i];
@@ -663,7 +663,7 @@ inline void BFS_kernel_sparse_reverse(
 				float *dependencies)
 {
 	// From offset, get active vertices (para_for)
-//#pragma omp parallel for schedule(dynamic, CHUNK_SIZE)
+#pragma omp parallel for schedule(dynamic, CHUNK_SIZE)
 	for (unsigned i = 0; i < queue_size; ++i) {
 		unsigned start = h_graph_queue[i];
 		unsigned base_edge_i = graph_vertices[start];
@@ -949,7 +949,7 @@ inline void scheduler_dense_reverse(
 	unsigned start_tile_id = start_row_index * SIDE_LENGTH;
 	//unsigned bound_row_id = start_row_index + tile_step;
 	unsigned end_tile_id = start_tile_id + tile_step * SIDE_LENGTH;
-//#pragma omp parallel for schedule(dynamic, 1)
+#pragma omp parallel for schedule(dynamic, 1)
 	for (unsigned tile_index = start_tile_id; tile_index < end_tile_id; tile_index += tile_step) {
 		unsigned bound_tile_id = tile_index + tile_step;
 		for (unsigned tile_id = tile_index; tile_id < bound_tile_id; ++tile_id) {
@@ -1101,7 +1101,7 @@ void BC(
 	is_dense_frontier.push_back(last_is_dense);
 	// Update the h_graph_visited, get the sum of the number of active nodes and their out degrees.
 	unsigned out_degree = 0;
-//#pragma omp parallel for reduction(+: out_degree)
+#pragma omp parallel for reduction(+: out_degree)
 	for (unsigned i = 0; i < frontier_size; ++i)
 	{
 		unsigned vertex_id = h_graph_queue[i];
@@ -1332,12 +1332,12 @@ void BC(
 		}
 	}
 
-	//Test
-	//puts("After:");
-	for (unsigned i = 0; i < NNODES; ++i) {
-		printf("dependencies[%u]: %f\n", i, dependencies[i]);
-	}
-	//End Test
+	////Test
+	////puts("After:");
+	//for (unsigned i = 0; i < NNODES; ++i) {
+	//	printf("dependencies[%u]: %f\n", i, dependencies[i]);
+	//}
+	////End Test
 
 	printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
 	
@@ -1350,6 +1350,7 @@ void BC(
 	free(dependencies);
 	free(is_active_side);
 	free(is_updating_active_side);
+	free(inverse_num_paths);
 }
 
 int main(int argc, char *argv[]) 
