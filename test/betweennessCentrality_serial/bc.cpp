@@ -103,9 +103,9 @@ void input(
 	tile_sizes_reverse = (unsigned *) malloc(NUM_TILES * sizeof(unsigned));
 	for (unsigned i = 0; i < NUM_TILES; ++i) {
 		if (NUM_TILES - 1 != i) {
-			tile_sizes_reverse[i] = tile_offsets[i + 1] - tile_offsets[i];
+			tile_sizes_reverse[i] = tile_offsets_reverse[i + 1] - tile_offsets_reverse[i];
 		} else {
-			tile_sizes_reverse[i] = NEDGES - tile_offsets[i];
+			tile_sizes_reverse[i] = NEDGES - tile_offsets_reverse[i];
 		}
 	}
 
@@ -396,6 +396,20 @@ inline void update_visited_reverse(
 //}
 ///////////////////////////////////////////////////////
 // Sparse
+void update_visited_sparse_reverse(
+		unsigned *h_graph_queue,
+		const unsigned &queue_size,
+		int *h_graph_visited,
+		float *dependencies,
+		float *inverse_num_paths)
+{
+#pragma omp parallel for
+	for (unsigned i = 0; i < queue_size; ++i) {
+		unsigned tail_id = h_graph_queue[i];
+		h_graph_visited[tail_id] = 1;
+		dependencies[tail_id] += inverse_num_paths[tail_id];
+	}
+}
 unsigned *to_sparse(
 		const unsigned &frontier_size,
 		unsigned *h_graph_mask)
@@ -497,7 +511,7 @@ inline unsigned *BFS_kernel_sparse(
 
 	// From offset, get active vertices (para_for)
 	unsigned *new_frontier_tmp = (unsigned *) malloc(sizeof(unsigned) * new_queue_size);
-#pragma omp parallel for schedule(dynamic, CHUNK_SIZE)
+//#pragma omp parallel for schedule(dynamic, CHUNK_SIZE)
 	for (unsigned i = 0; i < queue_size; ++i) {
 		unsigned start = h_graph_queue[i];
 		unsigned offset = degrees[i];
@@ -638,12 +652,78 @@ inline unsigned *BFS_sparse(
 				queue_size,
 				num_paths);
 }
+
+inline void BFS_kernel_sparse_reverse(
+				unsigned *graph_vertices,
+				unsigned *graph_edges,
+				unsigned *graph_degrees,
+				int *h_graph_visited,
+				unsigned *h_graph_queue,
+				unsigned &queue_size,
+				float *dependencies)
+{
+	// From offset, get active vertices (para_for)
+//#pragma omp parallel for schedule(dynamic, CHUNK_SIZE)
+	for (unsigned i = 0; i < queue_size; ++i) {
+		unsigned start = h_graph_queue[i];
+		unsigned base_edge_i = graph_vertices[start];
+		unsigned bound_edge_i = base_edge_i + graph_degrees[start];
+		for (unsigned edge_i = base_edge_i; edge_i < bound_edge_i; ++edge_i) {
+			unsigned end = graph_edges[edge_i];
+			if (0 == h_graph_visited[end]) {
+				volatile float old_val;
+				volatile float new_val;
+				do {
+					old_val = dependencies[end];
+					new_val = old_val + dependencies[start];
+				} while (!__sync_bool_compare_and_swap(
+												(int *) (dependencies + end), 
+												*((int *) &old_val), 
+												*((int *) &new_val)));
+			}
+		}
+	}
+}
+inline void BFS_sparse_reverse(
+				unsigned *h_graph_queue,
+				unsigned &queue_size,
+				unsigned *graph_vertices,
+				unsigned *graph_edges,
+				unsigned *graph_degrees,
+				int *h_graph_visited,
+				float *dependencies)
+{
+	BFS_kernel_sparse_reverse(
+				graph_vertices,
+				graph_edges,
+				graph_degrees,
+				h_graph_visited,
+				h_graph_queue,
+				queue_size,
+				dependencies);
+}
 // End Sparse
 //////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////
 // Dense
+
+void update_visited_dense_reverse(
+		unsigned *h_graph_mask,
+		int *h_graph_visited,
+		float *dependencies,
+		float *inverse_num_paths)
+{
+#pragma omp parallel for
+	for (unsigned i = 0; i < NNODES; ++i) {
+		if (h_graph_mask[i]) {
+			h_graph_visited[i] = 1;
+			dependencies[i] += inverse_num_paths[i];
+		}
+	}
+}
+
 unsigned *to_dense(
 		int *is_active_side, 
 		unsigned *h_graph_queue, 
@@ -689,7 +769,7 @@ inline void bfs_kernel_dense(
 			volatile unsigned new_val;
 			do {
 				old_val = num_paths[end];
-				new_val = old_val + num_paths[end];
+				new_val = old_val + num_paths[head];
 			} while (!__sync_bool_compare_and_swap(num_paths + end, old_val, new_val));
 			if (old_val == 0.0) {
 				h_updating_graph_mask[end] = 1;
@@ -811,6 +891,157 @@ inline unsigned *BFS_dense(
 
 	return new_mask;
 }
+
+inline void bfs_kernel_dense_reverse(
+		const unsigned &start_edge_i,
+		const unsigned &bound_edge_i,
+		unsigned *h_graph_heads,
+		unsigned *h_graph_tails,
+		unsigned *h_graph_mask,
+		//unsigned *h_updating_graph_mask,
+		int *h_graph_visited,
+		//unsigned *h_graph_parents,
+		//int *h_cost,
+		//int *is_updating_active_side,
+		float *dependencies)
+{
+	for (unsigned edge_i = start_edge_i; edge_i < bound_edge_i; ++edge_i) {
+		unsigned head = h_graph_heads[edge_i];
+		if (0 == h_graph_mask[head]) {
+			//++edge_i;
+			continue;
+		}
+		unsigned end = h_graph_tails[edge_i];
+		if (0 == h_graph_visited[end]) {
+			volatile float old_val;
+			volatile float new_val;
+			do {
+				old_val = dependencies[end];
+				new_val = old_val + dependencies[head];
+			} while (!__sync_bool_compare_and_swap(
+											(int *) (dependencies + end), 
+											*((int *) &old_val), 
+											*((int *) &new_val)));
+			//do {
+			//	old_val = num_paths[end];
+			//	new_val = old_val + num_paths[head];
+			//} while (!__sync_bool_compare_and_swap(num_paths + end, old_val, new_val));
+		}
+	}
+}
+inline void scheduler_dense_reverse(
+		const unsigned &start_row_index,
+		const unsigned &tile_step,
+		unsigned *h_graph_heads,
+		unsigned *h_graph_tails,
+		unsigned *h_graph_mask,
+		//unsigned *h_updating_graph_mask,
+		int *h_graph_visited,
+		//unsigned *h_graph_parents,
+		//int *h_cost,
+		unsigned *tile_offsets,
+		//int *is_empty_tile,
+		unsigned *tile_sizes,
+		//int *is_active_side,
+		//int *is_updating_active_side,
+		float *dependencies)
+{
+	unsigned start_tile_id = start_row_index * SIDE_LENGTH;
+	//unsigned bound_row_id = start_row_index + tile_step;
+	unsigned end_tile_id = start_tile_id + tile_step * SIDE_LENGTH;
+//#pragma omp parallel for schedule(dynamic, 1)
+	for (unsigned tile_index = start_tile_id; tile_index < end_tile_id; tile_index += tile_step) {
+		unsigned bound_tile_id = tile_index + tile_step;
+		for (unsigned tile_id = tile_index; tile_id < bound_tile_id; ++tile_id) {
+			unsigned row_id = (tile_id - start_tile_id) % tile_step + start_row_index;
+			//if (!tile_sizes[tile_id] || !is_active_side[row_id]) {
+			//	continue;
+			//}
+			if (!tile_sizes[tile_id]) {
+				continue;
+			}
+			// Kernel
+			unsigned bound_edge_i;
+			if (NUM_TILES - 1 != tile_id) {
+				bound_edge_i = tile_offsets[tile_id + 1];
+			} else {
+				bound_edge_i = NEDGES;
+			}
+			bfs_kernel_dense_reverse(
+					tile_offsets[tile_id],
+					bound_edge_i,
+					h_graph_heads,
+					h_graph_tails,
+					h_graph_mask,
+					//h_updating_graph_mask,
+					h_graph_visited,
+					//h_graph_parents,
+					//h_cost,
+					//is_updating_active_side,
+					dependencies);
+		}
+
+	}
+}
+
+inline void BFS_dense_reverse(
+		unsigned *h_graph_heads,
+		unsigned *h_graph_tails,
+		unsigned *h_graph_mask,
+		//int *h_updating_graph_mask,
+		int *h_graph_visited,
+		//unsigned *h_graph_parents,
+		//int *h_cost,
+		unsigned *tile_offsets,
+		//int *is_empty_tile,
+		unsigned *tile_sizes,
+		//int *is_active_side,
+		//int *is_updating_active_side,
+		float *dependencies)
+{
+	//unsigned *new_mask = (unsigned *) calloc(NNODES, sizeof(unsigned));
+	unsigned side_id;
+	for (side_id = 0; side_id + ROW_STEP <= SIDE_LENGTH; side_id += ROW_STEP) {
+		scheduler_dense_reverse(
+				//side_id * SIDE_LENGTH,\
+				//(side_id + ROW_STEP) * SIDE_LENGTH,
+				side_id,
+				ROW_STEP,
+				h_graph_heads,
+				h_graph_tails,
+				h_graph_mask,
+				//new_mask,
+				h_graph_visited,
+				//h_graph_parents,
+				//h_cost,
+				tile_offsets,
+				//is_empty_tile,
+				tile_sizes,
+				//is_active_side,
+				//is_updating_active_side,
+				dependencies);
+	}
+	scheduler_dense_reverse(
+			//side_id * SIDE_LENGTH,\
+			//NUM_TILES,
+			side_id,
+			SIDE_LENGTH - side_id,
+			h_graph_heads,
+			h_graph_tails,
+			h_graph_mask,
+			//new_mask,
+			h_graph_visited,
+			//h_graph_parents,
+			//h_cost,
+			tile_offsets,
+			//is_empty_tile,
+			tile_sizes,
+			//is_active_side,
+			//is_updating_active_side,
+			dependencies);
+
+	//return new_mask;
+}
 // End Dense
 ////////////////////////////////////////////////////////////////////////
 
@@ -836,9 +1067,10 @@ void BC(
 	int *h_graph_visited = (int *) calloc(NNODES, sizeof(int));
 	int *is_active_side = (int *) calloc(SIDE_LENGTH, sizeof(int));
 	int *is_updating_active_side = (int *) calloc(SIDE_LENGTH, sizeof(int));
-	unsigned *h_graph_mask;
+	unsigned *h_graph_mask = nullptr;
 	float *dependencies = (float *) calloc(NNODES, sizeof(float));
 	vector<unsigned *> frontiers;
+	vector<unsigned> frontier_sizes;
 	vector<bool> is_dense_frontier;
 	unsigned frontier_size;
 
@@ -849,6 +1081,8 @@ void BC(
 	unsigned *h_graph_queue = (unsigned *) malloc(frontier_size * sizeof(unsigned));
 	h_graph_queue[0] = source;
 	frontiers.push_back(h_graph_queue);
+	is_dense_frontier.push_back(false);
+	frontier_sizes.push_back(1);
 
 	double start_time = omp_get_wtime();
 	// First Phase
@@ -862,20 +1096,21 @@ void BC(
 								num_paths);
 	h_graph_queue = new_queue;
 	frontiers.push_back(h_graph_queue);
+	frontier_sizes.push_back(frontier_size);
+	bool last_is_dense = false;
+	is_dense_frontier.push_back(last_is_dense);
 	// Update the h_graph_visited, get the sum of the number of active nodes and their out degrees.
 	unsigned out_degree = 0;
-#pragma omp parallel for reduction(+: out_degree)
+//#pragma omp parallel for reduction(+: out_degree)
 	for (unsigned i = 0; i < frontier_size; ++i)
 	{
 		unsigned vertex_id = h_graph_queue[i];
 		out_degree += graph_degrees[vertex_id];
 		h_graph_visited[vertex_id] = 1;
 	}
-	bool last_is_dense = false;
-	is_dense_frontier.push_back(last_is_dense);
 	// According the sum, determing to run Sparse or Dense, and then change the last_is_dense.
 	unsigned bfs_threshold = NEDGES / T_RATIO;
-	while (frontier_size != 0) {
+	while (true) {
 		if (frontier_size + out_degree > bfs_threshold) {
 			if (!last_is_dense) {
 				free(is_active_side);
@@ -929,7 +1164,7 @@ void BC(
 			frontiers.push_back(h_graph_queue);
 			is_dense_frontier.push_back(last_is_dense);
 		}
-		// Get the sum again.
+		// Update h_graph_visited; Get the sum again.
 		if (last_is_dense) {
 			frontier_size = 0;
 			out_degree = 0;
@@ -951,20 +1186,28 @@ void BC(
 					if (1 == h_graph_mask[vertex_id]) {
 						frontier_size++;
 						out_degree += graph_degrees[vertex_id];
+						h_graph_visited[vertex_id] = 1;
 					}
 				}
 			}
+			frontier_sizes.push_back(frontier_size);
+			if (0 == frontier_size) {
+				break;
+			}
 		} else {
 			out_degree = 0;
+			frontier_sizes.push_back(frontier_size);
+			if (0 == frontier_size) {
+				break;
+			}
 #pragma omp parallel for reduction(+: out_degree)
 			for (unsigned i = 0; i < frontier_size; ++i) {
 				unsigned end = h_graph_queue[i];
 				out_degree += graph_degrees[end];
+				h_graph_visited[end] = 1;
 			}
 		}
-		printf("frontier_size: %u\n", frontier_size);
 	}
-
 		
 	//// First phase
 	//while (0 != frontier_size) {
@@ -981,7 +1224,7 @@ void BC(
 	//	frontiers_sizes.push_back(frontier_size);
 	//}
 	
-	// Second phase
+//	// Second phase
 //	int level_count = frontiers.size() - 1;
 //	float *inverse_num_paths = (float *) malloc(NNODES * sizeof(float));
 //#pragma omp parallel for num_threads(NUM_THREADS)
@@ -1023,8 +1266,80 @@ void BC(
 //			dependencies[i] = (dependencies[i] - inverse_num_paths[i]) / inverse_num_paths[i];
 //		}
 //	}
-//
-//	printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
+
+	int level_count = frontiers.size() - 1;
+	float *inverse_num_paths = (float *) malloc(NNODES * sizeof(float));
+#pragma omp parallel for num_threads(NUM_THREADS)
+	for (unsigned i = 0; i < NNODES; ++i) {
+		if (num_paths[i] == 0) {
+			inverse_num_paths[i] = 0.0;
+		} else {
+			inverse_num_paths[i] = 1/ (1.0 * num_paths[i]);
+		}
+	}
+	free(h_graph_visited);
+	h_graph_visited = (int *) calloc(NNODES, sizeof(int));
+
+	unsigned *frontier;
+	for (int lc = level_count - 1; lc >= 0; --lc) {
+		frontier = frontiers[lc];
+		if (is_dense_frontier[lc]) {
+			update_visited_dense_reverse(
+										frontier,
+										h_graph_visited,
+										dependencies,
+										inverse_num_paths);
+			BFS_dense_reverse(
+					graph_heads_reverse,
+					graph_tails_reverse,
+					frontier,
+					h_graph_visited,
+					tile_offsets_reverse,
+					tile_sizes_reverse,
+					//int *is_active_side,
+					dependencies);
+		} else {
+			unsigned queue_size = frontier_sizes[lc];
+			update_visited_sparse_reverse(
+										frontier,
+										queue_size,
+										h_graph_visited,
+										dependencies,
+										inverse_num_paths);
+			BFS_sparse_reverse(
+							frontier,
+							queue_size,
+							graph_vertices_reverse,
+							graph_edges_reverse,
+							graph_degrees_reverse,
+							h_graph_visited,
+							dependencies);
+		}
+	}
+	////Test
+	//puts("Before:");
+	//for (unsigned i = 0; i < NNODES; ++i) {
+	//	printf("dependencies[%d]: %f\n",i, dependencies[i]);
+	//}
+	////End Test
+
+#pragma omp parallel for num_threads(NUM_THREADS)
+	for (unsigned i = 0; i < NNODES; ++i) {
+		if (inverse_num_paths[i] == 0.0) {
+			dependencies[i] = 0.0;
+		} else {
+			dependencies[i] = (dependencies[i] - inverse_num_paths[i]) / inverse_num_paths[i];
+		}
+	}
+
+	//Test
+	//puts("After:");
+	for (unsigned i = 0; i < NNODES; ++i) {
+		printf("dependencies[%u]: %f\n", i, dependencies[i]);
+	}
+	//End Test
+
+	printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
 	
 	// Free memory
 	for (auto f = frontiers.begin(); f != frontiers.end(); ++f) {

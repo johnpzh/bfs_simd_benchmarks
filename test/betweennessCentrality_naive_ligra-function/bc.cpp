@@ -393,6 +393,13 @@ void BC(
 					dependencies);
 	}
 
+	////Test
+	//puts("Before:");
+	//for (unsigned i = 0; i < NNODES; ++i) {
+	//	printf("D[%d]: %f\n", i, dependencies[i]);
+	//}
+	////End Test
+
 #pragma omp parallel for num_threads(NUM_THREADS)
 	for (unsigned i = 0; i < NNODES; ++i) {
 		if (inverse_num_paths[i] == 0.0) {
@@ -402,11 +409,12 @@ void BC(
 		}
 	}
 
-	////Test
-	//for (unsigned i = 0; i < NNODES; ++i) {
-	//	printf("D[%d]: %f\n", i, dependencies[i]);
-	//}
-	////End Test
+	//Test
+	//puts("After:");
+	for (unsigned i = 0; i < NNODES; ++i) {
+		printf("dependencies[%u]: %f\n", i, dependencies[i]);
+	}
+	//End Test
 
 	printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
 	
