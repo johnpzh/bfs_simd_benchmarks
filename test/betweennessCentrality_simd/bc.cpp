@@ -838,12 +838,12 @@ inline void bfs_kernel_dense(
 		//__m512i cost_head_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), not_visited_m, head_v, h_cost, sizeof(int));
 		//__m512i cost_tail_v = _mm512_mask_add_epi32(_mm512_undefined_epi32(), not_visited_m, cost_head_v, _mm512_set1_epi32(1));
 		//_mm512_mask_i32scatter_epi32(h_cost, not_visited_m, tail_v, cost_tail_v, sizeof(int));
-		//_mm512_mask_i32scatter_epi32(h_updating_graph_mask, not_visited_m, tail_v, _mm512_set1_epi32(1), sizeof(int));
+		_mm512_mask_i32scatter_epi32(h_updating_graph_mask, not_visited_m, tail_v, _mm512_set1_epi32(1), sizeof(int));
 		__m512i TILE_WIDTH_v = _mm512_set1_epi32(TILE_WIDTH);
 		__m512i side_id_v = _mm512_div_epi32(tail_v, TILE_WIDTH_v);
 		_mm512_mask_i32scatter_epi32(is_updating_active_side, not_visited_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
 		//_mm512_mask_i32scatter_epi32(h_graph_parents, not_visited_m, tail_v, head_v, sizeof(unsigned));
-		_mm512_mask_i32scatter_epi32(h_graph_visited, not_visited_m, tail_v, _mm512_set1_epi32(1), sizeof(unsigned));
+		//_mm512_mask_i32scatter_epi32(h_graph_visited, not_visited_m, tail_v, _mm512_set1_epi32(1), sizeof(unsigned));
 	}
 
 	if (0 == remainder) {
@@ -873,12 +873,12 @@ inline void bfs_kernel_dense(
 	//__m512i cost_head_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), not_visited_m, head_v, h_cost, sizeof(int));
 	//__m512i cost_tail_v = _mm512_mask_add_epi32(_mm512_undefined_epi32(), not_visited_m, cost_head_v, _mm512_set1_epi32(1));
 	//_mm512_mask_i32scatter_epi32(h_cost, not_visited_m, tail_v, cost_tail_v, sizeof(int));
-	//_mm512_mask_i32scatter_epi32(h_updating_graph_mask, not_visited_m, tail_v, _mm512_set1_epi32(1), sizeof(int));
+	_mm512_mask_i32scatter_epi32(h_updating_graph_mask, not_visited_m, tail_v, _mm512_set1_epi32(1), sizeof(int));
 	__m512i TILE_WIDTH_v = _mm512_set1_epi32(TILE_WIDTH);
 	__m512i side_id_v = _mm512_div_epi32(tail_v, TILE_WIDTH_v);
 	_mm512_mask_i32scatter_epi32(is_updating_active_side, not_visited_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
 	//_mm512_mask_i32scatter_epi32(h_graph_parents, not_visited_m, tail_v, head_v, sizeof(unsigned));
-	_mm512_mask_i32scatter_epi32(h_graph_visited, not_visited_m, tail_v, _mm512_set1_epi32(1), sizeof(unsigned));
+	//_mm512_mask_i32scatter_epi32(h_graph_visited, not_visited_m, tail_v, _mm512_set1_epi32(1), sizeof(unsigned));
 }
 inline void scheduler_dense(
 		const unsigned &start_row_index,
@@ -1071,48 +1071,152 @@ inline unsigned *BFS_dense(
 	return new_mask;
 }
 
+//inline void bfs_kernel_dense_reverse(
+//		const unsigned &start_edge_i,
+//		const unsigned &bound_edge_i,
+//		unsigned *h_graph_heads,
+//		unsigned *h_graph_tails,
+//		unsigned *h_graph_mask,
+//		//unsigned *h_updating_graph_mask,
+//		int *h_graph_visited,
+//		//unsigned *h_graph_parents,
+//		//int *h_cost,
+//		//int *is_updating_active_side,
+//		float *dependencies)
+//{
+//	for (unsigned edge_i = start_edge_i; edge_i < bound_edge_i; ++edge_i) {
+//		unsigned head = h_graph_heads[edge_i];
+//		if (0 == h_graph_mask[head]) {
+//			//++edge_i;
+//			continue;
+//		}
+//		unsigned end = h_graph_tails[edge_i];
+//		if (0 == h_graph_visited[end]) {
+//			volatile float old_val;
+//			volatile float new_val;
+//			do {
+//				old_val = dependencies[end];
+//				new_val = old_val + dependencies[head];
+//			} while (!__sync_bool_compare_and_swap(
+//											(int *) (dependencies + end), 
+//											*((int *) &old_val), 
+//											*((int *) &new_val)));
+//			//do {
+//			//	old_val = num_paths[end];
+//			//	new_val = old_val + num_paths[head];
+//			//} while (!__sync_bool_compare_and_swap(num_paths + end, old_val, new_val));
+//		}
+//	}
+//}
+
+// Scan the data, accumulate the values with the same index.
+// Then, store the cumulative sum to the last element in the data with the same index.
+void scan_for_gather_add_scatter_conflict_safe_ps(
+												__m512 &data
+												__m512i indices)
+{
+	__m512i cd = _mm512_conflict_epi32(indices);
+	__mmask16 todo_mask = _mm512_test_epi32_mask(cd, _mm512_set1_epi32(-1));
+	if (todo_mask) {
+		__m512i lz = _mm512_lzcnt_epi32(cd);
+		__m512i lid = _mm512_sub_epi32(_mm512_set1_epi32(31), lz);
+		while (todo_mask) {
+			__m512i todo_bcast = _mm512_broadcastmw_epi32(todo_mask);
+			__mmask16 now_mask = _mm512_mask_testn_epi32_mask(todo_mask, cd, todo_bcast);
+			__m512 data_perm = _mm512_mask_permutexvar_ps(_mm512_undefined_ps(), now_mask, lid, data);
+			data = _mm512_mask_add_ps(data, now_mask, data, data_perm);
+			todo_mask = _mm512_kxor(todo_mask, now_mask);
+		}
+	} 
+}
+
 inline void bfs_kernel_dense_reverse(
-		const unsigned &start_edge_i,
-		const unsigned &bound_edge_i,
-		unsigned *h_graph_heads,
-		unsigned *h_graph_tails,
-		unsigned *h_graph_mask,
-		//unsigned *h_updating_graph_mask,
+		unsigned *heads_buffer,
+		unsigned *tails_buffer,
+		const unsigned &size_buffer,
+		int *h_graph_mask,
+		//int *h_updating_graph_mask,
 		int *h_graph_visited,
 		//unsigned *h_graph_parents,
 		//int *h_cost,
 		//int *is_updating_active_side,
 		float *dependencies)
 {
-	for (unsigned edge_i = start_edge_i; edge_i < bound_edge_i; ++edge_i) {
-		unsigned head = h_graph_heads[edge_i];
-		if (0 == h_graph_mask[head]) {
-			//++edge_i;
+	unsigned remainder = size_buffer % NUM_P_INT;
+	unsigned bound_edge_i = size_buffer - remainder;
+	unsigned edge_i;
+	for (edge_i = 0; edge_i < bound_edge_i; edge_i += NUM_P_INT) {
+		__m512i head_v = _mm512_load_epi32(heads_buffer + edge_i);
+		__m512i active_flag_v = _mm512_i32gather_epi32(head_v, h_graph_mask, sizeof(int));
+		__mmask16 is_active_m = _mm512_test_epi32_mask(active_flag_v, _mm512_set1_epi32(1));
+		if (!is_active_m) {
 			continue;
 		}
-		unsigned end = h_graph_tails[edge_i];
-		if (0 == h_graph_visited[end]) {
-			volatile float old_val;
-			volatile float new_val;
-			do {
-				old_val = dependencies[end];
-				new_val = old_val + dependencies[head];
-			} while (!__sync_bool_compare_and_swap(
-											(int *) (dependencies + end), 
-											*((int *) &old_val), 
-											*((int *) &new_val)));
-			//do {
-			//	old_val = num_paths[end];
-			//	new_val = old_val + num_paths[head];
-			//} while (!__sync_bool_compare_and_swap(num_paths + end, old_val, new_val));
+		__m512i tail_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), is_active_m, tails_buffer + edge_i);
+		__m512i visited_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(1), is_active_m, tail_v, h_graph_visited, sizeof(int));
+		__mmask16 not_visited_m = _mm512_testn_epi32_mask(visited_flag_v, _mm512_set1_epi32(1));
+		//__m512i visited_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(1), is_active_m, tail_v, h_graph_parents, sizeof(int));
+		//__mmask16 not_visited_m = _mm512_cmpeq_epi32_mask(visited_flag_v, _mm512_set1_epi32(-1));
+		if (!not_visited_m) {
+			continue;
 		}
+		__m512 dependencies_head_v = _mm512_mask_i32gather_ps(_mm512_undefined_ps(), not_visited_m, head_v, dependencies, sizeof(float));
+		scan_for_gather_add_scatter_conflict_safe_ps(dependencies_head_v, tail_v);
+		__m512 dependencies_tail_v = _mm512_mask_i32gather_ps(_mm512_undefined_ps(), not_visited_m, tail_v, dependencies, sizeof(float));
+		dependencies_tail_v = _mm512_mask_add_ps(_mm512_undefined_ps(), not_visited_m, dependencies_tail_v, dependencies_head_v);
+		_mm512_mask_i32scatter_ps(dependencies, not_visited_m, tail_v, dependencies_tail_v, sizeof(float));
+		//__m512i cost_head_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), not_visited_m, head_v, h_cost, sizeof(int));
+		//__m512i cost_tail_v = _mm512_mask_add_epi32(_mm512_undefined_epi32(), not_visited_m, cost_head_v, _mm512_set1_epi32(1));
+		//_mm512_mask_i32scatter_epi32(h_cost, not_visited_m, tail_v, cost_tail_v, sizeof(int));
+		//_mm512_mask_i32scatter_epi32(h_updating_graph_mask, not_visited_m, tail_v, _mm512_set1_epi32(1), sizeof(int));
+		//__m512i TILE_WIDTH_v = _mm512_set1_epi32(TILE_WIDTH);
+		//__m512i side_id_v = _mm512_div_epi32(tail_v, TILE_WIDTH_v);
+		//_mm512_mask_i32scatter_epi32(is_updating_active_side, not_visited_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
+		//_mm512_mask_i32scatter_epi32(h_graph_parents, not_visited_m, tail_v, head_v, sizeof(unsigned));
+		//_mm512_mask_i32scatter_epi32(h_graph_visited, not_visited_m, tail_v, _mm512_set1_epi32(1), sizeof(unsigned));
 	}
+
+	if (0 == remainder) {
+		return;
+	}
+	unsigned short in_range_m_t = (unsigned short) 0xFFFF >> (NUM_P_INT - remainder);
+	__mmask16 in_range_m = (__mmask16) in_range_m_t;
+	__m512i head_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, heads_buffer + edge_i);
+	__m512i active_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_range_m, head_v, h_graph_mask, sizeof(int));
+	__mmask16 is_active_m = _mm512_test_epi32_mask(active_flag_v, _mm512_set1_epi32(1));
+	if (!is_active_m) {
+		return;
+	}
+	__m512i tail_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), is_active_m, tails_buffer + edge_i);
+	__m512i visited_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(1), is_active_m, tail_v, h_graph_visited, sizeof(int));
+	__mmask16 not_visited_m = _mm512_testn_epi32_mask(visited_flag_v, _mm512_set1_epi32(1));
+	//__m512i visited_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(1), is_active_m, tail_v, h_graph_parents, sizeof(int));
+	//__mmask16 not_visited_m = _mm512_cmpeq_epi32_mask(visited_flag_v, _mm512_set1_epi32(-1));
+	if (!not_visited_m) {
+		return;
+	}
+	__m512 dependencies_head_v = _mm512_mask_i32gather_ps(_mm512_undefined_ps(), not_visited_m, head_v, dependencies, sizeof(float));
+	scan_for_gather_add_scatter_conflict_safe_ps(dependencies_head_v, tail_v);
+	__m512 dependencies_tail_v = _mm512_mask_i32gather_ps(_mm512_undefined_ps(), not_visited_m, tail_v, dependencies, sizeof(float));
+	dependencies_tail_v = _mm512_mask_add_ps(_mm512_undefined_ps(), not_visited_m, dependencies_tail_v, dependencies_head_v);
+	_mm512_mask_i32scatter_ps(dependencies, not_visited_m, tail_v, dependencies_tail_v, sizeof(float));
+	//__m512i cost_head_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), not_visited_m, head_v, h_cost, sizeof(int));
+	//__m512i cost_tail_v = _mm512_mask_add_epi32(_mm512_undefined_epi32(), not_visited_m, cost_head_v, _mm512_set1_epi32(1));
+	//_mm512_mask_i32scatter_epi32(h_cost, not_visited_m, tail_v, cost_tail_v, sizeof(int));
+	//_mm512_mask_i32scatter_epi32(h_updating_graph_mask, not_visited_m, tail_v, _mm512_set1_epi32(1), sizeof(int));
+	//__m512i TILE_WIDTH_v = _mm512_set1_epi32(TILE_WIDTH);
+	//__m512i side_id_v = _mm512_div_epi32(tail_v, TILE_WIDTH_v);
+	//_mm512_mask_i32scatter_epi32(is_updating_active_side, not_visited_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
+	//_mm512_mask_i32scatter_epi32(h_graph_parents, not_visited_m, tail_v, head_v, sizeof(unsigned));
+	//_mm512_mask_i32scatter_epi32(h_graph_visited, not_visited_m, tail_v, _mm512_set1_epi32(1), sizeof(unsigned));
 }
 inline void scheduler_dense_reverse(
 		const unsigned &start_row_index,
 		const unsigned &tile_step,
 		unsigned *h_graph_heads,
 		unsigned *h_graph_tails,
+		unsigned *heads_buffer,
+		unsigned *tails_buffer,
 		unsigned *h_graph_mask,
 		//unsigned *h_updating_graph_mask,
 		int *h_graph_visited,
@@ -1131,36 +1235,102 @@ inline void scheduler_dense_reverse(
 #pragma omp parallel for schedule(dynamic, 1)
 	for (unsigned tile_index = start_tile_id; tile_index < end_tile_id; tile_index += tile_step) {
 		unsigned bound_tile_id = tile_index + tile_step;
+		unsigned tid = omp_get_thread_num();
+		unsigned *heads_buffer_base = heads_buffer + tid * SIZE_BUFFER_MAX;
+		unsigned *tails_buffer_base = tails_buffer + tid * SIZE_BUFFER_MAX;
+		unsigned size_buffer = 0;
+		unsigned capacity = SIZE_BUFFER_MAX;
 		for (unsigned tile_id = tile_index; tile_id < bound_tile_id; ++tile_id) {
 			unsigned row_id = (tile_id - start_tile_id) % tile_step + start_row_index;
-			//if (!tile_sizes[tile_id] || !is_active_side[row_id]) {
-			//	continue;
-			//}
-			if (!tile_sizes[tile_id]) {
+			if (0 == tile_sizes[tile_id] || !is_active_side[row_id]) {
 				continue;
 			}
-			// Kernel
-			unsigned bound_edge_i;
-			if (NUM_TILES - 1 != tile_id) {
-				bound_edge_i = tile_offsets[tile_id + 1];
-			} else {
-				bound_edge_i = NEDGES;
+			// Load to buffer
+			unsigned edge_i = tile_offsets[tile_id];
+			unsigned remain = tile_sizes[tile_id];
+			while (remain != 0) {
+				if (capacity > 0) {
+					if (capacity > remain) {
+						// Put all remain into the buffer
+						memcpy(heads_buffer_base + size_buffer, h_graph_heads + edge_i, remain * sizeof(unsigned));
+						memcpy(tails_buffer_base + size_buffer, h_graph_tails + edge_i, remain * sizeof(unsigned));
+						edge_i += remain;
+						capacity -= remain;
+						size_buffer += remain;
+						remain = 0;
+					} else {
+						// Fill the buffer to full
+						memcpy(heads_buffer_base + size_buffer, h_graph_heads + edge_i, capacity * sizeof(unsigned));
+						memcpy(tails_buffer_base + size_buffer, h_graph_tails + edge_i, capacity * sizeof(unsigned));
+						edge_i += capacity;
+						remain -= capacity;
+						size_buffer += capacity;
+						capacity = 0;
+					}
+				} else {
+					// Process the full buffer
+					bfs_kernel_dense_reverse(
+							heads_buffer_base,
+							tails_buffer_base,
+							size_buffer,
+							h_graph_mask,
+							//h_updating_graph_mask,
+							h_graph_visited,
+							//h_graph_parents,
+							//h_cost,
+							//is_updating_active_side,
+							dependencies);
+					capacity = SIZE_BUFFER_MAX;
+					size_buffer = 0;
+				}
 			}
-			bfs_kernel_dense_reverse(
-					tile_offsets[tile_id],
-					bound_edge_i,
-					h_graph_heads,
-					h_graph_tails,
-					h_graph_mask,
-					//h_updating_graph_mask,
-					h_graph_visited,
-					//h_graph_parents,
-					//h_cost,
-					//is_updating_active_side,
-					dependencies);
+			
 		}
-
+		// Process the remains in buffer
+		bfs_kernel_dense_reverse(
+				heads_buffer_base,
+				tails_buffer_base,
+				size_buffer,
+				h_graph_mask,
+				//h_updating_graph_mask,
+				h_graph_visited,
+				//h_graph_parents,
+				//h_cost,
+				//is_updating_active_side,
+				dependencies);
 	}
+//	for (unsigned tile_index = start_tile_id; tile_index < end_tile_id; tile_index += tile_step) {
+//		unsigned bound_tile_id = tile_index + tile_step;
+//		for (unsigned tile_id = tile_index; tile_id < bound_tile_id; ++tile_id) {
+//			unsigned row_id = (tile_id - start_tile_id) % tile_step + start_row_index;
+//			//if (!tile_sizes[tile_id] || !is_active_side[row_id]) {
+//			//	continue;
+//			//}
+//			if (!tile_sizes[tile_id]) {
+//				continue;
+//			}
+//			// Kernel
+//			unsigned bound_edge_i;
+//			if (NUM_TILES - 1 != tile_id) {
+//				bound_edge_i = tile_offsets[tile_id + 1];
+//			} else {
+//				bound_edge_i = NEDGES;
+//			}
+//			bfs_kernel_dense_reverse(
+//					tile_offsets[tile_id],
+//					bound_edge_i,
+//					h_graph_heads,
+//					h_graph_tails,
+//					h_graph_mask,
+//					//h_updating_graph_mask,
+//					h_graph_visited,
+//					//h_graph_parents,
+//					//h_cost,
+//					//is_updating_active_side,
+//					dependencies);
+//		}
+//
+//	}
 }
 
 inline void BFS_dense_reverse(
@@ -1178,9 +1348,14 @@ inline void BFS_dense_reverse(
 		//int *is_updating_active_side,
 		float *dependencies)
 {
+	unsigned *heads_buffer = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS, ALIGNED_BYTES);
+	unsigned *tails_buffer = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS, ALIGNED_BYTES);
+
+	unsigned remainder = SIDE_LENGTH % ROW_STEP;
+	unsigned bound_side_id = SIDE_LENGTH - remainder;
 	//unsigned *new_mask = (unsigned *) calloc(NNODES, sizeof(unsigned));
 	unsigned side_id;
-	for (side_id = 0; side_id + ROW_STEP <= SIDE_LENGTH; side_id += ROW_STEP) {
+	for (side_id = 0; side_id < bound_side_id; side_id += ROW_STEP) {
 		scheduler_dense_reverse(
 				//side_id * SIDE_LENGTH,\
 				//(side_id + ROW_STEP) * SIDE_LENGTH,
@@ -1188,6 +1363,8 @@ inline void BFS_dense_reverse(
 				ROW_STEP,
 				h_graph_heads,
 				h_graph_tails,
+				heads_buffer,
+				tails_buffer,
 				h_graph_mask,
 				//new_mask,
 				h_graph_visited,
@@ -1204,9 +1381,11 @@ inline void BFS_dense_reverse(
 			//side_id * SIDE_LENGTH,\
 			//NUM_TILES,
 			side_id,
-			SIDE_LENGTH - side_id,
+			remainder,
 			h_graph_heads,
 			h_graph_tails,
+			heads_buffer,
+			tails_buffer,
 			h_graph_mask,
 			//new_mask,
 			h_graph_visited,
@@ -1218,6 +1397,8 @@ inline void BFS_dense_reverse(
 			//is_active_side,
 			//is_updating_active_side,
 			dependencies);
+	_mm_free(heads_buffer);
+	_mm_free(tails_buffer);
 
 	//return new_mask;
 }
@@ -1286,7 +1467,7 @@ void BC(
 		unsigned vertex_id = h_graph_queue[i];
 		out_degree += graph_degrees[vertex_id];
 		h_graph_visited[vertex_id] = 1;
-	}
+	}nK
 	// According the sum, determing to run Sparse or Dense, and then change the last_is_dense.
 	unsigned bfs_threshold = NEDGES / T_RATIO;
 	while (true) {
@@ -1355,19 +1536,55 @@ void BC(
 				}
 				is_updating_active_side[side_id] = 0;
 				is_active_side[side_id] = 1;
+				unsigned start_vertex_id = side_id * TILE_WIDTH;
 				unsigned bound_vertex_id;
 				if (SIDE_LENGTH - 1 != side_id) {
 					bound_vertex_id = side_id * TILE_WIDTH + TILE_WIDTH;
 				} else {
 					bound_vertex_id = NNODES;
 				}
-				for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++vertex_id) {
-					if (1 == h_graph_mask[vertex_id]) {
-						frontier_size++;
-						out_degree += graph_degrees[vertex_id];
-						h_graph_visited[vertex_id] = 1;
+				unsigned remainder = (bound_vertex_id - start_vertex_id) % NUM_P_INT;
+				bound_vertex_id -= remainder;
+				unsigned vertex_id;
+				for (vertex_id = start_vertex_id; 
+						vertex_id < bound_vertex_id; 
+						vertex_id += NUM_P_INT) {
+					__m512i updating_flag_v = _mm512_loadu_si512(h_graph_mask + vertex_id);
+					__mmask16 is_updating_m = _mm512_test_epi32_mask(updating_flag_v, _mm512_set1_epi32(1));
+					if (!is_updating_m) {
+						continue;
 					}
+					__m512i num_active_v = _mm512_mask_set1_epi32(_mm512_set1_epi32(0), is_updating_m, 1);
+					unsigned num_active = _mm512_reduce_add_epi32(num_active_v);
+					frontier_size += num_active;
+					__m512i out_degrees_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), is_updating_m, h_graph_degrees + vertex_id);
+					out_degree += _mm512_reduce_add_epi32(out_degrees_v);
+					_mm512_mask_storeu_epi32(h_graph_visited + vertex_id, is_updating_m, _mm512_set1_epi32(1));
 				}
+
+				if (0 == remainder) {
+					continue;
+				}
+				unsigned short in_range_m_t = (unsigned short) 0xFFFF >> (NUM_P_INT - remainder);
+				__mmask16 in_range_m = (__mmask16) in_range_m_t;
+				__m512i updating_flag_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), in_range_m, h_graph_mask + vertex_id);
+				__mmask16 is_updating_m = _mm512_test_epi32_mask(updating_flag_v, _mm512_set1_epi32(1));
+				if (!is_updating_m) {
+					continue;
+				}
+				__m512i num_active_v = _mm512_mask_set1_epi32(_mm512_set1_epi32(0), is_updating_m, 1);
+				unsigned num_active = _mm512_reduce_add_epi32(num_active_v);
+				frontier_size += num_active;
+				__m512i out_degrees_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), is_updating_m, h_graph_degrees + vertex_id);
+				out_degree += _mm512_reduce_add_epi32(out_degrees_v);
+				_mm512_mask_storeu_epi32(h_graph_visited + vertex_id, is_updating_m, _mm512_set1_epi32(1));
+				//for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++vertex_id) {
+				//	if (1 == h_graph_mask[vertex_id]) {
+				//		frontier_size++;
+				//		out_degree += graph_degrees[vertex_id];
+				//		h_graph_visited[vertex_id] = 1;
+				//	}
+				//}
 			}
 			frontier_sizes.push_back(frontier_size);
 			if (0 == frontier_size) {

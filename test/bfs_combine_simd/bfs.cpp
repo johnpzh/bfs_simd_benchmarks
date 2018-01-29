@@ -715,6 +715,7 @@ void graph_prepare(
 				__m512i updating_flag_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), in_range_m, h_updating_graph_mask + vertex_id);
 				__mmask16 is_updating_m = _mm512_test_epi32_mask(updating_flag_v, _mm512_set1_epi32(1));
 				if (!is_updating_m) {
+					_mm512_mask_storeu_epi32(h_graph_mask + vertex_id, in_range_m, _mm512_set1_epi32(0));//addition
 					continue;
 				}
 				_mm512_mask_storeu_epi32(h_updating_graph_mask + vertex_id, is_updating_m, _mm512_set1_epi32(0));
