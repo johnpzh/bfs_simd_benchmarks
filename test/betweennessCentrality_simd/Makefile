@@ -9,10 +9,10 @@ endif
 
 .PHONY: clean, all
 
-all: bfs
+all: bc
 
-bfs: bfs.cpp 
+bc: bc.cpp 
 	$(ICPC) $(CC_FLAGS) $^ -o $@ 
 
 clean:
-	rm -f bfs
+	rm -f bc

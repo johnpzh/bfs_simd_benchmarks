@@ -11,12 +11,16 @@
 #include <omp.h>
 #include <unistd.h>
 #include <algorithm>
+#include <immintrin.h>
 using std::string;
 using std::getline;
 using std::cout;
 using std::endl;
 using std::to_string;
 using std::vector;
+
+#define NUM_P_INT 16 // Number of packed intergers in one __m512i variable
+#define ALIGNED_BYTES 64
 
 unsigned NNODES;
 unsigned NEDGES;
@@ -26,6 +30,7 @@ unsigned SIDE_LENGTH;
 unsigned NUM_TILES;
 unsigned ROW_STEP;
 unsigned CHUNK_SIZE;
+unsigned SIZE_BUFFER_MAX;
 unsigned T_RATIO;
 
 double start;
@@ -288,35 +293,35 @@ void input(
 
 }
 
-inline unsigned update_visited(
-		int *h_graph_mask,
-		int *h_graph_visited)
-{
-	unsigned count = 0;
-#pragma omp parallel for reduction(+: count)
-	for (unsigned i = 0; i < NNODES; ++i) {
-		if (h_graph_mask[i]) {
-			h_graph_visited[i] = 1;
-			++count;
-		}
-	}
-	return count;
-}
+//inline unsigned update_visited(
+//		int *h_graph_mask,
+//		int *h_graph_visited)
+//{
+//	unsigned count = 0;
+//#pragma omp parallel for reduction(+: count)
+//	for (unsigned i = 0; i < NNODES; ++i) {
+//		if (h_graph_mask[i]) {
+//			h_graph_visited[i] = 1;
+//			++count;
+//		}
+//	}
+//	return count;
+//}
 
-inline void update_visited_reverse(
-		int *h_graph_mask,
-		int *h_graph_visited,
-		float *dependencies,
-		float *inverse_num_paths)
-{
-#pragma omp parallel for 
-	for (unsigned i = 0; i < NNODES; ++i) {
-		if (h_graph_mask[i]) {
-			h_graph_visited[i] = 1;
-			dependencies[i] += inverse_num_paths[i];
-		}
-	}
-}
+//inline void update_visited_reverse(
+//		int *h_graph_mask,
+//		int *h_graph_visited,
+//		float *dependencies,
+//		float *inverse_num_paths)
+//{
+//#pragma omp parallel for
+//	for (unsigned i = 0; i < NNODES; ++i) {
+//		if (h_graph_mask[i]) {
+//			h_graph_visited[i] = 1;
+//			dependencies[i] += inverse_num_paths[i];
+//		}
+//	}
+//}
 
 //inline int *BFS_kernel(
 //		unsigned *graph_vertices,
@@ -715,7 +720,7 @@ void update_visited_dense_reverse(
 		float *dependencies,
 		float *inverse_num_paths)
 {
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic, CHUNK_SIZE)
 	for (unsigned i = 0; i < NNODES; ++i) {
 		if (h_graph_mask[i]) {
 			h_graph_visited[i] = 1;
@@ -782,7 +787,7 @@ unsigned *to_dense(
 // Scan the data, accumulate the values with the same index.
 // Then, store the cumulative sum to the last element in the data with the same index.
 void scan_for_gather_add_scatter_conflict_safe_epi32(
-												__m512i &data
+												__m512i &data,
 												__m512i indices)
 {
 	__m512i cd = _mm512_conflict_epi32(indices);
@@ -804,8 +809,8 @@ inline void bfs_kernel_dense(
 		unsigned *heads_buffer,
 		unsigned *tails_buffer,
 		const unsigned &size_buffer,
-		int *h_graph_mask,
-		int *h_updating_graph_mask,
+		unsigned *h_graph_mask,
+		unsigned *h_updating_graph_mask,
 		int *h_graph_visited,
 		//unsigned *h_graph_parents,
 		//int *h_cost,
@@ -1112,7 +1117,7 @@ inline unsigned *BFS_dense(
 // Scan the data, accumulate the values with the same index.
 // Then, store the cumulative sum to the last element in the data with the same index.
 void scan_for_gather_add_scatter_conflict_safe_ps(
-												__m512 &data
+												__m512 &data,
 												__m512i indices)
 {
 	__m512i cd = _mm512_conflict_epi32(indices);
@@ -1134,7 +1139,7 @@ inline void bfs_kernel_dense_reverse(
 		unsigned *heads_buffer,
 		unsigned *tails_buffer,
 		const unsigned &size_buffer,
-		int *h_graph_mask,
+		unsigned *h_graph_mask,
 		//int *h_updating_graph_mask,
 		int *h_graph_visited,
 		//unsigned *h_graph_parents,
@@ -1242,7 +1247,10 @@ inline void scheduler_dense_reverse(
 		unsigned capacity = SIZE_BUFFER_MAX;
 		for (unsigned tile_id = tile_index; tile_id < bound_tile_id; ++tile_id) {
 			unsigned row_id = (tile_id - start_tile_id) % tile_step + start_row_index;
-			if (0 == tile_sizes[tile_id] || !is_active_side[row_id]) {
+			//if (0 == tile_sizes[tile_id] || !is_active_side[row_id]) {
+			//	continue;
+			//}
+			if (0 == tile_sizes[tile_id]) {
 				continue;
 			}
 			// Load to buffer
@@ -1436,6 +1444,7 @@ void BC(
 
 	num_paths[source] = 1;
 	// First is the Sparse
+	double time_now = omp_get_wtime();
 	frontier_size = 1;
 	h_graph_visited[source] = 1;
 	unsigned *h_graph_queue = (unsigned *) malloc(frontier_size * sizeof(unsigned));
@@ -1467,7 +1476,7 @@ void BC(
 		unsigned vertex_id = h_graph_queue[i];
 		out_degree += graph_degrees[vertex_id];
 		h_graph_visited[vertex_id] = 1;
-	}nK
+	}
 	// According the sum, determing to run Sparse or Dense, and then change the last_is_dense.
 	unsigned bfs_threshold = NEDGES / T_RATIO;
 	while (true) {
@@ -1557,7 +1566,7 @@ void BC(
 					__m512i num_active_v = _mm512_mask_set1_epi32(_mm512_set1_epi32(0), is_updating_m, 1);
 					unsigned num_active = _mm512_reduce_add_epi32(num_active_v);
 					frontier_size += num_active;
-					__m512i out_degrees_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), is_updating_m, h_graph_degrees + vertex_id);
+					__m512i out_degrees_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), is_updating_m, graph_degrees + vertex_id);
 					out_degree += _mm512_reduce_add_epi32(out_degrees_v);
 					_mm512_mask_storeu_epi32(h_graph_visited + vertex_id, is_updating_m, _mm512_set1_epi32(1));
 				}
@@ -1575,7 +1584,7 @@ void BC(
 				__m512i num_active_v = _mm512_mask_set1_epi32(_mm512_set1_epi32(0), is_updating_m, 1);
 				unsigned num_active = _mm512_reduce_add_epi32(num_active_v);
 				frontier_size += num_active;
-				__m512i out_degrees_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), is_updating_m, h_graph_degrees + vertex_id);
+				__m512i out_degrees_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), is_updating_m, graph_degrees + vertex_id);
 				out_degree += _mm512_reduce_add_epi32(out_degrees_v);
 				_mm512_mask_storeu_epi32(h_graph_visited + vertex_id, is_updating_m, _mm512_set1_epi32(1));
 				//for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++vertex_id) {
@@ -1604,6 +1613,9 @@ void BC(
 			}
 		}
 	}
+
+	double first_phase_time = omp_get_wtime() - time_now;
+	time_now = omp_get_wtime();
 		
 	//// First phase
 	//while (0 != frontier_size) {
@@ -1666,7 +1678,7 @@ void BC(
 	// Second Phase
 	int level_count = frontiers.size() - 1;
 	float *inverse_num_paths = (float *) malloc(NNODES * sizeof(float));
-#pragma omp parallel for num_threads(NUM_THREADS)
+#pragma omp parallel for
 	for (unsigned i = 0; i < NNODES; ++i) {
 		if (num_paths[i] == 0) {
 			inverse_num_paths[i] = 0.0;
@@ -1720,7 +1732,7 @@ void BC(
 	//}
 	////End Test
 
-#pragma omp parallel for num_threads(NUM_THREADS)
+#pragma omp parallel for
 	for (unsigned i = 0; i < NNODES; ++i) {
 		if (inverse_num_paths[i] == 0.0) {
 			dependencies[i] = 0.0;
@@ -1735,6 +1747,9 @@ void BC(
 	//	printf("dependencies[%u]: %f\n", i, dependencies[i]);
 	//}
 	////End Test
+	double second_phase_time = omp_get_wtime() - time_now;
+	//printf("first_phase_time: %f\n", first_phase_time);
+	//printf("second_phase_time: %f\n", second_phase_time);
 
 	printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
 	
@@ -1759,8 +1774,8 @@ int main(int argc, char *argv[])
 		TILE_WIDTH = strtoul(argv[2], NULL, 0);
 		ROW_STEP = strtoul(argv[3], NULL, 0);
 	} else {
-		//filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec";
-		filename = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
+		filename = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
+		//filename = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
 		TILE_WIDTH = 1024;
 		ROW_STEP = 16;
 	}
@@ -1809,14 +1824,18 @@ int main(int argc, char *argv[])
 #else
 	unsigned run_count = 9;
 #endif
-	T_RATIO = 100;
+	//T_RATIO = 20;
+	T_RATIO = 40;
 	CHUNK_SIZE = 2048;
+	//SIZE_BUFFER_MAX = 512;
+	SIZE_BUFFER_MAX = 1024;
 	// BFS
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
 		//sleep(10);
 #endif
+		for (unsigned k = 0; k < 3; ++k) {
 		BC(
 			graph_heads, 
 			graph_tails, 
@@ -1833,6 +1852,7 @@ int main(int argc, char *argv[])
 			tile_offsets_reverse,
 			tile_sizes_reverse,
 			source);
+		}
 		//// Re-initializing
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
