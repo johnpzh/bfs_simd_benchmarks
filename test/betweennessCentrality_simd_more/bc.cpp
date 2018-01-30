@@ -401,6 +401,33 @@ void input(
 //}
 ///////////////////////////////////////////////////////
 // Sparse
+unsigned update_visited_sparse(
+						unsigned *h_graph_visited,
+						unsigned *h_graph_queue,
+						unsigned queue_size,
+						unsigned *graph_degrees)
+{
+//	unsigned out_degree = 0;
+//#pragma omp parallel for reduction(+: out_degree)
+//	for (unsigned i = 0; i < queue_size; ++i)
+//	{
+//		unsigned vertex_id = h_graph_queue[i];
+//		out_degree += graph_degrees[vertex_id];
+//		h_graph_visited[vertex_id] = 1;
+//	}
+
+	unsigned out_degree = 0;
+	unsigned remainder = queue_size % NUM_P_INT;
+	unsigned bound_i = queue_size - remainder;
+#pragma omp parallel for reduction(+: out_degree)
+	for (unsigned i = 0; i < bound_i; i += NUM_P_INT) {
+		__m512i vertex_id_v = _mm512_load_epi32(h_graph_queue + i);
+		__m512i degrees_v = _mm512_i32gather_epi32(vertex_id_v, graph_degrees, sizeof(unsigned));
+		unsigned sum_degrees = _mm512_reduce_add_epi32(degrees_v);
+		out_degree += sum_degrees;
+		_mm512_i32scatter_epi32(h_graph_visited, vertex_id_v, _mm512_set1_epi32(1), sizeof(unsigned));
+	}
+}
 void update_visited_sparse_reverse(
 		unsigned *h_graph_queue,
 		const unsigned &queue_size,
@@ -556,28 +583,28 @@ inline unsigned *BFS_kernel_sparse(
 
 	unsigned *nums_in_blocks = NULL;
 	if (num_blocks > 1) {
-	nums_in_blocks = (unsigned *) malloc(sizeof(unsigned) * num_blocks);
-	unsigned new_queue_size_tmp = 0;
-//#pragma omp parallel for schedule(dynamic) reduction(+: new_queue_size_tmp)
+		nums_in_blocks = (unsigned *) malloc(sizeof(unsigned) * num_blocks);
+		unsigned new_queue_size_tmp = 0;
+		//#pragma omp parallel for schedule(dynamic) reduction(+: new_queue_size_tmp)
 #pragma omp parallel for reduction(+: new_queue_size_tmp)
-	for (unsigned block_i = 0; block_i < num_blocks; ++block_i) {
-		unsigned offset = block_i * block_size;
-		unsigned bound;
-		if (num_blocks - 1 != block_i) {
-			bound = offset + block_size;
-		} else {
-			bound = new_queue_size;
-		}
-		unsigned base = offset;
-		for (unsigned end_i = offset; end_i < bound; ++end_i) {
-			if ((unsigned) - 1 != new_frontier_tmp[end_i]) {
-				new_frontier_tmp[base++] = new_frontier_tmp[end_i];
+		for (unsigned block_i = 0; block_i < num_blocks; ++block_i) {
+			unsigned offset = block_i * block_size;
+			unsigned bound;
+			if (num_blocks - 1 != block_i) {
+				bound = offset + block_size;
+			} else {
+				bound = new_queue_size;
 			}
+			unsigned base = offset;
+			for (unsigned end_i = offset; end_i < bound; ++end_i) {
+				if ((unsigned) - 1 != new_frontier_tmp[end_i]) {
+					new_frontier_tmp[base++] = new_frontier_tmp[end_i];
+				}
+			}
+			nums_in_blocks[block_i] = base - offset;
+			new_queue_size_tmp += nums_in_blocks[block_i];
 		}
-		nums_in_blocks[block_i] = base - offset;
-		new_queue_size_tmp += nums_in_blocks[block_i];
-	}
-	new_queue_size = new_queue_size_tmp;
+		new_queue_size = new_queue_size_tmp;
 	} else {
 		unsigned base = 0;
 		for (unsigned i = 0; i < new_queue_size; ++i) {
@@ -599,30 +626,31 @@ inline unsigned *BFS_kernel_sparse(
 	}
 
 	// Get the final new frontier
-	unsigned *new_frontier = (unsigned *) malloc(sizeof(unsigned) * new_queue_size);
+	//unsigned *new_frontier = (unsigned *) malloc(sizeof(unsigned) * new_queue_size);
+	unsigned *new_frontier = (unsigned *) _mm_malloc(sizeof(unsigned) * new_queue_size, ALIGNED_BYTES);
 	if (num_blocks > 1) {
-	//TODO: blocked parallel for
-	offset_sum = 0;
-	for (unsigned i = 0; i < num_blocks; ++i) {
-		unsigned tmp = nums_in_blocks[i];
-		nums_in_blocks[i] = offset_sum;
-		offset_sum += tmp;
-	}
-//#pragma omp parallel for schedule(dynamic)
+		//TODO: blocked parallel for
+		offset_sum = 0;
+		for (unsigned i = 0; i < num_blocks; ++i) {
+			unsigned tmp = nums_in_blocks[i];
+			nums_in_blocks[i] = offset_sum;
+			offset_sum += tmp;
+		}
+		//#pragma omp parallel for schedule(dynamic)
 #pragma omp parallel for
-	for (unsigned block_i = 0; block_i < num_blocks; ++block_i) {
-		unsigned offset = nums_in_blocks[block_i];
-		unsigned bound;
-		if (num_blocks - 1 != block_i) {
-			bound = nums_in_blocks[block_i + 1];
-		} else {
-			bound = new_queue_size;
+		for (unsigned block_i = 0; block_i < num_blocks; ++block_i) {
+			unsigned offset = nums_in_blocks[block_i];
+			unsigned bound;
+			if (num_blocks - 1 != block_i) {
+				bound = nums_in_blocks[block_i + 1];
+			} else {
+				bound = new_queue_size;
+			}
+			unsigned base = block_i * block_size;
+			for (unsigned i = offset; i < bound; ++i) {
+				new_frontier[i] = new_frontier_tmp[base++];
+			}
 		}
-		unsigned base = block_i * block_size;
-		for (unsigned i = offset; i < bound; ++i) {
-			new_frontier[i] = new_frontier_tmp[base++];
-		}
-	}
 	} else {
 		unsigned base = 0;
 		for (unsigned i = 0; i < new_queue_size; ++i) {
@@ -1027,7 +1055,9 @@ inline unsigned *BFS_dense(
 
 	unsigned remainder = SIDE_LENGTH % ROW_STEP;
 	unsigned bound_side_id = SIDE_LENGTH - remainder;
-	unsigned *new_mask = (unsigned *) calloc(NNODES, sizeof(unsigned));
+	//unsigned *new_mask = (unsigned *) calloc(NNODES, sizeof(unsigned));
+	unsigned *new_mask = (unsigned *) _mm_malloc(NNODES * sizeof(unsigned), ALIGNED_BYTES);
+	memset(new_mask, 0, NNODES * sizeof(unsigned));
 	unsigned side_id;
 	for (side_id = 0; side_id < bound_side_id; side_id += ROW_STEP) {
 		scheduler_dense(
@@ -1413,6 +1443,7 @@ inline void BFS_dense_reverse(
 // End Dense
 ////////////////////////////////////////////////////////////////////////
 
+
 void BC(
 		unsigned *graph_heads, 
 		unsigned *graph_tails, 
@@ -1741,21 +1772,23 @@ void BC(
 		}
 	}
 
-	////Test
-	////puts("After:");
-	//for (unsigned i = 0; i < NNODES; ++i) {
-	//	printf("dependencies[%u]: %f\n", i, dependencies[i]);
-	//}
-	////End Test
 	double second_phase_time = omp_get_wtime() - time_now;
-	//printf("first_phase_time: %f\n", first_phase_time);
-	//printf("second_phase_time: %f\n", second_phase_time);
+	printf("first_phase_time: %f\n", first_phase_time);
+	printf("second_phase_time: %f\n", second_phase_time);
 
 	printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
+	////Test
+	////puts("After:");
+	//FILE *fout = fopen("output.txt", "w");
+	//for (unsigned i = 0; i < NNODES; ++i) {
+	//	fprintf(fout, "d[%u]: %f\n", i, dependencies[i]);
+	//}
+	//fclose(fout);
+	////End Test
 	
 	// Free memory
 	for (auto f = frontiers.begin(); f != frontiers.end(); ++f) {
-		free(*f);
+		_mm_free(*f);
 	}
 	free(num_paths);
 	free(h_graph_visited);
@@ -1824,15 +1857,14 @@ int main(int argc, char *argv[])
 #else
 	unsigned run_count = 9;
 #endif
-	T_RATIO = 80;
-	//T_RATIO = 100;
+	T_RATIO = 81;
+	//T_RATIO = 60;
+	//CHUNK_SIZE = 2048;
 	CHUNK_SIZE = 32768;
 	SIZE_BUFFER_MAX = 512;
 	//SIZE_BUFFER_MAX = 1024;
-	for (unsigned tr = 10; tr < 121; tr += 10) {
-		T_RATIO = tr;
-		printf("T_RATIO: %u\n", T_RATIO);
 	// BFS
+	for (unsigned cz = 0; cz < 2; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG

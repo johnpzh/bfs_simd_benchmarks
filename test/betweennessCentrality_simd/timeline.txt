@@ -1,4 +1,3 @@
-input end: 325.480776
-Thread 64 end: 391.346613
-Thread 128 end: 467.103016
-Thread 256 end: 606.483340
+input end: 298.463002
+Thread 64 end: 369.248218
+Thread 64 end: 409.303225

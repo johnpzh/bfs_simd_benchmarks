@@ -409,14 +409,17 @@ void BC(
 		}
 	}
 
-	//Test
-	//puts("After:");
-	for (unsigned i = 0; i < NNODES; ++i) {
-		printf("dependencies[%u]: %f\n", i, dependencies[i]);
-	}
-	//End Test
 
 	printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
+
+	//Test
+	//puts("After:");
+	FILE *fout = fopen("output.txt", "w");
+	for (unsigned i = 0; i < NNODES; ++i) {
+		fprintf(fout, "d[%u]: %f\n", i, dependencies[i]);
+	}
+	fclose(fout);
+	//End Test
 	
 	// Free memory
 	for (auto f = frontiers.begin(); f != frontiers.end(); ++f) {
@@ -435,8 +438,8 @@ int main(int argc, char *argv[])
 	if (argc > 1) {
 		filename = argv[1];
 	} else {
-		//filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec";
-		filename = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
+		filename = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
+		//filename = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
 	}
 	// Input
 	unsigned *graph_heads;
@@ -483,6 +486,7 @@ int main(int argc, char *argv[])
 	unsigned run_count = 9;
 #endif
 	// BFS
+	for (unsigned cz = 0; cz < 2; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
@@ -518,6 +522,7 @@ int main(int argc, char *argv[])
 		//		h_cost);
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
+	}
 	}
 	fclose(time_out);
 

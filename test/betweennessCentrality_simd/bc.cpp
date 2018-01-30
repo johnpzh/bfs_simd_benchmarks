@@ -1748,8 +1748,8 @@ void BC(
 	//}
 	////End Test
 	double second_phase_time = omp_get_wtime() - time_now;
-	//printf("first_phase_time: %f\n", first_phase_time);
-	//printf("second_phase_time: %f\n", second_phase_time);
+	printf("first_phase_time: %f\n", first_phase_time);
+	printf("second_phase_time: %f\n", second_phase_time);
 
 	printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
 	
@@ -1822,14 +1822,15 @@ int main(int argc, char *argv[])
 	printf("Input finished: %s\n", filename);
 	unsigned run_count = 9;
 #else
-	unsigned run_count = 9;
+	unsigned run_count = 8;
 #endif
-	T_RATIO = 60;
+	T_RATIO = 80;
 	//T_RATIO = 100;
 	CHUNK_SIZE = 32768;
 	SIZE_BUFFER_MAX = 512;
 	//SIZE_BUFFER_MAX = 1024;
 	// BFS
+	for (unsigned cz = 0; cz < 2; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
@@ -1856,6 +1857,7 @@ int main(int argc, char *argv[])
 		//// Re-initializing
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
+	}
 	}
 	fclose(time_out);
 
