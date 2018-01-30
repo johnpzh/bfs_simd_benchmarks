@@ -1824,11 +1824,14 @@ int main(int argc, char *argv[])
 #else
 	unsigned run_count = 9;
 #endif
-	T_RATIO = 60;
+	T_RATIO = 80;
 	//T_RATIO = 100;
 	CHUNK_SIZE = 32768;
 	SIZE_BUFFER_MAX = 512;
 	//SIZE_BUFFER_MAX = 1024;
+	for (unsigned tr = 10; tr < 121; tr += 10) {
+		T_RATIO = tr;
+		printf("T_RATIO: %u\n", T_RATIO);
 	// BFS
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
@@ -1856,6 +1859,7 @@ int main(int argc, char *argv[])
 		//// Re-initializing
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
+	}
 	}
 	fclose(time_out);
 
