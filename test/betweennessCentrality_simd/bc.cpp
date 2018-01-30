@@ -1748,8 +1748,8 @@ void BC(
 	//}
 	////End Test
 	double second_phase_time = omp_get_wtime() - time_now;
-	printf("first_phase_time: %f\n", first_phase_time);
-	printf("second_phase_time: %f\n", second_phase_time);
+	//printf("first_phase_time: %f\n", first_phase_time);
+	//printf("second_phase_time: %f\n", second_phase_time);
 
 	printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
 	
@@ -1757,6 +1757,7 @@ void BC(
 	for (auto f = frontiers.begin(); f != frontiers.end(); ++f) {
 		free(*f);
 	}
+	frontiers.clear();
 	free(num_paths);
 	free(h_graph_visited);
 	free(dependencies);
@@ -1822,7 +1823,7 @@ int main(int argc, char *argv[])
 	printf("Input finished: %s\n", filename);
 	unsigned run_count = 9;
 #else
-	unsigned run_count = 8;
+	unsigned run_count = 9;
 #endif
 	T_RATIO = 80;
 	//T_RATIO = 100;

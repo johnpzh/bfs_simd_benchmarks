@@ -377,9 +377,11 @@ void BC(
 	}
 
 	////Test
-	//for (unsigned i = 0; i < NNODES; ++i) {
-	//	printf("D[%d]: %f\n", i, dependencies[i]);
-	//}
+	FILE *fout = fopen("output.txt", "w");
+	for (unsigned i = 0; i < NNODES; ++i) {
+		fprintf(fout, "d[%d]: %f\n", i, dependencies[i]);
+	}
+	fclose(fout);
 	////End Test
 
 	printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
@@ -400,8 +402,8 @@ int main(int argc, char *argv[])
 	if (argc > 1) {
 		filename = argv[1];
 	} else {
-		//filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec";
-		filename = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
+		filename = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
+		//filename = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
 	}
 	// Input
 	unsigned *graph_heads;

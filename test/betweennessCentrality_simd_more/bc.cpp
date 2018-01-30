@@ -401,8 +401,8 @@ void input(
 //}
 ///////////////////////////////////////////////////////
 // Sparse
-unsigned update_visited_sparse(
-						unsigned *h_graph_visited,
+inline unsigned update_visited_sparse(
+						int *h_graph_visited,
 						unsigned *h_graph_queue,
 						unsigned queue_size,
 						unsigned *graph_degrees)
@@ -429,7 +429,7 @@ unsigned update_visited_sparse(
 	}
 	return out_degree;
 }
-void update_visited_sparse_reverse(
+inline void update_visited_sparse_reverse(
 		unsigned *h_graph_queue,
 		const unsigned &queue_size,
 		int *h_graph_visited,
@@ -443,7 +443,7 @@ void update_visited_sparse_reverse(
 		dependencies[tail_id] += inverse_num_paths[tail_id];
 	}
 }
-unsigned *to_sparse(
+inline unsigned *to_sparse(
 		const unsigned &frontier_size,
 		unsigned *h_graph_mask)
 {
@@ -1479,7 +1479,7 @@ void BC(
 	double time_now = omp_get_wtime();
 	frontier_size = 1;
 	h_graph_visited[source] = 1;
-	unsigned *h_graph_queue = (unsigned *) malloc(frontier_size * sizeof(unsigned));
+	unsigned *h_graph_queue = (unsigned *) _mm_malloc(frontier_size * sizeof(unsigned), ALIGNED_BYTES);
 	h_graph_queue[0] = source;
 	frontiers.push_back(h_graph_queue);
 	is_dense_frontier.push_back(false);
@@ -1501,14 +1501,19 @@ void BC(
 	bool last_is_dense = false;
 	is_dense_frontier.push_back(last_is_dense);
 	// Update the h_graph_visited, get the sum of the number of active nodes and their out degrees.
-	unsigned out_degree = 0;
-#pragma omp parallel for reduction(+: out_degree)
-	for (unsigned i = 0; i < frontier_size; ++i)
-	{
-		unsigned vertex_id = h_graph_queue[i];
-		out_degree += graph_degrees[vertex_id];
-		h_graph_visited[vertex_id] = 1;
-	}
+	unsigned out_degree = update_visited_sparse(
+											h_graph_visited,
+											h_graph_queue,
+											frontier_size,
+											graph_degrees);
+//	unsigned out_degree = 0;
+//#pragma omp parallel for reduction(+: out_degree)
+//	for (unsigned i = 0; i < frontier_size; ++i)
+//	{
+//		unsigned vertex_id = h_graph_queue[i];
+//		out_degree += graph_degrees[vertex_id];
+//		h_graph_visited[vertex_id] = 1;
+//	}
 	// According the sum, determing to run Sparse or Dense, and then change the last_is_dense.
 	unsigned bfs_threshold = NEDGES / T_RATIO;
 	while (true) {
@@ -1632,17 +1637,22 @@ void BC(
 				break;
 			}
 		} else {
-			out_degree = 0;
 			frontier_sizes.push_back(frontier_size);
 			if (0 == frontier_size) {
 				break;
 			}
-#pragma omp parallel for reduction(+: out_degree)
-			for (unsigned i = 0; i < frontier_size; ++i) {
-				unsigned end = h_graph_queue[i];
-				out_degree += graph_degrees[end];
-				h_graph_visited[end] = 1;
-			}
+			out_degree = update_visited_sparse(
+										h_graph_visited,
+										h_graph_queue,
+										frontier_size,
+										graph_degrees);
+//			out_degree = 0;
+//#pragma omp parallel for reduction(+: out_degree)
+//			for (unsigned i = 0; i < frontier_size; ++i) {
+//				unsigned end = h_graph_queue[i];
+//				out_degree += graph_degrees[end];
+//				h_graph_visited[end] = 1;
+//			}
 		}
 	}
 
@@ -1780,17 +1790,18 @@ void BC(
 	printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
 	////Test
 	////puts("After:");
-	//FILE *fout = fopen("output.txt", "w");
-	//for (unsigned i = 0; i < NNODES; ++i) {
-	//	fprintf(fout, "d[%u]: %f\n", i, dependencies[i]);
-	//}
-	//fclose(fout);
+	FILE *fout = fopen("output.txt", "w");
+	for (unsigned i = 0; i < NNODES; ++i) {
+		fprintf(fout, "d[%u]: %f\n", i, dependencies[i]);
+	}
+	fclose(fout);
 	////End Test
 	
 	// Free memory
 	for (auto f = frontiers.begin(); f != frontiers.end(); ++f) {
 		_mm_free(*f);
 	}
+	frontiers.clear();
 	free(num_paths);
 	free(h_graph_visited);
 	free(dependencies);
@@ -1808,8 +1819,8 @@ int main(int argc, char *argv[])
 		TILE_WIDTH = strtoul(argv[2], NULL, 0);
 		ROW_STEP = strtoul(argv[3], NULL, 0);
 	} else {
-		//filename = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
-		filename = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
+		filename = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
+		//filename = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
 		TILE_WIDTH = 1024;
 		ROW_STEP = 16;
 	}
@@ -1854,9 +1865,9 @@ int main(int argc, char *argv[])
 	fprintf(time_out, "input end: %lf\n", now - start);
 #ifdef ONEDEBUG
 	printf("Input finished: %s\n", filename);
-	unsigned run_count = 9;
+	unsigned run_count = 7;
 #else
-	unsigned run_count = 9;
+	unsigned run_count = 7;
 #endif
 	T_RATIO = 81;
 	//T_RATIO = 60;
