@@ -427,6 +427,7 @@ unsigned update_visited_sparse(
 		out_degree += sum_degrees;
 		_mm512_i32scatter_epi32(h_graph_visited, vertex_id_v, _mm512_set1_epi32(1), sizeof(unsigned));
 	}
+	return out_degree;
 }
 void update_visited_sparse_reverse(
 		unsigned *h_graph_queue,
@@ -1807,8 +1808,8 @@ int main(int argc, char *argv[])
 		TILE_WIDTH = strtoul(argv[2], NULL, 0);
 		ROW_STEP = strtoul(argv[3], NULL, 0);
 	} else {
-		filename = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
-		//filename = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
+		//filename = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
+		filename = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
 		TILE_WIDTH = 1024;
 		ROW_STEP = 16;
 	}
