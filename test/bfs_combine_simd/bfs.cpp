@@ -60,7 +60,7 @@ inline void bfs_kernel_dense(
 	for (edge_i = 0; edge_i < bound_edge_i; edge_i += NUM_P_INT) {
 		__m512i head_v = _mm512_load_epi32(heads_buffer + edge_i);
 		__m512i active_flag_v = _mm512_i32gather_epi32(head_v, h_graph_mask, sizeof(int));
-		__mmask16 is_active_m = _mm512_test_epi32_mask(active_flag_v, _mm512_set1_epi32(1));
+		__mmask16 is_active_m = _mm512_test_epi32_mask(active_flag_v, _mm512_set1_epi32(-1));
 		if (!is_active_m) {
 			continue;
 		}
@@ -89,7 +89,7 @@ inline void bfs_kernel_dense(
 	__mmask16 in_range_m = (__mmask16) in_range_m_t;
 	__m512i head_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, heads_buffer + edge_i);
 	__m512i active_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_range_m, head_v, h_graph_mask, sizeof(int));
-	__mmask16 is_active_m = _mm512_test_epi32_mask(active_flag_v, _mm512_set1_epi32(1));
+	__mmask16 is_active_m = _mm512_test_epi32_mask(active_flag_v, _mm512_set1_epi32(-1));
 	if (!is_active_m) {
 		return;
 	}
@@ -692,7 +692,7 @@ void graph_prepare(
 						vertex_id < bound_vertex_id; 
 						vertex_id += NUM_P_INT) {
 					__m512i updating_flag_v = _mm512_loadu_si512(h_updating_graph_mask + vertex_id);
-					__mmask16 is_updating_m = _mm512_test_epi32_mask(updating_flag_v, _mm512_set1_epi32(1));
+					__mmask16 is_updating_m = _mm512_test_epi32_mask(updating_flag_v, _mm512_set1_epi32(-1));
 					if (!is_updating_m) {
 						_mm512_storeu_si512(h_graph_mask + vertex_id, _mm512_set1_epi32(0));
 						continue;
@@ -713,7 +713,7 @@ void graph_prepare(
 				unsigned short in_range_m_t = (unsigned short) 0xFFFF >> (NUM_P_INT - remainder);
 				__mmask16 in_range_m = (__mmask16) in_range_m_t;
 				__m512i updating_flag_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), in_range_m, h_updating_graph_mask + vertex_id);
-				__mmask16 is_updating_m = _mm512_test_epi32_mask(updating_flag_v, _mm512_set1_epi32(1));
+				__mmask16 is_updating_m = _mm512_test_epi32_mask(updating_flag_v, _mm512_set1_epi32(-1));
 				if (!is_updating_m) {
 					_mm512_mask_storeu_epi32(h_graph_mask + vertex_id, in_range_m, _mm512_set1_epi32(0));//addition
 					continue;

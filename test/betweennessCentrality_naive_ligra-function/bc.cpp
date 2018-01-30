@@ -438,8 +438,8 @@ int main(int argc, char *argv[])
 	if (argc > 1) {
 		filename = argv[1];
 	} else {
-		filename = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
-		//filename = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
+		//filename = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
+		filename = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
 	}
 	// Input
 	unsigned *graph_heads;
