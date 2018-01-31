@@ -38,6 +38,17 @@ double now;
 FILE *time_out;
 char *time_file = "timeline.txt";
 
+
+void print_m512i(__m512i v)
+{
+	int *a = (int *) &v;
+	printf("__m512i:");
+	for (int i = 0; i < 16; ++i) {
+		printf(" %d", a[i]);
+	}
+	putchar('\n');
+}
+
 void input(
 		char filename[], 
 		unsigned *&graph_heads, 
@@ -437,6 +448,7 @@ inline unsigned update_visited_sparse(
 	}
 	return out_degree;
 }
+//TOBEV
 inline void update_visited_sparse_reverse(
 		unsigned *h_graph_queue,
 		const unsigned &queue_size,
@@ -526,16 +538,33 @@ inline unsigned *BFS_kernel_sparse(
 				unsigned *num_paths)
 {
 	// From h_graph_queue, get the degrees (para_for)
-	unsigned *degrees = (unsigned *) malloc(sizeof(unsigned) *  queue_size);
+	unsigned *degrees = (unsigned *) _mm_malloc(sizeof(unsigned) *  queue_size, ALIGNED_BYTES);
 	unsigned new_queue_size = 0;
+	unsigned remainder = queue_size % NUM_P_INT;
+	unsigned bound_i = queue_size - remainder;
 //#pragma omp parallel for schedule(dynamic) reduction(+: new_queue_size)
 #pragma omp parallel for reduction(+: new_queue_size)
-	for (unsigned i = 0; i < queue_size; ++i) {
-		degrees[i] = graph_degrees[h_graph_queue[i]];
-		new_queue_size += degrees[i];
+	for (unsigned i = 0; i < bound_i; i += NUM_P_INT) {
+		__m512i v_ids = _mm512_load_epi32(h_graph_queue + i);
+		__m512i degrees_v = _mm512_i32gather_epi32(v_ids, graph_degrees, sizeof(unsigned));
+		_mm512_store_epi32(degrees + i, degrees_v);
+		unsigned sum_degrees = _mm512_reduce_add_epi32(degrees_v);
+		new_queue_size += sum_degrees;
 	}
+	if (remainder) {
+		__mmask16 in_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
+		__m512i v_ids = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_m, h_graph_queue + bound_i);
+		__m512i degrees_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_m, v_ids, graph_degrees, sizeof(unsigned));
+		_mm512_mask_store_epi32(degrees + bound_i, in_m, degrees_v);
+		unsigned sum_degrees = _mm512_reduce_add_epi32(degrees_v);
+		new_queue_size += sum_degrees;
+	}
+	//for (unsigned i = 0; i < queue_size; ++i) {
+	//	degrees[i] = graph_degrees[h_graph_queue[i]];
+	//	new_queue_size += degrees[i];
+	//}
 	if (0 == new_queue_size) {
-		free(degrees);
+		_mm_free(degrees);
 		queue_size = 0;
 		//h_graph_queue = nullptr;
 		return nullptr;
@@ -626,7 +655,7 @@ inline unsigned *BFS_kernel_sparse(
 	}
 	
 	if (0 == new_queue_size) {
-		free(degrees);
+		_mm_free(degrees);
 		_mm_free(new_frontier_tmp);
 		//free(new_frontier_tmp);
 		if (nums_in_blocks) {
@@ -662,13 +691,13 @@ inline unsigned *BFS_kernel_sparse(
 			unsigned bound_i = bound - remainder;
 			for (unsigned i = offset; i < bound_i; i += NUM_P_INT) {
 				__m512i tmp = _mm512_load_epi32(new_frontier_tmp + base);
-				_mm512_store_epi32(new_frontier + i, tmp);
+				_mm512_storeu_si512(new_frontier + i, tmp);
 				base += NUM_P_INT;
 			}
 			if (remainder) {
 				__mmask16 in_range_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
 				__m512i tmp = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, new_frontier_tmp + base);
-				_mm512_mask_store_epi32(new_frontier + bound_i, in_range_m, tmp);
+				_mm512_mask_storeu_epi32(new_frontier + bound_i, in_range_m, tmp);
 			}
 			//for (unsigned i = offset; i < bound; ++i) {
 			//	new_frontier[i] = new_frontier_tmp[base++];
@@ -693,7 +722,7 @@ inline unsigned *BFS_kernel_sparse(
 	}
 
 	// Return the results
-	free(degrees);
+	_mm_free(degrees);
 	_mm_free(new_frontier_tmp);
 	//free(new_frontier_tmp);
 	if (nums_in_blocks) {
@@ -850,7 +879,7 @@ inline void update_visited_dense(
 	_frontier_size = frontier_size;
 	_out_degree = out_degree;
 }
-
+//TOBEV
 void update_visited_dense_reverse(
 		unsigned *h_graph_mask,
 		int *h_graph_visited,
@@ -872,12 +901,29 @@ unsigned *to_dense(
 		unsigned frontier_size)
 {
 	unsigned *new_mask = (unsigned *) calloc(NNODES, sizeof(unsigned));
+	unsigned remainder = frontier_size % NUM_P_INT;
+	unsigned bound_i = frontier_size - remainder;
 #pragma omp parallel for
-	for (unsigned i = 0; i < frontier_size; ++i) {
-		unsigned vertex_id = h_graph_queue[i];
-		new_mask[vertex_id] = 1;
-		is_active_side[vertex_id / TILE_WIDTH] = 1;
+	for (unsigned i = 0; i < bound_i; i += NUM_P_INT) {
+		__m512i v_ids_v = _mm512_load_epi32(h_graph_queue + i);
+		_mm512_i32scatter_epi32(new_mask, v_ids_v, _mm512_set1_epi32(1), sizeof(int));
+		__m512i tw_v = _mm512_set1_epi32(TILE_WIDTH);
+		__m512i side_id_v = _mm512_div_epi32(v_ids_v, tw_v);
+		_mm512_i32scatter_epi32(is_active_side, side_id_v, _mm512_set1_epi32(1), sizeof(int));
 	}
+	if (remainder) {
+		__mmask16 in_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
+		__m512i v_ids_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_m, h_graph_queue + bound_i);
+		_mm512_mask_i32scatter_epi32(new_mask, in_m, v_ids_v, _mm512_set1_epi32(1), sizeof(int));
+		__m512i tw_v = _mm512_set1_epi32(TILE_WIDTH);
+		__m512i side_id_v = _mm512_mask_div_epi32(_mm512_undefined_epi32(), in_m, v_ids_v, tw_v);
+		_mm512_mask_i32scatter_epi32(is_active_side, in_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
+	}
+//	for (unsigned i = 0; i < frontier_size; ++i) {
+//		unsigned vertex_id = h_graph_queue[i];
+//		new_mask[vertex_id] = 1;
+//		is_active_side[vertex_id / TILE_WIDTH] = 1;
+//	}
 	return new_mask;
 }
 //inline void bfs_kernel_dense(
@@ -1911,7 +1957,7 @@ void BC(
 	//	printf("dependencies[%d]: %f\n",i, dependencies[i]);
 	//}
 	////End Test
-
+//TOBEV
 #pragma omp parallel for
 	for (unsigned i = 0; i < NNODES; ++i) {
 		if (inverse_num_paths[i] == 0.0) {
@@ -1959,8 +2005,8 @@ int main(int argc, char *argv[])
 		TILE_WIDTH = strtoul(argv[2], NULL, 0);
 		ROW_STEP = strtoul(argv[3], NULL, 0);
 	} else {
-		//filename = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
-		filename = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
+		filename = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
+		//filename = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
 		TILE_WIDTH = 1024;
 		ROW_STEP = 16;
 	}

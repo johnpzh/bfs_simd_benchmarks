@@ -1831,13 +1831,13 @@ int main(int argc, char *argv[])
 	SIZE_BUFFER_MAX = 512;
 	//SIZE_BUFFER_MAX = 1024;
 	// BFS
-	for (unsigned cz = 0; cz < 2; ++cz) {
+	for (unsigned cz = 0; cz < 1; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
 		//sleep(10);
 #endif
-		for (unsigned k = 0; k < 3; ++k) {
+		for (unsigned k = 0; k < 6; ++k) {
 		BC(
 			graph_heads, 
 			graph_tails, 
