@@ -436,7 +436,7 @@ inline unsigned update_visited_sparse(
 		__m512i degrees_v = _mm512_i32gather_epi32(vertex_id_v, graph_degrees, sizeof(unsigned));
 		unsigned sum_degrees = _mm512_reduce_add_epi32(degrees_v);
 		out_degree += sum_degrees;
-		_mm512_i32scatter_epi32(h_graph_visited, vertex_id_v, _mm512_set1_epi32(1), sizeof(unsigned));
+		_mm512_i32scatter_epi32(h_graph_visited, vertex_id_v, _mm512_set1_epi32(1), sizeof(int));
 	}
 	if (remainder) {
 		__mmask16 in_range_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
@@ -444,7 +444,7 @@ inline unsigned update_visited_sparse(
 		__m512i degrees_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_range_m, vertex_id_v, graph_degrees, sizeof(unsigned));
 		unsigned sum_degrees = _mm512_reduce_add_epi32(degrees_v);
 		out_degree += sum_degrees;
-		_mm512_mask_i32scatter_epi32(h_graph_visited, in_range_m, vertex_id_v, _mm512_set1_epi32(1), sizeof(unsigned));
+		_mm512_mask_i32scatter_epi32(h_graph_visited, in_range_m, vertex_id_v, _mm512_set1_epi32(1), sizeof(int));
 	}
 	return out_degree;
 }
@@ -456,18 +456,39 @@ inline void update_visited_sparse_reverse(
 		float *dependencies,
 		float *inverse_num_paths)
 {
+//#pragma omp parallel for
+//	for (unsigned i = 0; i < queue_size; ++i) {
+//		unsigned tail_id = h_graph_queue[i];
+//		h_graph_visited[tail_id] = 1;
+//		dependencies[tail_id] += inverse_num_paths[tail_id];
+//	}
+	unsigned remainder = queue_size % NUM_P_INT;
+	unsigned bound_i = queue_size - remainder;
 #pragma omp parallel for
-	for (unsigned i = 0; i < queue_size; ++i) {
-		unsigned tail_id = h_graph_queue[i];
-		h_graph_visited[tail_id] = 1;
-		dependencies[tail_id] += inverse_num_paths[tail_id];
+	for (unsigned i = 0; i < bound_i; i += NUM_P_INT) {
+		__m512i vertex_id_v = _mm512_load_epi32(h_graph_queue + i);
+		_mm512_i32scatter_epi32(h_graph_visited, vertex_id_v, _mm512_set1_epi32(1), sizeof(int));
+		__m512 inv_num_paths_v = _mm512_i32gather_ps(vertex_id_v, inverse_num_paths, sizeof(float));
+		__m512 dep_v = _mm512_i32gather_ps(vertex_id_v, dependencies, sizeof(float));
+		dep_v = _mm512_add_ps(dep_v, inv_num_paths_v);
+		_mm512_i32scatter_ps(dependencies, vertex_id_v, dep_v, sizeof(float));
+	}
+	if (remainder) {
+		__mmask16 in_range_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
+		__m512i vertex_id_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, h_graph_queue + bound_i);
+		_mm512_mask_i32scatter_epi32(h_graph_visited, in_range_m, vertex_id_v, _mm512_set1_epi32(1), sizeof(int));
+		__m512 inv_num_paths_v = _mm512_mask_i32gather_ps(_mm512_undefined_ps(), in_range_m, vertex_id_v, inverse_num_paths, sizeof(float));
+		__m512 dep_v = _mm512_mask_i32gather_ps(_mm512_undefined_ps(), in_range_m, vertex_id_v, dependencies, sizeof(float));
+		dep_v = _mm512_mask_add_ps(_mm512_undefined_ps(), in_range_m, dep_v, inv_num_paths_v);
+		_mm512_mask_i32scatter_ps(dependencies, in_range_m, vertex_id_v, dep_v, sizeof(float));
 	}
 }
 inline unsigned *to_sparse(
 		const unsigned &frontier_size,
 		unsigned *h_graph_mask)
 {
-	unsigned *new_frontier = (unsigned *) malloc(frontier_size * sizeof(unsigned));
+	//unsigned *new_frontier = (unsigned *) malloc(frontier_size * sizeof(unsigned));
+	unsigned *new_frontier = (unsigned *) _mm_malloc(frontier_size * sizeof(unsigned), ALIGNED_BYTES);
 
 	const unsigned block_size = 1 << 12;
 	unsigned num_blocks = (NNODES - 1)/block_size + 1;
@@ -879,19 +900,47 @@ inline void update_visited_dense(
 	_frontier_size = frontier_size;
 	_out_degree = out_degree;
 }
-//TOBEV
+
 void update_visited_dense_reverse(
 		unsigned *h_graph_mask,
 		int *h_graph_visited,
 		float *dependencies,
 		float *inverse_num_paths)
 {
+//#pragma omp parallel for schedule(dynamic, CHUNK_SIZE)
+//	for (unsigned i = 0; i < NNODES; ++i) {
+//		if (h_graph_mask[i]) {
+//			h_graph_visited[i] = 1;
+//			dependencies[i] += inverse_num_paths[i];
+//		}
+//	}
+	unsigned remainder = NNODES % NUM_P_INT;
+	unsigned bound_i = NNODES - remainder;
 #pragma omp parallel for schedule(dynamic, CHUNK_SIZE)
-	for (unsigned i = 0; i < NNODES; ++i) {
-		if (h_graph_mask[i]) {
-			h_graph_visited[i] = 1;
-			dependencies[i] += inverse_num_paths[i];
+	for (unsigned i = 0; i < bound_i; i += NUM_P_INT) {
+		__m512i mask_v = _mm512_load_epi32(h_graph_mask + i);
+		__mmask16 is_set_v = _mm512_test_epi32_mask(mask_v, _mm512_set1_epi32(-1));
+		if (!is_set_v) {
+			continue;
 		}
+		_mm512_mask_store_epi32(h_graph_visited + i, is_set_v, _mm512_set1_epi32(1));
+		__m512 inv_num_paths_v = _mm512_mask_load_ps(_mm512_undefined_ps(), is_set_v, inverse_num_paths + i);
+		__m512 dep_v = _mm512_mask_load_ps(_mm512_undefined_ps(), is_set_v, dependencies + i);
+		dep_v = _mm512_mask_add_ps(dep_v, is_set_v, dep_v, inv_num_paths_v);
+		_mm512_mask_store_ps(dependencies + i, is_set_v, dep_v);
+	}
+	if (remainder) {
+		__mmask16 in_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
+		__m512i mask_v = _mm512_mask_load_epi32(_mm512_set1_epi32(0), in_m, h_graph_mask + bound_i);
+		__mmask16 is_set_v = _mm512_test_epi32_mask(mask_v, _mm512_set1_epi32(-1));
+		if (!is_set_v) {
+			return;
+		}
+		_mm512_mask_store_epi32(h_graph_visited + bound_i, is_set_v, _mm512_set1_epi32(1));
+		__m512 inv_num_paths_v = _mm512_mask_load_ps(_mm512_undefined_ps(), is_set_v, inverse_num_paths + bound_i);
+		__m512 dep_v = _mm512_mask_load_ps(_mm512_undefined_ps(), is_set_v, dependencies + bound_i);
+		dep_v = _mm512_mask_add_ps(dep_v, is_set_v, dep_v, inv_num_paths_v);
+		_mm512_mask_store_ps(dependencies + bound_i, is_set_v, dep_v);
 	}
 }
 
@@ -1620,11 +1669,15 @@ void BC(
 	//unsigned *num_paths = (unsigned *) calloc(NNODES, sizeof(unsigned));
 	unsigned *num_paths = (unsigned *) _mm_malloc(NNODES * sizeof(unsigned), ALIGNED_BYTES);
 	memset(num_paths, 0, NNODES * sizeof(unsigned));
-	int *h_graph_visited = (int *) calloc(NNODES, sizeof(int));
+	//int *h_graph_visited = (int *) calloc(NNODES, sizeof(int));
+	int *h_graph_visited = (int *) _mm_malloc(NNODES * sizeof(unsigned), ALIGNED_BYTES);
+	memset(h_graph_visited, 0, NNODES * sizeof(unsigned));
 	int *is_active_side = (int *) calloc(SIDE_LENGTH, sizeof(int));
 	int *is_updating_active_side = (int *) calloc(SIDE_LENGTH, sizeof(int));
 	unsigned *h_graph_mask = nullptr;
-	float *dependencies = (float *) calloc(NNODES, sizeof(float));
+	//float *dependencies = (float *) calloc(NNODES, sizeof(float));
+	float *dependencies = (float *) _mm_malloc(NNODES * sizeof(float), ALIGNED_BYTES);
+	memset(dependencies, 0, NNODES * sizeof(float));
 	vector<unsigned *> frontiers;
 	vector<unsigned> frontier_sizes;
 	vector<bool> is_dense_frontier;
@@ -1719,7 +1772,8 @@ void BC(
 								h_graph_visited,
 								num_paths);
 			if (last_is_dense) {
-				free(h_graph_queue);
+				//free(h_graph_queue);
+				_mm_free(h_graph_queue);
 			}
 			h_graph_queue = new_queue;
 			last_is_dense = false;
@@ -1912,8 +1966,10 @@ void BC(
 //			inverse_num_paths[i] = 1/ (1.0 * num_paths[i]);
 //		}
 //	}
-	free(h_graph_visited);
-	h_graph_visited = (int *) calloc(NNODES, sizeof(int));
+
+	//free(h_graph_visited);
+	//h_graph_visited = (int *) calloc(NNODES, sizeof(int));
+	memset(h_graph_visited, 0, NNODES * sizeof(int));
 
 	unsigned *frontier;
 	for (int lc = level_count - 1; lc >= 0; --lc) {
@@ -1957,14 +2013,34 @@ void BC(
 	//	printf("dependencies[%d]: %f\n",i, dependencies[i]);
 	//}
 	////End Test
-//TOBEV
+
+//#pragma omp parallel for
+//	for (unsigned i = 0; i < NNODES; ++i) {
+//		if (inverse_num_paths[i] == 0.0) {
+//			dependencies[i] = 0.0;
+//		} else {
+//			dependencies[i] = (dependencies[i] - inverse_num_paths[i]) / inverse_num_paths[i];
+//		}
+//	}
+	remainder = NNODES % NUM_P_INT;
+	bound_i = NNODES - remainder;
 #pragma omp parallel for
-	for (unsigned i = 0; i < NNODES; ++i) {
-		if (inverse_num_paths[i] == 0.0) {
-			dependencies[i] = 0.0;
-		} else {
-			dependencies[i] = (dependencies[i] - inverse_num_paths[i]) / inverse_num_paths[i];
-		}
+	for (unsigned i = 0; i < bound_i; i += NUM_P_INT) {
+		__m512 inv_num_paths_v = _mm512_load_ps(inverse_num_paths + i);
+		__mmask16 no_zero_m = _mm512_cmpneq_ps_mask(inv_num_paths_v, _mm512_set1_ps(0.0));
+		__m512 dep_v = _mm512_mask_load_ps(_mm512_undefined_ps(), no_zero_m, dependencies + i);
+		__m512 num_v = _mm512_mask_sub_ps(_mm512_undefined_ps(), no_zero_m, dep_v, inv_num_paths_v);
+		__m512 new_dep_v = _mm512_mask_div_ps(_mm512_set1_ps(0.0), no_zero_m, num_v, inv_num_paths_v);
+		_mm512_store_ps(dependencies + i, new_dep_v);
+	}
+	if (remainder) {
+		__mmask16 in_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
+		__m512 inv_num_paths_v = _mm512_mask_load_ps(_mm512_set1_ps(0.0), in_m, inverse_num_paths + bound_i);
+		__mmask16 no_zero_m = _mm512_cmpneq_ps_mask(inv_num_paths_v, _mm512_set1_ps(0.0));
+		__m512 dep_v = _mm512_mask_load_ps(_mm512_undefined_ps(), no_zero_m, dependencies + bound_i);
+		__m512 num_v = _mm512_mask_sub_ps(_mm512_undefined_ps(), no_zero_m, dep_v, inv_num_paths_v);
+		__m512 new_dep_v = _mm512_mask_div_ps(_mm512_set1_ps(0.0), no_zero_m, num_v, inv_num_paths_v);
+		_mm512_mask_store_ps(dependencies + bound_i, in_m, new_dep_v);
 	}
 
 	double second_phase_time = omp_get_wtime() - time_now;
@@ -1974,11 +2050,11 @@ void BC(
 	printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
 	////Test
 	////puts("After:");
-	FILE *fout = fopen("output.txt", "w");
-	for (unsigned i = 0; i < NNODES; ++i) {
-		fprintf(fout, "d[%u]: %f\n", i, dependencies[i]);
-	}
-	fclose(fout);
+	//FILE *fout = fopen("output.txt", "w");
+	//for (unsigned i = 0; i < NNODES; ++i) {
+	//	fprintf(fout, "d[%u]: %f\n", i, dependencies[i]);
+	//}
+	//fclose(fout);
 	////End Test
 	
 	// Free memory
@@ -1988,8 +2064,10 @@ void BC(
 	frontiers.clear();
 	//free(num_paths);
 	_mm_free(num_paths);
-	free(h_graph_visited);
-	free(dependencies);
+	//free(h_graph_visited);
+	_mm_free(h_graph_visited);
+	//free(dependencies);
+	_mm_free(dependencies);
 	free(is_active_side);
 	free(is_updating_active_side);
 	//free(inverse_num_paths);
@@ -2053,7 +2131,7 @@ int main(int argc, char *argv[])
 	printf("Input finished: %s\n", filename);
 	unsigned run_count = 7;
 #else
-	unsigned run_count = 7;
+	unsigned run_count = 9;
 #endif
 	T_RATIO = 81;
 	//T_RATIO = 60;
@@ -2062,13 +2140,13 @@ int main(int argc, char *argv[])
 	SIZE_BUFFER_MAX = 512;
 	//SIZE_BUFFER_MAX = 1024;
 	// BFS
-	for (unsigned cz = 0; cz < 1; ++cz) {
+	for (unsigned cz = 0; cz < 2; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
 		//sleep(10);
 #endif
-		for (unsigned k = 0; k < 1; ++k) {
+		for (unsigned k = 0; k < 2; ++k) {
 		BC(
 			graph_heads, 
 			graph_tails, 
