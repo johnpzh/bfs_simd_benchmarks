@@ -29,9 +29,12 @@ unsigned TILE_WIDTH;
 unsigned SIDE_LENGTH;
 unsigned NUM_TILES;
 unsigned ROW_STEP;
-unsigned CHUNK_SIZE;
+unsigned CHUNK_SIZE_DENSE;
+unsigned CHUNK_SIZE_SPARSE;
+unsigned CHUNK_SIZE_BLOCK;
 unsigned SIZE_BUFFER_MAX;
 unsigned T_RATIO;
+unsigned WORK_LOAD;
 
 double start;
 double now;
@@ -47,6 +50,16 @@ void print_m512i(__m512i v)
 		printf(" %d", a[i]);
 	}
 	putchar('\n');
+}
+
+inline unsigned get_chunk_size(unsigned amount)
+{
+	unsigned r = amount / NUM_THREADS / WORK_LOAD;
+	if (r) {
+		return r;
+	} else {
+		return 1;
+	}
 }
 
 void input(
@@ -499,6 +512,7 @@ inline unsigned *to_sparse(
 		memset(nums_in_blocks, 0, num_blocks * sizeof(unsigned));
 		// The start locations where the vertices are put in the frontier.
 #pragma omp parallel for
+//#pragma omp parallel for schedule(dynamic, CHUNK_SIZE_BLOCK)
 		for (unsigned block_i = 0; block_i < num_blocks; ++block_i) {
 			unsigned offset = block_i * block_size;
 			unsigned bound;
@@ -523,6 +537,7 @@ inline unsigned *to_sparse(
 		}
 		// Put vertices into the frontier
 #pragma omp parallel for
+//#pragma omp parallel for schedule(dynamic, CHUNK_SIZE_BLOCK)
 		for (unsigned block_i = 0; block_i < num_blocks; ++block_i) {
 			unsigned base = nums_in_blocks[block_i];
 			unsigned offset = block_i * block_size;
@@ -603,7 +618,8 @@ inline unsigned *BFS_kernel_sparse(
 	// From offset, get active vertices (para_for)
 	//unsigned *new_frontier_tmp = (unsigned *) malloc(sizeof(unsigned) * new_queue_size);
 	unsigned *new_frontier_tmp = (unsigned *) _mm_malloc(sizeof(unsigned) * new_queue_size, ALIGNED_BYTES);
-#pragma omp parallel for schedule(dynamic, CHUNK_SIZE)
+	CHUNK_SIZE_SPARSE = get_chunk_size(queue_size);
+#pragma omp parallel for schedule(dynamic, CHUNK_SIZE_SPARSE)
 	for (unsigned i = 0; i < queue_size; ++i) {
 		unsigned start = h_graph_queue[i];
 		unsigned offset = degrees[i];
@@ -698,7 +714,7 @@ inline unsigned *BFS_kernel_sparse(
 			offset_sum += tmp;
 		}
 		//#pragma omp parallel for schedule(dynamic)
-//#pragma omp parallel for
+#pragma omp parallel for
 		for (unsigned block_i = 0; block_i < num_blocks; ++block_i) {
 			unsigned offset = nums_in_blocks[block_i];
 			unsigned bound;
@@ -781,7 +797,8 @@ inline void BFS_kernel_sparse_reverse(
 				float *dependencies)
 {
 	// From offset, get active vertices (para_for)
-#pragma omp parallel for schedule(dynamic, CHUNK_SIZE)
+	CHUNK_SIZE_SPARSE = get_chunk_size(queue_size);
+#pragma omp parallel for schedule(dynamic, CHUNK_SIZE_SPARSE)
 	for (unsigned i = 0; i < queue_size; ++i) {
 		unsigned start = h_graph_queue[i];
 		unsigned base_edge_i = graph_vertices[start];
@@ -839,6 +856,7 @@ inline void update_visited_dense(
 	unsigned frontier_size = 0;
 	unsigned out_degree = 0;
 #pragma omp parallel for reduction(+: frontier_size, out_degree)
+//#pragma omp parallel for schedule(dynamic, 2) reduction(+: frontier_size, out_degree)
 	for (unsigned side_id = 0; side_id < SIDE_LENGTH; ++side_id) {
 		if (!is_updating_active_side[side_id]) {
 			is_active_side[side_id] = 0;
@@ -916,7 +934,7 @@ void update_visited_dense_reverse(
 //	}
 	unsigned remainder = NNODES % NUM_P_INT;
 	unsigned bound_i = NNODES - remainder;
-#pragma omp parallel for schedule(dynamic, CHUNK_SIZE)
+#pragma omp parallel for schedule(dynamic, CHUNK_SIZE_DENSE)
 	for (unsigned i = 0; i < bound_i; i += NUM_P_INT) {
 		__m512i mask_v = _mm512_load_epi32(h_graph_mask + i);
 		__mmask16 is_set_v = _mm512_test_epi32_mask(mask_v, _mm512_set1_epi32(-1));
@@ -2133,20 +2151,28 @@ int main(int argc, char *argv[])
 #else
 	unsigned run_count = 9;
 #endif
-	T_RATIO = 81;
+	//T_RATIO = 81;
 	//T_RATIO = 60;
 	//CHUNK_SIZE = 2048;
-	CHUNK_SIZE = 32768;
-	SIZE_BUFFER_MAX = 512;
+	//CHUNK_SIZE_DENSE = 32768;
+	//SIZE_BUFFER_MAX = 512;
+	//for (unsigned v = 100; v < 3001; v += 100) {
+	T_RATIO = 25;
+	WORK_LOAD = 30;
+	//CHUNK_SIZE_SPARSE = v;
+	CHUNK_SIZE_DENSE = 1024;
+	//CHUNK_SIZE_BLOCK = v;
+	SIZE_BUFFER_MAX = 800;
+	//printf("CHUNK_SIZE_BLOCK: %u\n", CHUNK_SIZE_BLOCK);
 	//SIZE_BUFFER_MAX = 1024;
 	// BFS
-	for (unsigned cz = 0; cz < 2; ++cz) {
+	//for (unsigned cz = 0; cz < 2; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
 		//sleep(10);
 #endif
-		for (unsigned k = 0; k < 2; ++k) {
+		for (unsigned k = 0; k < 6; ++k) {
 		BC(
 			graph_heads, 
 			graph_tails, 
@@ -2168,7 +2194,8 @@ int main(int argc, char *argv[])
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 	}
-	}
+	//}
+	//}
 	fclose(time_out);
 
 	// Free memory
