@@ -2047,6 +2047,7 @@ void BC(
 	printf("%u %f\n", NUM_THREADS, run_time = omp_get_wtime() - start_time);
 	//print_time();
 	print_simd_utilization();
+	puts("==================");
 	////Test
 	////puts("After:");
 	//FILE *fout = fopen("output.txt", "w");
@@ -2082,8 +2083,8 @@ int main(int argc, char *argv[])
 		TILE_WIDTH = strtoul(argv[2], NULL, 0);
 		ROW_STEP = strtoul(argv[3], NULL, 0);
 	} else {
-		filename = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
-		//filename = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
+		//filename = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
+		filename = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
 		TILE_WIDTH = 1024;
 		ROW_STEP = 16;
 	}
@@ -2147,7 +2148,7 @@ int main(int argc, char *argv[])
 	//printf("CHUNK_SIZE_BLOCK: %u\n", CHUNK_SIZE_BLOCK);
 	//SIZE_BUFFER_MAX = 1024;
 	// BFS
-	for (unsigned cz = 0; cz < 3; ++cz) {
+	for (unsigned cz = 0; cz < 2; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG

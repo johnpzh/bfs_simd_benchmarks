@@ -453,6 +453,8 @@ void to_dense(
 		unsigned *frontier,
 		const unsigned &frontier_size)
 {
+	memset(h_graph_mask, 0, NNODES * sizeof(int));
+	memset(is_active_side, 0, SIDE_LENGTH * sizeof(int));
 #pragma omp parallel for
 	for (unsigned i = 0; i < frontier_size; ++i) {
 		unsigned vertex_id = frontier[i];
