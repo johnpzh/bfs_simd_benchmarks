@@ -36,6 +36,10 @@ unsigned SIZE_BUFFER_MAX;
 unsigned T_RATIO;
 unsigned WORK_LOAD;
 
+unsigned long miss_sparse;
+unsigned long miss_dense;
+unsigned long load_count;
+
 double start;
 double now;
 FILE *time_out;
@@ -50,6 +54,12 @@ void print_m512i(__m512i v)
 		printf(" %d", a[i]);
 	}
 	putchar('\n');
+}
+
+unsigned mmask16_count_one(__mmask16 m)
+{
+	__m512i ones = _mm512_mask_set1_epi32(_mm512_set1_epi32(0), m, 1);
+	return _mm512_reduce_add_epi32(ones);
 }
 
 inline unsigned get_chunk_size(unsigned amount)
@@ -619,33 +629,6 @@ inline unsigned *BFS_kernel_sparse(
 	//unsigned *new_frontier_tmp = (unsigned *) malloc(sizeof(unsigned) * new_queue_size);
 	unsigned *new_frontier_tmp = (unsigned *) _mm_malloc(sizeof(unsigned) * new_queue_size, ALIGNED_BYTES);
 	CHUNK_SIZE_SPARSE = get_chunk_size(queue_size);
-	if (CHUNK_SIZE_SPARSE == 1) {
-#pragma omp parallel for
-	for (unsigned i = 0; i < queue_size; ++i) {
-		unsigned start = h_graph_queue[i];
-		unsigned offset = degrees[i];
-		unsigned out_degree = graph_degrees[start];
-		unsigned base = graph_vertices[start];
-		for (unsigned k = 0; k < out_degree; ++k) {
-			unsigned end = graph_edges[base + k];
-			if (0 == h_graph_visited[end]) {
-				volatile unsigned old_val;
-				volatile unsigned new_val;
-				do {
-					old_val = num_paths[end];
-					new_val = old_val + num_paths[start];
-				} while (!__sync_bool_compare_and_swap(num_paths + end, old_val, new_val));
-				if (old_val == 0.0) {
-					new_frontier_tmp[offset + k] = end;
-				} else {
-					new_frontier_tmp[offset + k] = (unsigned) -1;
-				}
-			} else {
-				new_frontier_tmp[offset + k] = (unsigned) -1;
-			}
-		}
-	}
-	} else {
 #pragma omp parallel for schedule(dynamic, CHUNK_SIZE_SPARSE)
 	for (unsigned i = 0; i < queue_size; ++i) {
 		unsigned start = h_graph_queue[i];
@@ -655,6 +638,13 @@ inline unsigned *BFS_kernel_sparse(
 		for (unsigned k = 0; k < out_degree; ++k) {
 			unsigned end = graph_edges[base + k];
 			if (0 == h_graph_visited[end]) {
+				//bool unvisited = __sync_bool_compare_and_swap(h_graph_visited + end, 0, 1); //update h_graph_visited
+				//if (unvisited) {
+				//	new_frontier_tmp[offset + k] = end;
+				//} else {
+				//	new_frontier_tmp[offset + k] = (unsigned) -1;
+				//}
+				// Update num_paths
 				volatile unsigned old_val;
 				volatile unsigned new_val;
 				do {
@@ -671,32 +661,6 @@ inline unsigned *BFS_kernel_sparse(
 			}
 		}
 	}
-	}
-//#pragma omp parallel for schedule(dynamic, CHUNK_SIZE_SPARSE)
-//	for (unsigned i = 0; i < queue_size; ++i) {
-//		unsigned start = h_graph_queue[i];
-//		unsigned offset = degrees[i];
-//		unsigned out_degree = graph_degrees[start];
-//		unsigned base = graph_vertices[start];
-//		for (unsigned k = 0; k < out_degree; ++k) {
-//			unsigned end = graph_edges[base + k];
-//			if (0 == h_graph_visited[end]) {
-//				volatile unsigned old_val;
-//				volatile unsigned new_val;
-//				do {
-//					old_val = num_paths[end];
-//					new_val = old_val + num_paths[start];
-//				} while (!__sync_bool_compare_and_swap(num_paths + end, old_val, new_val));
-//				if (old_val == 0.0) {
-//					new_frontier_tmp[offset + k] = end;
-//				} else {
-//					new_frontier_tmp[offset + k] = (unsigned) -1;
-//				}
-//			} else {
-//				new_frontier_tmp[offset + k] = (unsigned) -1;
-//			}
-//		}
-//	}
 
 
 	// Refine active vertices, removing visited and redundant (block_para_for)
@@ -844,28 +808,6 @@ inline void BFS_kernel_sparse_reverse(
 {
 	// From offset, get active vertices (para_for)
 	CHUNK_SIZE_SPARSE = get_chunk_size(queue_size);
-	if (1 == CHUNK_SIZE_SPARSE) {
-#pragma omp parallel for
-	for (unsigned i = 0; i < queue_size; ++i) {
-		unsigned start = h_graph_queue[i];
-		unsigned base_edge_i = graph_vertices[start];
-		unsigned bound_edge_i = base_edge_i + graph_degrees[start];
-		for (unsigned edge_i = base_edge_i; edge_i < bound_edge_i; ++edge_i) {
-			unsigned end = graph_edges[edge_i];
-			if (0 == h_graph_visited[end]) {
-				volatile float old_val;
-				volatile float new_val;
-				do {
-					old_val = dependencies[end];
-					new_val = old_val + dependencies[start];
-				} while (!__sync_bool_compare_and_swap(
-												(int *) (dependencies + end), 
-												*((int *) &old_val), 
-												*((int *) &new_val)));
-			}
-		}
-	}
-	} else {
 #pragma omp parallel for schedule(dynamic, CHUNK_SIZE_SPARSE)
 	for (unsigned i = 0; i < queue_size; ++i) {
 		unsigned start = h_graph_queue[i];
@@ -886,27 +828,6 @@ inline void BFS_kernel_sparse_reverse(
 			}
 		}
 	}
-	}
-//#pragma omp parallel for schedule(dynamic, CHUNK_SIZE_SPARSE)
-//	for (unsigned i = 0; i < queue_size; ++i) {
-//		unsigned start = h_graph_queue[i];
-//		unsigned base_edge_i = graph_vertices[start];
-//		unsigned bound_edge_i = base_edge_i + graph_degrees[start];
-//		for (unsigned edge_i = base_edge_i; edge_i < bound_edge_i; ++edge_i) {
-//			unsigned end = graph_edges[edge_i];
-//			if (0 == h_graph_visited[end]) {
-//				volatile float old_val;
-//				volatile float new_val;
-//				do {
-//					old_val = dependencies[end];
-//					new_val = old_val + dependencies[start];
-//				} while (!__sync_bool_compare_and_swap(
-//												(int *) (dependencies + end), 
-//												*((int *) &old_val), 
-//												*((int *) &new_val)));
-//			}
-//		}
-//	}
 }
 inline void BFS_sparse_reverse(
 				unsigned *h_graph_queue,
@@ -1164,6 +1085,8 @@ inline void bfs_kernel_dense(
 		__m512i active_flag_v = _mm512_i32gather_epi32(head_v, h_graph_mask, sizeof(int));
 		__mmask16 is_active_m = _mm512_test_epi32_mask(active_flag_v, _mm512_set1_epi32(-1));
 		if (!is_active_m) {
+			miss_dense += 16;
+			++load_count;
 			continue;
 		}
 		__m512i tail_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), is_active_m, tails_buffer + edge_i);
@@ -1172,8 +1095,12 @@ inline void bfs_kernel_dense(
 		//__m512i visited_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(1), is_active_m, tail_v, h_graph_parents, sizeof(int));
 		//__mmask16 not_visited_m = _mm512_cmpeq_epi32_mask(visited_flag_v, _mm512_set1_epi32(-1));
 		if (!not_visited_m) {
+			miss_dense += 16;
+			++load_count;
 			continue;
 		}
+		miss_dense += 16 - mmask16_count_one(not_visited_m);
+		++load_count;
 		__m512i num_paths_head_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), not_visited_m, head_v, num_paths, sizeof(int));
 		scan_for_gather_add_scatter_conflict_safe_epi32(num_paths_head_v, tail_v);
 		__m512i num_paths_tail_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), not_visited_m, tail_v, num_paths, sizeof(int));
@@ -1199,6 +1126,8 @@ inline void bfs_kernel_dense(
 	__m512i active_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_range_m, head_v, h_graph_mask, sizeof(int));
 	__mmask16 is_active_m = _mm512_test_epi32_mask(active_flag_v, _mm512_set1_epi32(-1));
 	if (!is_active_m) {
+		miss_dense += 16;
+		++load_count;
 		return;
 	}
 	__m512i tail_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), is_active_m, tails_buffer + edge_i);
@@ -1207,8 +1136,12 @@ inline void bfs_kernel_dense(
 	//__m512i visited_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(1), is_active_m, tail_v, h_graph_parents, sizeof(int));
 	//__mmask16 not_visited_m = _mm512_cmpeq_epi32_mask(visited_flag_v, _mm512_set1_epi32(-1));
 	if (!not_visited_m) {
+		miss_dense += 16;
+		++load_count;
 		return;
 	}
+	miss_dense += 16 - mmask16_count_one(not_visited_m);
+	++load_count;
 	__m512i num_paths_head_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), not_visited_m, head_v, num_paths, sizeof(int));
 	scan_for_gather_add_scatter_conflict_safe_epi32(num_paths_head_v, tail_v);
 	__m512i num_paths_tail_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), not_visited_m, tail_v, num_paths, sizeof(int));
@@ -1496,6 +1429,8 @@ inline void bfs_kernel_dense_reverse(
 		__m512i active_flag_v = _mm512_i32gather_epi32(head_v, h_graph_mask, sizeof(int));
 		__mmask16 is_active_m = _mm512_test_epi32_mask(active_flag_v, _mm512_set1_epi32(-1));
 		if (!is_active_m) {
+			miss_dense += 16;
+			++load_count;
 			continue;
 		}
 		__m512i tail_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), is_active_m, tails_buffer + edge_i);
@@ -1504,8 +1439,12 @@ inline void bfs_kernel_dense_reverse(
 		//__m512i visited_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(1), is_active_m, tail_v, h_graph_parents, sizeof(int));
 		//__mmask16 not_visited_m = _mm512_cmpeq_epi32_mask(visited_flag_v, _mm512_set1_epi32(-1));
 		if (!not_visited_m) {
+			miss_dense += 16;
+			++load_count;
 			continue;
 		}
+		miss_dense += 16 - mmask16_count_one(not_visited_m);
+		++load_count;
 		__m512 dependencies_head_v = _mm512_mask_i32gather_ps(_mm512_undefined_ps(), not_visited_m, head_v, dependencies, sizeof(float));
 		scan_for_gather_add_scatter_conflict_safe_ps(dependencies_head_v, tail_v);
 		__m512 dependencies_tail_v = _mm512_mask_i32gather_ps(_mm512_undefined_ps(), not_visited_m, tail_v, dependencies, sizeof(float));
@@ -1523,6 +1462,8 @@ inline void bfs_kernel_dense_reverse(
 	}
 
 	if (0 == remainder) {
+		miss_dense += 16;
+		++load_count;
 		return;
 	}
 	unsigned short in_range_m_t = (unsigned short) 0xFFFF >> (NUM_P_INT - remainder);
@@ -1531,6 +1472,8 @@ inline void bfs_kernel_dense_reverse(
 	__m512i active_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_range_m, head_v, h_graph_mask, sizeof(int));
 	__mmask16 is_active_m = _mm512_test_epi32_mask(active_flag_v, _mm512_set1_epi32(-1));
 	if (!is_active_m) {
+		miss_dense += 16;
+		++load_count;
 		return;
 	}
 	__m512i tail_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), is_active_m, tails_buffer + edge_i);
@@ -1541,6 +1484,8 @@ inline void bfs_kernel_dense_reverse(
 	if (!not_visited_m) {
 		return;
 	}
+	miss_dense += 16 - mmask16_count_one(not_visited_m);
+	++load_count;
 	__m512 dependencies_head_v = _mm512_mask_i32gather_ps(_mm512_undefined_ps(), not_visited_m, head_v, dependencies, sizeof(float));
 	scan_for_gather_add_scatter_conflict_safe_ps(dependencies_head_v, tail_v);
 	__m512 dependencies_tail_v = _mm512_mask_i32gather_ps(_mm512_undefined_ps(), not_visited_m, tail_v, dependencies, sizeof(float));
@@ -1776,6 +1721,11 @@ void print_time()
 	printf("=========================\n");
 }
 
+void print_simd_utilization()
+{
+	printf("SIMD_utilization: %lf\n", 1.0 * miss_dense / (load_count * 16.0));
+}
+
 void BC(
 		unsigned *graph_heads, 
 		unsigned *graph_tails, 
@@ -1798,6 +1748,9 @@ void BC(
 	sparse_time = 0.0 ;
 	to_sparse_time = 0.0;
 	update_time = 0.0;
+	miss_sparse = 0;
+	miss_dense = 0;
+	load_count = 0;
 
 	omp_set_num_threads(NUM_THREADS);
 	//unsigned *num_paths = (unsigned *) calloc(NNODES, sizeof(unsigned));
@@ -1864,41 +1817,41 @@ void BC(
 	// According the sum, determing to run Sparse or Dense, and then change the last_is_dense.
 	unsigned bfs_threshold = NEDGES / T_RATIO;
 	while (true) {
-		//if (frontier_size + out_degree > bfs_threshold) {
-		//	if (!last_is_dense) {
-		//		last_time = omp_get_wtime();
-		//		free(is_active_side);
-		//		is_active_side = (int *) calloc(NNODES, sizeof(int));
-		//		h_graph_mask = to_dense(
-		//			is_active_side, 
-		//			h_graph_queue, 
-		//			frontier_size);
-		//		to_dense_time += omp_get_wtime() - last_time;
-		//	}
-		//	last_time = omp_get_wtime();
-		//	unsigned *new_mask = BFS_dense(
-		//			graph_heads,
-		//			graph_tails,
-		//			h_graph_mask,
-		//			//h_updating_graph_mask,
-		//			h_graph_visited,
-		//			//h_graph_parents,
-		//			//h_cost,
-		//			tile_offsets,
-		//			//is_empty_tile,
-		//			tile_sizes,
-		//			is_active_side,
-		//			is_updating_active_side,
-		//			num_paths);
-		//	if (!last_is_dense) {
-		//		free(h_graph_mask);
-		//	}
-		//	h_graph_mask = new_mask;
-		//	last_is_dense = true;
-		//	frontiers.push_back(h_graph_mask);
-		//	is_dense_frontier.push_back(last_is_dense);
-		//	dense_time += omp_get_wtime() - last_time;
-		//} else {
+		if (frontier_size + out_degree > bfs_threshold) {
+			if (!last_is_dense) {
+				last_time = omp_get_wtime();
+				free(is_active_side);
+				is_active_side = (int *) calloc(NNODES, sizeof(int));
+				h_graph_mask = to_dense(
+					is_active_side, 
+					h_graph_queue, 
+					frontier_size);
+				to_dense_time += omp_get_wtime() - last_time;
+			}
+			last_time = omp_get_wtime();
+			unsigned *new_mask = BFS_dense(
+					graph_heads,
+					graph_tails,
+					h_graph_mask,
+					//h_updating_graph_mask,
+					h_graph_visited,
+					//h_graph_parents,
+					//h_cost,
+					tile_offsets,
+					//is_empty_tile,
+					tile_sizes,
+					is_active_side,
+					is_updating_active_side,
+					num_paths);
+			if (!last_is_dense) {
+				free(h_graph_mask);
+			}
+			h_graph_mask = new_mask;
+			last_is_dense = true;
+			frontiers.push_back(h_graph_mask);
+			is_dense_frontier.push_back(last_is_dense);
+			dense_time += omp_get_wtime() - last_time;
+		} else {
 			// Sparse
 			if (last_is_dense) {
 				last_time = omp_get_wtime();
@@ -1925,7 +1878,7 @@ void BC(
 			frontiers.push_back(h_graph_queue);
 			is_dense_frontier.push_back(last_is_dense);
 			sparse_time += omp_get_wtime() - last_time;
-		//}
+		}
 		// Update h_graph_visited; Get the sum again.
 		if (last_is_dense) {
 			last_time = omp_get_wtime();
@@ -1966,7 +1919,6 @@ void BC(
 
 	double first_phase_time = omp_get_wtime() - time_now;
 	time_now = omp_get_wtime();
-
 		
 	// Second Phase
 	// Inverse num_paths
@@ -2050,6 +2002,12 @@ void BC(
 			sparse_time += omp_get_wtime() - last_time;
 		}
 	}
+	////Test
+	//puts("Before:");
+	//for (unsigned i = 0; i < NNODES; ++i) {
+	//	printf("dependencies[%d]: %f\n",i, dependencies[i]);
+	//}
+	////End Test
 
 	// Update Dependencies
 //#pragma omp parallel for
@@ -2088,6 +2046,15 @@ void BC(
 	//printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
 	printf("%u %f\n", NUM_THREADS, run_time = omp_get_wtime() - start_time);
 	//print_time();
+	print_simd_utilization();
+	////Test
+	////puts("After:");
+	//FILE *fout = fopen("output.txt", "w");
+	//for (unsigned i = 0; i < NNODES; ++i) {
+	//	fprintf(fout, "d[%u]: %f\n", i, dependencies[i]);
+	//}
+	//fclose(fout);
+	////End Test
 	
 	// Free memory
 	for (auto f = frontiers.begin(); f != frontiers.end(); ++f) {
@@ -2170,17 +2137,17 @@ int main(int argc, char *argv[])
 	//CHUNK_SIZE = 2048;
 	//CHUNK_SIZE_DENSE = 32768;
 	//SIZE_BUFFER_MAX = 512;
-	for (unsigned v = 2; v < 21; v += 2) {
+	//for (unsigned v = 100; v < 3001; v += 100) {
 	T_RATIO = 25;
-	WORK_LOAD = v;
+	WORK_LOAD = 30;
 	//CHUNK_SIZE_SPARSE = v;
 	CHUNK_SIZE_DENSE = 1024;
 	//CHUNK_SIZE_BLOCK = v;
 	SIZE_BUFFER_MAX = 800;
-	printf("WORK_LOAD: %u\n", WORK_LOAD);
+	//printf("CHUNK_SIZE_BLOCK: %u\n", CHUNK_SIZE_BLOCK);
 	//SIZE_BUFFER_MAX = 1024;
 	// BFS
-	for (unsigned cz = 0; cz < 2; ++cz) {
+	for (unsigned cz = 0; cz < 3; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
@@ -2209,7 +2176,7 @@ int main(int argc, char *argv[])
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 	}
 	}
-	}
+	//}
 	fclose(time_out);
 
 	// Free memory
