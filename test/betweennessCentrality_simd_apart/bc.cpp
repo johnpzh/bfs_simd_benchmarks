@@ -2170,7 +2170,7 @@ int main(int argc, char *argv[])
 	//CHUNK_SIZE = 2048;
 	//CHUNK_SIZE_DENSE = 32768;
 	//SIZE_BUFFER_MAX = 512;
-	for (unsigned v = 2; v < 21; v += 2) {
+	for (unsigned v = 5; v < 15; v += 1) {
 	T_RATIO = 25;
 	WORK_LOAD = v;
 	//CHUNK_SIZE_SPARSE = v;
