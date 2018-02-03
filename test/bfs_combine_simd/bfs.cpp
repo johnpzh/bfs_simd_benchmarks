@@ -740,6 +740,7 @@ void graph_prepare(
 			}
 		}
 		update_time += omp_get_wtime() - last_time;
+		printf("frontier_size: %u\n", frontier_size);//test
 	}
 	double end_time = omp_get_wtime();
 	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
@@ -756,8 +757,8 @@ void input( int argc, char** argv)
 	//ROW_STEP = 2;
 	
 	if(argc < 4){
-		input_f = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
-		//input_f = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
+		//input_f = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
+		input_f = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
 		TILE_WIDTH = 1024;
 		ROW_STEP = 16;
 	} else {
@@ -775,6 +776,10 @@ void input( int argc, char** argv)
 	//string prefix = string(input_f) + "_col-2-coo-tiled-" + to_string(TILE_WIDTH);
 	string fname = prefix + "-0";
 	FILE *fin = fopen(fname.c_str(), "r");
+	if (!fin) {
+		fprintf(stderr, "cannot open file: %s\n", fname.c_str());
+		exit(1);
+	}
 	fscanf(fin, "%u %u", &NNODES, &NEDGES);
 	fclose(fin);
 	if (NNODES % TILE_WIDTH) {
@@ -924,14 +929,14 @@ void input( int argc, char** argv)
 	printf("Input finished: %s\n", input_f);
 	unsigned run_count = 9;
 #else
-	unsigned run_count = 9;
+	unsigned run_count = 7;
 #endif
 	// BFS
 	//SIZE_BUFFER_MAX = 1024;
 	SIZE_BUFFER_MAX = 512;
 	T_RATIO = 100;
 	CHUNK_SIZE = 2048;
-	for (unsigned i = 0; i < run_count; ++i) {
+	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
 		//sleep(10);

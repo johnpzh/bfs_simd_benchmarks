@@ -36,12 +36,19 @@ unsigned CHUNK_SIZE;
 unsigned SIZE_BUFFER_MAX;
 unsigned T_RATIO;
 
-unsigned long unnecessary_count;
+unsigned long effective_count;
+unsigned long total_count;
 
 double start;
 double now;
 FILE *time_out;
 char *time_file = "timeline.txt";
+
+unsigned mmask16_count_one(__mmask16 m)
+{
+	__m512i ones = _mm512_mask_set1_epi32(_mm512_set1_epi32(0), m, 1);
+	return _mm512_reduce_add_epi32(ones);
+}
 
 //////////////////////////////////////////////////////////////////
 // Dense (bottom-up)
@@ -54,18 +61,24 @@ inline void bfs_kernel_dense(
 		//int *h_graph_visited,
 		unsigned *h_graph_parents,
 		int *h_cost,
-		int *is_updating_active_side)
+		int *is_updating_active_side,
+		unsigned long &_effect,
+		unsigned long &_total)
 {
 	unsigned remainder = size_buffer % NUM_P_INT;
 	unsigned bound_edge_i = size_buffer - remainder;
 	unsigned edge_i;
 	for (edge_i = 0; edge_i < bound_edge_i; edge_i += NUM_P_INT) {
+		_total += 16;
+
 		__m512i head_v = _mm512_load_epi32(heads_buffer + edge_i);
 		__m512i active_flag_v = _mm512_i32gather_epi32(head_v, h_graph_mask, sizeof(int));
 		__mmask16 is_active_m = _mm512_test_epi32_mask(active_flag_v, _mm512_set1_epi32(-1));
 		if (!is_active_m) {
 			continue;
 		}
+		_effect += mmask16_count_one(is_active_m);
+
 		__m512i tail_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), is_active_m, tails_buffer + edge_i);
 		//__m512i visited_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(1), is_active_m, tail_v, h_graph_visited, sizeof(int));
 		//__mmask16 not_visited_m = _mm512_testn_epi32_mask(visited_flag_v, _mm512_set1_epi32(1));
@@ -87,6 +100,8 @@ inline void bfs_kernel_dense(
 	if (0 == remainder) {
 		return;
 	}
+	_total += remainder;
+
 	unsigned short in_range_m_t = (unsigned short) 0xFFFF >> (NUM_P_INT - remainder);
 	__mmask16 in_range_m = (__mmask16) in_range_m_t;
 	__m512i head_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, heads_buffer + edge_i);
@@ -95,6 +110,8 @@ inline void bfs_kernel_dense(
 	if (!is_active_m) {
 		return;
 	}
+	_effect += mmask16_count_one(is_active_m);
+
 	__m512i tail_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), is_active_m, tails_buffer + edge_i);
 	//__m512i visited_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(1), is_active_m, tail_v, h_graph_visited, sizeof(int));
 	//__mmask16 not_visited_m = _mm512_testn_epi32_mask(visited_flag_v, _mm512_set1_epi32(1));
@@ -130,7 +147,7 @@ inline void scheduler_dense(
 {
 	unsigned start_tile_id = start_row_index * SIDE_LENGTH;
 	unsigned end_tile_id = start_tile_id + tile_step * SIDE_LENGTH;
-#pragma omp parallel for schedule(dynamic, 1)
+#pragma omp parallel for schedule(dynamic, 1) reduction(+: effective_count, total_count)
 	for (unsigned tile_index = start_tile_id; tile_index < end_tile_id; tile_index += tile_step) {
 		unsigned bound_tile_id = tile_index + tile_step;
 		unsigned tid = omp_get_thread_num();
@@ -167,6 +184,8 @@ inline void scheduler_dense(
 					}
 				} else {
 					// Process the full buffer
+					unsigned long effect = 0;
+					unsigned long total = 0;
 					bfs_kernel_dense(
 							heads_buffer_base,
 							tails_buffer_base,
@@ -176,7 +195,11 @@ inline void scheduler_dense(
 							//h_graph_visited,
 							h_graph_parents,
 							h_cost,
-							is_updating_active_side);
+							is_updating_active_side,
+							effect,
+							total);
+					effective_count += effect;
+					total_count += total;
 					capacity = SIZE_BUFFER_MAX;
 					size_buffer = 0;
 				}
@@ -184,6 +207,8 @@ inline void scheduler_dense(
 			
 		}
 		// Process the remains in buffer
+		unsigned long effect = 0;
+		unsigned long total = 0;
 		bfs_kernel_dense(
 				heads_buffer_base,
 				tails_buffer_base,
@@ -193,7 +218,11 @@ inline void scheduler_dense(
 				//h_graph_visited,
 				h_graph_parents,
 				h_cost,
-				is_updating_active_side);
+				is_updating_active_side,
+				effect,
+				total);
+		effective_count += effect;
+		total_count += total;
 	}
 }
 void BFS_dense(
@@ -552,6 +581,11 @@ void print_time()
 	printf("==========================\n");
 }
 
+void print_effective()
+{
+	printf("effective_count: %lu / %lu (%.2f%%)\n", effective_count, total_count, 1.0 * effective_count / total_count);
+}
+
 void graph_prepare(
 		unsigned *h_graph_vertices,
 		unsigned *h_graph_edges,
@@ -575,7 +609,8 @@ void graph_prepare(
 	to_sparse_time = 0;
 	update_time = 0;
 	run_time = 0;
-	unnecessary_count = 0;
+	effective_count = 0;
+	total_count = 0;
 	// The first time, running the Sparse
 	omp_set_num_threads(NUM_THREADS);
 	unsigned frontier_size = 1;
@@ -583,27 +618,27 @@ void graph_prepare(
 	frontier[0] = source;
 	double last_time = omp_get_wtime();
 	double start_time = omp_get_wtime();
-	unsigned *new_frontier = BFS_sparse(
-								frontier,
-								h_graph_vertices,
-								h_graph_edges,
-								h_graph_degrees,
-								h_graph_parents,
-								frontier_size);
-	free(frontier);
-	frontier = new_frontier;
+	//unsigned *new_frontier = BFS_sparse(
+	//							frontier,
+	//							h_graph_vertices,
+	//							h_graph_edges,
+	//							h_graph_degrees,
+	//							h_graph_parents,
+	//							frontier_size);
+	//free(frontier);
+	//frontier = new_frontier;
 	sparse_time += omp_get_wtime() - last_time;
 	last_time = omp_get_wtime();
 
 	// When update the parents, get the sum of the number of active nodes and their out degree.
 	unsigned out_degree = 0;
-#pragma omp parallel for reduction(+: out_degree)
-	for (unsigned i = 0; i < frontier_size; ++i) {
-		unsigned end = frontier[i];
-		unsigned start = h_graph_parents[end];
-		h_cost[end] = h_cost[start] + 1;
-		out_degree += h_graph_degrees[end];
-	}
+//#pragma omp parallel for reduction(+: out_degree)
+//	for (unsigned i = 0; i < frontier_size; ++i) {
+//		unsigned end = frontier[i];
+//		unsigned start = h_graph_parents[end];
+//		h_cost[end] = h_cost[start] + 1;
+//		out_degree += h_graph_degrees[end];
+//	}
 	update_time += omp_get_wtime() - last_time;
 	bool last_is_dense = false;
 	// According the sum, determine to run Sparse or Dense, and then change the last_is_dense.
@@ -744,10 +779,12 @@ void graph_prepare(
 			}
 		}
 		update_time += omp_get_wtime() - last_time;
+		//printf("frontier_size: %u\n", frontier_size);//test
 	}
 	double end_time = omp_get_wtime();
 	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
 	//print_time();//test
+	print_effective();
 	free(frontier);
 }
 
@@ -760,8 +797,8 @@ void input( int argc, char** argv)
 	//ROW_STEP = 2;
 	
 	if(argc < 4){
-		input_f = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
-		//input_f = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
+		//input_f = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
+		input_f = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
 		TILE_WIDTH = 1024;
 		ROW_STEP = 16;
 	} else {
@@ -928,14 +965,14 @@ void input( int argc, char** argv)
 	printf("Input finished: %s\n", input_f);
 	unsigned run_count = 9;
 #else
-	unsigned run_count = 9;
+	unsigned run_count = 7;
 #endif
 	// BFS
 	//SIZE_BUFFER_MAX = 1024;
 	SIZE_BUFFER_MAX = 512;
 	T_RATIO = 100;
 	CHUNK_SIZE = 2048;
-	for (unsigned i = 0; i < run_count; ++i) {
+	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
 		//sleep(10);
