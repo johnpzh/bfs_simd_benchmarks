@@ -2183,7 +2183,7 @@ int main(int argc, char *argv[])
 	//printf("WORK_LOAD: %u\n", WORK_LOAD);
 	//SIZE_BUFFER_MAX = 1024;
 	// BFS
-	for (unsigned cz = 0; cz < 2; ++cz) {
+	for (unsigned cz = 0; cz < 3; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG

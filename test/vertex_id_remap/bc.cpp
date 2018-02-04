@@ -1687,6 +1687,24 @@ void print_time()
 	printf("=========================\n");
 }
 
+void add_mask2map(
+			unsigned *vertex_map,
+			unsigned &top_index,
+			unsigned *h_graph_mask)
+{
+	for (unsigned i = 0; i < NNODES; ++i) {
+		if (!h_graph_mask[i]) {
+			continue;
+		}
+		if ((unsigned) -1 != vertex_map[i]) {
+			printf("Error: add_mask2map: double-parked, vertex_map[%u]: %u.\n", i, vertex_map[i]);
+			exit(2);
+		}
+		vertex_map[i] = top_index++;
+	}
+}
+
+
 void BC(
 		unsigned *graph_heads, 
 		unsigned *graph_tails, 
@@ -1702,13 +1720,15 @@ void BC(
 		unsigned *graph_degrees_reverse,
 		unsigned *tile_offsets_reverse,
 		unsigned *tile_sizes_reverse,
-		const unsigned &source)
+		const unsigned &source,
+		unsigned *vertex_map)
 {
 	dense_time = 0.0;
 	to_dense_time = 0.0;
 	sparse_time = 0.0 ;
 	to_sparse_time = 0.0;
 	update_time = 0.0;
+	unsigned top_index = 0;
 
 	omp_set_num_threads(NUM_THREADS);
 	//unsigned *num_paths = (unsigned *) calloc(NNODES, sizeof(unsigned));
@@ -1727,6 +1747,7 @@ void BC(
 	vector<unsigned> frontier_sizes;
 	vector<bool> is_dense_frontier;
 	unsigned frontier_size;
+	unsigned out_degree;
 
 	num_paths[source] = 1;
 	// First is the Sparse
@@ -1740,30 +1761,32 @@ void BC(
 	is_dense_frontier.push_back(false);
 	frontier_sizes.push_back(1);
 
+	vertex_map[source] = top_index++;
+
 	double start_time = omp_get_wtime();
-	// First Phase
-	unsigned *new_queue = BFS_sparse(
-								h_graph_queue,
-								frontier_size,
-								graph_vertices,
-								graph_edges,
-								graph_degrees,
-								h_graph_visited,
-								num_paths);
-	h_graph_queue = new_queue;
-	frontiers.push_back(h_graph_queue);
-	frontier_sizes.push_back(frontier_size);
 	bool last_is_dense = false;
-	is_dense_frontier.push_back(last_is_dense);
-	sparse_time += omp_get_wtime() - last_time;
-	// Update the h_graph_visited, get the sum of the number of active nodes and their out degrees.
-	last_time = omp_get_wtime();
-	unsigned out_degree = update_visited_sparse(
-											h_graph_visited,
-											h_graph_queue,
-											frontier_size,
-											graph_degrees);
-	update_time += omp_get_wtime() - last_time;
+	// First Phase
+	//unsigned *new_queue = BFS_sparse(
+	//							h_graph_queue,
+	//							frontier_size,
+	//							graph_vertices,
+	//							graph_edges,
+	//							graph_degrees,
+	//							h_graph_visited,
+	//							num_paths);
+	//h_graph_queue = new_queue;
+	//frontiers.push_back(h_graph_queue);
+	//frontier_sizes.push_back(frontier_size);
+	//is_dense_frontier.push_back(last_is_dense);
+	//sparse_time += omp_get_wtime() - last_time;
+	//// Update the h_graph_visited, get the sum of the number of active nodes and their out degrees.
+	//last_time = omp_get_wtime();
+	//out_degree = update_visited_sparse(
+	//										h_graph_visited,
+	//										h_graph_queue,
+	//										frontier_size,
+	//										graph_degrees);
+	//update_time += omp_get_wtime() - last_time;
 //	unsigned out_degree = 0;
 //#pragma omp parallel for reduction(+: out_degree)
 //	for (unsigned i = 0; i < frontier_size; ++i)
@@ -1775,7 +1798,7 @@ void BC(
 	// According the sum, determing to run Sparse or Dense, and then change the last_is_dense.
 	unsigned bfs_threshold = NEDGES / T_RATIO;
 	while (true) {
-		if (frontier_size + out_degree > bfs_threshold) {
+		//if (frontier_size + out_degree > bfs_threshold) {
 			if (!last_is_dense) {
 				last_time = omp_get_wtime();
 				free(is_active_side);
@@ -1809,34 +1832,39 @@ void BC(
 			frontiers.push_back(h_graph_mask);
 			is_dense_frontier.push_back(last_is_dense);
 			dense_time += omp_get_wtime() - last_time;
-		} else {
-			// Sparse
-			if (last_is_dense) {
-				last_time = omp_get_wtime();
-				h_graph_queue = to_sparse(
-					frontier_size,
+
+			add_mask2map(
+					vertex_map,
+					top_index,
 					h_graph_mask);
-				to_sparse_time += omp_get_wtime() - last_time;
-			}
-			last_time = omp_get_wtime();
-			new_queue = BFS_sparse(
-								h_graph_queue,
-								frontier_size,
-								graph_vertices,
-								graph_edges,
-								graph_degrees,
-								h_graph_visited,
-								num_paths);
-			if (last_is_dense) {
-				//free(h_graph_queue);
-				_mm_free(h_graph_queue);
-			}
-			h_graph_queue = new_queue;
-			last_is_dense = false;
-			frontiers.push_back(h_graph_queue);
-			is_dense_frontier.push_back(last_is_dense);
-			sparse_time += omp_get_wtime() - last_time;
-		}
+		//} else {
+		//	// Sparse
+		//	if (last_is_dense) {
+		//		last_time = omp_get_wtime();
+		//		h_graph_queue = to_sparse(
+		//			frontier_size,
+		//			h_graph_mask);
+		//		to_sparse_time += omp_get_wtime() - last_time;
+		//	}
+		//	last_time = omp_get_wtime();
+		//	new_queue = BFS_sparse(
+		//						h_graph_queue,
+		//						frontier_size,
+		//						graph_vertices,
+		//						graph_edges,
+		//						graph_degrees,
+		//						h_graph_visited,
+		//						num_paths);
+		//	if (last_is_dense) {
+		//		//free(h_graph_queue);
+		//		_mm_free(h_graph_queue);
+		//	}
+		//	h_graph_queue = new_queue;
+		//	last_is_dense = false;
+		//	frontiers.push_back(h_graph_queue);
+		//	is_dense_frontier.push_back(last_is_dense);
+		//	sparse_time += omp_get_wtime() - last_time;
+		//}
 		// Update h_graph_visited; Get the sum again.
 		if (last_is_dense) {
 			last_time = omp_get_wtime();
@@ -1848,66 +1876,6 @@ void BC(
 					is_active_side,
 					is_updating_active_side,
 					graph_degrees);
-//			frontier_size = 0;
-//			out_degree = 0;
-//#pragma omp parallel for reduction(+: frontier_size, out_degree)
-//			for (unsigned side_id = 0; side_id < SIDE_LENGTH; ++side_id) {
-//				if (!is_updating_active_side[side_id]) {
-//					is_active_side[side_id] = 0;
-//					continue;
-//				}
-//				is_updating_active_side[side_id] = 0;
-//				is_active_side[side_id] = 1;
-//				unsigned start_vertex_id = side_id * TILE_WIDTH;
-//				unsigned bound_vertex_id;
-//				if (SIDE_LENGTH - 1 != side_id) {
-//					bound_vertex_id = side_id * TILE_WIDTH + TILE_WIDTH;
-//				} else {
-//					bound_vertex_id = NNODES;
-//				}
-//				unsigned remainder = (bound_vertex_id - start_vertex_id) % NUM_P_INT;
-//				bound_vertex_id -= remainder;
-//				unsigned vertex_id;
-//				for (vertex_id = start_vertex_id; 
-//						vertex_id < bound_vertex_id; 
-//						vertex_id += NUM_P_INT) {
-//					__m512i updating_flag_v = _mm512_loadu_si512(h_graph_mask + vertex_id);
-//					__mmask16 is_updating_m = _mm512_test_epi32_mask(updating_flag_v, _mm512_set1_epi32(1));
-//					if (!is_updating_m) {
-//						continue;
-//					}
-//					__m512i num_active_v = _mm512_mask_set1_epi32(_mm512_set1_epi32(0), is_updating_m, 1);
-//					unsigned num_active = _mm512_reduce_add_epi32(num_active_v);
-//					frontier_size += num_active;
-//					__m512i out_degrees_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), is_updating_m, graph_degrees + vertex_id);
-//					out_degree += _mm512_reduce_add_epi32(out_degrees_v);
-//					_mm512_mask_storeu_epi32(h_graph_visited + vertex_id, is_updating_m, _mm512_set1_epi32(1));
-//				}
-//
-//				if (0 == remainder) {
-//					continue;
-//				}
-//				unsigned short in_range_m_t = (unsigned short) 0xFFFF >> (NUM_P_INT - remainder);
-//				__mmask16 in_range_m = (__mmask16) in_range_m_t;
-//				__m512i updating_flag_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), in_range_m, h_graph_mask + vertex_id);
-//				__mmask16 is_updating_m = _mm512_test_epi32_mask(updating_flag_v, _mm512_set1_epi32(1));
-//				if (!is_updating_m) {
-//					continue;
-//				}
-//				__m512i num_active_v = _mm512_mask_set1_epi32(_mm512_set1_epi32(0), is_updating_m, 1);
-//				unsigned num_active = _mm512_reduce_add_epi32(num_active_v);
-//				frontier_size += num_active;
-//				__m512i out_degrees_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), is_updating_m, graph_degrees + vertex_id);
-//				out_degree += _mm512_reduce_add_epi32(out_degrees_v);
-//				_mm512_mask_storeu_epi32(h_graph_visited + vertex_id, is_updating_m, _mm512_set1_epi32(1));
-//				//for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++vertex_id) {
-//				//	if (1 == h_graph_mask[vertex_id]) {
-//				//		frontier_size++;
-//				//		out_degree += graph_degrees[vertex_id];
-//				//		h_graph_visited[vertex_id] = 1;
-//				//	}
-//				//}
-//			}
 			frontier_sizes.push_back(frontier_size);
 			update_time += omp_get_wtime() - last_time;
 			if (0 == frontier_size) {
@@ -1925,213 +1893,22 @@ void BC(
 										frontier_size,
 										graph_degrees);
 			update_time += omp_get_wtime() - last_time;
-//			out_degree = 0;
-//#pragma omp parallel for reduction(+: out_degree)
-//			for (unsigned i = 0; i < frontier_size; ++i) {
-//				unsigned end = h_graph_queue[i];
-//				out_degree += graph_degrees[end];
-//				h_graph_visited[end] = 1;
-//			}
 		}
 	}
+
+	// Check
+	unsigned total_size = 0;
+	for (auto fs = frontier_sizes.begin(); fs != frontier_sizes.end(); ++fs) {
+		total_size += *fs;
+	}
+	printf("total_size: %u\n", total_size);
+	printf("top_index: %u\n", top_index);
+	// End Check
 
 	double first_phase_time = omp_get_wtime() - time_now;
 	time_now = omp_get_wtime();
 		
-	//// First phase
-	//while (0 != frontier_size) {
-	//	int *new_frontier = BFS_kernel(
-	//							graph_vertices,
-	//							graph_edges,
-	//							graph_degrees,
-	//							h_graph_mask,
-	//							h_graph_visited,
-	//							num_paths);
-	//	h_graph_mask = new_frontier;
-	//	frontiers.push_back(h_graph_mask);
-	//	frontier_size = update_visited(h_graph_mask, h_graph_visited);
-	//	frontiers_sizes.push_back(frontier_size);
-	//}
-	
-//	// Second phase
-//	int level_count = frontiers.size() - 1;
-//	float *inverse_num_paths = (float *) malloc(NNODES * sizeof(float));
-//#pragma omp parallel for num_threads(NUM_THREADS)
-//	for (unsigned i = 0; i < NNODES; ++i) {
-//		if (num_paths[i] == 0) {
-//			inverse_num_paths[i] = 0.0;
-//		} else {
-//			inverse_num_paths[i] = 1/ (1.0 * num_paths[i]);
-//		}
-//	}
-//#pragma omp parallel for num_threads(NUM_THREADS)
-//	for (unsigned i = 0; i < NNODES; ++i) {
-//		h_graph_visited[i] = 0;
-//	}
-//
-//	for (int lc = level_count - 1; lc >= 0; --lc) {
-//		h_graph_mask = frontiers[lc];
-//		//undate_visited();
-//		update_visited_reverse(
-//						h_graph_mask, 
-//						h_graph_visited,
-//						dependencies,
-//						inverse_num_paths);
-//		BFS_kernel_reverse(
-//					graph_vertices_reverse,
-//					graph_edges_reverse,
-//					graph_degrees_reverse,
-//					h_graph_mask,
-//					h_graph_visited,
-//					num_paths,
-//					dependencies);
-//	}
-//
-//#pragma omp parallel for num_threads(NUM_THREADS)
-//	for (unsigned i = 0; i < NNODES; ++i) {
-//		if (inverse_num_paths[i] == 0.0) {
-//			dependencies[i] = 0.0;
-//		} else {
-//			dependencies[i] = (dependencies[i] - inverse_num_paths[i]) / inverse_num_paths[i];
-//		}
-//	}
 
-	// Second Phase
-	// Inverse num_paths
-	int level_count = frontiers.size() - 1;
-	float *inverse_num_paths = (float *) _mm_malloc(NNODES * sizeof(float), ALIGNED_BYTES);
-	unsigned remainder = NNODES % NUM_P_INT;
-	unsigned bound_i = NNODES - remainder;
-#pragma omp parallel for
-	for (unsigned i = 0; i < bound_i; i += NUM_P_INT) {
-		__m512i num_paths_v_i = _mm512_load_epi32(num_paths + i);
-		__m512 num_paths_v = _mm512_cvtepi32_ps(num_paths_v_i);
-		__mmask16 not_zero_m = _mm512_test_epi32_mask(num_paths_v_i, _mm512_set1_epi32(-1));
-		__m512 invs_num_paths = _mm512_mask_div_ps(_mm512_set1_ps(0.0), not_zero_m, _mm512_set1_ps(1.0), num_paths_v);
-		_mm512_store_ps(inverse_num_paths + i, invs_num_paths);
-	}
-	if (remainder) {
-		__mmask16 in_range_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
-		__m512i num_paths_v_i = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, num_paths + bound_i);
-		__m512 num_paths_v = _mm512_cvtepi32_ps(num_paths_v_i);
-		__mmask16 not_zero_m = _mm512_mask_test_epi32_mask(in_range_m, num_paths_v_i, _mm512_set1_epi32(-1));
-		__m512 invs_num_paths = _mm512_mask_div_ps(_mm512_set1_ps(0.0), not_zero_m, _mm512_set1_ps(1.0), num_paths_v);
-		_mm512_mask_store_ps(inverse_num_paths + bound_i, in_range_m, invs_num_paths);
-	}
-
-//	float *inverse_num_paths = (float *) malloc(NNODES * sizeof(float));
-//#pragma omp parallel for
-//	for (unsigned i = 0; i < NNODES; ++i) {
-//		if (num_paths[i] == 0) {
-//			inverse_num_paths[i] = 0.0;
-//		} else {
-//			inverse_num_paths[i] = 1/ (1.0 * num_paths[i]);
-//		}
-//	}
-
-	//free(h_graph_visited);
-	//h_graph_visited = (int *) calloc(NNODES, sizeof(int));
-	memset(h_graph_visited, 0, NNODES * sizeof(int));
-
-	// Reverse traverse
-	unsigned *frontier;
-	for (int lc = level_count - 1; lc >= 0; --lc) {
-		frontier = frontiers[lc];
-		if (is_dense_frontier[lc]) {
-			last_time = omp_get_wtime();
-			update_visited_dense_reverse(
-										frontier,
-										h_graph_visited,
-										dependencies,
-										inverse_num_paths);
-			update_time += omp_get_wtime() - last_time;
-			last_time = omp_get_wtime();
-			BFS_dense_reverse(
-					graph_heads_reverse,
-					graph_tails_reverse,
-					frontier,
-					h_graph_visited,
-					tile_offsets_reverse,
-					tile_sizes_reverse,
-					//int *is_active_side,
-					dependencies);
-			dense_time += omp_get_wtime() - last_time;
-		} else {
-			unsigned queue_size = frontier_sizes[lc];
-			last_time = omp_get_wtime();
-			update_visited_sparse_reverse(
-										frontier,
-										queue_size,
-										h_graph_visited,
-										dependencies,
-										inverse_num_paths);
-			update_time += omp_get_wtime() - last_time;
-			last_time = omp_get_wtime();
-			BFS_sparse_reverse(
-							frontier,
-							queue_size,
-							graph_vertices_reverse,
-							graph_edges_reverse,
-							graph_degrees_reverse,
-							h_graph_visited,
-							dependencies);
-			sparse_time += omp_get_wtime() - last_time;
-		}
-	}
-	////Test
-	//puts("Before:");
-	//for (unsigned i = 0; i < NNODES; ++i) {
-	//	printf("dependencies[%d]: %f\n",i, dependencies[i]);
-	//}
-	////End Test
-
-	// Update Dependencies
-//#pragma omp parallel for
-//	for (unsigned i = 0; i < NNODES; ++i) {
-//		if (inverse_num_paths[i] == 0.0) {
-//			dependencies[i] = 0.0;
-//		} else {
-//			dependencies[i] = (dependencies[i] - inverse_num_paths[i]) / inverse_num_paths[i];
-//		}
-//	}
-	remainder = NNODES % NUM_P_INT;
-	bound_i = NNODES - remainder;
-#pragma omp parallel for
-	for (unsigned i = 0; i < bound_i; i += NUM_P_INT) {
-		__m512 inv_num_paths_v = _mm512_load_ps(inverse_num_paths + i);
-		__mmask16 no_zero_m = _mm512_cmpneq_ps_mask(inv_num_paths_v, _mm512_set1_ps(0.0));
-		__m512 dep_v = _mm512_mask_load_ps(_mm512_undefined_ps(), no_zero_m, dependencies + i);
-		__m512 num_v = _mm512_mask_sub_ps(_mm512_undefined_ps(), no_zero_m, dep_v, inv_num_paths_v);
-		__m512 new_dep_v = _mm512_mask_div_ps(_mm512_set1_ps(0.0), no_zero_m, num_v, inv_num_paths_v);
-		_mm512_store_ps(dependencies + i, new_dep_v);
-	}
-	if (remainder) {
-		__mmask16 in_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
-		__m512 inv_num_paths_v = _mm512_mask_load_ps(_mm512_set1_ps(0.0), in_m, inverse_num_paths + bound_i);
-		__mmask16 no_zero_m = _mm512_cmpneq_ps_mask(inv_num_paths_v, _mm512_set1_ps(0.0));
-		__m512 dep_v = _mm512_mask_load_ps(_mm512_undefined_ps(), no_zero_m, dependencies + bound_i);
-		__m512 num_v = _mm512_mask_sub_ps(_mm512_undefined_ps(), no_zero_m, dep_v, inv_num_paths_v);
-		__m512 new_dep_v = _mm512_mask_div_ps(_mm512_set1_ps(0.0), no_zero_m, num_v, inv_num_paths_v);
-		_mm512_mask_store_ps(dependencies + bound_i, in_m, new_dep_v);
-	}
-
-	double second_phase_time = omp_get_wtime() - time_now;
-
-	//printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
-	printf("%u %f\n", NUM_THREADS, run_time = omp_get_wtime() - start_time);
-	printf("first_phase_time: %f\n", first_phase_time);
-	printf("second_phase_time: %f\n", second_phase_time);
-	puts("------- -------");
-	//print_time();
-	////Test
-	////puts("After:");
-	//FILE *fout = fopen("output.txt", "w");
-	//for (unsigned i = 0; i < NNODES; ++i) {
-	//	fprintf(fout, "d[%u]: %f\n", i, dependencies[i]);
-	//}
-	//fclose(fout);
-	////End Test
-	
 	// Free memory
 	for (auto f = frontiers.begin(); f != frontiers.end(); ++f) {
 		_mm_free(*f);
@@ -2145,8 +1922,6 @@ void BC(
 	_mm_free(dependencies);
 	free(is_active_side);
 	free(is_updating_active_side);
-	//free(inverse_num_paths);
-	_mm_free(inverse_num_paths);
 }
 
 int main(int argc, char *argv[]) 
@@ -2180,6 +1955,7 @@ int main(int argc, char *argv[])
 	unsigned *tile_offsets_reverse;
 	unsigned *tile_sizes_reverse;
 
+
 	input(
 		filename, 
 		graph_heads, 
@@ -2198,6 +1974,12 @@ int main(int argc, char *argv[])
 		tile_sizes_reverse);
 
 	unsigned source = 0;
+	// Map a vertex index to its new index: vertex_map[old] = new;
+	unsigned *vertex_map = (unsigned *) malloc(NNODES * sizeof(unsigned));
+//#pragma omp parallel for num_threads(64)
+	for (unsigned i = 0; i < NNODES; ++i) {
+		vertex_map[i] = (unsigned) -1;
+	}
 
 	now = omp_get_wtime();
 	time_out = fopen(time_file, "w");
@@ -2206,30 +1988,30 @@ int main(int argc, char *argv[])
 	printf("Input finished: %s\n", filename);
 	unsigned run_count = 7;
 #else
-	unsigned run_count = 9;
+	unsigned run_count = 7;
 #endif
 	//T_RATIO = 81;
 	//T_RATIO = 60;
 	//CHUNK_SIZE = 2048;
 	//CHUNK_SIZE_DENSE = 32768;
 	//SIZE_BUFFER_MAX = 512;
-	for (unsigned v = 5; v < 101; v += 5) {
-	T_RATIO = v;
+	//for (unsigned v = 5; v < 101; v += 5) {
+	T_RATIO = 20;
 	WORK_LOAD = 10;
 	//CHUNK_SIZE_SPARSE = v;
 	CHUNK_SIZE_DENSE = 1024;
 	//CHUNK_SIZE_BLOCK = v;
 	SIZE_BUFFER_MAX = 800;
-	printf("T_RATIO: %u\n", v);
+	//printf("T_RATIO: %u\n", v);
 	//SIZE_BUFFER_MAX = 1024;
 	// BFS
-	for (unsigned cz = 0; cz < 3; ++cz) {
+	for (unsigned cz = 0; cz < 1; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
 		//sleep(10);
 #endif
-		for (unsigned k = 0; k < 3; ++k) {
+		for (unsigned k = 0; k < 1; ++k) {
 		BC(
 			graph_heads, 
 			graph_tails, 
@@ -2245,14 +2027,15 @@ int main(int argc, char *argv[])
 			graph_degrees_reverse,
 			tile_offsets_reverse,
 			tile_sizes_reverse,
-			source);
+			source,
+			vertex_map);
 		}
 		//// Re-initializing
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 	}
 	}
-	}
+	//}
 	fclose(time_out);
 
 	// Free memory
@@ -2270,6 +2053,7 @@ int main(int argc, char *argv[])
 	free(graph_degrees_reverse);
 	free(tile_offsets_reverse);
 	free(tile_sizes_reverse);
+	free(vertex_map);
 
 	return 0;
 }
