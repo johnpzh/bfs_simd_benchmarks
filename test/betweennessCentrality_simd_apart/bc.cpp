@@ -1826,11 +1826,13 @@ void BC(
 	unsigned *h_graph_queue = (unsigned *) _mm_malloc(frontier_size * sizeof(unsigned), ALIGNED_BYTES);
 	h_graph_queue[0] = source;
 	frontiers.push_back(h_graph_queue);
+	bool last_is_dense = false;
 	is_dense_frontier.push_back(false);
 	frontier_sizes.push_back(1);
 
 	double start_time = omp_get_wtime();
-	// First Phase
+	unsigned out_degree = 0;
+	//// First Phase
 	unsigned *new_queue = BFS_sparse(
 								h_graph_queue,
 								frontier_size,
@@ -1842,12 +1844,11 @@ void BC(
 	h_graph_queue = new_queue;
 	frontiers.push_back(h_graph_queue);
 	frontier_sizes.push_back(frontier_size);
-	bool last_is_dense = false;
 	is_dense_frontier.push_back(last_is_dense);
 	sparse_time += omp_get_wtime() - last_time;
 	// Update the h_graph_visited, get the sum of the number of active nodes and their out degrees.
 	last_time = omp_get_wtime();
-	unsigned out_degree = update_visited_sparse(
+	out_degree = update_visited_sparse(
 											h_graph_visited,
 											h_graph_queue,
 											frontier_size,
@@ -1864,41 +1865,41 @@ void BC(
 	// According the sum, determing to run Sparse or Dense, and then change the last_is_dense.
 	unsigned bfs_threshold = NEDGES / T_RATIO;
 	while (true) {
-		//if (frontier_size + out_degree > bfs_threshold) {
-		//	if (!last_is_dense) {
-		//		last_time = omp_get_wtime();
-		//		free(is_active_side);
-		//		is_active_side = (int *) calloc(NNODES, sizeof(int));
-		//		h_graph_mask = to_dense(
-		//			is_active_side, 
-		//			h_graph_queue, 
-		//			frontier_size);
-		//		to_dense_time += omp_get_wtime() - last_time;
-		//	}
-		//	last_time = omp_get_wtime();
-		//	unsigned *new_mask = BFS_dense(
-		//			graph_heads,
-		//			graph_tails,
-		//			h_graph_mask,
-		//			//h_updating_graph_mask,
-		//			h_graph_visited,
-		//			//h_graph_parents,
-		//			//h_cost,
-		//			tile_offsets,
-		//			//is_empty_tile,
-		//			tile_sizes,
-		//			is_active_side,
-		//			is_updating_active_side,
-		//			num_paths);
-		//	if (!last_is_dense) {
-		//		free(h_graph_mask);
-		//	}
-		//	h_graph_mask = new_mask;
-		//	last_is_dense = true;
-		//	frontiers.push_back(h_graph_mask);
-		//	is_dense_frontier.push_back(last_is_dense);
-		//	dense_time += omp_get_wtime() - last_time;
-		//} else {
+		if (frontier_size + out_degree > bfs_threshold) {
+			if (!last_is_dense) {
+				last_time = omp_get_wtime();
+				free(is_active_side);
+				is_active_side = (int *) calloc(NNODES, sizeof(int));
+				h_graph_mask = to_dense(
+					is_active_side, 
+					h_graph_queue, 
+					frontier_size);
+				to_dense_time += omp_get_wtime() - last_time;
+			}
+			last_time = omp_get_wtime();
+			unsigned *new_mask = BFS_dense(
+					graph_heads,
+					graph_tails,
+					h_graph_mask,
+					//h_updating_graph_mask,
+					h_graph_visited,
+					//h_graph_parents,
+					//h_cost,
+					tile_offsets,
+					//is_empty_tile,
+					tile_sizes,
+					is_active_side,
+					is_updating_active_side,
+					num_paths);
+			if (!last_is_dense) {
+				free(h_graph_mask);
+			}
+			h_graph_mask = new_mask;
+			last_is_dense = true;
+			frontiers.push_back(h_graph_mask);
+			is_dense_frontier.push_back(last_is_dense);
+			dense_time += omp_get_wtime() - last_time;
+		} else {
 			// Sparse
 			if (last_is_dense) {
 				last_time = omp_get_wtime();
@@ -1925,7 +1926,7 @@ void BC(
 			frontiers.push_back(h_graph_queue);
 			is_dense_frontier.push_back(last_is_dense);
 			sparse_time += omp_get_wtime() - last_time;
-		//}
+		}
 		// Update h_graph_visited; Get the sum again.
 		if (last_is_dense) {
 			last_time = omp_get_wtime();
@@ -1962,6 +1963,7 @@ void BC(
 //				h_graph_visited[end] = 1;
 //			}
 		}
+		//printf("frontier_size: %u\n", frontier_size);//test
 	}
 
 	double first_phase_time = omp_get_wtime() - time_now;
@@ -2082,11 +2084,12 @@ void BC(
 	}
 
 	double second_phase_time = omp_get_wtime() - time_now;
-	//printf("first_phase_time: %f\n", first_phase_time);
-	//printf("second_phase_time: %f\n", second_phase_time);
 
 	//printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
 	printf("%u %f\n", NUM_THREADS, run_time = omp_get_wtime() - start_time);
+	printf("first_phase_time: %f\n", first_phase_time);
+	printf("second_phase_time: %f\n", second_phase_time);
+	puts("================================");
 	//print_time();
 	
 	// Free memory
@@ -2170,14 +2173,14 @@ int main(int argc, char *argv[])
 	//CHUNK_SIZE = 2048;
 	//CHUNK_SIZE_DENSE = 32768;
 	//SIZE_BUFFER_MAX = 512;
-	for (unsigned v = 5; v < 15; v += 1) {
-	T_RATIO = 25;
-	WORK_LOAD = v;
+	//for (unsigned v = 5; v < 15; v += 1) {
+	T_RATIO = 20;
+	WORK_LOAD = 10;
 	//CHUNK_SIZE_SPARSE = v;
 	CHUNK_SIZE_DENSE = 1024;
 	//CHUNK_SIZE_BLOCK = v;
 	SIZE_BUFFER_MAX = 800;
-	printf("WORK_LOAD: %u\n", WORK_LOAD);
+	//printf("WORK_LOAD: %u\n", WORK_LOAD);
 	//SIZE_BUFFER_MAX = 1024;
 	// BFS
 	for (unsigned cz = 0; cz < 2; ++cz) {
@@ -2209,7 +2212,7 @@ int main(int argc, char *argv[])
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 	}
 	}
-	}
+	//}
 	fclose(time_out);
 
 	// Free memory

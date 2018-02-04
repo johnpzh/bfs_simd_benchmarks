@@ -581,9 +581,10 @@ void print_time()
 	printf("==========================\n");
 }
 
-void print_effective()
+void print_effective(double t)
 {
-	printf("effective_count: %lu / %lu (%.2f%%)\n", effective_count, total_count, 1.0 * effective_count / total_count);
+	//printf("effective_count: %lu / %lu (%.2f%%)\n", effective_count, total_count, 100.0 * effective_count / total_count);
+	printf("%u %lu/%lu(%.2f%%) %f\n", TILE_WIDTH, effective_count, total_count, 100.0 * effective_count / total_count, t);
 }
 
 void graph_prepare(
@@ -782,9 +783,9 @@ void graph_prepare(
 		//printf("frontier_size: %u\n", frontier_size);//test
 	}
 	double end_time = omp_get_wtime();
-	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
+	//printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
 	//print_time();//test
-	print_effective();
+	print_effective(end_time - start_time);
 	free(frontier);
 }
 
@@ -797,8 +798,8 @@ void input( int argc, char** argv)
 	//ROW_STEP = 2;
 	
 	if(argc < 4){
-		//input_f = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
-		input_f = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
+		input_f = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
+		//input_f = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
 		TILE_WIDTH = 1024;
 		ROW_STEP = 16;
 	} else {
@@ -816,6 +817,10 @@ void input( int argc, char** argv)
 	//string prefix = string(input_f) + "_col-2-coo-tiled-" + to_string(TILE_WIDTH);
 	string fname = prefix + "-0";
 	FILE *fin = fopen(fname.c_str(), "r");
+	if (!fin) {
+		fprintf(stderr, "cannot open file: %s\n", fname.c_str());
+		exit(1);
+	}
 	fscanf(fin, "%u %u", &NNODES, &NEDGES);
 	fclose(fin);
 	if (NNODES % TILE_WIDTH) {
@@ -980,7 +985,7 @@ void input( int argc, char** argv)
 		//for (T_RATIO = 100; T_RATIO < 200; T_RATIO *= 2) {}
 		//printf("T_RATIO: %u\n", T_RATIO);//test
 		// Re-initializing
-		for (unsigned k = 0; k < 3; ++k) {
+		for (unsigned k = 0; k < 1; ++k) {
 		memset(h_graph_mask, 0, sizeof(int)*NNODES);
 		//h_graph_mask[source] = 1;
 		memset(h_updating_graph_mask, 0, sizeof(int)*NNODES);
