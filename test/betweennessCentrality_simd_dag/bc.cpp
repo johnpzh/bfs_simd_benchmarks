@@ -69,6 +69,7 @@ void input(
 		unsigned *&graph_vertices,
 		unsigned *&graph_edges,
 		unsigned *&graph_degrees,
+		unsigned *&graph_in_degrees_prefix,
 		unsigned *&tile_offsets,
 		unsigned *&tile_sizes,
 		unsigned *&graph_heads_reverse,
@@ -143,11 +144,14 @@ void input(
 	graph_vertices = (unsigned *) malloc(NNODES * sizeof(unsigned));
 	graph_edges = (unsigned *) malloc(NEDGES * sizeof(unsigned));
 	graph_degrees = (unsigned *) malloc(NNODES * sizeof(unsigned));
+	graph_in_degrees_prefix = (unsigned *) malloc(NNODES * sizeof(unsigned));
 	graph_heads_reverse = (unsigned *) malloc(NEDGES * sizeof(unsigned));
 	graph_tails_reverse = (unsigned *) malloc(NEDGES * sizeof(unsigned));
 	graph_vertices_reverse = (unsigned *) malloc(NNODES * sizeof(unsigned));
 	graph_edges_reverse = (unsigned *) malloc(NEDGES * sizeof(unsigned));
 	graph_degrees_reverse = (unsigned *) malloc(NNODES * sizeof(unsigned));
+
+	memset(graph_in_degrees_prefix, 0, NNODES * sizeof(unsigned));
 
 	// For heads and tails
 	NUM_THREADS = 64;
@@ -179,9 +183,20 @@ void input(
 		n2--;
 		graph_heads[index] = n1;
 		graph_tails[index] = n2;
+#pragma omp atomic
+		++graph_in_degrees_prefix[n2];
 	}
 	fclose(fin);
 }
+	unsigned tmp_total = 0;
+	for (unsigned i = 0; i < NNODES; ++i) {
+		unsigned tmp = graph_in_degrees_prefix[i];
+		graph_in_degrees_prefix[i] = tmp_total;
+		tmp_total += tmp;
+		if (NNODES - 1 == i) {
+			printf("tmp_total: %u\n", tmp_total);
+		}
+	}
 //Reverse
 #pragma omp parallel num_threads(NUM_THREADS) private(fname, fin)
 {
@@ -1848,66 +1863,6 @@ void BC(
 					is_active_side,
 					is_updating_active_side,
 					graph_degrees);
-//			frontier_size = 0;
-//			out_degree = 0;
-//#pragma omp parallel for reduction(+: frontier_size, out_degree)
-//			for (unsigned side_id = 0; side_id < SIDE_LENGTH; ++side_id) {
-//				if (!is_updating_active_side[side_id]) {
-//					is_active_side[side_id] = 0;
-//					continue;
-//				}
-//				is_updating_active_side[side_id] = 0;
-//				is_active_side[side_id] = 1;
-//				unsigned start_vertex_id = side_id * TILE_WIDTH;
-//				unsigned bound_vertex_id;
-//				if (SIDE_LENGTH - 1 != side_id) {
-//					bound_vertex_id = side_id * TILE_WIDTH + TILE_WIDTH;
-//				} else {
-//					bound_vertex_id = NNODES;
-//				}
-//				unsigned remainder = (bound_vertex_id - start_vertex_id) % NUM_P_INT;
-//				bound_vertex_id -= remainder;
-//				unsigned vertex_id;
-//				for (vertex_id = start_vertex_id; 
-//						vertex_id < bound_vertex_id; 
-//						vertex_id += NUM_P_INT) {
-//					__m512i updating_flag_v = _mm512_loadu_si512(h_graph_mask + vertex_id);
-//					__mmask16 is_updating_m = _mm512_test_epi32_mask(updating_flag_v, _mm512_set1_epi32(1));
-//					if (!is_updating_m) {
-//						continue;
-//					}
-//					__m512i num_active_v = _mm512_mask_set1_epi32(_mm512_set1_epi32(0), is_updating_m, 1);
-//					unsigned num_active = _mm512_reduce_add_epi32(num_active_v);
-//					frontier_size += num_active;
-//					__m512i out_degrees_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), is_updating_m, graph_degrees + vertex_id);
-//					out_degree += _mm512_reduce_add_epi32(out_degrees_v);
-//					_mm512_mask_storeu_epi32(h_graph_visited + vertex_id, is_updating_m, _mm512_set1_epi32(1));
-//				}
-//
-//				if (0 == remainder) {
-//					continue;
-//				}
-//				unsigned short in_range_m_t = (unsigned short) 0xFFFF >> (NUM_P_INT - remainder);
-//				__mmask16 in_range_m = (__mmask16) in_range_m_t;
-//				__m512i updating_flag_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), in_range_m, h_graph_mask + vertex_id);
-//				__mmask16 is_updating_m = _mm512_test_epi32_mask(updating_flag_v, _mm512_set1_epi32(1));
-//				if (!is_updating_m) {
-//					continue;
-//				}
-//				__m512i num_active_v = _mm512_mask_set1_epi32(_mm512_set1_epi32(0), is_updating_m, 1);
-//				unsigned num_active = _mm512_reduce_add_epi32(num_active_v);
-//				frontier_size += num_active;
-//				__m512i out_degrees_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), is_updating_m, graph_degrees + vertex_id);
-//				out_degree += _mm512_reduce_add_epi32(out_degrees_v);
-//				_mm512_mask_storeu_epi32(h_graph_visited + vertex_id, is_updating_m, _mm512_set1_epi32(1));
-//				//for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++vertex_id) {
-//				//	if (1 == h_graph_mask[vertex_id]) {
-//				//		frontier_size++;
-//				//		out_degree += graph_degrees[vertex_id];
-//				//		h_graph_visited[vertex_id] = 1;
-//				//	}
-//				//}
-//			}
 			frontier_sizes.push_back(frontier_size);
 			update_time += omp_get_wtime() - last_time;
 			if (0 == frontier_size) {
@@ -1938,20 +1893,6 @@ void BC(
 	double first_phase_time = omp_get_wtime() - time_now;
 	time_now = omp_get_wtime();
 		
-	//// First phase
-	//while (0 != frontier_size) {
-	//	int *new_frontier = BFS_kernel(
-	//							graph_vertices,
-	//							graph_edges,
-	//							graph_degrees,
-	//							h_graph_mask,
-	//							h_graph_visited,
-	//							num_paths);
-	//	h_graph_mask = new_frontier;
-	//	frontiers.push_back(h_graph_mask);
-	//	frontier_size = update_visited(h_graph_mask, h_graph_visited);
-	//	frontiers_sizes.push_back(frontier_size);
-	//}
 	
 //	// Second phase
 //	int level_count = frontiers.size() - 1;
@@ -2116,11 +2057,12 @@ void BC(
 	}
 
 	double second_phase_time = omp_get_wtime() - time_now;
-	//printf("first_phase_time: %f\n", first_phase_time);
-	//printf("second_phase_time: %f\n", second_phase_time);
 
 	//printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
 	printf("%u %f\n", NUM_THREADS, run_time = omp_get_wtime() - start_time);
+	//printf("first_phase_time: %f\n", first_phase_time);
+	//printf("second_phase_time: %f\n", second_phase_time);
+	//puts("------- -------");
 	//print_time();
 	////Test
 	////puts("After:");
@@ -2168,6 +2110,7 @@ int main(int argc, char *argv[])
 	unsigned *graph_vertices;
 	unsigned *graph_edges;
 	unsigned *graph_degrees;
+	unsigned *graph_in_degrees_prefix;
 	unsigned *tile_offsets;
 	unsigned *tile_sizes;
 
@@ -2186,6 +2129,7 @@ int main(int argc, char *argv[])
 		graph_vertices,
 		graph_edges,
 		graph_degrees,
+		graph_in_degrees_prefix,
 		tile_offsets,
 		tile_sizes,
 		graph_heads_reverse,
@@ -2212,7 +2156,7 @@ int main(int argc, char *argv[])
 	//CHUNK_SIZE = 2048;
 	//CHUNK_SIZE_DENSE = 32768;
 	//SIZE_BUFFER_MAX = 512;
-	for (unsigned v = 5; v < 51; v += 5) {
+	for (unsigned v = 5; v < 101; v += 5) {
 	T_RATIO = v;
 	WORK_LOAD = 10;
 	//CHUNK_SIZE_SPARSE = v;

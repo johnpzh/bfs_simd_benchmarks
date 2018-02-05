@@ -740,7 +740,7 @@ void graph_prepare(
 			}
 		}
 		update_time += omp_get_wtime() - last_time;
-		printf("frontier_size: %u\n", frontier_size);//test
+		//printf("frontier_size: %u\n", frontier_size);//test
 	}
 	double end_time = omp_get_wtime();
 	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
@@ -757,8 +757,8 @@ void input( int argc, char** argv)
 	//ROW_STEP = 2;
 	
 	if(argc < 4){
-		//input_f = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
-		input_f = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
+		input_f = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
+		//input_f = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
 		TILE_WIDTH = 1024;
 		ROW_STEP = 16;
 	} else {
@@ -929,20 +929,20 @@ void input( int argc, char** argv)
 	printf("Input finished: %s\n", input_f);
 	unsigned run_count = 9;
 #else
-	unsigned run_count = 7;
+	unsigned run_count = 9;
 #endif
 	// BFS
 	//SIZE_BUFFER_MAX = 1024;
 	SIZE_BUFFER_MAX = 512;
-	T_RATIO = 100;
+	//T_RATIO = 100;
+	T_RATIO = 20;
 	CHUNK_SIZE = 2048;
+	for (unsigned cz = 0; cz < 3; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
 		//sleep(10);
 #endif
-		//for (T_RATIO = 100; T_RATIO < 200; T_RATIO *= 2) {}
-		//printf("T_RATIO: %u\n", T_RATIO);//test
 		// Re-initializing
 		for (unsigned k = 0; k < 3; ++k) {
 		memset(h_graph_mask, 0, sizeof(int)*NNODES);
@@ -986,9 +986,8 @@ void input( int argc, char** argv)
 		printf("Thread %u finished.\n", NUM_THREADS);
 #endif
 		}
-		//}
 	}
-	//}
+	}
 	fclose(time_out);
 
 	//Store the result into a file
