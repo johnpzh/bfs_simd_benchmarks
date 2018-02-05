@@ -1696,11 +1696,22 @@ void add_mask2map(
 		if (!h_graph_mask[i]) {
 			continue;
 		}
-		if ((unsigned) -1 != vertex_map[i]) {
-			printf("Error: add_mask2map: double-parked, vertex_map[%u]: %u.\n", i, vertex_map[i]);
-			exit(2);
-		}
+		//if ((unsigned) -1 != vertex_map[i]) {
+		//	printf("Error: add_mask2map: double-parked, vertex_map[%u]: %u.\n", i, vertex_map[i]);
+		//	exit(2);
+		//}
 		vertex_map[i] = top_index++;
+	}
+}
+
+void add_remainder2map(
+		unsigned *vertex_map,
+		unsigned &top_index)
+{
+	for (unsigned i =0; i < NNODES; ++i) {
+		if ((unsigned) -1 == vertex_map[i]) {
+			vertex_map[i] = top_index++;
+		}
 	}
 }
 
@@ -1766,39 +1777,9 @@ void BC(
 	double start_time = omp_get_wtime();
 	bool last_is_dense = false;
 	// First Phase
-	//unsigned *new_queue = BFS_sparse(
-	//							h_graph_queue,
-	//							frontier_size,
-	//							graph_vertices,
-	//							graph_edges,
-	//							graph_degrees,
-	//							h_graph_visited,
-	//							num_paths);
-	//h_graph_queue = new_queue;
-	//frontiers.push_back(h_graph_queue);
-	//frontier_sizes.push_back(frontier_size);
-	//is_dense_frontier.push_back(last_is_dense);
-	//sparse_time += omp_get_wtime() - last_time;
-	//// Update the h_graph_visited, get the sum of the number of active nodes and their out degrees.
-	//last_time = omp_get_wtime();
-	//out_degree = update_visited_sparse(
-	//										h_graph_visited,
-	//										h_graph_queue,
-	//										frontier_size,
-	//										graph_degrees);
-	//update_time += omp_get_wtime() - last_time;
-//	unsigned out_degree = 0;
-//#pragma omp parallel for reduction(+: out_degree)
-//	for (unsigned i = 0; i < frontier_size; ++i)
-//	{
-//		unsigned vertex_id = h_graph_queue[i];
-//		out_degree += graph_degrees[vertex_id];
-//		h_graph_visited[vertex_id] = 1;
-//	}
 	// According the sum, determing to run Sparse or Dense, and then change the last_is_dense.
 	unsigned bfs_threshold = NEDGES / T_RATIO;
 	while (true) {
-		//if (frontier_size + out_degree > bfs_threshold) {
 			if (!last_is_dense) {
 				last_time = omp_get_wtime();
 				free(is_active_side);
@@ -1837,34 +1818,7 @@ void BC(
 					vertex_map,
 					top_index,
 					h_graph_mask);
-		//} else {
-		//	// Sparse
-		//	if (last_is_dense) {
-		//		last_time = omp_get_wtime();
-		//		h_graph_queue = to_sparse(
-		//			frontier_size,
-		//			h_graph_mask);
-		//		to_sparse_time += omp_get_wtime() - last_time;
-		//	}
-		//	last_time = omp_get_wtime();
-		//	new_queue = BFS_sparse(
-		//						h_graph_queue,
-		//						frontier_size,
-		//						graph_vertices,
-		//						graph_edges,
-		//						graph_degrees,
-		//						h_graph_visited,
-		//						num_paths);
-		//	if (last_is_dense) {
-		//		//free(h_graph_queue);
-		//		_mm_free(h_graph_queue);
-		//	}
-		//	h_graph_queue = new_queue;
-		//	last_is_dense = false;
-		//	frontiers.push_back(h_graph_queue);
-		//	is_dense_frontier.push_back(last_is_dense);
-		//	sparse_time += omp_get_wtime() - last_time;
-		//}
+
 		// Update h_graph_visited; Get the sum again.
 		if (last_is_dense) {
 			last_time = omp_get_wtime();
@@ -1895,15 +1849,10 @@ void BC(
 			update_time += omp_get_wtime() - last_time;
 		}
 	}
+	add_remainder2map(
+		vertex_map,
+		top_index);
 
-	// Check
-	unsigned total_size = 0;
-	for (auto fs = frontier_sizes.begin(); fs != frontier_sizes.end(); ++fs) {
-		total_size += *fs;
-	}
-	printf("total_size: %u\n", total_size);
-	printf("top_index: %u\n", top_index);
-	// End Check
 
 	double first_phase_time = omp_get_wtime() - time_now;
 	time_now = omp_get_wtime();
@@ -1913,6 +1862,16 @@ void BC(
 	for (auto f = frontiers.begin(); f != frontiers.end(); ++f) {
 		_mm_free(*f);
 	}
+	//for (unsigned i = 0; i < frontiers.size(); ++i) {
+	//	printf("frontiers[%u]:\n", i);
+	//	for (unsigned v_i = 0; v_i < NNODES; ++v_i) {
+	//		if (frontiers[i][v_i] == 1) {
+	//			printf(" %u", v_i);
+	//		}
+	//	}
+	//	putchar('\n');
+	//	_mm_free(frontiers[i]);
+	//}
 	frontiers.clear();
 	//free(num_paths);
 	_mm_free(num_paths);
@@ -1922,6 +1881,30 @@ void BC(
 	_mm_free(dependencies);
 	free(is_active_side);
 	free(is_updating_active_side);
+}
+
+void make_up_data(
+				unsigned *vertex_map,
+				unsigned *graph_heads,
+				unsigned *graph_tails,
+				char *filename)
+{
+	puts("Writing...");
+	unsigned *new_heads = (unsigned *) malloc(NEDGES * sizeof(unsigned));
+	unsigned *new_tails = (unsigned *) malloc(NEDGES * sizeof(unsigned));
+	string fname = string(filename) + "_reorder";
+	FILE *fout = fopen(fname.c_str(), "w");
+	fprintf(fout, "%u %u\n", NNODES, NEDGES);
+	for (unsigned e_i = 0; e_i < NEDGES; ++e_i) {
+		unsigned head = graph_heads[e_i];
+		unsigned tail = graph_tails[e_i];
+		unsigned new_head = vertex_map[head];
+		unsigned new_tail = vertex_map[tail];
+		++new_head;
+		++new_tail;
+		fprintf(fout, "%u %u\n", new_head, new_tail);
+	}
+	puts("Done.");
 }
 
 int main(int argc, char *argv[]) 
@@ -1976,7 +1959,7 @@ int main(int argc, char *argv[])
 	unsigned source = 0;
 	// Map a vertex index to its new index: vertex_map[old] = new;
 	unsigned *vertex_map = (unsigned *) malloc(NNODES * sizeof(unsigned));
-//#pragma omp parallel for num_threads(64)
+#pragma omp parallel for num_threads(64)
 	for (unsigned i = 0; i < NNODES; ++i) {
 		vertex_map[i] = (unsigned) -1;
 	}
@@ -2037,6 +2020,11 @@ int main(int argc, char *argv[])
 	}
 	//}
 	fclose(time_out);
+	make_up_data(
+			vertex_map,
+			graph_heads,
+			graph_tails,
+			filename);
 
 	// Free memory
 	free(graph_heads);
