@@ -194,7 +194,7 @@ void input(
 		graph_in_degrees_prefix[i] = tmp_total;
 		tmp_total += tmp;
 		if (NNODES - 1 == i) {
-			printf("tmp_total: %u\n", tmp_total);
+			printf("tmp_total: %u\n", tmp_total);//test
 		}
 	}
 //Reverse
@@ -583,7 +583,10 @@ inline unsigned *BFS_kernel_sparse(
 				unsigned *graph_vertices,
 				unsigned *graph_edges,
 				unsigned *graph_degrees,
+				unsigned *graph_in_degrees_prefix,
 				int *h_graph_visited,
+				unsigned *h_graph_mothers,
+				unsigned *h_graph_in,
 				unsigned *h_graph_queue,
 				unsigned &queue_size,
 				unsigned *num_paths)
@@ -661,6 +664,18 @@ inline unsigned *BFS_kernel_sparse(
 				} else {
 					new_frontier_tmp[offset + k] = (unsigned) -1;
 				}
+
+				unsigned index;
+				unsigned offset = graph_in_degrees_prefix[end];
+				do {
+					index = offset + h_graph_in[end];
+					old_val = h_graph_mothers[index];
+					new_val = start;
+				} while (!__sync_bool_compare_and_swap(h_graph_mothers + index, old_val, new_val));
+				do {
+					old_val = h_graph_in[end];
+					new_val = old_val + 1;
+				} while (!__sync_bool_compare_and_swap(h_graph_in + end, old_val, new_val));
 			} else {
 				new_frontier_tmp[offset + k] = (unsigned) -1;
 			}
@@ -788,15 +803,21 @@ inline unsigned *BFS_sparse(
 				unsigned &queue_size,
 				unsigned *graph_vertices,
 				unsigned *graph_edges,
+				unsigned *graph_in_degrees_prefix,
 				unsigned *graph_degrees,
 				int *h_graph_visited,
+				unsigned *h_graph_mothers,
+				unsigned *h_graph_in,
 				unsigned *num_paths)
 {
 	return BFS_kernel_sparse(
 				graph_vertices,
 				graph_edges,
 				graph_degrees,
+				graph_in_degrees_prefix,
 				h_graph_visited,
+				h_graph_mothers,
+				h_garph_in,
 				h_graph_queue,
 				queue_size,
 				num_paths);
@@ -1074,9 +1095,12 @@ inline void bfs_kernel_dense(
 		unsigned *heads_buffer,
 		unsigned *tails_buffer,
 		const unsigned &size_buffer,
+		unsigned *graph_in_degrees_prefix,
 		unsigned *h_graph_mask,
 		unsigned *h_updating_graph_mask,
 		int *h_graph_visited,
+		unsigned *h_graph_mothers,
+		unsigned *h_graph_in,
 		//unsigned *h_graph_parents,
 		//int *h_cost,
 		int *is_updating_active_side,
@@ -1155,11 +1179,14 @@ inline void scheduler_dense(
 		const unsigned &tile_step,
 		unsigned *h_graph_heads,
 		unsigned *h_graph_tails,
+		unsigned graph_in_degrees_prefix,
 		unsigned *heads_buffer,
 		unsigned *tails_buffer,
 		unsigned *h_graph_mask,
 		unsigned *h_updating_graph_mask,
 		int *h_graph_visited,
+		unsigned *h_graph_mothers,
+		unsigned *h_graph_in,
 		//unsigned *h_graph_parents,
 		//int *h_cost,
 		unsigned *tile_offsets,
@@ -1212,9 +1239,12 @@ inline void scheduler_dense(
 							heads_buffer_base,
 							tails_buffer_base,
 							size_buffer,
+							graph_in_degrees_prefix,
 							h_graph_mask,
 							h_updating_graph_mask,
 							h_graph_visited,
+							h_graph_mothers,
+							h_graph_in,
 							//h_graph_parents,
 							//h_cost,
 							is_updating_active_side,
@@ -1230,9 +1260,12 @@ inline void scheduler_dense(
 				heads_buffer_base,
 				tails_buffer_base,
 				size_buffer,
+				graph_in_degrees_prefix,
 				h_graph_mask,
 				h_updating_graph_mask,
 				h_graph_visited,
+				h_graph_mothers,
+				h_graph_in,
 				//h_graph_parents,
 				//h_cost,
 				is_updating_active_side,
@@ -1275,9 +1308,12 @@ inline void scheduler_dense(
 inline unsigned *BFS_dense(
 		unsigned *h_graph_heads,
 		unsigned *h_graph_tails,
+		unsigned *graph_in_degrees_prefix,
 		unsigned *h_graph_mask,
 		//int *h_updating_graph_mask,
 		int *h_graph_visited,
+		unsigned *h_graph_mothers,
+		unsigned *h_graph_in,
 		//unsigned *h_graph_parents,
 		//int *h_cost,
 		unsigned *tile_offsets,
@@ -1304,11 +1340,14 @@ inline unsigned *BFS_dense(
 				ROW_STEP,
 				h_graph_heads,
 				h_graph_tails,
+				graph_in_degrees_prefix,
 				heads_buffer,
 				tails_buffer,
 				h_graph_mask,
 				new_mask,
 				h_graph_visited,
+				h_graph_mothers,
+				h_graph_in,
 				//h_graph_parents,
 				//h_cost,
 				tile_offsets,
@@ -1325,11 +1364,14 @@ inline unsigned *BFS_dense(
 			remainder,
 			h_graph_heads,
 			h_graph_tails,
+			graph_in_degrees_prefix,
 			heads_buffer,
 			tails_buffer,
 			h_graph_mask,
 			new_mask,
 			h_graph_visited,
+			h_graph_mothers,
+			h_graph_in,
 			//h_graph_parents,
 			//h_cost,
 			tile_offsets,
@@ -1708,6 +1750,7 @@ void BC(
 		unsigned *graph_vertices,
 		unsigned *graph_edges,
 		unsigned *graph_degrees,
+		unsigned *graph_in_degrees_prefix,
 		unsigned *tile_offsets,
 		unsigned *tile_sizes,
 		unsigned *graph_heads_reverse, 
@@ -1754,6 +1797,12 @@ void BC(
 	frontiers.push_back(h_graph_queue);
 	is_dense_frontier.push_back(false);
 	frontier_sizes.push_back(1);
+	unsigned *h_graph_mothers = (unsigned *) _mm_malloc(NEDGES * sizeof(unsigned), ALIGNED_BYTES);
+#pragma omp parallel for 
+	for (unsigned i = 0; i < NEDGES; ++i) {
+		h_graph_mothers[i] = (unsigned) -1;
+	}
+	unsigned *h_graph_in = (unsigned *) calloc(NNODES, sizeof(unsigned));
 
 	double start_time = omp_get_wtime();
 	// First Phase
@@ -1763,7 +1812,10 @@ void BC(
 								graph_vertices,
 								graph_edges,
 								graph_degrees,
+								graph_in_degrees_prefix,
 								h_graph_visited,
+								h_graph_mothers,
+								h_graph_in,
 								num_paths);
 	h_graph_queue = new_queue;
 	frontiers.push_back(h_graph_queue);
@@ -2088,6 +2140,9 @@ void BC(
 	free(is_updating_active_side);
 	//free(inverse_num_paths);
 	_mm_free(inverse_num_paths);
+
+	_mm_free(h_graph_mothers);
+	free(h_graph_in);
 }
 
 int main(int argc, char *argv[]) 
@@ -2179,6 +2234,7 @@ int main(int argc, char *argv[])
 			graph_vertices,
 			graph_edges,
 			graph_degrees,
+			graph_in_degrees_prefix,
 			tile_offsets,
 			tile_sizes,
 			graph_heads_reverse, 
@@ -2204,6 +2260,7 @@ int main(int argc, char *argv[])
 	free(graph_vertices);
 	free(graph_edges);
 	free(graph_degrees);
+	free(graph_in_degrees_prefix);
 	free(tile_offsets);
 	free(tile_sizes);
 	free(graph_heads_reverse);

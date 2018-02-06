@@ -6,6 +6,7 @@
 #include <string>
 #include <unistd.h>
 #include <immintrin.h>
+#include <papi.h>
 
 using std::string;
 using std::to_string;
@@ -41,6 +42,24 @@ double now;
 FILE *time_out;
 char *time_file = "timeline.txt";
 
+// PAPI test results
+static void test_fail(char *file, int line, char *call, int retval){
+	printf("%s\tFAILED\nLine # %d\n", file, line);
+	if ( retval == PAPI_ESYS ) {
+		char buf[128];
+		memset( buf, '\0', sizeof(buf) );
+		sprintf(buf, "System error in %s:", call );
+		perror(buf);
+	}
+	else if ( retval > 0 ) {
+		printf("Error calculating: %s\n", call );
+	}
+	else {
+		printf("Error in %s: %s\n", call, PAPI_strerror(retval) );
+	}
+	printf("\n");
+	exit(1);
+}
 //////////////////////////////////////////////////////////////////
 // Dense (bottom-up)
 inline void bfs_kernel_dense(
@@ -578,6 +597,13 @@ void graph_prepare(
 	unsigned frontier_size = 1;
 	unsigned *frontier = (unsigned *) malloc(sizeof(unsigned) * frontier_size);
 	frontier[0] = source;
+	// PAPI
+	int events[2] = { PAPI_L2_TCA, PAPI_L2_TCM};
+	int retval;
+	if ((retval = PAPI_start_counters(events, 2)) < PAPI_OK) {
+		test_fail(__FILE__, __LINE__, "PAPI_start_counters", retval);
+	}
+	// End PAPI
 	double last_time = omp_get_wtime();
 	double start_time = omp_get_wtime();
 	unsigned *new_frontier = BFS_sparse(
@@ -743,6 +769,13 @@ void graph_prepare(
 		//printf("frontier_size: %u\n", frontier_size);//test
 	}
 	double end_time = omp_get_wtime();
+	// PAPI results
+	long long values[2];
+	if ((retval = PAPI_stop_counters(values, 2)) < PAPI_OK) {
+		test_fail(__FILE__, __LINE__, "PAPI_stop_counters", retval);
+	}
+	printf("cache access: %lld, cache misses: %lld, miss rate: %.2f%%\n", values[0], values[1], 100.0* values[1]/values[0]);
+	// End PAPI results
 	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
 	//print_time();//test
 	free(frontier);

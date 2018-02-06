@@ -12,6 +12,8 @@
 #include <unistd.h>
 #include <algorithm>
 #include <immintrin.h>
+#include <papi.h>
+
 using std::string;
 using std::getline;
 using std::cout;
@@ -41,6 +43,24 @@ double now;
 FILE *time_out;
 char *time_file = "timeline.txt";
 
+// PAPI test results
+static void test_fail(char *file, int line, char *call, int retval){
+	printf("%s\tFAILED\nLine # %d\n", file, line);
+	if ( retval == PAPI_ESYS ) {
+		char buf[128];
+		memset( buf, '\0', sizeof(buf) );
+		sprintf(buf, "System error in %s:", call );
+		perror(buf);
+	}
+	else if ( retval > 0 ) {
+		printf("Error calculating: %s\n", call );
+	}
+	else {
+		printf("Error in %s: %s\n", call, PAPI_strerror(retval) );
+	}
+	printf("\n");
+	exit(1);
+}
 
 void print_m512i(__m512i v)
 {
@@ -1740,6 +1760,13 @@ void BC(
 	is_dense_frontier.push_back(false);
 	frontier_sizes.push_back(1);
 
+	// PAPI
+	int events[2] = { PAPI_L2_TCA, PAPI_L2_TCM};
+	int retval;
+	if ((retval = PAPI_start_counters(events, 2)) < PAPI_OK) {
+		test_fail(__FILE__, __LINE__, "PAPI_start_counters", retval);
+	}
+	// End PAPI
 	double start_time = omp_get_wtime();
 	// First Phase
 	unsigned *new_queue = BFS_sparse(
@@ -1848,66 +1875,6 @@ void BC(
 					is_active_side,
 					is_updating_active_side,
 					graph_degrees);
-//			frontier_size = 0;
-//			out_degree = 0;
-//#pragma omp parallel for reduction(+: frontier_size, out_degree)
-//			for (unsigned side_id = 0; side_id < SIDE_LENGTH; ++side_id) {
-//				if (!is_updating_active_side[side_id]) {
-//					is_active_side[side_id] = 0;
-//					continue;
-//				}
-//				is_updating_active_side[side_id] = 0;
-//				is_active_side[side_id] = 1;
-//				unsigned start_vertex_id = side_id * TILE_WIDTH;
-//				unsigned bound_vertex_id;
-//				if (SIDE_LENGTH - 1 != side_id) {
-//					bound_vertex_id = side_id * TILE_WIDTH + TILE_WIDTH;
-//				} else {
-//					bound_vertex_id = NNODES;
-//				}
-//				unsigned remainder = (bound_vertex_id - start_vertex_id) % NUM_P_INT;
-//				bound_vertex_id -= remainder;
-//				unsigned vertex_id;
-//				for (vertex_id = start_vertex_id; 
-//						vertex_id < bound_vertex_id; 
-//						vertex_id += NUM_P_INT) {
-//					__m512i updating_flag_v = _mm512_loadu_si512(h_graph_mask + vertex_id);
-//					__mmask16 is_updating_m = _mm512_test_epi32_mask(updating_flag_v, _mm512_set1_epi32(1));
-//					if (!is_updating_m) {
-//						continue;
-//					}
-//					__m512i num_active_v = _mm512_mask_set1_epi32(_mm512_set1_epi32(0), is_updating_m, 1);
-//					unsigned num_active = _mm512_reduce_add_epi32(num_active_v);
-//					frontier_size += num_active;
-//					__m512i out_degrees_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), is_updating_m, graph_degrees + vertex_id);
-//					out_degree += _mm512_reduce_add_epi32(out_degrees_v);
-//					_mm512_mask_storeu_epi32(h_graph_visited + vertex_id, is_updating_m, _mm512_set1_epi32(1));
-//				}
-//
-//				if (0 == remainder) {
-//					continue;
-//				}
-//				unsigned short in_range_m_t = (unsigned short) 0xFFFF >> (NUM_P_INT - remainder);
-//				__mmask16 in_range_m = (__mmask16) in_range_m_t;
-//				__m512i updating_flag_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), in_range_m, h_graph_mask + vertex_id);
-//				__mmask16 is_updating_m = _mm512_test_epi32_mask(updating_flag_v, _mm512_set1_epi32(1));
-//				if (!is_updating_m) {
-//					continue;
-//				}
-//				__m512i num_active_v = _mm512_mask_set1_epi32(_mm512_set1_epi32(0), is_updating_m, 1);
-//				unsigned num_active = _mm512_reduce_add_epi32(num_active_v);
-//				frontier_size += num_active;
-//				__m512i out_degrees_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), is_updating_m, graph_degrees + vertex_id);
-//				out_degree += _mm512_reduce_add_epi32(out_degrees_v);
-//				_mm512_mask_storeu_epi32(h_graph_visited + vertex_id, is_updating_m, _mm512_set1_epi32(1));
-//				//for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++vertex_id) {
-//				//	if (1 == h_graph_mask[vertex_id]) {
-//				//		frontier_size++;
-//				//		out_degree += graph_degrees[vertex_id];
-//				//		h_graph_visited[vertex_id] = 1;
-//				//	}
-//				//}
-//			}
 			frontier_sizes.push_back(frontier_size);
 			update_time += omp_get_wtime() - last_time;
 			if (0 == frontier_size) {
@@ -2119,8 +2086,16 @@ void BC(
 
 	//printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
 	printf("%u %f\n", NUM_THREADS, run_time = omp_get_wtime() - start_time);
-	printf("first_phase_time: %f\n", first_phase_time);
-	printf("second_phase_time: %f\n", second_phase_time);
+	// PAPI results
+	long long values[2];
+	if ((retval = PAPI_stop_counters(values, 2)) < PAPI_OK) {
+		test_fail(__FILE__, __LINE__, "PAPI_stop_counters", retval);
+	}
+	printf("cache access: %lld, cache misses: %lld, miss rate: %.2f%%\n", values[0], values[1], 100.0* values[1]/values[0]);
+	// End PAPI results
+
+	//printf("first_phase_time: %f\n", first_phase_time);
+	//printf("second_phase_time: %f\n", second_phase_time);
 	puts("------- -------");
 	//print_time();
 	////Test
