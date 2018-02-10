@@ -942,9 +942,11 @@ inline void update_visited_dense(
 void update_visited_dense_reverse(
 		unsigned *h_graph_mask,
 		int *h_graph_visited,
+		int *is_active_side,
 		float *dependencies,
 		float *inverse_num_paths)
 {
+	memset(is_active_side, 0, SIDE_LENGTH * sizeof(int));
 //#pragma omp parallel for schedule(dynamic, CHUNK_SIZE)
 //	for (unsigned i = 0; i < NNODES; ++i) {
 //		if (h_graph_mask[i]) {
@@ -966,6 +968,15 @@ void update_visited_dense_reverse(
 		__m512 dep_v = _mm512_mask_load_ps(_mm512_undefined_ps(), is_set_v, dependencies + i);
 		dep_v = _mm512_mask_add_ps(dep_v, is_set_v, dep_v, inv_num_paths_v);
 		_mm512_mask_store_ps(dependencies + i, is_set_v, dep_v);
+
+		__m512i index_v = _mm512_set_epi32(
+									i+15, i+14, i+13, i+12,
+									i+11, i+10, i+9, i+8,
+									i+7, i+6, i+5, i+4,
+									i+3, i+2, i+1, i);
+		__m512i TILE_WIDTH_v = _mm512_set1_epi32(TILE_WIDTH);
+		__m512i side_id_v = _mm512_div_epi32(index_v, TILE_WIDTH_v);
+		_mm512_mask_i32scatter_epi32(is_active_side, is_set_v, side_id_v, _mm512_set1_epi32(1), sizeof(int));
 	}
 	if (remainder) {
 		__mmask16 in_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
@@ -979,6 +990,15 @@ void update_visited_dense_reverse(
 		__m512 dep_v = _mm512_mask_load_ps(_mm512_undefined_ps(), is_set_v, dependencies + bound_i);
 		dep_v = _mm512_mask_add_ps(dep_v, is_set_v, dep_v, inv_num_paths_v);
 		_mm512_mask_store_ps(dependencies + bound_i, is_set_v, dep_v);
+
+		__m512i index_v = _mm512_set_epi32(
+									bound_i + 15, bound_i + 14, bound_i + 13, bound_i + 12,
+									bound_i + 11, bound_i + 10, bound_i + 9, bound_i + 8,
+									bound_i + 7, bound_i + 6, bound_i + 5, bound_i + 4,
+									bound_i + 3, bound_i + 2, bound_i + 1, bound_i);
+		__m512i TILE_WIDTH_v = _mm512_set1_epi32(TILE_WIDTH);
+		__m512i side_id_v = _mm512_div_epi32(index_v, TILE_WIDTH_v);
+		_mm512_mask_i32scatter_epi32(is_active_side, is_set_v, side_id_v, _mm512_set1_epi32(1), sizeof(int));
 	}
 }
 
@@ -1502,7 +1522,7 @@ inline void scheduler_dense_reverse(
 		unsigned *tile_offsets,
 		//int *is_empty_tile,
 		unsigned *tile_sizes,
-		//int *is_active_side,
+		int *is_active_side,
 		//int *is_updating_active_side,
 		float *dependencies)
 {
@@ -1519,12 +1539,12 @@ inline void scheduler_dense_reverse(
 		unsigned capacity = SIZE_BUFFER_MAX;
 		for (unsigned tile_id = tile_index; tile_id < bound_tile_id; ++tile_id) {
 			unsigned row_id = (tile_id - start_tile_id) % tile_step + start_row_index;
-			//if (0 == tile_sizes[tile_id] || !is_active_side[row_id]) {
-			//	continue;
-			//}
-			if (0 == tile_sizes[tile_id]) {
+			if (0 == tile_sizes[tile_id] || !is_active_side[row_id]) {
 				continue;
 			}
+			//if (0 == tile_sizes[tile_id]) {
+			//	continue;
+			//}
 			// Load to buffer
 			unsigned edge_i = tile_offsets[tile_id];
 			unsigned remain = tile_sizes[tile_id];
@@ -1624,7 +1644,7 @@ inline void BFS_dense_reverse(
 		unsigned *tile_offsets,
 		//int *is_empty_tile,
 		unsigned *tile_sizes,
-		//int *is_active_side,
+		int *is_active_side,
 		//int *is_updating_active_side,
 		float *dependencies)
 {
@@ -1634,8 +1654,8 @@ inline void BFS_dense_reverse(
 	unsigned remainder = SIDE_LENGTH % ROW_STEP;
 	unsigned bound_side_id = SIDE_LENGTH - remainder;
 	//unsigned *new_mask = (unsigned *) calloc(NNODES, sizeof(unsigned));
-	unsigned side_id;
-	for (side_id = 0; side_id < bound_side_id; side_id += ROW_STEP) {
+	//unsigned side_id;
+	for (unsigned side_id = 0; side_id < bound_side_id; side_id += ROW_STEP) {
 		scheduler_dense_reverse(
 				//side_id * SIDE_LENGTH,\
 				//(side_id + ROW_STEP) * SIDE_LENGTH,
@@ -1653,30 +1673,32 @@ inline void BFS_dense_reverse(
 				tile_offsets,
 				//is_empty_tile,
 				tile_sizes,
-				//is_active_side,
+				is_active_side,
 				//is_updating_active_side,
 				dependencies);
 	}
-	scheduler_dense_reverse(
-			//side_id * SIDE_LENGTH,\
-			//NUM_TILES,
-			side_id,
-			remainder,
-			h_graph_heads,
-			h_graph_tails,
-			heads_buffer,
-			tails_buffer,
-			h_graph_mask,
-			//new_mask,
-			h_graph_visited,
-			//h_graph_parents,
-			//h_cost,
-			tile_offsets,
-			//is_empty_tile,
-			tile_sizes,
-			//is_active_side,
-			//is_updating_active_side,
-			dependencies);
+	if (remainder) {
+		scheduler_dense_reverse(
+				//side_id * SIDE_LENGTH,\
+				//NUM_TILES,
+				bound_side_id,
+				remainder,
+				h_graph_heads,
+				h_graph_tails,
+				heads_buffer,
+				tails_buffer,
+				h_graph_mask,
+				//new_mask,
+				h_graph_visited,
+				//h_graph_parents,
+				//h_cost,
+				tile_offsets,
+				//is_empty_tile,
+				tile_sizes,
+				is_active_side,
+				//is_updating_active_side,
+				dependencies);
+	}
 	_mm_free(heads_buffer);
 	_mm_free(tails_buffer);
 
@@ -1760,13 +1782,13 @@ void BC(
 	is_dense_frontier.push_back(false);
 	frontier_sizes.push_back(1);
 
-	// PAPI
-	int events[2] = { PAPI_L2_TCA, PAPI_L2_TCM};
-	int retval;
-	if ((retval = PAPI_start_counters(events, 2)) < PAPI_OK) {
-		test_fail(__FILE__, __LINE__, "PAPI_start_counters", retval);
-	}
-	// End PAPI
+	//// PAPI
+	//int events[2] = { PAPI_L2_TCA, PAPI_L2_TCM};
+	//int retval;
+	//if ((retval = PAPI_start_counters(events, 2)) < PAPI_OK) {
+	//	test_fail(__FILE__, __LINE__, "PAPI_start_counters", retval);
+	//}
+	//// End PAPI
 	double start_time = omp_get_wtime();
 	// First Phase
 	unsigned *new_queue = BFS_sparse(
@@ -2009,6 +2031,7 @@ void BC(
 			update_visited_dense_reverse(
 										frontier,
 										h_graph_visited,
+										is_active_side,
 										dependencies,
 										inverse_num_paths);
 			update_time += omp_get_wtime() - last_time;
@@ -2020,7 +2043,7 @@ void BC(
 					h_graph_visited,
 					tile_offsets_reverse,
 					tile_sizes_reverse,
-					//int *is_active_side,
+					is_active_side,
 					dependencies);
 			dense_time += omp_get_wtime() - last_time;
 		} else {
@@ -2086,26 +2109,26 @@ void BC(
 
 	//printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
 	printf("%u %f\n", NUM_THREADS, run_time = omp_get_wtime() - start_time);
-	// PAPI results
-	long long values[2];
-	if ((retval = PAPI_stop_counters(values, 2)) < PAPI_OK) {
-		test_fail(__FILE__, __LINE__, "PAPI_stop_counters", retval);
-	}
-	printf("cache access: %lld, cache misses: %lld, miss rate: %.2f%%\n", values[0], values[1], 100.0* values[1]/values[0]);
-	// End PAPI results
+	//// PAPI results
+	//long long values[2];
+	//if ((retval = PAPI_stop_counters(values, 2)) < PAPI_OK) {
+	//	test_fail(__FILE__, __LINE__, "PAPI_stop_counters", retval);
+	//}
+	//printf("cache access: %lld, cache misses: %lld, miss rate: %.2f%%\n", values[0], values[1], 100.0* values[1]/values[0]);
+	//// End PAPI results
 
 	//printf("first_phase_time: %f\n", first_phase_time);
 	//printf("second_phase_time: %f\n", second_phase_time);
-	puts("------- -------");
+	//puts("------- -------");
 	//print_time();
 	////Test
 	////puts("After:");
-	FILE *fout = fopen("output.txt", "w");
-	for (unsigned i = 0; i < NNODES; ++i) {
-		fprintf(fout, "d[%u]: %f\n", i, dependencies[i]);
-	}
-	fclose(fout);
-	exit(1);
+	//FILE *fout = fopen("output.txt", "w");
+	//for (unsigned i = 0; i < NNODES; ++i) {
+	//	fprintf(fout, "d[%u]: %f\n", i, dependencies[i]);
+	//}
+	//fclose(fout);
+	//exit(1);
 	////End Test
 	
 	// Free memory
@@ -2180,7 +2203,7 @@ int main(int argc, char *argv[])
 	fprintf(time_out, "input end: %lf\n", now - start);
 #ifdef ONEDEBUG
 	printf("Input finished: %s\n", filename);
-	unsigned run_count = 7;
+	unsigned run_count = 9;
 #else
 	unsigned run_count = 9;
 #endif
@@ -2199,13 +2222,13 @@ int main(int argc, char *argv[])
 	printf("T_RATIO: %u\n", v);
 	//SIZE_BUFFER_MAX = 1024;
 	// BFS
-	for (unsigned cz = 0; cz < 1; ++cz) {
+	for (unsigned cz = 0; cz < 3; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
 		//sleep(10);
 #endif
-		for (unsigned k = 0; k < 1; ++k) {
+		for (unsigned k = 0; k < 3; ++k) {
 		BC(
 			graph_heads, 
 			graph_tails, 
