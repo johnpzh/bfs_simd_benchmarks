@@ -712,6 +712,7 @@ inline void BFS_sparse_reverse(
 void update_visited_dense_reverse(
 		unsigned *h_graph_mask,
 		int *h_graph_visited,
+		int *is_active_side,
 		float *dependencies,
 		float *inverse_num_paths)
 {
@@ -719,6 +720,7 @@ void update_visited_dense_reverse(
 	for (unsigned i = 0; i < NNODES; ++i) {
 		if (h_graph_mask[i]) {
 			h_graph_visited[i] = 1;
+			is_active_side[i / TILE_WIDTH] = 1;
 			dependencies[i] += inverse_num_paths[i];
 		}
 	}
@@ -942,7 +944,7 @@ inline void scheduler_dense_reverse(
 		unsigned *tile_offsets,
 		//int *is_empty_tile,
 		unsigned *tile_sizes,
-		//int *is_active_side,
+		int *is_active_side,
 		//int *is_updating_active_side,
 		float *dependencies)
 {
@@ -954,12 +956,12 @@ inline void scheduler_dense_reverse(
 		unsigned bound_tile_id = tile_index + tile_step;
 		for (unsigned tile_id = tile_index; tile_id < bound_tile_id; ++tile_id) {
 			unsigned row_id = (tile_id - start_tile_id) % tile_step + start_row_index;
-			//if (!tile_sizes[tile_id] || !is_active_side[row_id]) {
-			//	continue;
-			//}
-			if (!tile_sizes[tile_id]) {
+			if (!tile_sizes[tile_id] || !is_active_side[row_id]) {
 				continue;
 			}
+			//if (!tile_sizes[tile_id]) {
+			//	continue;
+			//}
 			// Kernel
 			unsigned bound_edge_i;
 			if (NUM_TILES - 1 != tile_id) {
@@ -995,13 +997,15 @@ inline void BFS_dense_reverse(
 		unsigned *tile_offsets,
 		//int *is_empty_tile,
 		unsigned *tile_sizes,
-		//int *is_active_side,
+		int *is_active_side,
 		//int *is_updating_active_side,
 		float *dependencies)
 {
 	//unsigned *new_mask = (unsigned *) calloc(NNODES, sizeof(unsigned));
-	unsigned side_id;
-	for (side_id = 0; side_id + ROW_STEP <= SIDE_LENGTH; side_id += ROW_STEP) {
+	unsigned remainder = SIDE_LENGTH % ROW_STEP;
+	unsigned bound_side_id = SIDE_LENGTH - remainder;
+	//unsigned side_id;
+	for (unsigned side_id = 0; side_id < bound_side_id; side_id += ROW_STEP) {
 		scheduler_dense_reverse(
 				//side_id * SIDE_LENGTH,\
 				//(side_id + ROW_STEP) * SIDE_LENGTH,
@@ -1017,15 +1021,15 @@ inline void BFS_dense_reverse(
 				tile_offsets,
 				//is_empty_tile,
 				tile_sizes,
-				//is_active_side,
+				is_active_side,
 				//is_updating_active_side,
 				dependencies);
 	}
 	scheduler_dense_reverse(
 			//side_id * SIDE_LENGTH,\
 			//NUM_TILES,
-			side_id,
-			SIDE_LENGTH - side_id,
+			bound_side_id,
+			remainder,
 			h_graph_heads,
 			h_graph_tails,
 			h_graph_mask,
@@ -1036,7 +1040,7 @@ inline void BFS_dense_reverse(
 			tile_offsets,
 			//is_empty_tile,
 			tile_sizes,
-			//is_active_side,
+			is_active_side,
 			//is_updating_active_side,
 			dependencies);
 
@@ -1287,6 +1291,7 @@ void BC(
 			update_visited_dense_reverse(
 										frontier,
 										h_graph_visited,
+										is_active_side,
 										dependencies,
 										inverse_num_paths);
 			BFS_dense_reverse(
@@ -1296,7 +1301,7 @@ void BC(
 					h_graph_visited,
 					tile_offsets_reverse,
 					tile_sizes_reverse,
-					//int *is_active_side,
+					is_active_side,
 					dependencies);
 		} else {
 			unsigned queue_size = frontier_sizes[lc];
@@ -1332,14 +1337,16 @@ void BC(
 		}
 	}
 
+	printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
+
 	////Test
 	////puts("After:");
-	//for (unsigned i = 0; i < NNODES; ++i) {
-	//	printf("dependencies[%u]: %f\n", i, dependencies[i]);
-	//}
+	FILE *fout = fopen("output.txt", "w");
+	for (unsigned i = 0; i < NNODES; ++i) {
+		fprintf(fout, "d[%u]: %f\n", i, dependencies[i]);
+	}
+	fclose(fout);
 	////End Test
-
-	printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
 	
 	// Free memory
 	for (auto f = frontiers.begin(); f != frontiers.end(); ++f) {
@@ -1362,8 +1369,8 @@ int main(int argc, char *argv[])
 		TILE_WIDTH = strtoul(argv[2], NULL, 0);
 		ROW_STEP = strtoul(argv[3], NULL, 0);
 	} else {
-		//filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec";
-		filename = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
+		filename = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
+		//filename = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
 		TILE_WIDTH = 1024;
 		ROW_STEP = 16;
 	}
@@ -1408,9 +1415,9 @@ int main(int argc, char *argv[])
 	fprintf(time_out, "input end: %lf\n", now - start);
 #ifdef ONEDEBUG
 	printf("Input finished: %s\n", filename);
-	unsigned run_count = 9;
+	unsigned run_count = 7;
 #else
-	unsigned run_count = 9;
+	unsigned run_count = 7;
 #endif
 	T_RATIO = 100;
 	CHUNK_SIZE = 2048;
