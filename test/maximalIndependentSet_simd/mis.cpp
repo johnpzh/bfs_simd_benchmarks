@@ -11,12 +11,16 @@
 #include <omp.h>
 #include <unistd.h>
 #include <algorithm>
+#include <immintrin.h>
 using std::string;
 using std::getline;
 using std::cout;
 using std::endl;
 using std::to_string;
 using std::vector;
+
+#define NUM_P_INT 16 // Number of packed intergers in one __m512i variable
+#define ALIGNED_BYTES 64
 
 unsigned NNODES;
 unsigned NEDGES;
@@ -25,6 +29,7 @@ unsigned TILE_WIDTH;
 unsigned SIDE_LENGTH;
 unsigned NUM_TILES;
 unsigned ROW_STEP;
+unsigned SIZE_BUFFER_MAX;
 unsigned CHUNK_SIZE;
 unsigned T_RATIO;
 
@@ -378,38 +383,95 @@ unsigned *to_sparse(
 	}
 	return new_frontier;
 }
+//inline void BFS_kernel_sparse(
+//				unsigned *graph_vertices,
+//				unsigned *graph_edges,
+//				unsigned *graph_degrees,
+//				//int *h_graph_visited,
+//				unsigned *h_graph_queue,
+//				const unsigned &queue_size,
+//				//unsigned *num_paths)
+//				Status *h_graph_flags)
+//{
+//#pragma omp parallel for
+//	for (unsigned i = 0; i < queue_size; ++i) {
+//		unsigned head = h_graph_queue[i];
+//		unsigned start_edge_i = graph_vertices[head];
+//		unsigned bound_edge_i = start_edge_i + graph_degrees[head];
+//		for (unsigned edge_i = start_edge_i; edge_i < bound_edge_i; ++edge_i) {
+//			unsigned tail = graph_edges[edge_i];
+//			if (IN == h_graph_flags[tail]) {
+//				if (OUT != h_graph_flags[head]) {
+//					h_graph_flags[head] = OUT;
+//				}
+//			} else if (tail < head && h_graph_flags[tail] < OUT && SEMI_IN == h_graph_flags[head]) {
+//				h_graph_flags[head] = UNDECIDED;
+//			}
+//			//if (IN == h_graph_flags[tail]) {
+//			//	if (OUT != h_graph_flags[head]) {
+//			//		h_graph_flags[head] = OUT;
+//			//	}
+//			//} else if (SEMI_IN == h_graph_flags[tail] && SEMI_IN == h_graph_flags[head]) {
+//			//	h_graph_flags[head] = UNDECIDED;
+//			//}
+//		}
+//	}
+//}
 inline void BFS_kernel_sparse(
 				unsigned *graph_vertices,
 				unsigned *graph_edges,
 				unsigned *graph_degrees,
-				//int *h_graph_visited,
 				unsigned *h_graph_queue,
 				const unsigned &queue_size,
-				//unsigned *num_paths)
 				Status *h_graph_flags)
 {
 #pragma omp parallel for
 	for (unsigned i = 0; i < queue_size; ++i) {
 		unsigned head = h_graph_queue[i];
 		unsigned start_edge_i = graph_vertices[head];
-		unsigned bound_edge_i = start_edge_i + graph_degrees[head];
-		for (unsigned edge_i = start_edge_i; edge_i < bound_edge_i; ++edge_i) {
-			unsigned tail = graph_edges[edge_i];
-			if (IN == h_graph_flags[tail]) {
-				if (OUT != h_graph_flags[head]) {
-					h_graph_flags[head] = OUT;
-				}
-			} else if (tail < head && h_graph_flags[tail] < OUT && SEMI_IN == h_graph_flags[head]) {
-				h_graph_flags[head] = UNDECIDED;
-			}
-			//if (IN == h_graph_flags[tail]) {
-			//	if (OUT != h_graph_flags[head]) {
-			//		h_graph_flags[head] = OUT;
-			//	}
-			//} else if (SEMI_IN == h_graph_flags[tail] && SEMI_IN == h_graph_flags[head]) {
-			//	h_graph_flags[head] = UNDECIDED;
-			//}
+		//unsigned bound_edge_i = start_edge_i + graph_degrees[head];
+		unsigned remainder = graph_degrees[head] % NUM_P_INT;
+		unsigned bound_edge_i = start_edge_i + graph_degrees[head] - remainder;
+		for (unsigned edge_i = start_edge_i; edge_i < bound_edge_i; edge_i += NUM_P_INT) {
+			__m512i head_v = _mm512_set1_epi32(head);
+			__m512i tail_v = _mm512_loadu_si512(graph_edges + edge_i);
+			__m512i flags_head_v = _mm512_i32gather_epi32(head_v, h_graph_flags, sizeof(Status));
+			__m512i flags_tail_v = _mm512_i32gather_epi32(tail_v, h_graph_flags, sizeof(Status));
+			__mmask16 is_IN_tail_m = _mm512_cmpeq_epi32_mask(flags_tail_v, _mm512_set1_epi32(IN));
+			__mmask16 not_OUT_head_m = _mm512_mask_cmpneq_epi32_mask(is_IN_tail_m, flags_head_v, _mm512_set1_epi32(OUT));
+			_mm512_mask_i32scatter_epi32(h_graph_flags, not_OUT_head_m, head_v, _mm512_set1_epi32(OUT), sizeof(Status));
+			__mmask16 not_IN_tail_m = _mm512_cmpneq_epi32_mask(flags_tail_v, _mm512_set1_epi32(IN));
+			not_IN_tail_m = _mm512_mask_cmplt_epi32_mask(not_IN_tail_m, tail_v, head_v);
+			not_IN_tail_m = _mm512_mask_cmplt_epi32_mask(not_IN_tail_m, flags_tail_v, _mm512_set1_epi32(OUT));
+			not_IN_tail_m = _mm512_mask_cmpeq_epi32_mask(not_IN_tail_m, flags_head_v, _mm512_set1_epi32(SEMI_IN));
+			_mm512_mask_i32scatter_epi32(h_graph_flags, not_IN_tail_m, head_v, _mm512_set1_epi32(UNDECIDED), sizeof(Status));
 		}
+		if (remainder) {
+			__mmask16 in_range_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
+			__m512i head_v = _mm512_mask_set1_epi32(_mm512_undefined_epi32(), in_range_m, head);
+			__m512i tail_v = _mm512_mask_loadu_epi32(_mm512_undefined_epi32(), in_range_m, graph_edges + bound_edge_i);
+			__m512i flags_head_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), in_range_m, head_v, h_graph_flags, sizeof(Status));
+			__m512i flags_tail_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), in_range_m, tail_v, h_graph_flags, sizeof(Status));
+			__mmask16 is_IN_tail_m = _mm512_mask_cmpeq_epi32_mask(in_range_m, flags_tail_v, _mm512_set1_epi32(IN));
+			__mmask16 not_OUT_head_m = _mm512_mask_cmpneq_epi32_mask(is_IN_tail_m, flags_head_v, _mm512_set1_epi32(OUT));
+			_mm512_mask_i32scatter_epi32(h_graph_flags, not_OUT_head_m, head_v, _mm512_set1_epi32(OUT), sizeof(Status));
+			__mmask16 not_IN_tail_m = _mm512_mask_cmpneq_epi32_mask(in_range_m, flags_tail_v, _mm512_set1_epi32(IN));
+			not_IN_tail_m = _mm512_mask_cmplt_epi32_mask(not_IN_tail_m, tail_v, head_v);
+			not_IN_tail_m = _mm512_mask_cmplt_epi32_mask(not_IN_tail_m, flags_tail_v, _mm512_set1_epi32(OUT));
+			not_IN_tail_m = _mm512_mask_cmpeq_epi32_mask(not_IN_tail_m, flags_head_v, _mm512_set1_epi32(SEMI_IN));
+			_mm512_mask_i32scatter_epi32(h_graph_flags, not_IN_tail_m, head_v, _mm512_set1_epi32(UNDECIDED), sizeof(Status));
+		}
+		///////////////////
+		//for (unsigned edge_i = start_edge_i; edge_i < bound_edge_i; ++edge_i) {
+		//	unsigned tail = graph_edges[edge_i];
+		//	if (IN == h_graph_flags[tail]) {
+		//		if (OUT != h_graph_flags[head]) {
+		//			h_graph_flags[head] = OUT;
+		//		}
+		//	} else if (tail < head && h_graph_flags[tail] < OUT && SEMI_IN == h_graph_flags[head]) {
+		//		h_graph_flags[head] = UNDECIDED;
+		//	}
+		//}
 	}
 }
 inline void BFS_sparse(
@@ -489,47 +551,113 @@ void to_dense(
 		is_active_side[vertex_id / TILE_WIDTH] = 1;
 	}
 }
+//inline void bfs_kernel_dense(
+//		const unsigned &start_edge_i,
+//		const unsigned &bound_edge_i,
+//		unsigned *h_graph_heads,
+//		unsigned *h_graph_tails,
+//		int *h_graph_mask,
+//		//unsigned *h_updating_graph_mask,
+//		//int *h_graph_visited,
+//		//unsigned *h_graph_parents,
+//		//int *h_cost,
+//		//int *is_updating_active_side,
+//		Status *h_graph_flags)
+//{
+//	for (unsigned edge_i = start_edge_i; edge_i < bound_edge_i; ++edge_i) {
+//		unsigned head = h_graph_heads[edge_i];
+//		if (0 == h_graph_mask[head]) {
+//			//++edge_i;
+//			continue;
+//		}
+//		unsigned tail = h_graph_tails[edge_i];
+//		if (IN == h_graph_flags[tail]) {
+//			if (OUT != h_graph_flags[head]) {
+//				h_graph_flags[head] = OUT;
+//			}
+//		} else if (tail < head && h_graph_flags[tail] < OUT && SEMI_IN == h_graph_flags[head]) {
+//			h_graph_flags[head] = UNDECIDED;
+//		}
+//		//if (IN == h_graph_flags[tail]) {
+//		//	if (OUT != h_graph_flags[head]) {
+//		//		h_graph_flags[head] = OUT;
+//		//	}
+//		//} else if (SEMI_IN == h_graph_flags[tail] && SEMI_IN == h_graph_flags[head]) {
+//		//	h_graph_flags[head] = UNDECIDED;
+//		//}
+//	}
+//}
 inline void bfs_kernel_dense(
-		const unsigned &start_edge_i,
-		const unsigned &bound_edge_i,
-		unsigned *h_graph_heads,
-		unsigned *h_graph_tails,
+		unsigned *heads_buffer,
+		unsigned *tails_buffer,
+		const unsigned &size_buffer,
 		int *h_graph_mask,
-		//unsigned *h_updating_graph_mask,
-		//int *h_graph_visited,
-		//unsigned *h_graph_parents,
-		//int *h_cost,
-		//int *is_updating_active_side,
 		Status *h_graph_flags)
 {
-	for (unsigned edge_i = start_edge_i; edge_i < bound_edge_i; ++edge_i) {
-		unsigned head = h_graph_heads[edge_i];
-		if (0 == h_graph_mask[head]) {
-			//++edge_i;
+	unsigned remainder = size_buffer % NUM_P_INT;
+	unsigned bound_edge_i = size_buffer - remainder;
+	for (unsigned edge_i = 0; edge_i < bound_edge_i; edge_i += NUM_P_INT) {
+		__m512i head_v = _mm512_load_epi32(heads_buffer + edge_i);
+		__m512i head_mask_v = _mm512_i32gather_epi32(head_v, h_graph_mask, sizeof(int));
+		__mmask16 is_frontier_m = _mm512_test_epi32_mask(head_mask_v, _mm512_set1_epi32(-1));
+		if (!is_frontier_m) {
 			continue;
 		}
-		unsigned tail = h_graph_tails[edge_i];
-		if (IN == h_graph_flags[tail]) {
-			if (OUT != h_graph_flags[head]) {
-				h_graph_flags[head] = OUT;
-			}
-		} else if (tail < head && h_graph_flags[tail] < OUT && SEMI_IN == h_graph_flags[head]) {
-			h_graph_flags[head] = UNDECIDED;
-		}
-		//if (IN == h_graph_flags[tail]) {
-		//	if (OUT != h_graph_flags[head]) {
-		//		h_graph_flags[head] = OUT;
-		//	}
-		//} else if (SEMI_IN == h_graph_flags[tail] && SEMI_IN == h_graph_flags[head]) {
-		//	h_graph_flags[head] = UNDECIDED;
-		//}
+		__m512i tail_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), is_frontier_m, tails_buffer + edge_i);
+		__m512i flags_head_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), is_frontier_m, head_v, h_graph_flags, sizeof(Status));
+		__m512i flags_tail_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), is_frontier_m, tail_v, h_graph_flags, sizeof(Status));
+		__mmask16 is_IN_tail_m = _mm512_mask_cmpeq_epi32_mask(is_frontier_m, flags_tail_v, _mm512_set1_epi32(IN));
+		__mmask16 not_OUT_head_m = _mm512_mask_cmpneq_epi32_mask(is_IN_tail_m, flags_head_v, _mm512_set1_epi32(OUT));
+		_mm512_mask_i32scatter_epi32(h_graph_flags, not_OUT_head_m, head_v, _mm512_set1_epi32(OUT), sizeof(Status));
+		__mmask16 not_IN_tail_m = _mm512_mask_cmpneq_epi32_mask(is_frontier_m, flags_tail_v, _mm512_set1_epi32(IN));
+		not_IN_tail_m = _mm512_mask_cmplt_epi32_mask(not_IN_tail_m, tail_v, head_v);
+		not_IN_tail_m = _mm512_mask_cmplt_epi32_mask(not_IN_tail_m, flags_tail_v, _mm512_set1_epi32(OUT));
+		not_IN_tail_m = _mm512_mask_cmpeq_epi32_mask(not_IN_tail_m, flags_head_v, _mm512_set1_epi32(SEMI_IN));
+		_mm512_mask_i32scatter_epi32(h_graph_flags, not_IN_tail_m, head_v, _mm512_set1_epi32(UNDECIDED), sizeof(Status));
 	}
+	if (remainder) {
+		__mmask16 in_range_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
+		__m512i head_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, heads_buffer + bound_edge_i);
+		__m512i head_mask_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_range_m, head_v, h_graph_mask, sizeof(int));
+		__mmask16 is_frontier_m = _mm512_test_epi32_mask(head_mask_v, _mm512_set1_epi32(-1));
+		if (!is_frontier_m) {
+			return;
+		}
+		__m512i tail_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), is_frontier_m, tails_buffer + bound_edge_i);
+		__m512i flags_head_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), is_frontier_m, head_v, h_graph_flags, sizeof(Status));
+		__m512i flags_tail_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), is_frontier_m, tail_v, h_graph_flags, sizeof(Status));
+		__mmask16 is_IN_tail_m = _mm512_mask_cmpeq_epi32_mask(is_frontier_m, flags_tail_v, _mm512_set1_epi32(IN));
+		__mmask16 not_OUT_head_m = _mm512_mask_cmpneq_epi32_mask(is_IN_tail_m, flags_head_v, _mm512_set1_epi32(OUT));
+		_mm512_mask_i32scatter_epi32(h_graph_flags, not_OUT_head_m, head_v, _mm512_set1_epi32(OUT), sizeof(Status));
+		__mmask16 not_IN_tail_m = _mm512_mask_cmpneq_epi32_mask(is_frontier_m, flags_tail_v, _mm512_set1_epi32(IN));
+		not_IN_tail_m = _mm512_mask_cmplt_epi32_mask(not_IN_tail_m, tail_v, head_v);
+		not_IN_tail_m = _mm512_mask_cmplt_epi32_mask(not_IN_tail_m, flags_tail_v, _mm512_set1_epi32(OUT));
+		not_IN_tail_m = _mm512_mask_cmpeq_epi32_mask(not_IN_tail_m, flags_head_v, _mm512_set1_epi32(SEMI_IN));
+		_mm512_mask_i32scatter_epi32(h_graph_flags, not_IN_tail_m, head_v, _mm512_set1_epi32(UNDECIDED), sizeof(Status));
+	}
+	////////////////////////////////
+	//for (unsigned edge_i = start_edge_i; edge_i < bound_edge_i; ++edge_i) {
+	//	unsigned head = h_graph_heads[edge_i];
+	//	if (0 == h_graph_mask[head]) {
+	//		continue;
+	//	}
+	//	unsigned tail = h_graph_tails[edge_i];
+	//	if (IN == h_graph_flags[tail]) {
+	//		if (OUT != h_graph_flags[head]) {
+	//			h_graph_flags[head] = OUT;
+	//		}
+	//	} else if (tail < head && h_graph_flags[tail] < OUT && SEMI_IN == h_graph_flags[head]) {
+	//		h_graph_flags[head] = UNDECIDED;
+	//	}
+	//}
 }
 inline void scheduler_dense(
 		const unsigned &start_col_index,
 		const unsigned &tile_step,
 		unsigned *h_graph_heads,
 		unsigned *h_graph_tails,
+		unsigned *heads_buffer,
+		unsigned *tails_buffer,
 		int *h_graph_mask,
 		//unsigned *h_updating_graph_mask,
 		//int *h_graph_visited,
@@ -543,35 +671,80 @@ inline void scheduler_dense(
 {
 #pragma omp parallel for schedule(dynamic, 1)
 	for (unsigned row_id = 0; row_id < SIDE_LENGTH; ++row_id) {
+		unsigned tid = omp_get_thread_num();
+		unsigned *heads_buffer_base = heads_buffer + tid * SIZE_BUFFER_MAX;
+		unsigned *tails_buffer_base = tails_buffer + tid * SIZE_BUFFER_MAX;
+		unsigned size_buffer = 0;
+		unsigned capacity = SIZE_BUFFER_MAX;
 		unsigned bound_col_id = start_col_index + tile_step;
 		for (unsigned col_id = start_col_index; col_id < bound_col_id; ++col_id) {
 			unsigned tile_id = row_id * SIDE_LENGTH + col_id;
 			if (0 == tile_sizes[tile_id] || !is_active_side[col_id]) {
 				continue;
 			}
-			// Kernel
-			unsigned start_edge_i = tile_offsets[tile_id];
-			unsigned bound_edge_i = start_edge_i + tile_sizes[tile_id];
-			//unsigned bound_edge_i;
-			//if (NUM_TILES - 1 != tile_id) {
-			//	bound_edge_i = tile_offsets[tile_id + 1];
-			//} else {
-			//	bound_edge_i = NEDGES;
-			//}
+			// Load to buffer
+			unsigned edge_i = tile_offsets[tile_id];
+			unsigned remain = tile_sizes[tile_id];
+			while (remain != 0) {
+				if (capacity > 0) {
+					if (capacity > remain) {
+						// Put all remain into the buffer
+						memcpy(heads_buffer_base + size_buffer, h_graph_heads + edge_i, remain * sizeof(unsigned));
+						memcpy(tails_buffer_base + size_buffer, h_graph_tails + edge_i, remain * sizeof(unsigned));
+						edge_i += remain;
+						capacity -= remain;
+						size_buffer += remain;
+						remain = 0;
+					} else {
+						// Fill the buffer to full
+						memcpy(heads_buffer_base + size_buffer, h_graph_heads + edge_i, capacity * sizeof(unsigned));
+						memcpy(tails_buffer_base + size_buffer, h_graph_tails + edge_i, capacity * sizeof(unsigned));
+						edge_i += capacity;
+						remain -= capacity;
+						size_buffer += capacity;
+						capacity = 0;
+					}
+				} else {
+					// Process the full buffer
+					bfs_kernel_dense(
+							heads_buffer_base,
+							tails_buffer_base,
+							size_buffer,
+							h_graph_mask,
+							h_graph_flags);
+					capacity = SIZE_BUFFER_MAX;
+					size_buffer = 0;
+				}
+			}
+			
+		}
+		// Process the remains in buffer
+		if (size_buffer) {
 			bfs_kernel_dense(
-					//tile_offsets[tile_id],
-					start_edge_i,
-					bound_edge_i,
-					h_graph_heads,
-					h_graph_tails,
+					heads_buffer_base,
+					tails_buffer_base,
+					size_buffer,
 					h_graph_mask,
-					//h_updating_graph_mask,
-					//h_graph_visited,
-					//h_graph_parents,
-					//h_cost,
-					//is_updating_active_side,
 					h_graph_flags);
 		}
+
+		//unsigned bound_col_id = start_col_index + tile_step;
+		//for (unsigned col_id = start_col_index; col_id < bound_col_id; ++col_id) {
+		//	unsigned tile_id = row_id * SIDE_LENGTH + col_id;
+		//	if (0 == tile_sizes[tile_id] || !is_active_side[col_id]) {
+		//		continue;
+		//	}
+		//	// Kernel
+		//	unsigned start_edge_i = tile_offsets[tile_id];
+		//	unsigned bound_edge_i = start_edge_i + tile_sizes[tile_id];
+		//	bfs_kernel_dense(
+		//			start_edge_i,
+		//			bound_edge_i,
+		//			h_graph_heads,
+		//			h_graph_tails,
+		//			h_graph_mask,
+		//			h_graph_flags);
+		//}
 	}
 }
 
@@ -585,6 +758,8 @@ inline void BFS_dense(
 		//int *is_updating_active_side,
 		Status *h_graph_flags)
 {
+	unsigned *heads_buffer = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS, ALIGNED_BYTES);
+	unsigned *tails_buffer = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS, ALIGNED_BYTES);
 	//unsigned *new_mask = (unsigned *) calloc(NNODES, sizeof(unsigned));
 	//unsigned side_id;
 	unsigned remainder = SIDE_LENGTH % ROW_STEP;
@@ -595,6 +770,8 @@ inline void BFS_dense(
 				ROW_STEP,
 				h_graph_heads,
 				h_graph_tails,
+				heads_buffer,
+				tails_buffer,
 				h_graph_mask,
 				//new_mask,
 				//h_graph_visited,
@@ -612,6 +789,8 @@ inline void BFS_dense(
 				remainder,
 				h_graph_heads,
 				h_graph_tails,
+				heads_buffer,
+				tails_buffer,
 				h_graph_mask,
 				//new_mask,
 				//h_graph_visited,
@@ -623,6 +802,9 @@ inline void BFS_dense(
 				//is_updating_active_side,
 				h_graph_flags);
 	}
+
+	_mm_free(heads_buffer);
+	_mm_free(tails_buffer);
 
 	//return new_mask;
 }
@@ -738,6 +920,7 @@ void MIS(
 	}
 
 	printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
+#ifdef ONEDEBUG
 	unsigned mis_count = 0;
 #pragma omp parallel for reduction(+: mis_count)
 	for (unsigned i = 0; i < NNODES; ++i) {
@@ -755,6 +938,7 @@ void MIS(
 	//} else {
 	//	puts("Congrats.\n");
 	//}
+#endif
 
 	free(h_graph_mask);
 	free(h_graph_flags);
@@ -803,9 +987,10 @@ int main(int argc, char *argv[])
 	printf("Input finished: %s\n", filename);
 	unsigned run_count = 7;
 #else
-	unsigned run_count = 7;
+	unsigned run_count = 9;
 #endif
 	T_RATIO = 20;
+	SIZE_BUFFER_MAX = 800;
 	CHUNK_SIZE = 2048;
 	// BFS
 	for (unsigned i = 6; i < run_count; ++i) {
