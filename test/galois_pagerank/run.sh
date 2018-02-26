@@ -1,8 +1,9 @@
 #!/usr/bin/bash
-#bin="/home/zpeng/code/Galois/build/release/apps/bfs"
-bin="/home/zpeng/code/galois_set/build/release/apps/betweennesscentrality/betweennesscentrality-outer"
-data="/home/zpeng/benchmarks/data/pokec/soc-pokec_nohead.vgr"
-#data="/home/zpeng/benchmarks/data/twt/out.twitter_nohead.vgr"
+bin="/home/zpeng/code/galois_set/build/release/apps/pagerank/pagerank"
+#data="/home/zpeng/benchmarks/data/pokec/soc-pokec_nohead.gr"
+data="/home/zpeng/benchmarks/data/twt/out.twitter_nohead.gr"
+#data_tran="/home/zpeng/benchmarks/data/pokec/soc-pokec_nohead.tvgr"
+data_tran="/home/zpeng/benchmarks/data/twt/out.twitter_nohead.tvgr"
 output="output_$(date +%Y%m%d-%H%M%S).txt"
 :> $output
 #for ((i = 0; i < 9; ++i)); do
@@ -13,12 +14,8 @@ output="output_$(date +%Y%m%d-%H%M%S).txt"
 
 thd=64
 set -x
-echo "async-------" >> $output
-${bin} ${data} -startNode=0 -t=${thd} -noverify -limit=1 >> $output
-echo "barrier-------" >> $output
-${bin} ${data} -startNode=0 -t=${thd} -noverify -limit=1 >> $output
-echo "barrierWithCas-------" >> $output
-${bin} ${data} -startNode=0 -t=${thd} -noverify -limit=1 >> $output
+echo "pull-------" >> $output
+${bin} ${data} -graphTranspose=${data_tran} -maxIterations=1 -t=${thd} noverify -algo=pull >> $output
 #echo "detBase-------" >> $output
 #${bin} ${data} -startNode=0 -t=${thd} -algo=detBase -noverify >> $output
 #echo "detDisjoint-------" >> $output
