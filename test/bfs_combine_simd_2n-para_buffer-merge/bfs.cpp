@@ -71,8 +71,21 @@ inline void bfs_kernel_dense(
 		//int *h_graph_visited,
 		unsigned *h_graph_parents,
 		int *h_cost,
-		int *is_updating_active_side)
+		int *is_updating_active_side,
+		int *is_idle_thread)
 {
+	// Check the number of idle threads
+	int num_idle_thread = 0;
+	for (unsigned i = 0; i < NUM_THREADS; ++i) {
+		if (is_idle_thread[i]) {
+			++num_idle_thread;
+		}
+	}
+	//int threshold = NUM_THREADS / 2;
+	int threshold = NUM_THREADS - 1;
+	// Choose to do nested parallel or not
+	if (num_idle_thread < threshold) {
+		// No 2nd-level parallelism
 	unsigned remainder = size_buffer % NUM_P_INT;
 	unsigned bound_edge_i = size_buffer - remainder;
 	unsigned edge_i;
@@ -128,6 +141,27 @@ inline void bfs_kernel_dense(
 	__m512i side_id_v = _mm512_div_epi32(tail_v, TILE_WIDTH_v);
 	_mm512_mask_i32scatter_epi32(is_updating_active_side, not_visited_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
 	_mm512_mask_i32scatter_epi32(h_graph_parents, not_visited_m, tail_v, head_v, sizeof(unsigned));
+	} else {
+#pragma omp parallel for
+		for (unsigned edge_i = 0; edge_i < size_buffer; ++edge_i) {
+			unsigned head_id = heads_buffer[edge_i];
+			if (0 == h_graph_mask[head_id]) {
+				continue;
+			}
+			unsigned end_id = tails_buffer[edge_i];
+			if ((unsigned) -1 == h_graph_parents[end_id]) {
+				unsigned old_v = h_graph_parents[end_id];
+				unsigned new_v = head_id;
+				bool is_updated = __sync_bool_compare_and_swap(h_graph_parents + end_id, old_v, new_v);
+				if (is_updated) {
+					h_cost[end_id] = h_cost[head_id] + 1;
+					h_updating_graph_mask[end_id] = 1;
+					is_updating_active_side[end_id / TILE_WIDTH] = 1;
+				}
+			}
+		}
+		//printf("num_threads: %d\n", omp_get_num_threads());//test
+	}
 }
 inline void scheduler_dense(
 		unsigned *h_graph_heads,
@@ -145,20 +179,22 @@ inline void scheduler_dense(
 		const unsigned &start_row_index,
 		const unsigned &tile_step)
 {
+	int *is_idle_thread = (int *) calloc(NUM_THREADS, sizeof(int)); // mark idle threads
 	unsigned *sizes_buffers = (unsigned *) calloc(NUM_THREADS, sizeof(unsigned));
 	unsigned start_tile_id = start_row_index * SIDE_LENGTH;
 	unsigned end_tile_id = start_tile_id + tile_step * SIDE_LENGTH;
-//#pragma omp parallel for schedule(dynamic, 1)
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic, 1)
+//#pragma omp parallel for
 	for (unsigned tile_index = start_tile_id; tile_index < end_tile_id; tile_index += tile_step) {
-		unsigned bound_tile_id = tile_index + tile_step;
 		unsigned tid = omp_get_thread_num();
+		is_idle_thread[tid] = 0;
 		unsigned *heads_buffer_base = heads_buffer + tid * SIZE_BUFFER_MAX;
 		unsigned *tails_buffer_base = tails_buffer + tid * SIZE_BUFFER_MAX;
 		//unsigned size_buffer = 0;
 		//unsigned capacity = SIZE_BUFFER_MAX;
 		unsigned size_buffer = sizes_buffers[tid];
 		unsigned capacity = SIZE_BUFFER_MAX - size_buffer;
+		unsigned bound_tile_id = tile_index + tile_step;
 		for (unsigned tile_id = tile_index; tile_id < bound_tile_id; ++tile_id) {
 			unsigned row_id = (tile_id - start_tile_id) % tile_step + start_row_index;
 			if (0 == tile_sizes[tile_id] || !is_active_side[row_id]) {
@@ -197,7 +233,8 @@ inline void scheduler_dense(
 							//h_graph_visited,
 							h_graph_parents,
 							h_cost,
-							is_updating_active_side);
+							is_updating_active_side,
+							is_idle_thread);
 					capacity = SIZE_BUFFER_MAX;
 					size_buffer = 0;
 				}
@@ -216,6 +253,7 @@ inline void scheduler_dense(
 		//		h_graph_parents,
 		//		h_cost,
 		//		is_updating_active_side);
+		is_idle_thread[tid] = 1;
 	}
 
 	// Process the remains in buffer
@@ -235,11 +273,13 @@ inline void scheduler_dense(
 					//h_graph_visited,
 					h_graph_parents,
 					h_cost,
-					is_updating_active_side);
+					is_updating_active_side,
+					is_idle_thread);
 		}
 	}
 
 	free(sizes_buffers);
+	free(is_idle_thread);
 }
 void BFS_dense(
 		unsigned *h_graph_heads,
@@ -621,47 +661,53 @@ void graph_prepare(
 	update_time = 0;
 	run_time = 0;
 	// The first time, running the Sparse
+	omp_set_nested(true); // Set nested parallelism available.
+	if (!omp_get_nested()) {
+		puts("Error: cannot set nested parallelism.");
+		exit(1);
+	} else {
+		puts("Set nested parallelism successed.");
+	}
 	omp_set_num_threads(NUM_THREADS);
 	unsigned frontier_size = 1;
 	unsigned *frontier = (unsigned *) malloc(sizeof(unsigned) * frontier_size);
 	frontier[0] = source;
-	// PAPI
-	int events[2] = { PAPI_L2_TCA, PAPI_L2_TCM};
-	int retval;
-	if ((retval = PAPI_start_counters(events, 2)) < PAPI_OK) {
-		test_fail(__FILE__, __LINE__, "PAPI_start_counters", retval);
-	}
-	// End PAPI
+	//// PAPI
+	//int events[2] = { PAPI_L2_TCA, PAPI_L2_TCM};
+	//int retval;
+	//if ((retval = PAPI_start_counters(events, 2)) < PAPI_OK) {
+	//	test_fail(__FILE__, __LINE__, "PAPI_start_counters", retval);
+	//}
+	//// End PAPI
 	double last_time = omp_get_wtime();
 	double start_time = omp_get_wtime();
-	//unsigned *new_frontier = BFS_sparse(
-	//							frontier,
-	//							h_graph_vertices,
-	//							h_graph_edges,
-	//							h_graph_degrees,
-	//							h_graph_parents,
-	//							frontier_size);
-	//free(frontier);
-	//frontier = new_frontier;
+	unsigned *new_frontier = BFS_sparse(
+								frontier,
+								h_graph_vertices,
+								h_graph_edges,
+								h_graph_degrees,
+								h_graph_parents,
+								frontier_size);
+	free(frontier);
+	frontier = new_frontier;
 	sparse_time += omp_get_wtime() - last_time;
 	last_time = omp_get_wtime();
 
 	unsigned out_degree = 0;
-//	// When update the parents, get the sum of the number of active nodes and their out degree.
-//#pragma omp parallel for reduction(+: out_degree)
-//	for (unsigned i = 0; i < frontier_size; ++i) {
-//		unsigned end = frontier[i];
-//		unsigned start = h_graph_parents[end];
-//		h_cost[end] = h_cost[start] + 1;
-//		out_degree += h_graph_degrees[end];
-//	}
+	// When update the parents, get the sum of the number of active nodes and their out degree.
+#pragma omp parallel for reduction(+: out_degree)
+	for (unsigned i = 0; i < frontier_size; ++i) {
+		unsigned end = frontier[i];
+		unsigned start = h_graph_parents[end];
+		h_cost[end] = h_cost[start] + 1;
+		out_degree += h_graph_degrees[end];
+	}
 	update_time += omp_get_wtime() - last_time;
 	bool last_is_dense = false;
 	// According the sum, determine to run Sparse or Dense, and then change the last_is_dense.
-	//unsigned bfs_threshold = NEDGES / 20 / T_RATIO; // Determined according to Ligra
 	unsigned bfs_threshold = NEDGES / T_RATIO; // Determined according to Ligra
 	while (frontier_size != 0) {
-		//if (frontier_size + out_degree > bfs_threshold) {
+		if (frontier_size + out_degree > bfs_threshold) {
 			if (!last_is_dense) {
 				last_time = omp_get_wtime();
 				to_dense(
@@ -686,31 +732,31 @@ void graph_prepare(
 					is_updating_active_side);
 			dense_time += omp_get_wtime() - last_time;
 			last_is_dense = true;
-		//} else {
-		//	// Sparse
-		//	if (last_is_dense) {
-		//		last_time = omp_get_wtime();
-		//		new_frontier = to_sparse(
-		//			frontier,
-		//			frontier_size,
-		//			h_graph_mask);
-		//		free(frontier);
-		//		frontier = new_frontier;
-		//		to_sparse_time += omp_get_wtime() - last_time;
-		//	}
-		//	last_time = omp_get_wtime();
-		//	new_frontier = BFS_sparse(
-		//						frontier,
-		//						h_graph_vertices,
-		//						h_graph_edges,
-		//						h_graph_degrees,
-		//						h_graph_parents,
-		//						frontier_size);
-		//	free(frontier);
-		//	frontier = new_frontier;
-		//	last_is_dense = false;
-		//	sparse_time += omp_get_wtime() - last_time;
-		//}
+		} else {
+			// Sparse
+			if (last_is_dense) {
+				last_time = omp_get_wtime();
+				new_frontier = to_sparse(
+					frontier,
+					frontier_size,
+					h_graph_mask);
+				free(frontier);
+				frontier = new_frontier;
+				to_sparse_time += omp_get_wtime() - last_time;
+			}
+			last_time = omp_get_wtime();
+			new_frontier = BFS_sparse(
+								frontier,
+								h_graph_vertices,
+								h_graph_edges,
+								h_graph_degrees,
+								h_graph_parents,
+								frontier_size);
+			free(frontier);
+			frontier = new_frontier;
+			last_is_dense = false;
+			sparse_time += omp_get_wtime() - last_time;
+		}
 		// Update the parents, also get the sum again.
 		last_time = omp_get_wtime();
 		if (last_is_dense) {
@@ -797,13 +843,13 @@ void graph_prepare(
 		//printf("frontier_size: %u\n", frontier_size);//test
 	}
 	double end_time = omp_get_wtime();
-	// PAPI results
-	long long values[2];
-	if ((retval = PAPI_stop_counters(values, 2)) < PAPI_OK) {
-		test_fail(__FILE__, __LINE__, "PAPI_stop_counters", retval);
-	}
+	//// PAPI results
+	//long long values[2];
+	//if ((retval = PAPI_stop_counters(values, 2)) < PAPI_OK) {
+	//	test_fail(__FILE__, __LINE__, "PAPI_stop_counters", retval);
+	//}
 	//printf("cache access: %lld, cache misses: %lld, miss rate: %.2f%%\n", values[0], values[1], 100.0* values[1]/values[0]);
-	// End PAPI results
+	//// End PAPI results
 	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
 	//print_time();//test
 	free(frontier);
@@ -998,14 +1044,14 @@ void input( int argc, char** argv)
 	//T_RATIO = 100;
 	T_RATIO = 20;
 	CHUNK_SIZE = 2048;
-	for (unsigned cz = 0; cz < 1; ++cz) {
+	for (unsigned cz = 0; cz < 3; ++cz) {
 	for (unsigned i = 0; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
 		//sleep(10);
 #endif
 		// Re-initializing
-		for (unsigned k = 0; k < 1; ++k) {
+		for (unsigned k = 0; k < 3; ++k) {
 		memset(h_graph_mask, 0, sizeof(int)*NNODES);
 		//h_graph_mask[source] = 1;
 		memset(h_updating_graph_mask, 0, sizeof(int)*NNODES);
