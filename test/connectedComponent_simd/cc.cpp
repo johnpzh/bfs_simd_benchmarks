@@ -491,10 +491,12 @@ int main(int argc, char *argv[])
 	if (argc > 2) {
 		filename = argv[1];
 		TILE_WIDTH = strtoul(argv[2], NULL, 0);
+		ROW_STEP = strtoul(argv[3], NULL, 0);
 	} else {
-		//filename = "/home/zpeng/benchmarks/data/pokec/coo_tiled_bak/soc-pokec";
-		filename = "/home/zpeng/benchmarks/data/skitter/coo_tiled_bak/out.skitter";
+		filename = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
+		//filename = "/home/zpeng/benchmarks/data/skitter/coo_tiled_bak/out.skitter";
 		TILE_WIDTH = 1024;
+		ROW_STEP = 16;
 	}
 	// Input
 	unsigned *graph_heads;
@@ -530,7 +532,7 @@ int main(int argc, char *argv[])
 #else
 	unsigned run_count = 9;
 #endif
-	ROW_STEP = 16;
+	//ROW_STEP = 16;
 	SIZE_BUFFER_MAX = 512;
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);

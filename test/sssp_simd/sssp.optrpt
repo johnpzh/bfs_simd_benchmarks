@@ -11,18 +11,18 @@ Begin optimization report for: main(int, char **)
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at sssp.cpp(474,2)
-   remark #15382: vectorization support: call to function memset(void *, int, size_t) cannot be vectorized   [ sssp.cpp(476,3) ]
+LOOP BEGIN at sssp.cpp(476,2)
    remark #15382: vectorization support: call to function memset(void *, int, size_t) cannot be vectorized   [ sssp.cpp(478,3) ]
    remark #15382: vectorization support: call to function memset(void *, int, size_t) cannot be vectorized   [ sssp.cpp(480,3) ]
-   remark #15382: vectorization support: call to function memset(void *, int, size_t) cannot be vectorized   [ sssp.cpp(481,3) ]
+   remark #15382: vectorization support: call to function memset(void *, int, size_t) cannot be vectorized   [ sssp.cpp(482,3) ]
    remark #15382: vectorization support: call to function memset(void *, int, size_t) cannot be vectorized   [ sssp.cpp(483,3) ]
-   remark #15382: vectorization support: call to function sssp(unsigned int *, unsigned int *, unsigned int *, int *, int *, int *, int *, int *, int *) cannot be vectorized   [ sssp.cpp(486,3) ]
-   remark #15382: vectorization support: call to function omp_get_wtime() cannot be vectorized   [ sssp.cpp(496,9) ]
-   remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ sssp.cpp(497,3) ]
+   remark #15382: vectorization support: call to function memset(void *, int, size_t) cannot be vectorized   [ sssp.cpp(485,3) ]
+   remark #15382: vectorization support: call to function sssp(unsigned int *, unsigned int *, unsigned int *, int *, int *, int *, int *, int *, int *) cannot be vectorized   [ sssp.cpp(488,3) ]
+   remark #15382: vectorization support: call to function omp_get_wtime() cannot be vectorized   [ sssp.cpp(498,9) ]
+   remark #15382: vectorization support: call to function fprintf(FILE *, const char *, ...) cannot be vectorized   [ sssp.cpp(499,3) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between call:memset(void *, int, size_t) (476:3) and call:fprintf(FILE *, const char *, ...) (497:3)
-   remark #15346: vector dependence: assumed OUTPUT dependence between call:fprintf(FILE *, const char *, ...) (497:3) and call:memset(void *, int, size_t) (476:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:memset(void *, int, size_t) (478:3) and call:fprintf(FILE *, const char *, ...) (499:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:fprintf(FILE *, const char *, ...) (499:3) and call:memset(void *, int, size_t) (478:3)
 LOOP END
 ===========================================================================
 

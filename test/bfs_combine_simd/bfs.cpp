@@ -147,7 +147,8 @@ inline void scheduler_dense(
 {
 	unsigned start_tile_id = start_row_index * SIDE_LENGTH;
 	unsigned end_tile_id = start_tile_id + tile_step * SIDE_LENGTH;
-#pragma omp parallel for schedule(dynamic, 1)
+//#pragma omp parallel for schedule(dynamic, 1)
+#pragma omp parallel for
 	for (unsigned tile_index = start_tile_id; tile_index < end_tile_id; tile_index += tile_step) {
 		unsigned bound_tile_id = tile_index + tile_step;
 		unsigned tid = omp_get_thread_num();
@@ -597,13 +598,13 @@ void graph_prepare(
 	unsigned frontier_size = 1;
 	unsigned *frontier = (unsigned *) malloc(sizeof(unsigned) * frontier_size);
 	frontier[0] = source;
-	// PAPI
-	int events[2] = { PAPI_L2_TCA, PAPI_L2_TCM};
-	int retval;
-	if ((retval = PAPI_start_counters(events, 2)) < PAPI_OK) {
-		test_fail(__FILE__, __LINE__, "PAPI_start_counters", retval);
-	}
-	// End PAPI
+	//// PAPI
+	//int events[2] = { PAPI_L2_TCA, PAPI_L2_TCM};
+	//int retval;
+	//if ((retval = PAPI_start_counters(events, 2)) < PAPI_OK) {
+	//	test_fail(__FILE__, __LINE__, "PAPI_start_counters", retval);
+	//}
+	//// End PAPI
 	double last_time = omp_get_wtime();
 	double start_time = omp_get_wtime();
 	//unsigned *new_frontier = BFS_sparse(
@@ -769,13 +770,13 @@ void graph_prepare(
 		//printf("frontier_size: %u\n", frontier_size);//test
 	}
 	double end_time = omp_get_wtime();
-	// PAPI results
-	long long values[2];
-	if ((retval = PAPI_stop_counters(values, 2)) < PAPI_OK) {
-		test_fail(__FILE__, __LINE__, "PAPI_stop_counters", retval);
-	}
-	printf("cache access: %lld, cache misses: %lld, miss rate: %.2f%%\n", values[0], values[1], 100.0* values[1]/values[0]);
-	// End PAPI results
+	//// PAPI results
+	//long long values[2];
+	//if ((retval = PAPI_stop_counters(values, 2)) < PAPI_OK) {
+	//	test_fail(__FILE__, __LINE__, "PAPI_stop_counters", retval);
+	//}
+	//printf("cache access: %lld, cache misses: %lld, miss rate: %.2f%%\n", values[0], values[1], 100.0* values[1]/values[0]);
+	//// End PAPI results
 	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
 	//print_time();//test
 	free(frontier);
@@ -970,14 +971,14 @@ void input( int argc, char** argv)
 	//T_RATIO = 100;
 	T_RATIO = 20;
 	CHUNK_SIZE = 2048;
-	for (unsigned cz = 0; cz < 3; ++cz) {
-	for (unsigned i = 6; i < run_count; ++i) {
+	for (unsigned cz = 0; cz < 1; ++cz) {
+	for (unsigned i = 0; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
 		//sleep(10);
 #endif
 		// Re-initializing
-		for (unsigned k = 0; k < 3; ++k) {
+		for (unsigned k = 0; k < 1; ++k) {
 		memset(h_graph_mask, 0, sizeof(int)*NNODES);
 		//h_graph_mask[source] = 1;
 		memset(h_updating_graph_mask, 0, sizeof(int)*NNODES);

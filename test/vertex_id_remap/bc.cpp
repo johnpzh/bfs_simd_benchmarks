@@ -1,3 +1,7 @@
+/*
+   Re-map vertex ID to new ID. New ID's order is determined according to access order. 
+   Those vertices accessed earlier will have a smaller ID.
+*/
 #include <iostream>
 #include <fstream>
 #include <vector>

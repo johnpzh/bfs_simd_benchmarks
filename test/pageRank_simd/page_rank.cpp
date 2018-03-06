@@ -148,7 +148,7 @@ void input(char filename[])
 	time_out = fopen(time_file, "w");
 	fprintf(time_out, "input end: %lf\n", now - start);
 #ifdef ONEDEBUG
-	unsigned bound_i = 2;
+	unsigned bound_i = 7;
 #else
 	unsigned bound_i = 9;
 #endif
@@ -579,7 +579,7 @@ int main(int argc, char *argv[])
 		filename = argv[1];
 		TILE_WIDTH = strtoul(argv[2], NULL, 0);
 	} else {
-		filename = "/home/zpeng/benchmarks/data/pokec/coo_tiled_bak/soc-pokec";
+		filename = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
 		TILE_WIDTH = 1024;
 	}
 	input(filename);

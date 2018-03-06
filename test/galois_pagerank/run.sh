@@ -3,7 +3,7 @@ bin="/home/zpeng/code/galois_set/build/release/apps/pagerank/pagerank"
 #data="/home/zpeng/benchmarks/data/pokec/soc-pokec_nohead.gr"
 data="/home/zpeng/benchmarks/data/twt/out.twitter_nohead.gr"
 #data_tran="/home/zpeng/benchmarks/data/pokec/soc-pokec_nohead.tvgr"
-data_tran="/home/zpeng/benchmarks/data/twt/out.twitter_nohead.tvgr"
+data_tran="/home/zpeng/benchmarks/data/twt/out.twitter_nohead.tgr"
 output="output_$(date +%Y%m%d-%H%M%S).txt"
 :> $output
 #for ((i = 0; i < 9; ++i)); do
@@ -15,7 +15,7 @@ output="output_$(date +%Y%m%d-%H%M%S).txt"
 thd=64
 set -x
 echo "pull-------" >> $output
-${bin} ${data} -graphTranspose=${data_tran} -maxIterations=1 -t=${thd} noverify -algo=pull >> $output
+${bin} ${data} -graphTranspose=${data_tran} -maxIterations=1 -t=${thd} -noverify -algo=pull >> $output
 #echo "detBase-------" >> $output
 #${bin} ${data} -startNode=0 -t=${thd} -algo=detBase -noverify >> $output
 #echo "detDisjoint-------" >> $output

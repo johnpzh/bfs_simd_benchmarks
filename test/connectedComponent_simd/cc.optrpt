@@ -11,20 +11,20 @@ Begin optimization report for: main(int, char **)
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at cc.cpp(535,2)
+LOOP BEGIN at cc.cpp(537,2)
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cc.cpp(537,3)
+   LOOP BEGIN at cc.cpp(539,3)
    <Peeled loop for vectorization>
-      remark #15389: vectorization support: reference graph_active[k] has unaligned access   [ cc.cpp(538,4) ]
+      remark #15389: vectorization support: reference graph_active[k] has unaligned access   [ cc.cpp(540,4) ]
       remark #15381: vectorization support: unaligned access used inside loop body
       remark #15305: vectorization support: vector length 16
       remark #15309: vectorization support: normalized vectorization overhead 1.364
       remark #15301: PEEL LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at cc.cpp(537,3)
-      remark #15389: vectorization support: reference graph_active[k] has unaligned access   [ cc.cpp(538,4) ]
+   LOOP BEGIN at cc.cpp(539,3)
+      remark #15389: vectorization support: reference graph_active[k] has unaligned access   [ cc.cpp(540,4) ]
       remark #15381: vectorization support: unaligned access used inside loop body
       remark #15305: vectorization support: vector length 16
       remark #15309: vectorization support: normalized vectorization overhead 3.333
@@ -38,26 +38,26 @@ LOOP BEGIN at cc.cpp(535,2)
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at cc.cpp(537,3)
+   LOOP BEGIN at cc.cpp(539,3)
    <Remainder loop for vectorization>
-      remark #15389: vectorization support: reference graph_active[k] has unaligned access   [ cc.cpp(538,4) ]
+      remark #15389: vectorization support: reference graph_active[k] has unaligned access   [ cc.cpp(540,4) ]
       remark #15381: vectorization support: unaligned access used inside loop body
       remark #15305: vectorization support: vector length 16
       remark #15309: vectorization support: normalized vectorization overhead 1.364
       remark #15301: REMAINDER LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at cc.cpp(541,3)
+   LOOP BEGIN at cc.cpp(543,3)
    <Peeled loop for vectorization>
-      remark #15389: vectorization support: reference is_active_side[k] has unaligned access   [ cc.cpp(542,4) ]
+      remark #15389: vectorization support: reference is_active_side[k] has unaligned access   [ cc.cpp(544,4) ]
       remark #15381: vectorization support: unaligned access used inside loop body
       remark #15305: vectorization support: vector length 16
       remark #15309: vectorization support: normalized vectorization overhead 1.364
       remark #15301: PEEL LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at cc.cpp(541,3)
-      remark #15389: vectorization support: reference is_active_side[k] has unaligned access   [ cc.cpp(542,4) ]
+   LOOP BEGIN at cc.cpp(543,3)
+      remark #15389: vectorization support: reference is_active_side[k] has unaligned access   [ cc.cpp(544,4) ]
       remark #15381: vectorization support: unaligned access used inside loop body
       remark #15305: vectorization support: vector length 16
       remark #15309: vectorization support: normalized vectorization overhead 3.333
@@ -71,26 +71,26 @@ LOOP BEGIN at cc.cpp(535,2)
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at cc.cpp(541,3)
+   LOOP BEGIN at cc.cpp(543,3)
    <Remainder loop for vectorization>
-      remark #15389: vectorization support: reference is_active_side[k] has unaligned access   [ cc.cpp(542,4) ]
+      remark #15389: vectorization support: reference is_active_side[k] has unaligned access   [ cc.cpp(544,4) ]
       remark #15381: vectorization support: unaligned access used inside loop body
       remark #15305: vectorization support: vector length 16
       remark #15309: vectorization support: normalized vectorization overhead 1.364
       remark #15301: REMAINDER LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at cc.cpp(545,3)
+   LOOP BEGIN at cc.cpp(547,3)
    <Peeled loop for vectorization>
-      remark #15389: vectorization support: reference graph_component[k] has unaligned access   [ cc.cpp(546,4) ]
+      remark #15389: vectorization support: reference graph_component[k] has unaligned access   [ cc.cpp(548,4) ]
       remark #15381: vectorization support: unaligned access used inside loop body
       remark #15305: vectorization support: vector length 16
       remark #15309: vectorization support: normalized vectorization overhead 1.455
       remark #15301: PEEL LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at cc.cpp(545,3)
-      remark #15389: vectorization support: reference graph_component[k] has unaligned access   [ cc.cpp(546,4) ]
+   LOOP BEGIN at cc.cpp(547,3)
+      remark #15389: vectorization support: reference graph_component[k] has unaligned access   [ cc.cpp(548,4) ]
       remark #15381: vectorization support: unaligned access used inside loop body
       remark #15305: vectorization support: vector length 16
       remark #15309: vectorization support: normalized vectorization overhead 3.667
@@ -104,9 +104,9 @@ LOOP BEGIN at cc.cpp(535,2)
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at cc.cpp(545,3)
+   LOOP BEGIN at cc.cpp(547,3)
    <Remainder loop for vectorization>
-      remark #15389: vectorization support: reference graph_component[k] has unaligned access   [ cc.cpp(546,4) ]
+      remark #15389: vectorization support: reference graph_component[k] has unaligned access   [ cc.cpp(548,4) ]
       remark #15381: vectorization support: unaligned access used inside loop body
       remark #15305: vectorization support: vector length 16
       remark #15309: vectorization support: normalized vectorization overhead 1.455

@@ -1,10 +1,2 @@
-input end: 0.613179
-Thread 1 end: 0.967357
-Thread 2 end: 1.160829
-Thread 4 end: 1.297281
-Thread 8 end: 1.379035
-Thread 16 end: 1.435542
-Thread 32 end: 1.480648
-Thread 64 end: 1.563645
-Thread 128 end: 1.602409
-Thread 256 end: 1.641121
+input end: 2.123326
+Thread 1 end: 5.286053
