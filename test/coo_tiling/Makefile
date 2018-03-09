@@ -1,9 +1,13 @@
 ICPC = icpc
 
 ifeq (${debug}, 1)
-	CC_FLAGS = -Wall -Wextra -g -std=c++11 -qopenmp -DONEDEBUG
+	CPPFLAGS = -Wall -Wextra -g -std=c++14 -qopenmp -DONEDEBUG
 else
-	CC_FLAGS = -Wall -Wextra -g -std=c++11 -qopenmp -O3 -qopt-report=5 -qopt-report-phase=vec
+	CPPFLAGS = -Wall -Wextra -g -std=c++14 -qopenmp -O3 -qopt-report=5 -qopt-report-phase=vec
+endif
+
+ifeq (${weighted}, 1)
+	CPPFLAGS += -DWEIGHTED
 endif
 
 .PHONY: clean
@@ -12,7 +16,7 @@ all: page_rank
 
 page_rank: page_rank.cpp
 #icc -mmic -O3 -o page_rank page_rank.cpp -w
-	$(ICPC) $(CC_FLAGS) $^ -o $@
+	$(ICPC) $(CPPFLAGS) $^ -o $@
 
 clean:
 	rm -f page_rank

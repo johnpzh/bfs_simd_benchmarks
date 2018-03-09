@@ -66,26 +66,19 @@ inline unsigned get_chunk_size(unsigned amount)
 	}
 }
 
-void input(
+void input_weighted(
 		char filename[], 
 		unsigned *&graph_heads, 
 		unsigned *&graph_tails, 
 		unsigned *&graph_vertices,
 		unsigned *&graph_edges,
 		unsigned *&graph_degrees,
+		unsigned *&graph_weights,
 		unsigned *&tile_offsets,
-		unsigned *&tile_sizes,
-		unsigned *&graph_heads_reverse,
-		unsigned *&graph_tails_reverse,
-		unsigned *&graph_vertices_reverse,
-		unsigned *&graph_edges_reverse,
-		unsigned *&graph_degrees_reverse,
-		unsigned *&tile_offsets_reverse,
-		unsigned *&tile_sizes_reverse)
+		unsigned *&tile_sizes)
 {
 	//printf("data: %s\n", filename);
 	string prefix = string(filename) + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH);
-	string prefix_reverse = string(filename) + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH) + "_reverse";
 	string fname = prefix + "-0";
 	FILE *fin = fopen(fname.c_str(), "r");
 	if (!fin) {
@@ -121,37 +114,13 @@ void input(
 			tile_sizes[i] = NEDGES - tile_offsets[i];
 		}
 	}
-	// Reverse
-	fname = prefix_reverse + "-offsets";
-	fin = fopen(fname.c_str(), "r");
-	if (!fin) {
-		fprintf(stderr, "cannot open file: %s\n", fname.c_str());
-		exit(1);
-	}
-	tile_offsets_reverse = (unsigned *) malloc(NUM_TILES * sizeof(unsigned));
-	for (unsigned i = 0; i < NUM_TILES; ++i) {
-		fscanf(fin, "%u", tile_offsets_reverse + i);
-	}
-	fclose(fin);
-	tile_sizes_reverse = (unsigned *) malloc(NUM_TILES * sizeof(unsigned));
-	for (unsigned i = 0; i < NUM_TILES; ++i) {
-		if (NUM_TILES - 1 != i) {
-			tile_sizes_reverse[i] = tile_offsets_reverse[i + 1] - tile_offsets_reverse[i];
-		} else {
-			tile_sizes_reverse[i] = NEDGES - tile_offsets_reverse[i];
-		}
-	}
 
 	graph_heads = (unsigned *) malloc(NEDGES * sizeof(unsigned));
 	graph_tails = (unsigned *) malloc(NEDGES * sizeof(unsigned));
 	graph_vertices = (unsigned *) malloc(NNODES * sizeof(unsigned));
 	graph_edges = (unsigned *) malloc(NEDGES * sizeof(unsigned));
 	graph_degrees = (unsigned *) malloc(NNODES * sizeof(unsigned));
-	graph_heads_reverse = (unsigned *) malloc(NEDGES * sizeof(unsigned));
-	graph_tails_reverse = (unsigned *) malloc(NEDGES * sizeof(unsigned));
-	graph_vertices_reverse = (unsigned *) malloc(NNODES * sizeof(unsigned));
-	graph_edges_reverse = (unsigned *) malloc(NEDGES * sizeof(unsigned));
-	graph_degrees_reverse = (unsigned *) malloc(NNODES * sizeof(unsigned));
+	graph_weights = (unsigned *) malloc(NEDGES * sizeof(unsigned));
 
 	// For heads and tails
 	NUM_THREADS = 64;
@@ -178,49 +147,19 @@ void input(
 	for (unsigned index = offset; index < bound_index; ++index) {
 		unsigned n1;
 		unsigned n2;
-		fscanf(fin, "%u %u", &n1, &n2);
+		unsigned wt;
+		fscanf(fin, "%u %u %u", &n1, &n2, &wt);
 		n1--;
 		n2--;
 		graph_heads[index] = n1;
 		graph_tails[index] = n2;
-	}
-	fclose(fin);
-}
-//Reverse
-#pragma omp parallel num_threads(NUM_THREADS) private(fname, fin)
-{
-	unsigned tid = omp_get_thread_num();
-	unsigned offset = tid * edge_bound;
-	fname = prefix_reverse + "-" + to_string(tid);
-	fin = fopen(fname.c_str(), "r");
-	if (!fin) {
-		fprintf(stderr, "Error: cannot open file %s\n", fname.c_str());
-		exit(1);
-	}
-	if (0 == tid) {
-		fscanf(fin, "%u %u", &NNODES, &NEDGES);
-	}
-	unsigned bound_index;
-	if (NUM_THREADS - 1 != tid) {
-		bound_index = offset + edge_bound;
-	} else {
-		bound_index = NEDGES;
-	}
-	for (unsigned index = offset; index < bound_index; ++index) {
-		unsigned n1;
-		unsigned n2;
-		fscanf(fin, "%u %u", &n1, &n2);
-		n1--;
-		n2--;
-		graph_heads_reverse[index] = n1;
-		graph_tails_reverse[index] = n2;
+		graph_weights[index] = wt;
 	}
 	fclose(fin);
 }
 
 	//For graph CSR
 	prefix = string(filename) + "_untiled";
-	prefix_reverse = string(filename) + "_untiled_reverse";
 
 	// Read degrees
 	fname = prefix + "-nneibor";
@@ -231,17 +170,6 @@ void input(
 	}
 	for (unsigned i = 0; i < NNODES; ++i) {
 		fscanf(fin, "%u", graph_degrees + i);
-	}
-	fclose(fin);
-	//Reverse
-	fname = prefix_reverse + "-nneibor";
-	fin = fopen(fname.c_str(), "r");
-	if (!fin) {
-		fprintf(stderr, "cannot open file: %s\n", fname.c_str());
-		exit(1);
-	}
-	for (unsigned i = 0; i < NNODES; ++i) {
-		fscanf(fin, "%u", graph_degrees_reverse + i);
 	}
 	fclose(fin);
 
@@ -276,12 +204,76 @@ void input(
 	}
 	fclose(fin);
 }
-//Reverse
+	// CSR
+	unsigned edge_start = 0;
+	for (unsigned i = 0; i < NNODES; ++i) {
+		graph_vertices[i] = edge_start;
+		edge_start += graph_degrees[i];
+	}
+}
+
+void input(
+		char filename[], 
+		unsigned *&graph_heads, 
+		unsigned *&graph_tails, 
+		unsigned *&graph_vertices,
+		unsigned *&graph_edges,
+		unsigned *&graph_degrees,
+		unsigned *&tile_offsets,
+		unsigned *&tile_sizes)
+{
+	//printf("data: %s\n", filename);
+	string prefix = string(filename) + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH);
+	string fname = prefix + "-0";
+	FILE *fin = fopen(fname.c_str(), "r");
+	if (!fin) {
+		fprintf(stderr, "Error: cannot open file %s.\n", fname.c_str());
+		exit(1);
+	}
+	fscanf(fin, "%u %u", &NNODES, &NEDGES);
+	fclose(fin);
+	if (NNODES % TILE_WIDTH) {
+		SIDE_LENGTH = NNODES / TILE_WIDTH + 1;
+	} else {
+		SIDE_LENGTH = NNODES / TILE_WIDTH;
+	}
+	NUM_TILES = SIDE_LENGTH * SIDE_LENGTH;
+
+	// Read tile Offsets, and get tile sizes
+	fname = prefix + "-offsets";
+	fin = fopen(fname.c_str(), "r");
+	if (!fin) {
+		fprintf(stderr, "cannot open file: %s\n", fname.c_str());
+		exit(1);
+	}
+	tile_offsets = (unsigned *) malloc(NUM_TILES * sizeof(unsigned));
+	for (unsigned i = 0; i < NUM_TILES; ++i) {
+		fscanf(fin, "%u", tile_offsets + i);
+	}
+	fclose(fin);
+	tile_sizes = (unsigned *) malloc(NUM_TILES * sizeof(unsigned));
+	for (unsigned i = 0; i < NUM_TILES; ++i) {
+		if (NUM_TILES - 1 != i) {
+			tile_sizes[i] = tile_offsets[i + 1] - tile_offsets[i];
+		} else {
+			tile_sizes[i] = NEDGES - tile_offsets[i];
+		}
+	}
+
+	graph_heads = (unsigned *) malloc(NEDGES * sizeof(unsigned));
+	graph_tails = (unsigned *) malloc(NEDGES * sizeof(unsigned));
+	graph_vertices = (unsigned *) malloc(NNODES * sizeof(unsigned));
+	graph_edges = (unsigned *) malloc(NEDGES * sizeof(unsigned));
+	graph_degrees = (unsigned *) malloc(NNODES * sizeof(unsigned));
+
+	// For heads and tails
+	NUM_THREADS = 64;
+	unsigned edge_bound = NEDGES / NUM_THREADS;
 #pragma omp parallel num_threads(NUM_THREADS) private(fname, fin)
 {
 	unsigned tid = omp_get_thread_num();
 	unsigned offset = tid * edge_bound;
-	fname = prefix_reverse + "-" + to_string(tid);
+	fname = prefix + "-" + to_string(tid);
 	fin = fopen(fname.c_str(), "r");
 	if (!fin) {
 		fprintf(stderr, "Error: cannot open file %s\n", fname.c_str());
@@ -302,7 +294,55 @@ void input(
 		fscanf(fin, "%u %u", &n1, &n2);
 		n1--;
 		n2--;
-		graph_edges_reverse[index] = n2;
+		graph_heads[index] = n1;
+		graph_tails[index] = n2;
+	}
+	fclose(fin);
+}
+
+	//For graph CSR
+	prefix = string(filename) + "_untiled";
+
+	// Read degrees
+	fname = prefix + "-nneibor";
+	fin = fopen(fname.c_str(), "r");
+	if (!fin) {
+		fprintf(stderr, "cannot open file: %s\n", fname.c_str());
+		exit(1);
+	}
+	for (unsigned i = 0; i < NNODES; ++i) {
+		fscanf(fin, "%u", graph_degrees + i);
+	}
+	fclose(fin);
+
+	NUM_THREADS = 64;
+	edge_bound = NEDGES / NUM_THREADS;
+#pragma omp parallel num_threads(NUM_THREADS) private(fname, fin)
+{
+	unsigned tid = omp_get_thread_num();
+	unsigned offset = tid * edge_bound;
+	fname = prefix + "-" + to_string(tid);
+	fin = fopen(fname.c_str(), "r");
+	if (!fin) {
+		fprintf(stderr, "Error: cannot open file %s\n", fname.c_str());
+		exit(1);
+	}
+	if (0 == tid) {
+		fscanf(fin, "%u %u", &NNODES, &NEDGES);
+	}
+	unsigned bound_index;
+	if (NUM_THREADS - 1 != tid) {
+		bound_index = offset + edge_bound;
+	} else {
+		bound_index = NEDGES;
+	}
+	for (unsigned index = offset; index < bound_index; ++index) {
+		unsigned n1;
+		unsigned n2;
+		fscanf(fin, "%u %u", &n1, &n2);
+		n1--;
+		n2--;
+		graph_edges[index] = n2;
 	}
 	fclose(fin);
 }
@@ -312,121 +352,7 @@ void input(
 		graph_vertices[i] = edge_start;
 		edge_start += graph_degrees[i];
 	}
-//Reverse
-	edge_start = 0;
-	for (unsigned i = 0; i < NNODES; ++i) {
-		graph_vertices_reverse[i] = edge_start;
-		edge_start += graph_degrees_reverse[i];
-	}
-
 }
-
-//inline unsigned update_visited(
-//		int *h_graph_mask,
-//		int *h_graph_visited)
-//{
-//	unsigned count = 0;
-//#pragma omp parallel for reduction(+: count)
-//	for (unsigned i = 0; i < NNODES; ++i) {
-//		if (h_graph_mask[i]) {
-//			h_graph_visited[i] = 1;
-//			++count;
-//		}
-//	}
-//	return count;
-//}
-
-//inline void update_visited_reverse(
-//		int *h_graph_mask,
-//		int *h_graph_visited,
-//		float *dependencies,
-//		float *inverse_num_paths)
-//{
-//#pragma omp parallel for
-//	for (unsigned i = 0; i < NNODES; ++i) {
-//		if (h_graph_mask[i]) {
-//			h_graph_visited[i] = 1;
-//			dependencies[i] += inverse_num_paths[i];
-//		}
-//	}
-//}
-
-//inline int *BFS_kernel(
-//		unsigned *graph_vertices,
-//		unsigned *graph_edges,
-//		unsigned *graph_degrees,
-//		int *h_graph_mask,
-//		int *h_graph_visited,
-//		unsigned *num_paths)
-//{
-//	int *new_frontier = (int *) calloc(NNODES, sizeof(int));
-//	//unsigned new_frontier_size = 0;
-//
-////#pragma omp parallel for schedule(dynamic, 512) reduction(+: new_frontier_size)
-//#pragma omp parallel for schedule(dynamic, 512)
-//	for(unsigned int head_id = 0; head_id < NNODES; head_id++ )
-//	{
-//		if (!h_graph_mask[head_id]) {
-//			continue;
-//		}
-//		//unsigned num_paths_head = num_paths[head_id];
-//		unsigned bound_edge_i = graph_vertices[head_id] + graph_degrees[head_id];
-//		for (unsigned edge_i = graph_vertices[head_id]; edge_i < bound_edge_i; ++edge_i) {
-//			unsigned tail_id = graph_edges[edge_i];
-//			if (h_graph_visited[tail_id]) {
-//				continue;
-//			}
-//			// Change in new_frontier
-//			if (!new_frontier[tail_id]) {
-//				new_frontier[tail_id] = 1;
-//			}
-//			// Update num_paths
-//			volatile unsigned old_val = num_paths[tail_id];
-//			volatile unsigned new_val = old_val + num_paths[head_id];
-//			while (!__sync_bool_compare_and_swap(num_paths + tail_id, old_val, new_val)) {
-//				old_val = num_paths[tail_id];
-//				new_val = old_val + num_paths[head_id];
-//			}
-//		}
-//	}
-//
-//	return new_frontier;
-//}
-//
-//void BFS_kernel_reverse(
-//			unsigned *graph_vertices_reverse,
-//			unsigned *graph_edges_reverse,
-//			unsigned *graph_degrees_reverse,
-//			int *h_graph_mask,
-//			int *h_graph_visited,
-//			unsigned *num_paths,
-//			float *dependencies)
-//
-//{
-//#pragma omp parallel for schedule(dynamic, 512)
-//	for(unsigned int head_id = 0; head_id < NNODES; head_id++ )
-//	{
-//		if (!h_graph_mask[head_id]) {
-//			continue;
-//		}
-//		unsigned bound_edge_i = graph_vertices_reverse[head_id] + graph_degrees_reverse[head_id];
-//		for (unsigned edge_i = graph_vertices_reverse[head_id]; edge_i < bound_edge_i; ++edge_i) {
-//			unsigned tail_id = graph_edges_reverse[edge_i];
-//			if (h_graph_visited[tail_id]) {
-//				continue;
-//			}
-//			volatile float old_val;
-//			volatile float new_val;
-//			do {
-//				old_val = dependencies[tail_id];
-//				new_val = old_val + dependencies[head_id];
-//			} while (!__sync_bool_compare_and_swap(
-//											(int *) (dependencies + tail_id), 
-//											*((int *) &old_val), 
-//											*((int *) &new_val)));
-//		}
-//	}
-//}
 ///////////////////////////////////////////////////////
 // Sparse
 inline unsigned update_visited_sparse(
@@ -465,7 +391,7 @@ inline unsigned update_visited_sparse(
 	}
 	return out_degree;
 }
-//TOBEV
+
 inline void update_visited_sparse_reverse(
 		unsigned *h_graph_queue,
 		const unsigned &queue_size,
@@ -1728,13 +1654,6 @@ void BC(
 		unsigned *graph_degrees,
 		unsigned *tile_offsets,
 		unsigned *tile_sizes,
-		unsigned *graph_heads_reverse, 
-		unsigned *graph_tails_reverse, 
-		unsigned *graph_vertices_reverse,
-		unsigned *graph_edges_reverse,
-		unsigned *graph_degrees_reverse,
-		unsigned *tile_offsets_reverse,
-		unsigned *tile_sizes_reverse,
 		const unsigned &source,
 		unsigned *vertex_map)
 {
@@ -1887,6 +1806,30 @@ void BC(
 	free(is_updating_active_side);
 }
 
+void make_up_data_weighted(
+				unsigned *vertex_map,
+				unsigned *graph_heads,
+				unsigned *graph_tails,
+				unsigned *graph_weights,
+				char *filename)
+{
+	puts("Writing...");
+	string fname = string(filename) + "_reorder";
+	FILE *fout = fopen(fname.c_str(), "w");
+	fprintf(fout, "%u %u\n", NNODES, NEDGES);
+	for (unsigned e_i = 0; e_i < NEDGES; ++e_i) {
+		unsigned head = graph_heads[e_i];
+		unsigned tail = graph_tails[e_i];
+		unsigned weight = graph_weights[e_i];
+		unsigned new_head = vertex_map[head];
+		unsigned new_tail = vertex_map[tail];
+		++new_head;
+		++new_tail;
+		fprintf(fout, "%u %u %u\n", new_head, new_tail, weight);
+	}
+	puts("Done.");
+}
+
 void make_up_data(
 				unsigned *vertex_map,
 				unsigned *graph_heads,
@@ -1894,8 +1837,6 @@ void make_up_data(
 				char *filename)
 {
 	puts("Writing...");
-	unsigned *new_heads = (unsigned *) malloc(NEDGES * sizeof(unsigned));
-	unsigned *new_tails = (unsigned *) malloc(NEDGES * sizeof(unsigned));
 	string fname = string(filename) + "_reorder";
 	FILE *fout = fopen(fname.c_str(), "w");
 	fprintf(fout, "%u %u\n", NNODES, NEDGES);
@@ -1934,15 +1875,21 @@ int main(int argc, char *argv[])
 	unsigned *tile_offsets;
 	unsigned *tile_sizes;
 
-	unsigned *graph_heads_reverse;
-	unsigned *graph_tails_reverse;
-	unsigned *graph_vertices_reverse;
-	unsigned *graph_edges_reverse;
-	unsigned *graph_degrees_reverse;
-	unsigned *tile_offsets_reverse;
-	unsigned *tile_sizes_reverse;
+	unsigned *graph_weights = nullptr;
 
 
+#ifdef WEIGHTED
+	input_weighted(
+		filename, 
+		graph_heads, 
+		graph_tails, 
+		graph_vertices,
+		graph_edges,
+		graph_degrees,
+		graph_weights,
+		tile_offsets,
+		tile_sizes);
+#else
 	input(
 		filename, 
 		graph_heads, 
@@ -1951,14 +1898,8 @@ int main(int argc, char *argv[])
 		graph_edges,
 		graph_degrees,
 		tile_offsets,
-		tile_sizes,
-		graph_heads_reverse,
-		graph_tails_reverse,
-		graph_vertices_reverse,
-		graph_edges_reverse,
-		graph_degrees_reverse,
-		tile_offsets_reverse,
-		tile_sizes_reverse);
+		tile_sizes);
+#endif
 
 	unsigned source = 0;
 	// Map a vertex index to its new index: vertex_map[old] = new;
@@ -2007,13 +1948,6 @@ int main(int argc, char *argv[])
 			graph_degrees,
 			tile_offsets,
 			tile_sizes,
-			graph_heads_reverse, 
-			graph_tails_reverse, 
-			graph_vertices_reverse,
-			graph_edges_reverse,
-			graph_degrees_reverse,
-			tile_offsets_reverse,
-			tile_sizes_reverse,
 			source,
 			vertex_map);
 		}
@@ -2024,11 +1958,20 @@ int main(int argc, char *argv[])
 	}
 	//}
 	fclose(time_out);
+#ifdef WEIGHTED
+	make_up_data_weighted(
+			vertex_map,
+			graph_heads,
+			graph_tails,
+			graph_weights,
+			filename);
+#else
 	make_up_data(
 			vertex_map,
 			graph_heads,
 			graph_tails,
 			filename);
+#endif
 
 	// Free memory
 	free(graph_heads);
@@ -2036,15 +1979,11 @@ int main(int argc, char *argv[])
 	free(graph_vertices);
 	free(graph_edges);
 	free(graph_degrees);
+	if (nullptr != graph_weights) {
+		free(graph_weights);
+	}
 	free(tile_offsets);
 	free(tile_sizes);
-	free(graph_heads_reverse);
-	free(graph_tails_reverse);
-	free(graph_vertices_reverse);
-	free(graph_edges_reverse);
-	free(graph_degrees_reverse);
-	free(tile_offsets_reverse);
-	free(tile_sizes_reverse);
 	free(vertex_map);
 
 	return 0;

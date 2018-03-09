@@ -1,2 +1,2 @@
-input end: 304.950242
-Thread 64 end: 322.963869
+input end: 3.051770
+Thread 64 end: 3.412072
