@@ -117,7 +117,7 @@ void input_weighted(
 }
 }
 
-inline void sssp_kernel_weight(
+inline void sssp_kernel_weighted(
 				unsigned *graph_heads, 
 				unsigned *graph_ends, 
 				unsigned *graph_weights,
@@ -144,7 +144,7 @@ inline void sssp_kernel_weight(
 	}
 }
 
-inline void scheduler_weight(
+inline void scheduler_weighted(
 					unsigned *graph_heads, 
 					unsigned *graph_ends, 
 					unsigned *graph_weights,
@@ -174,7 +174,7 @@ inline void scheduler_weight(
 			} else {
 				bound_edge_i = nedges;
 			}
-			sssp_kernel_weight(
+			sssp_kernel_weighted(
 				graph_heads, 
 				graph_ends, 
 				graph_weights,
@@ -213,7 +213,7 @@ void sssp_weighted(
 			//	++side_id;
 			//	continue;
 			//}
-			scheduler_weight(
+			scheduler_weighted(
 				graph_heads, 
 				graph_ends, 
 				graph_weights,
@@ -229,7 +229,7 @@ void sssp_weighted(
 			//side_id += ROW_STEP;
 		}
 		if (remainder > 0) {
-			scheduler_weight(
+			scheduler_weighted(
 					graph_heads, 
 					graph_ends, 
 					graph_weights,
@@ -523,6 +523,8 @@ void sssp(
 
 int main(int argc, char *argv[]) 
 {
+	int is_weighted_graph = 0;
+	// Process the options
 	start = omp_get_wtime();
 	char *filename;
 	if (argc > 3) {
@@ -530,10 +532,35 @@ int main(int argc, char *argv[])
 		TILE_WIDTH = strtoul(argv[2], NULL, 0);
 		ROW_STEP = strtoul(argv[3], NULL, 0);
 	} else {
-		filename = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
+		filename = "/home/zpeng/benchmarks/data/pokec/coo_tiled_bak/soc-pokec";
 		TILE_WIDTH = 1024;
 		ROW_STEP = 16;
 	}
+
+	int arg_flag;
+	while (1) {
+		static option long_options[] = {
+			{"weighted", no_argument, 0, 'w'},
+			{0, 0, 0, 0}
+		};
+		int option_index = 0;
+		arg_flag = getopt_long (argc, argv, "w", long_options, &option_index);
+
+		if (-1 == arg_flag) {
+			break;
+		}
+
+		switch (arg_flag) {
+			case 'w':
+				is_weighted_graph = 1;
+				break;
+			default:
+				// Need to do something here if all option process has been combined here.
+				break;
+		}
+	}
+	// End Process the options
+	
 	// Input
 	unsigned *graph_heads;
 	unsigned *graph_ends;
@@ -551,22 +578,22 @@ int main(int argc, char *argv[])
 //		tile_offsets,
 //		is_empty_tile);
 //#endif
-#ifdef WEIGHTED
-	input_weighted(
-		filename, 
-		graph_heads, 
-		graph_ends, 
-		graph_weights,
-		tile_offsets,
-		is_empty_tile);
-#else
-	input(
-		filename, 
-		graph_heads, 
-		graph_ends, 
-		tile_offsets,
-		is_empty_tile);
-#endif
+	if (is_weighted_graph) {
+		input_weighted(
+				filename, 
+				graph_heads, 
+				graph_ends, 
+				graph_weights,
+				tile_offsets,
+				is_empty_tile);
+	} else {
+		input(
+				filename, 
+				graph_heads, 
+				graph_ends, 
+				tile_offsets,
+				is_empty_tile);
+	}
 
 	// SSSP
 	int *distances = (int *) malloc(nnodes * sizeof(int));
@@ -585,7 +612,7 @@ int main(int argc, char *argv[])
 #else
 	unsigned run_count = 9;
 #endif
-	for (unsigned i = 0; i < run_count; ++i) {
+	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 		memset(distances, -1, nnodes * sizeof(int));
 		distances[source] = 0;
@@ -597,30 +624,30 @@ int main(int argc, char *argv[])
 		memset(is_updating_active_side, 0, sizeof(int) * SIDE_LENGTH);
 
 		//sleep(10);
-#ifdef WEIGHTED
-		sssp_weighted(
-			graph_heads, 
-			graph_ends, 
-			graph_weights,
-			tile_offsets,
-			graph_active, 
-			graph_updating_active,
-			is_active_side,
-			is_updating_active_side,
-			is_empty_tile,
-			distances);
-#else
-		sssp(
-			graph_heads, 
-			graph_ends, 
-			tile_offsets,
-			graph_active, 
-			graph_updating_active,
-			is_active_side,
-			is_updating_active_side,
-			is_empty_tile,
-			distances);
-#endif
+		if (is_weighted_graph) {
+			sssp_weighted(
+				graph_heads, 
+				graph_ends, 
+				graph_weights,
+				tile_offsets,
+				graph_active, 
+				graph_updating_active,
+				is_active_side,
+				is_updating_active_side,
+				is_empty_tile,
+				distances);
+		} else {
+			sssp(
+				graph_heads, 
+				graph_ends, 
+				tile_offsets,
+				graph_active, 
+				graph_updating_active,
+				is_active_side,
+				is_updating_active_side,
+				is_empty_tile,
+				distances);
+		}
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 	}
