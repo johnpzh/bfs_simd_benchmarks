@@ -4,79 +4,276 @@ See "https://software.intel.com/en-us/intel-advisor-xe" for details.
 
 Intel(R) C++ Intel(R) 64 Compiler for applications running on Intel(R) 64, Version 17.0.1.132 Build 20161005
 
-Compiler options: -Wall -Wextra -g -std=c++14 -qopenmp -O3 -xMIC-AVX512 -qopt-report=5 -qopt-report-phase=vec -inline-level=2 -inline-forceinline -DWEIGHTED -o sssp
+Compiler options: -Wall -Wextra -g -std=c++14 -qopenmp -O3 -xMIC-AVX512 -qopt-report=5 -qopt-report-phase=vec -inline-level=2 -inline-forceinline -o sssp
 
 Begin optimization report for: main(int, char **)
 
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at sssp.cpp(588,2)
-   remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
+LOOP BEGIN at sssp.cpp(1172,3)
+   remark #15522: loop was not vectorized: loop control flow is too complex. Try using canonical loop form from OpenMP specification
+LOOP END
 
-   LOOP BEGIN at sssp.cpp(207,2) inlined into sssp.cpp(601,3)
+LOOP BEGIN at sssp.cpp(1257,2)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at sssp.cpp(528,2) inlined into sssp.cpp(1270,4)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed FLOW dependence between offset_sum (531:3) and offset_sum (530:3)
+      remark #15346: vector dependence: assumed ANTI dependence between offset_sum (530:3) and offset_sum (531:3)
+      remark #15346: vector dependence: assumed ANTI dependence between offset_sum (530:3) and offset_sum (531:3)
+      remark #15346: vector dependence: assumed FLOW dependence between offset_sum (531:3) and offset_sum (530:3)
+   LOOP END
+
+   LOOP BEGIN at sssp.cpp(528,2) inlined into sssp.cpp(1270,4)
+   <Remainder>
+   LOOP END
+
+   LOOP BEGIN at sssp.cpp(611,3) inlined into sssp.cpp(1270,4)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed FLOW dependence between base (613:22) and base (613:5)
+      remark #15346: vector dependence: assumed ANTI dependence between base (613:5) and base (613:22)
+      remark #15346: vector dependence: assumed ANTI dependence between base (613:5) and base (613:22)
+      remark #15346: vector dependence: assumed FLOW dependence between base (613:22) and base (613:5)
+   LOOP END
+
+   LOOP BEGIN at sssp.cpp(611,3) inlined into sssp.cpp(1270,4)
+   <Remainder>
+   LOOP END
+
+   LOOP BEGIN at sssp.cpp(634,2) inlined into sssp.cpp(1270,4)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed FLOW dependence between offset_sum (637:3) and offset_sum (636:3)
+      remark #15346: vector dependence: assumed ANTI dependence between offset_sum (636:3) and offset_sum (637:3)
+      remark #15346: vector dependence: assumed ANTI dependence between offset_sum (636:3) and offset_sum (637:3)
+      remark #15346: vector dependence: assumed FLOW dependence between offset_sum (637:3) and offset_sum (636:3)
+   LOOP END
+
+   LOOP BEGIN at sssp.cpp(634,2) inlined into sssp.cpp(1270,4)
+   <Remainder>
+   LOOP END
+
+   LOOP BEGIN at sssp.cpp(656,3) inlined into sssp.cpp(1270,4)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at sssp.cpp(656,3) inlined into sssp.cpp(1270,4)
+      <Peeled loop for vectorization, Multiversioned v2>
+         remark #15389: vectorization support: reference new_frontier[i] has unaligned access   [ sssp.cpp(657,4) ]
+         remark #15389: vectorization support: reference new_frontier_tmp[base] has unaligned access   [ sssp.cpp(657,22) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+         remark #15305: vectorization support: vector length 16
+         remark #15309: vectorization support: normalized vectorization overhead 1.385
+         remark #15301: PEEL LOOP WAS VECTORIZED
+      LOOP END
+
+      LOOP BEGIN at sssp.cpp(656,3) inlined into sssp.cpp(1270,4)
+      <Multiversioned v2>
+         remark #15389: vectorization support: reference new_frontier[i] has unaligned access   [ sssp.cpp(657,4) ]
+         remark #15389: vectorization support: reference new_frontier_tmp[base] has unaligned access   [ sssp.cpp(657,22) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+         remark #15305: vectorization support: vector length 16
+         remark #15309: vectorization support: normalized vectorization overhead 3.250
+         remark #15300: LOOP WAS VECTORIZED
+         remark #15442: entire loop may be executed in remainder
+         remark #15450: unmasked unaligned unit stride loads: 1 
+         remark #15451: unmasked unaligned unit stride stores: 1 
+         remark #15475: --- begin vector cost summary ---
+         remark #15476: scalar cost: 5 
+         remark #15477: vector cost: 0.250 
+         remark #15478: estimated potential speedup: 15.460 
+         remark #15488: --- end vector cost summary ---
+      LOOP END
+
+      LOOP BEGIN at sssp.cpp(656,3) inlined into sssp.cpp(1270,4)
+      <Remainder loop for vectorization, Multiversioned v2>
+      LOOP END
+   LOOP END
+
+   LOOP BEGIN at sssp.cpp(758,7) inlined into sssp.cpp(1270,4)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at sssp.cpp(371,2) inlined into sssp.cpp(1270,4)
+         remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+      LOOP END
+
+      LOOP BEGIN at sssp.cpp(451,3) inlined into sssp.cpp(1270,4)
+         remark #15344: loop was not vectorized: vector dependence prevents vectorization
+         remark #15346: vector dependence: assumed FLOW dependence between offset_sum (454:4) and offset_sum (453:4)
+         remark #15346: vector dependence: assumed ANTI dependence between offset_sum (453:4) and offset_sum (454:4)
+         remark #15346: vector dependence: assumed ANTI dependence between offset_sum (453:4) and offset_sum (454:4)
+         remark #15346: vector dependence: assumed FLOW dependence between offset_sum (454:4) and offset_sum (453:4)
+      LOOP END
+
+      LOOP BEGIN at sssp.cpp(451,3) inlined into sssp.cpp(1270,4)
+      <Remainder>
+      LOOP END
+
+      LOOP BEGIN at sssp.cpp(476,3) inlined into sssp.cpp(1270,4)
+      <Peeled loop for vectorization>
+         remark #15305: vectorization support: vector length 16
+         remark #15309: vectorization support: normalized vectorization overhead 0.826
+         remark #15301: PEEL LOOP WAS VECTORIZED
+      LOOP END
+
+      LOOP BEGIN at sssp.cpp(476,3) inlined into sssp.cpp(1270,4)
+         remark #15305: vectorization support: vector length 16
+         remark #15309: vectorization support: normalized vectorization overhead 1.000
+         remark #15300: LOOP WAS VECTORIZED
+         remark #15442: entire loop may be executed in remainder
+         remark #15450: unmasked unaligned unit stride loads: 1 
+         remark #15457: masked unaligned unit stride stores: 1 
+         remark #15475: --- begin vector cost summary ---
+         remark #15476: scalar cost: 13 
+         remark #15477: vector cost: 0.870 
+         remark #15478: estimated potential speedup: 12.660 
+         remark #15488: --- end vector cost summary ---
+         remark #15497: vector compress: 1 
+      LOOP END
+
+      LOOP BEGIN at sssp.cpp(476,3) inlined into sssp.cpp(1270,4)
+      <Remainder loop for vectorization>
+         remark #15305: vectorization support: vector length 16
+         remark #15309: vectorization support: normalized vectorization overhead 0.826
+         remark #15301: REMAINDER LOOP WAS VECTORIZED
+      LOOP END
+
+      LOOP BEGIN at sssp.cpp(528,2) inlined into sssp.cpp(1270,4)
+         remark #15344: loop was not vectorized: vector dependence prevents vectorization
+         remark #15346: vector dependence: assumed FLOW dependence between offset_sum (531:3) and offset_sum (530:3)
+         remark #15346: vector dependence: assumed ANTI dependence between offset_sum (530:3) and offset_sum (531:3)
+         remark #15346: vector dependence: assumed ANTI dependence between offset_sum (530:3) and offset_sum (531:3)
+         remark #15346: vector dependence: assumed FLOW dependence between offset_sum (531:3) and offset_sum (530:3)
+      LOOP END
+
+      LOOP BEGIN at sssp.cpp(528,2) inlined into sssp.cpp(1270,4)
+      <Remainder>
+      LOOP END
+
+      LOOP BEGIN at sssp.cpp(611,3) inlined into sssp.cpp(1270,4)
+         remark #15344: loop was not vectorized: vector dependence prevents vectorization
+         remark #15346: vector dependence: assumed FLOW dependence between base (613:22) and base (613:5)
+         remark #15346: vector dependence: assumed ANTI dependence between base (613:5) and base (613:22)
+         remark #15346: vector dependence: assumed ANTI dependence between base (613:5) and base (613:22)
+         remark #15346: vector dependence: assumed FLOW dependence between base (613:22) and base (613:5)
+      LOOP END
+
+      LOOP BEGIN at sssp.cpp(611,3) inlined into sssp.cpp(1270,4)
+      <Remainder>
+      LOOP END
+
+      LOOP BEGIN at sssp.cpp(634,2) inlined into sssp.cpp(1270,4)
+         remark #15344: loop was not vectorized: vector dependence prevents vectorization
+         remark #15346: vector dependence: assumed FLOW dependence between offset_sum (637:3) and offset_sum (636:3)
+         remark #15346: vector dependence: assumed ANTI dependence between offset_sum (636:3) and offset_sum (637:3)
+         remark #15346: vector dependence: assumed ANTI dependence between offset_sum (636:3) and offset_sum (637:3)
+         remark #15346: vector dependence: assumed FLOW dependence between offset_sum (637:3) and offset_sum (636:3)
+      LOOP END
+
+      LOOP BEGIN at sssp.cpp(634,2) inlined into sssp.cpp(1270,4)
+      <Remainder>
+      LOOP END
+
+      LOOP BEGIN at sssp.cpp(656,3) inlined into sssp.cpp(1270,4)
+         remark #15542: loop was not vectorized: inner loop was already vectorized
+
+         LOOP BEGIN at sssp.cpp(656,3) inlined into sssp.cpp(1270,4)
+         <Peeled loop for vectorization, Multiversioned v2>
+            remark #15389: vectorization support: reference new_frontier[i] has unaligned access   [ sssp.cpp(657,4) ]
+            remark #15389: vectorization support: reference new_frontier_tmp[base] has unaligned access   [ sssp.cpp(657,22) ]
+            remark #15381: vectorization support: unaligned access used inside loop body
+            remark #15305: vectorization support: vector length 16
+            remark #15309: vectorization support: normalized vectorization overhead 1.385
+            remark #15301: PEEL LOOP WAS VECTORIZED
+         LOOP END
+
+         LOOP BEGIN at sssp.cpp(656,3) inlined into sssp.cpp(1270,4)
+         <Multiversioned v2>
+            remark #15389: vectorization support: reference new_frontier[i] has unaligned access   [ sssp.cpp(657,4) ]
+            remark #15389: vectorization support: reference new_frontier_tmp[base] has unaligned access   [ sssp.cpp(657,22) ]
+            remark #15381: vectorization support: unaligned access used inside loop body
+            remark #15305: vectorization support: vector length 16
+            remark #15309: vectorization support: normalized vectorization overhead 3.250
+            remark #15300: LOOP WAS VECTORIZED
+            remark #15442: entire loop may be executed in remainder
+            remark #15450: unmasked unaligned unit stride loads: 1 
+            remark #15451: unmasked unaligned unit stride stores: 1 
+            remark #15475: --- begin vector cost summary ---
+            remark #15476: scalar cost: 5 
+            remark #15477: vector cost: 0.250 
+            remark #15478: estimated potential speedup: 15.460 
+            remark #15488: --- end vector cost summary ---
+         LOOP END
+
+         LOOP BEGIN at sssp.cpp(656,3) inlined into sssp.cpp(1270,4)
+         <Remainder loop for vectorization, Multiversioned v2>
+         LOOP END
+      LOOP END
+   LOOP END
+
+   LOOP BEGIN at sssp.cpp(1090,2) inlined into sssp.cpp(1287,4)
       remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-      LOOP BEGIN at sssp.cpp(211,3) inlined into sssp.cpp(601,3)
+      LOOP BEGIN at sssp.cpp(1094,3) inlined into sssp.cpp(1287,4)
          remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at sssp.cpp(164,2) inlined into sssp.cpp(601,3)
+LOOP BEGIN at sssp.cpp(1031,2) inlined into sssp.cpp(1287,4)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed ANTI dependence between dists (138:37) and dists (140:4)
-   remark #15346: vector dependence: assumed FLOW dependence between dists (140:4) and dists (138:37)
+   remark #15346: vector dependence: assumed ANTI dependence between dists (1007:3) and dists (1008:4)
+   remark #15346: vector dependence: assumed FLOW dependence between dists (1008:4) and dists (1007:3)
 
-   LOOP BEGIN at sssp.cpp(165,3) inlined into sssp.cpp(601,3)
+   LOOP BEGIN at sssp.cpp(1032,3) inlined into sssp.cpp(1287,4)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed ANTI dependence between dists (138:37) and dists (140:4)
-      remark #15346: vector dependence: assumed FLOW dependence between dists (140:4) and dists (138:37)
+      remark #15346: vector dependence: assumed ANTI dependence between dists (1007:3) and dists (1008:4)
+      remark #15346: vector dependence: assumed FLOW dependence between dists (1008:4) and dists (1007:3)
 
-      LOOP BEGIN at sssp.cpp(132,2) inlined into sssp.cpp(601,3)
+      LOOP BEGIN at sssp.cpp(1001,2) inlined into sssp.cpp(1287,4)
          remark #15344: loop was not vectorized: vector dependence prevents vectorization
-         remark #15346: vector dependence: assumed ANTI dependence between dists (138:37) and dists (140:4)
-         remark #15346: vector dependence: assumed FLOW dependence between dists (140:4) and dists (138:37)
+         remark #15346: vector dependence: assumed ANTI dependence between dists (1007:3) and dists (1008:4)
+         remark #15346: vector dependence: assumed FLOW dependence between dists (1008:4) and dists (1007:3)
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at sssp.cpp(164,2) inlined into sssp.cpp(601,3)
+LOOP BEGIN at sssp.cpp(1031,2) inlined into sssp.cpp(1287,4)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed ANTI dependence between dists (138:37) and dists (140:4)
-   remark #15346: vector dependence: assumed FLOW dependence between dists (140:4) and dists (138:37)
+   remark #15346: vector dependence: assumed ANTI dependence between dists (1007:3) and dists (1008:4)
+   remark #15346: vector dependence: assumed FLOW dependence between dists (1008:4) and dists (1007:3)
 
-   LOOP BEGIN at sssp.cpp(165,3) inlined into sssp.cpp(601,3)
+   LOOP BEGIN at sssp.cpp(1032,3) inlined into sssp.cpp(1287,4)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed ANTI dependence between dists (138:37) and dists (140:4)
-      remark #15346: vector dependence: assumed FLOW dependence between dists (140:4) and dists (138:37)
+      remark #15346: vector dependence: assumed ANTI dependence between dists (1007:3) and dists (1008:4)
+      remark #15346: vector dependence: assumed FLOW dependence between dists (1008:4) and dists (1007:3)
 
-      LOOP BEGIN at sssp.cpp(132,2) inlined into sssp.cpp(601,3)
+      LOOP BEGIN at sssp.cpp(1001,2) inlined into sssp.cpp(1287,4)
          remark #15344: loop was not vectorized: vector dependence prevents vectorization
-         remark #15346: vector dependence: assumed ANTI dependence between dists (138:37) and dists (140:4)
-         remark #15346: vector dependence: assumed FLOW dependence between dists (140:4) and dists (138:37)
+         remark #15346: vector dependence: assumed ANTI dependence between dists (1007:3) and dists (1008:4)
+         remark #15346: vector dependence: assumed FLOW dependence between dists (1008:4) and dists (1007:3)
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at sssp.cpp(247,3) inlined into sssp.cpp(601,3)
+LOOP BEGIN at sssp.cpp(1128,3) inlined into sssp.cpp(1287,4)
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at sssp.cpp(261,4) inlined into sssp.cpp(601,3)
+   LOOP BEGIN at sssp.cpp(1142,4) inlined into sssp.cpp(1287,4)
    <Peeled loop for vectorization>
-      remark #15389: vectorization support: reference graph_updating_active has unaligned access   [ sssp.cpp(263,6) ]
-      remark #15389: vectorization support: reference graph_active has unaligned access   [ sssp.cpp(264,6) ]
-      remark #15389: vectorization support: reference graph_active has unaligned access   [ sssp.cpp(266,6) ]
+      remark #15389: vectorization support: reference graph_updating_active has unaligned access   [ sssp.cpp(1144,6) ]
+      remark #15389: vectorization support: reference graph_active has unaligned access   [ sssp.cpp(1145,6) ]
+      remark #15389: vectorization support: reference graph_active has unaligned access   [ sssp.cpp(1147,6) ]
       remark #15381: vectorization support: unaligned access used inside loop body
       remark #15305: vectorization support: vector length 16
       remark #15309: vectorization support: normalized vectorization overhead 0.324
       remark #15301: PEEL LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at sssp.cpp(261,4) inlined into sssp.cpp(601,3)
-      remark #15389: vectorization support: reference graph_updating_active has unaligned access   [ sssp.cpp(263,6) ]
-      remark #15389: vectorization support: reference graph_active has unaligned access   [ sssp.cpp(264,6) ]
-      remark #15389: vectorization support: reference graph_updating_active has unaligned access   [ sssp.cpp(263,6) ]
+   LOOP BEGIN at sssp.cpp(1142,4) inlined into sssp.cpp(1287,4)
+      remark #15389: vectorization support: reference graph_updating_active has unaligned access   [ sssp.cpp(1144,6) ]
+      remark #15389: vectorization support: reference graph_active has unaligned access   [ sssp.cpp(1145,6) ]
+      remark #15389: vectorization support: reference graph_updating_active has unaligned access   [ sssp.cpp(1144,6) ]
       remark #15381: vectorization support: unaligned access used inside loop body
       remark #15305: vectorization support: vector length 16
       remark #15309: vectorization support: normalized vectorization overhead 0.765
@@ -91,124 +288,1104 @@ LOOP BEGIN at sssp.cpp(247,3) inlined into sssp.cpp(601,3)
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at sssp.cpp(261,4) inlined into sssp.cpp(601,3)
+   LOOP BEGIN at sssp.cpp(1142,4) inlined into sssp.cpp(1287,4)
    <Remainder loop for vectorization>
-      remark #15389: vectorization support: reference graph_updating_active has unaligned access   [ sssp.cpp(263,6) ]
-      remark #15389: vectorization support: reference graph_active has unaligned access   [ sssp.cpp(264,6) ]
-      remark #15389: vectorization support: reference graph_active has unaligned access   [ sssp.cpp(266,6) ]
+      remark #15389: vectorization support: reference graph_updating_active has unaligned access   [ sssp.cpp(1144,6) ]
+      remark #15389: vectorization support: reference graph_active has unaligned access   [ sssp.cpp(1145,6) ]
+      remark #15389: vectorization support: reference graph_active has unaligned access   [ sssp.cpp(1147,6) ]
       remark #15381: vectorization support: unaligned access used inside loop body
       remark #15305: vectorization support: vector length 16
       remark #15309: vectorization support: normalized vectorization overhead 0.324
       remark #15301: REMAINDER LOOP WAS VECTORIZED
    LOOP END
 LOOP END
-===========================================================================
 
-Begin optimization report for: input_weighted(char *, unsigned int *&, unsigned int *&, unsigned int *&, unsigned int *&, int *&)
-
-    Report from: Vector optimizations [vec]
-
-
-LOOP BEGIN at sssp.cpp(64,2)
-   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP BEGIN at sssp.cpp(513,1) inlined into sssp.cpp(1270,4)
+<Peeled loop for vectorization>
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(515,3) ]
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(515,30) ]
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(516,21) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 0.619
+   remark #15301: PEEL LOOP WAS VECTORIZED
 LOOP END
 
-LOOP BEGIN at sssp.cpp(73,2)
-   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP BEGIN at sssp.cpp(513,1) inlined into sssp.cpp(1270,4)
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(515,3) ]
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(515,30) ]
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(516,21) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15415: vectorization support: irregularly indexed load was generated for the variable <*graph_degrees[*(*h_graph_queue+i*4)]>, part of index is read from memory   [ sssp.cpp(515,16) ]
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 1.419
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15442: entire loop may be executed in remainder
+   remark #15450: unmasked unaligned unit stride loads: 2 
+   remark #15451: unmasked unaligned unit stride stores: 1 
+   remark #15462: unmasked indexed (or gather) loads: 1 
+   remark #15475: --- begin vector cost summary ---
+   remark #15476: scalar cost: 11 
+   remark #15477: vector cost: 1.930 
+   remark #15478: estimated potential speedup: 4.740 
+   remark #15488: --- end vector cost summary ---
 LOOP END
 
-LOOP BEGIN at sssp.cpp(105,2)
-   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ sssp.cpp(109,3) ]
+LOOP BEGIN at sssp.cpp(513,1) inlined into sssp.cpp(1270,4)
+<Remainder loop for vectorization>
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(515,3) ]
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(515,30) ]
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(516,21) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 0.619
+   remark #15301: REMAINDER LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at sssp.cpp(591,2) inlined into sssp.cpp(1270,4)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed FLOW dependence between wt (109:3) and wt (114:3)
-   remark #15346: vector dependence: assumed ANTI dependence between wt (114:3) and wt (109:3)
-LOOP END
-===========================================================================
+   remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (602:5) and new_frontier_tmp (602:5)
+   remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (602:5) and new_frontier_tmp (602:5)
 
-Begin optimization report for: sssp_weighted(unsigned int *, unsigned int *, unsigned int *, unsigned int *, int *, int *, int *, int *, int *, int *)
-
-    Report from: Vector optimizations [vec]
-
-
-LOOP BEGIN at sssp.cpp(207,2)
-   remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
-
-   LOOP BEGIN at sssp.cpp(211,3)
-      remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
-   LOOP END
-LOOP END
-
-LOOP BEGIN at sssp.cpp(164,2) inlined into sssp.cpp(216,4)
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed ANTI dependence between SIDE_LENGTH (166:46) and is_updating_active_side (142:4)
-   remark #15346: vector dependence: assumed FLOW dependence between is_updating_active_side (142:4) and SIDE_LENGTH (166:46)
-
-   LOOP BEGIN at sssp.cpp(165,3) inlined into sssp.cpp(216,4)
+   LOOP BEGIN at sssp.cpp(600,3) inlined into sssp.cpp(1270,4)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed ANTI dependence between SIDE_LENGTH (166:46) and is_updating_active_side (142:4)
-      remark #15346: vector dependence: assumed FLOW dependence between is_updating_active_side (142:4) and SIDE_LENGTH (166:46)
-
-      LOOP BEGIN at sssp.cpp(132,2) inlined into sssp.cpp(216,4)
-         remark #15344: loop was not vectorized: vector dependence prevents vectorization
-         remark #15346: vector dependence: assumed ANTI dependence between graph_heads (133:19) and is_updating_active_side (142:4)
-         remark #15346: vector dependence: assumed FLOW dependence between is_updating_active_side (142:4) and graph_heads (133:19)
-      LOOP END
-   LOOP END
-LOOP END
-
-LOOP BEGIN at sssp.cpp(164,2) inlined into sssp.cpp(232,4)
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed ANTI dependence between SIDE_LENGTH (166:46) and is_updating_active_side (142:4)
-   remark #15346: vector dependence: assumed FLOW dependence between is_updating_active_side (142:4) and SIDE_LENGTH (166:46)
-
-   LOOP BEGIN at sssp.cpp(165,3) inlined into sssp.cpp(232,4)
-      remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed ANTI dependence between SIDE_LENGTH (166:46) and is_updating_active_side (142:4)
-      remark #15346: vector dependence: assumed FLOW dependence between is_updating_active_side (142:4) and SIDE_LENGTH (166:46)
-
-      LOOP BEGIN at sssp.cpp(132,2) inlined into sssp.cpp(232,4)
-         remark #15344: loop was not vectorized: vector dependence prevents vectorization
-         remark #15346: vector dependence: assumed ANTI dependence between graph_heads (133:19) and is_updating_active_side (142:4)
-         remark #15346: vector dependence: assumed FLOW dependence between is_updating_active_side (142:4) and graph_heads (133:19)
-      LOOP END
-   LOOP END
-LOOP END
-
-LOOP BEGIN at sssp.cpp(247,3)
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between is_active_side[side_id] (249:5) and graph_active[vertex_id] (266:6)
-   remark #15346: vector dependence: assumed OUTPUT dependence between graph_active[vertex_id] (266:6) and is_active_side[side_id] (249:5)
-
-   LOOP BEGIN at sssp.cpp(261,4)
-      remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed OUTPUT dependence between graph_updating_active[vertex_id] (263:6) and graph_active[vertex_id] (266:6)
-      remark #15346: vector dependence: assumed OUTPUT dependence between graph_active[vertex_id] (266:6) and graph_updating_active[vertex_id] (263:6)
+      remark #15346: vector dependence: assumed FLOW dependence between new_frontier_tmp (602:5) and new_frontier_tmp (602:5)
+      remark #15346: vector dependence: assumed ANTI dependence between new_frontier_tmp (602:5) and new_frontier_tmp (602:5)
    LOOP END
 
-   LOOP BEGIN at sssp.cpp(261,4)
+   LOOP BEGIN at sssp.cpp(600,3) inlined into sssp.cpp(1270,4)
    <Remainder>
    LOOP END
 LOOP END
+
+LOOP BEGIN at sssp.cpp(641,2) inlined into sssp.cpp(1270,4)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at sssp.cpp(650,3) inlined into sssp.cpp(1270,4)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at sssp.cpp(650,3) inlined into sssp.cpp(1270,4)
+         remark #15389: vectorization support: reference new_frontier has unaligned access   [ sssp.cpp(651,4) ]
+         remark #15389: vectorization support: reference new_frontier_tmp has unaligned access   [ sssp.cpp(651,22) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+         remark #15305: vectorization support: vector length 16
+         remark #15309: vectorization support: normalized vectorization overhead 1.000
+         remark #15300: LOOP WAS VECTORIZED
+         remark #15450: unmasked unaligned unit stride loads: 1 
+         remark #15451: unmasked unaligned unit stride stores: 1 
+         remark #15475: --- begin vector cost summary ---
+         remark #15476: scalar cost: 5 
+         remark #15477: vector cost: 0.370 
+         remark #15478: estimated potential speedup: 5.000 
+         remark #15488: --- end vector cost summary ---
+      LOOP END
+
+      LOOP BEGIN at sssp.cpp(650,3) inlined into sssp.cpp(1270,4)
+      <Remainder loop for vectorization>
+         remark #15389: vectorization support: reference new_frontier has unaligned access   [ sssp.cpp(651,4) ]
+         remark #15389: vectorization support: reference new_frontier_tmp has unaligned access   [ sssp.cpp(651,22) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+         remark #15305: vectorization support: vector length 16
+         remark #15309: vectorization support: normalized vectorization overhead 1.385
+         remark #15301: REMAINDER LOOP WAS VECTORIZED
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at sssp.cpp(491,1) inlined into sssp.cpp(1270,4)
+<Peeled loop for vectorization>
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(493,24) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 1.278
+   remark #15301: PEEL LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at sssp.cpp(491,1) inlined into sssp.cpp(1270,4)
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(493,24) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15415: vectorization support: irregularly indexed load was generated for the variable <*graph_degrees[*(*h_graph_queue+i*4)]>, part of index is read from memory   [ sssp.cpp(494,17) ]
+   remark #15305: vectorization support: vector length 16
+   remark #15399: vectorization support: unroll factor set to 2
+   remark #15309: vectorization support: normalized vectorization overhead 0.759
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15442: entire loop may be executed in remainder
+   remark #15450: unmasked unaligned unit stride loads: 1 
+   remark #15462: unmasked indexed (or gather) loads: 1 
+   remark #15475: --- begin vector cost summary ---
+   remark #15476: scalar cost: 6 
+   remark #15477: vector cost: 1.680 
+   remark #15478: estimated potential speedup: 2.830 
+   remark #15488: --- end vector cost summary ---
+LOOP END
+
+LOOP BEGIN at sssp.cpp(491,1) inlined into sssp.cpp(1270,4)
+<Remainder loop for vectorization>
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(493,24) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 1.278
+   remark #15301: REMAINDER LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at sssp.cpp(434,3) inlined into sssp.cpp(1270,4)
+   remark #15541: outer loop was not auto-vectorized: consider using SIMD directive   [ sssp.cpp(442,4) ]
+
+   LOOP BEGIN at sssp.cpp(442,4) inlined into sssp.cpp(1270,4)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization   [ sssp.cpp(443,5) ]
+   LOOP END
+
+   LOOP BEGIN at sssp.cpp(442,4) inlined into sssp.cpp(1270,4)
+   <Remainder>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at sssp.cpp(458,3) inlined into sssp.cpp(1270,4)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at sssp.cpp(467,4) inlined into sssp.cpp(1270,4)
+   <Peeled loop for vectorization>
+      remark #15305: vectorization support: vector length 16
+      remark #15309: vectorization support: normalized vectorization overhead 0.826
+      remark #15301: PEEL LOOP WAS VECTORIZED
+   LOOP END
+
+   LOOP BEGIN at sssp.cpp(467,4) inlined into sssp.cpp(1270,4)
+      remark #15305: vectorization support: vector length 16
+      remark #15309: vectorization support: normalized vectorization overhead 1.000
+      remark #15300: LOOP WAS VECTORIZED
+      remark #15442: entire loop may be executed in remainder
+      remark #15450: unmasked unaligned unit stride loads: 1 
+      remark #15457: masked unaligned unit stride stores: 1 
+      remark #15475: --- begin vector cost summary ---
+      remark #15476: scalar cost: 13 
+      remark #15477: vector cost: 0.870 
+      remark #15478: estimated potential speedup: 12.660 
+      remark #15488: --- end vector cost summary ---
+      remark #15497: vector compress: 1 
+   LOOP END
+
+   LOOP BEGIN at sssp.cpp(467,4) inlined into sssp.cpp(1270,4)
+   <Remainder loop for vectorization>
+      remark #15305: vectorization support: vector length 16
+      remark #15309: vectorization support: normalized vectorization overhead 0.826
+      remark #15301: REMAINDER LOOP WAS VECTORIZED
+   LOOP END
+LOOP END
+
+LOOP BEGIN at sssp.cpp(513,1) inlined into sssp.cpp(1270,4)
+<Peeled loop for vectorization>
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(515,3) ]
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(515,30) ]
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(516,21) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 0.619
+   remark #15301: PEEL LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at sssp.cpp(513,1) inlined into sssp.cpp(1270,4)
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(515,3) ]
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(515,30) ]
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(516,21) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15415: vectorization support: irregularly indexed load was generated for the variable <*graph_degrees[*(*h_graph_queue+i*4)]>, part of index is read from memory   [ sssp.cpp(515,16) ]
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 1.419
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15442: entire loop may be executed in remainder
+   remark #15450: unmasked unaligned unit stride loads: 2 
+   remark #15451: unmasked unaligned unit stride stores: 1 
+   remark #15462: unmasked indexed (or gather) loads: 1 
+   remark #15475: --- begin vector cost summary ---
+   remark #15476: scalar cost: 11 
+   remark #15477: vector cost: 1.930 
+   remark #15478: estimated potential speedup: 4.740 
+   remark #15488: --- end vector cost summary ---
+LOOP END
+
+LOOP BEGIN at sssp.cpp(513,1) inlined into sssp.cpp(1270,4)
+<Remainder loop for vectorization>
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(515,3) ]
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(515,30) ]
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(516,21) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 0.619
+   remark #15301: REMAINDER LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at sssp.cpp(591,2) inlined into sssp.cpp(1270,4)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (602:5) and new_frontier_tmp (602:5)
+   remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (602:5) and new_frontier_tmp (602:5)
+
+   LOOP BEGIN at sssp.cpp(600,3) inlined into sssp.cpp(1270,4)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed FLOW dependence between new_frontier_tmp (602:5) and new_frontier_tmp (602:5)
+      remark #15346: vector dependence: assumed ANTI dependence between new_frontier_tmp (602:5) and new_frontier_tmp (602:5)
+   LOOP END
+
+   LOOP BEGIN at sssp.cpp(600,3) inlined into sssp.cpp(1270,4)
+   <Remainder>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at sssp.cpp(641,2) inlined into sssp.cpp(1270,4)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at sssp.cpp(650,3) inlined into sssp.cpp(1270,4)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at sssp.cpp(650,3) inlined into sssp.cpp(1270,4)
+         remark #15389: vectorization support: reference new_frontier has unaligned access   [ sssp.cpp(651,4) ]
+         remark #15389: vectorization support: reference new_frontier_tmp has unaligned access   [ sssp.cpp(651,22) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+         remark #15305: vectorization support: vector length 16
+         remark #15309: vectorization support: normalized vectorization overhead 1.000
+         remark #15300: LOOP WAS VECTORIZED
+         remark #15450: unmasked unaligned unit stride loads: 1 
+         remark #15451: unmasked unaligned unit stride stores: 1 
+         remark #15475: --- begin vector cost summary ---
+         remark #15476: scalar cost: 5 
+         remark #15477: vector cost: 0.370 
+         remark #15478: estimated potential speedup: 5.000 
+         remark #15488: --- end vector cost summary ---
+      LOOP END
+
+      LOOP BEGIN at sssp.cpp(650,3) inlined into sssp.cpp(1270,4)
+      <Remainder loop for vectorization>
+         remark #15389: vectorization support: reference new_frontier has unaligned access   [ sssp.cpp(651,4) ]
+         remark #15389: vectorization support: reference new_frontier_tmp has unaligned access   [ sssp.cpp(651,22) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+         remark #15305: vectorization support: vector length 16
+         remark #15309: vectorization support: normalized vectorization overhead 1.385
+         remark #15301: REMAINDER LOOP WAS VECTORIZED
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at sssp.cpp(193,1) inlined into sssp.cpp(1270,4)
+<Peeled loop for vectorization>
+   remark #15389: vectorization support: reference h_graph_queue has unaligned access   [ sssp.cpp(195,24) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 0.090
+   remark #15301: PEEL LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at sssp.cpp(193,1) inlined into sssp.cpp(1270,4)
+   remark #15389: vectorization support: reference h_graph_queue has unaligned access   [ sssp.cpp(195,24) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15416: vectorization support: irregularly indexed store was generated for the variable <h_graph_mask>, part of index is read from memory   [ sssp.cpp(196,3) ]
+   remark #15416: vectorization support: irregularly indexed store was generated for the variable <is_active_side>, part of index is nonlinearly computed   [ sssp.cpp(197,3) ]
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 0.067
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15442: entire loop may be executed in remainder
+   remark #15450: unmasked unaligned unit stride loads: 1 
+   remark #15463: unmasked indexed (or scatter) stores: 2 
+   remark #15475: --- begin vector cost summary ---
+   remark #15476: scalar cost: 30 
+   remark #15477: vector cost: 10.310 
+   remark #15478: estimated potential speedup: 2.580 
+   remark #15482: vectorized math library calls: 1 
+   remark #15488: --- end vector cost summary ---
+LOOP END
+
+LOOP BEGIN at sssp.cpp(193,1) inlined into sssp.cpp(1270,4)
+<Remainder loop for vectorization>
+   remark #15389: vectorization support: reference h_graph_queue has unaligned access   [ sssp.cpp(195,24) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 0.090
+   remark #15301: REMAINDER LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at sssp.cpp(307,20) inlined into sssp.cpp(1270,4)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+
+   LOOP BEGIN at sssp.cpp(297,2) inlined into sssp.cpp(1270,4)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed ANTI dependence between dists (270:37) and dists (272:4)
+      remark #15346: vector dependence: assumed FLOW dependence between dists (272:4) and dists (270:37)
+
+      LOOP BEGIN at sssp.cpp(299,3) inlined into sssp.cpp(1270,4)
+         remark #15344: loop was not vectorized: vector dependence prevents vectorization
+         remark #15346: vector dependence: assumed ANTI dependence between dists (270:37) and dists (272:4)
+         remark #15346: vector dependence: assumed FLOW dependence between dists (272:4) and dists (270:37)
+
+         LOOP BEGIN at sssp.cpp(264,2) inlined into sssp.cpp(1270,4)
+            remark #15344: loop was not vectorized: vector dependence prevents vectorization
+            remark #15346: vector dependence: assumed ANTI dependence between dists (270:37) and dists (272:4)
+            remark #15346: vector dependence: assumed FLOW dependence between dists (272:4) and dists (270:37)
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at sssp.cpp(307,20) inlined into sssp.cpp(1270,4)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+
+   LOOP BEGIN at sssp.cpp(297,2) inlined into sssp.cpp(1270,4)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed ANTI dependence between dists (270:37) and dists (272:4)
+      remark #15346: vector dependence: assumed FLOW dependence between dists (272:4) and dists (270:37)
+
+      LOOP BEGIN at sssp.cpp(299,3) inlined into sssp.cpp(1270,4)
+         remark #15344: loop was not vectorized: vector dependence prevents vectorization
+         remark #15346: vector dependence: assumed ANTI dependence between dists (270:37) and dists (272:4)
+         remark #15346: vector dependence: assumed FLOW dependence between dists (272:4) and dists (270:37)
+
+         LOOP BEGIN at sssp.cpp(264,2) inlined into sssp.cpp(1270,4)
+            remark #15344: loop was not vectorized: vector dependence prevents vectorization
+            remark #15346: vector dependence: assumed ANTI dependence between dists (270:37) and dists (272:4)
+            remark #15346: vector dependence: assumed FLOW dependence between dists (272:4) and dists (270:37)
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at sssp.cpp(491,1) inlined into sssp.cpp(1270,4)
+<Peeled loop for vectorization>
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(493,24) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 1.278
+   remark #15301: PEEL LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at sssp.cpp(491,1) inlined into sssp.cpp(1270,4)
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(493,24) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15415: vectorization support: irregularly indexed load was generated for the variable <*graph_degrees[*(*h_graph_queue+i*4)]>, part of index is read from memory   [ sssp.cpp(494,17) ]
+   remark #15305: vectorization support: vector length 16
+   remark #15399: vectorization support: unroll factor set to 2
+   remark #15309: vectorization support: normalized vectorization overhead 0.759
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15442: entire loop may be executed in remainder
+   remark #15450: unmasked unaligned unit stride loads: 1 
+   remark #15462: unmasked indexed (or gather) loads: 1 
+   remark #15475: --- begin vector cost summary ---
+   remark #15476: scalar cost: 6 
+   remark #15477: vector cost: 1.680 
+   remark #15478: estimated potential speedup: 2.830 
+   remark #15488: --- end vector cost summary ---
+LOOP END
+
+LOOP BEGIN at sssp.cpp(491,1) inlined into sssp.cpp(1270,4)
+<Remainder loop for vectorization>
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(493,24) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 1.278
+   remark #15301: REMAINDER LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at sssp.cpp(213,2) inlined into sssp.cpp(1270,4)
+   remark #15382: vectorization support: call to function memset(void *, int, size_t) cannot be vectorized   [ sssp.cpp(225,4) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed ANTI dependence between at (241:5) and at (241:5)
+   remark #15346: vector dependence: assumed FLOW dependence between at (241:5) and at (241:5)
+
+   LOOP BEGIN at sssp.cpp(236,3) inlined into sssp.cpp(1270,4)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed ANTI dependence between at (240:5) and at (240:5)
+      remark #15346: vector dependence: assumed FLOW dependence between at (240:5) and at (240:5)
+      remark #15346: vector dependence: assumed FLOW dependence between at (240:5) and at (240:5)
+      remark #15346: vector dependence: assumed ANTI dependence between at (240:5) and at (240:5)
+   LOOP END
+
+   LOOP BEGIN at sssp.cpp(236,3) inlined into sssp.cpp(1270,4)
+   <Remainder>
+   LOOP END
+LOOP END
+
+
+Non-optimizable loops:
+
+
+LOOP BEGIN at sssp.cpp(538,2) inlined into sssp.cpp(1270,4)
+   remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ sssp.cpp(549,33) ]
+
+   LOOP BEGIN at sssp.cpp(538,2) inlined into sssp.cpp(1270,4)
+      remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ sssp.cpp(549,33) ]
+
+      LOOP BEGIN at sssp.cpp(543,3) inlined into sssp.cpp(1270,4)
+         remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ sssp.cpp(549,33) ]
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at sssp.cpp(538,2) inlined into sssp.cpp(1270,4)
+   remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ sssp.cpp(549,33) ]
+
+   LOOP BEGIN at sssp.cpp(538,2) inlined into sssp.cpp(1270,4)
+      remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ sssp.cpp(549,33) ]
+
+      LOOP BEGIN at sssp.cpp(543,3) inlined into sssp.cpp(1270,4)
+         remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ sssp.cpp(549,33) ]
+      LOOP END
+   LOOP END
+LOOP END
 ===========================================================================
 
-Begin optimization report for: input(char *, unsigned int *&, unsigned int *&, unsigned int *&, int *&)
+Begin optimization report for: input_weighted(char *, unsigned int *&, unsigned int *&, unsigned int *&, unsigned int *&, unsigned int *&, unsigned int *&, unsigned int *&, unsigned int *&, unsigned int *&)
 
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at sssp.cpp(311,2)
+LOOP BEGIN at sssp.cpp(72,2)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 
-LOOP BEGIN at sssp.cpp(319,2)
+LOOP BEGIN at sssp.cpp(77,2)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 
-LOOP BEGIN at sssp.cpp(351,2)
-   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ sssp.cpp(354,3) ]
+LOOP BEGIN at sssp.cpp(137,2)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at sssp.cpp(177,2)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at sssp.cpp(114,2)
+   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ sssp.cpp(118,3) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (354:3) and n2 (356:3)
-   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (356:3) and n2 (354:3)
+   remark #15346: vector dependence: assumed FLOW dependence between wt (118:3) and wt (123:3)
+   remark #15346: vector dependence: assumed ANTI dependence between wt (123:3) and wt (118:3)
+LOOP END
+
+LOOP BEGIN at sssp.cpp(163,2)
+   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ sssp.cpp(167,3) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between wt (167:3) and wt (171:3)
+   remark #15346: vector dependence: assumed ANTI dependence between wt (171:3) and wt (167:3)
+LOOP END
+===========================================================================
+
+Begin optimization report for: input(char *, unsigned int *&, unsigned int *&, unsigned int *&, unsigned int *&)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at sssp.cpp(934,2)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at sssp.cpp(941,2)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at sssp.cpp(969,2)
+   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ sssp.cpp(972,3) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (972:3) and n2 (974:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (974:3) and n2 (972:3)
+LOOP END
+===========================================================================
+
+Begin optimization report for: sssp_weighted(unsigned int *, unsigned int *, unsigned int *, unsigned int *, unsigned int *, unsigned int *, unsigned int *, unsigned int *, unsigned int *, const unsigned int &)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at sssp.cpp(528,2) inlined into sssp.cpp(736,24)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between offset_sum (531:3) and offset_sum (530:3)
+   remark #15346: vector dependence: assumed ANTI dependence between offset_sum (530:3) and offset_sum (531:3)
+LOOP END
+
+LOOP BEGIN at sssp.cpp(528,2) inlined into sssp.cpp(736,24)
+<Remainder>
+LOOP END
+
+LOOP BEGIN at sssp.cpp(611,3) inlined into sssp.cpp(736,24)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between base (613:22) and base (613:5)
+   remark #15346: vector dependence: assumed ANTI dependence between base (613:5) and base (613:22)
+LOOP END
+
+LOOP BEGIN at sssp.cpp(611,3) inlined into sssp.cpp(736,24)
+<Remainder>
+LOOP END
+
+LOOP BEGIN at sssp.cpp(634,2) inlined into sssp.cpp(736,24)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between offset_sum (637:3) and offset_sum (636:3)
+   remark #15346: vector dependence: assumed ANTI dependence between offset_sum (636:3) and offset_sum (637:3)
+LOOP END
+
+LOOP BEGIN at sssp.cpp(634,2) inlined into sssp.cpp(736,24)
+<Remainder>
+LOOP END
+
+LOOP BEGIN at sssp.cpp(656,3) inlined into sssp.cpp(736,24)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at sssp.cpp(656,3) inlined into sssp.cpp(736,24)
+      remark #15389: vectorization support: reference new_frontier[i] has unaligned access   [ sssp.cpp(657,4) ]
+      remark #15389: vectorization support: reference new_frontier_tmp[base] has unaligned access   [ sssp.cpp(657,22) ]
+      remark #15381: vectorization support: unaligned access used inside loop body
+      remark #15305: vectorization support: vector length 16
+      remark #15309: vectorization support: normalized vectorization overhead 1.000
+      remark #15300: LOOP WAS VECTORIZED
+      remark #15450: unmasked unaligned unit stride loads: 1 
+      remark #15451: unmasked unaligned unit stride stores: 1 
+      remark #15475: --- begin vector cost summary ---
+      remark #15476: scalar cost: 5 
+      remark #15477: vector cost: 0.370 
+      remark #15478: estimated potential speedup: 5.000 
+      remark #15488: --- end vector cost summary ---
+   LOOP END
+
+   LOOP BEGIN at sssp.cpp(656,3) inlined into sssp.cpp(736,24)
+   <Remainder loop for vectorization>
+      remark #15389: vectorization support: reference new_frontier[i] has unaligned access   [ sssp.cpp(657,4) ]
+      remark #15389: vectorization support: reference new_frontier_tmp[base] has unaligned access   [ sssp.cpp(657,22) ]
+      remark #15381: vectorization support: unaligned access used inside loop body
+      remark #15305: vectorization support: vector length 16
+      remark #15309: vectorization support: normalized vectorization overhead 1.385
+      remark #15301: REMAINDER LOOP WAS VECTORIZED
+   LOOP END
+LOOP END
+
+LOOP BEGIN at sssp.cpp(371,2) inlined into sssp.cpp(767,4)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+
+LOOP BEGIN at sssp.cpp(451,3) inlined into sssp.cpp(782,17)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between offset_sum (454:4) and offset_sum (453:4)
+   remark #15346: vector dependence: assumed ANTI dependence between offset_sum (453:4) and offset_sum (454:4)
+LOOP END
+
+LOOP BEGIN at sssp.cpp(451,3) inlined into sssp.cpp(782,17)
+<Remainder>
+LOOP END
+
+LOOP BEGIN at sssp.cpp(476,3) inlined into sssp.cpp(782,17)
+<Peeled loop for vectorization>
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 0.826
+   remark #15301: PEEL LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at sssp.cpp(476,3) inlined into sssp.cpp(782,17)
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 1.000
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15442: entire loop may be executed in remainder
+   remark #15450: unmasked unaligned unit stride loads: 1 
+   remark #15457: masked unaligned unit stride stores: 1 
+   remark #15475: --- begin vector cost summary ---
+   remark #15476: scalar cost: 13 
+   remark #15477: vector cost: 0.870 
+   remark #15478: estimated potential speedup: 12.660 
+   remark #15488: --- end vector cost summary ---
+   remark #15497: vector compress: 1 
+LOOP END
+
+LOOP BEGIN at sssp.cpp(476,3) inlined into sssp.cpp(782,17)
+<Remainder loop for vectorization>
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 0.826
+   remark #15301: REMAINDER LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at sssp.cpp(528,2) inlined into sssp.cpp(788,16)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between offset_sum (531:3) and offset_sum (530:3)
+   remark #15346: vector dependence: assumed ANTI dependence between offset_sum (530:3) and offset_sum (531:3)
+LOOP END
+
+LOOP BEGIN at sssp.cpp(528,2) inlined into sssp.cpp(788,16)
+<Remainder>
+LOOP END
+
+LOOP BEGIN at sssp.cpp(611,3) inlined into sssp.cpp(788,16)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between base (613:22) and base (613:5)
+   remark #15346: vector dependence: assumed ANTI dependence between base (613:5) and base (613:22)
+LOOP END
+
+LOOP BEGIN at sssp.cpp(611,3) inlined into sssp.cpp(788,16)
+<Remainder>
+LOOP END
+
+LOOP BEGIN at sssp.cpp(634,2) inlined into sssp.cpp(788,16)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between offset_sum (637:3) and offset_sum (636:3)
+   remark #15346: vector dependence: assumed ANTI dependence between offset_sum (636:3) and offset_sum (637:3)
+LOOP END
+
+LOOP BEGIN at sssp.cpp(634,2) inlined into sssp.cpp(788,16)
+<Remainder>
+LOOP END
+
+LOOP BEGIN at sssp.cpp(656,3) inlined into sssp.cpp(788,16)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at sssp.cpp(656,3) inlined into sssp.cpp(788,16)
+      remark #15389: vectorization support: reference new_frontier[i] has unaligned access   [ sssp.cpp(657,4) ]
+      remark #15389: vectorization support: reference new_frontier_tmp[base] has unaligned access   [ sssp.cpp(657,22) ]
+      remark #15381: vectorization support: unaligned access used inside loop body
+      remark #15305: vectorization support: vector length 16
+      remark #15309: vectorization support: normalized vectorization overhead 1.000
+      remark #15300: LOOP WAS VECTORIZED
+      remark #15450: unmasked unaligned unit stride loads: 1 
+      remark #15451: unmasked unaligned unit stride stores: 1 
+      remark #15475: --- begin vector cost summary ---
+      remark #15476: scalar cost: 5 
+      remark #15477: vector cost: 0.370 
+      remark #15478: estimated potential speedup: 5.000 
+      remark #15488: --- end vector cost summary ---
+   LOOP END
+
+   LOOP BEGIN at sssp.cpp(656,3) inlined into sssp.cpp(788,16)
+   <Remainder loop for vectorization>
+      remark #15389: vectorization support: reference new_frontier[i] has unaligned access   [ sssp.cpp(657,4) ]
+      remark #15389: vectorization support: reference new_frontier_tmp[base] has unaligned access   [ sssp.cpp(657,22) ]
+      remark #15381: vectorization support: unaligned access used inside loop body
+      remark #15305: vectorization support: vector length 16
+      remark #15309: vectorization support: normalized vectorization overhead 1.385
+      remark #15301: REMAINDER LOOP WAS VECTORIZED
+   LOOP END
+LOOP END
+
+LOOP BEGIN at sssp.cpp(513,1) inlined into sssp.cpp(736,24)
+<Peeled loop for vectorization>
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(515,3) ]
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(515,30) ]
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(516,21) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 0.619
+   remark #15301: PEEL LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at sssp.cpp(513,1) inlined into sssp.cpp(736,24)
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(515,3) ]
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(515,30) ]
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(516,21) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15415: vectorization support: irregularly indexed load was generated for the variable <*graph_degrees[*(*h_graph_queue+i*4)]>, part of index is read from memory   [ sssp.cpp(515,16) ]
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 1.419
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15442: entire loop may be executed in remainder
+   remark #15450: unmasked unaligned unit stride loads: 2 
+   remark #15451: unmasked unaligned unit stride stores: 1 
+   remark #15462: unmasked indexed (or gather) loads: 1 
+   remark #15475: --- begin vector cost summary ---
+   remark #15476: scalar cost: 11 
+   remark #15477: vector cost: 1.930 
+   remark #15478: estimated potential speedup: 4.740 
+   remark #15488: --- end vector cost summary ---
+LOOP END
+
+LOOP BEGIN at sssp.cpp(513,1) inlined into sssp.cpp(736,24)
+<Remainder loop for vectorization>
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(515,3) ]
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(515,30) ]
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(516,21) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 0.619
+   remark #15301: REMAINDER LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at sssp.cpp(591,2) inlined into sssp.cpp(736,24)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (602:5) and new_frontier_tmp (602:5)
+   remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (602:5) and new_frontier_tmp (602:5)
+
+   LOOP BEGIN at sssp.cpp(600,3) inlined into sssp.cpp(736,24)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed FLOW dependence between new_frontier_tmp (602:5) and new_frontier_tmp (602:5)
+      remark #15346: vector dependence: assumed ANTI dependence between new_frontier_tmp (602:5) and new_frontier_tmp (602:5)
+   LOOP END
+
+   LOOP BEGIN at sssp.cpp(600,3) inlined into sssp.cpp(736,24)
+   <Remainder>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at sssp.cpp(641,2) inlined into sssp.cpp(736,24)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at sssp.cpp(650,3) inlined into sssp.cpp(736,24)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at sssp.cpp(650,3) inlined into sssp.cpp(736,24)
+         remark #15389: vectorization support: reference new_frontier has unaligned access   [ sssp.cpp(651,4) ]
+         remark #15389: vectorization support: reference new_frontier_tmp has unaligned access   [ sssp.cpp(651,22) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+         remark #15305: vectorization support: vector length 16
+         remark #15309: vectorization support: normalized vectorization overhead 1.000
+         remark #15300: LOOP WAS VECTORIZED
+         remark #15450: unmasked unaligned unit stride loads: 1 
+         remark #15451: unmasked unaligned unit stride stores: 1 
+         remark #15475: --- begin vector cost summary ---
+         remark #15476: scalar cost: 5 
+         remark #15477: vector cost: 0.370 
+         remark #15478: estimated potential speedup: 5.000 
+         remark #15488: --- end vector cost summary ---
+      LOOP END
+
+      LOOP BEGIN at sssp.cpp(650,3) inlined into sssp.cpp(736,24)
+      <Remainder loop for vectorization>
+         remark #15389: vectorization support: reference new_frontier has unaligned access   [ sssp.cpp(651,4) ]
+         remark #15389: vectorization support: reference new_frontier_tmp has unaligned access   [ sssp.cpp(651,22) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+         remark #15305: vectorization support: vector length 16
+         remark #15309: vectorization support: normalized vectorization overhead 1.385
+         remark #15301: REMAINDER LOOP WAS VECTORIZED
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at sssp.cpp(491,1) inlined into sssp.cpp(750,16)
+<Peeled loop for vectorization>
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(493,24) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 1.278
+   remark #15301: PEEL LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at sssp.cpp(491,1) inlined into sssp.cpp(750,16)
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(493,24) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15415: vectorization support: irregularly indexed load was generated for the variable <*graph_degrees[*(*h_graph_queue+i*4)]>, part of index is read from memory   [ sssp.cpp(494,17) ]
+   remark #15305: vectorization support: vector length 16
+   remark #15399: vectorization support: unroll factor set to 2
+   remark #15309: vectorization support: normalized vectorization overhead 0.759
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15442: entire loop may be executed in remainder
+   remark #15450: unmasked unaligned unit stride loads: 1 
+   remark #15462: unmasked indexed (or gather) loads: 1 
+   remark #15475: --- begin vector cost summary ---
+   remark #15476: scalar cost: 6 
+   remark #15477: vector cost: 1.680 
+   remark #15478: estimated potential speedup: 2.830 
+   remark #15488: --- end vector cost summary ---
+LOOP END
+
+LOOP BEGIN at sssp.cpp(491,1) inlined into sssp.cpp(750,16)
+<Remainder loop for vectorization>
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(493,24) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 1.278
+   remark #15301: REMAINDER LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at sssp.cpp(434,3) inlined into sssp.cpp(782,17)
+   remark #15541: outer loop was not auto-vectorized: consider using SIMD directive   [ sssp.cpp(442,4) ]
+
+   LOOP BEGIN at sssp.cpp(442,4) inlined into sssp.cpp(782,17)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization   [ sssp.cpp(443,5) ]
+   LOOP END
+
+   LOOP BEGIN at sssp.cpp(442,4) inlined into sssp.cpp(782,17)
+   <Remainder>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at sssp.cpp(458,3) inlined into sssp.cpp(782,17)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at sssp.cpp(467,4) inlined into sssp.cpp(782,17)
+   <Peeled loop for vectorization>
+      remark #15305: vectorization support: vector length 16
+      remark #15309: vectorization support: normalized vectorization overhead 0.826
+      remark #15301: PEEL LOOP WAS VECTORIZED
+   LOOP END
+
+   LOOP BEGIN at sssp.cpp(467,4) inlined into sssp.cpp(782,17)
+      remark #15305: vectorization support: vector length 16
+      remark #15309: vectorization support: normalized vectorization overhead 1.000
+      remark #15300: LOOP WAS VECTORIZED
+      remark #15442: entire loop may be executed in remainder
+      remark #15450: unmasked unaligned unit stride loads: 1 
+      remark #15457: masked unaligned unit stride stores: 1 
+      remark #15475: --- begin vector cost summary ---
+      remark #15476: scalar cost: 13 
+      remark #15477: vector cost: 0.870 
+      remark #15478: estimated potential speedup: 12.660 
+      remark #15488: --- end vector cost summary ---
+      remark #15497: vector compress: 1 
+   LOOP END
+
+   LOOP BEGIN at sssp.cpp(467,4) inlined into sssp.cpp(782,17)
+   <Remainder loop for vectorization>
+      remark #15305: vectorization support: vector length 16
+      remark #15309: vectorization support: normalized vectorization overhead 0.826
+      remark #15301: REMAINDER LOOP WAS VECTORIZED
+   LOOP END
+LOOP END
+
+LOOP BEGIN at sssp.cpp(513,1) inlined into sssp.cpp(788,16)
+<Peeled loop for vectorization>
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(515,3) ]
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(515,30) ]
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(516,21) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 0.619
+   remark #15301: PEEL LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at sssp.cpp(513,1) inlined into sssp.cpp(788,16)
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(515,3) ]
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(515,30) ]
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(516,21) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15415: vectorization support: irregularly indexed load was generated for the variable <*graph_degrees[*(*h_graph_queue+i*4)]>, part of index is read from memory   [ sssp.cpp(515,16) ]
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 1.419
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15442: entire loop may be executed in remainder
+   remark #15450: unmasked unaligned unit stride loads: 2 
+   remark #15451: unmasked unaligned unit stride stores: 1 
+   remark #15462: unmasked indexed (or gather) loads: 1 
+   remark #15475: --- begin vector cost summary ---
+   remark #15476: scalar cost: 11 
+   remark #15477: vector cost: 1.930 
+   remark #15478: estimated potential speedup: 4.740 
+   remark #15488: --- end vector cost summary ---
+LOOP END
+
+LOOP BEGIN at sssp.cpp(513,1) inlined into sssp.cpp(788,16)
+<Remainder loop for vectorization>
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(515,3) ]
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(515,30) ]
+   remark #15389: vectorization support: reference *degrees[i] has unaligned access   [ sssp.cpp(516,21) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 0.619
+   remark #15301: REMAINDER LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at sssp.cpp(591,2) inlined into sssp.cpp(788,16)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (602:5) and new_frontier_tmp (602:5)
+   remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (602:5) and new_frontier_tmp (602:5)
+
+   LOOP BEGIN at sssp.cpp(600,3) inlined into sssp.cpp(788,16)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed FLOW dependence between new_frontier_tmp (602:5) and new_frontier_tmp (602:5)
+      remark #15346: vector dependence: assumed ANTI dependence between new_frontier_tmp (602:5) and new_frontier_tmp (602:5)
+   LOOP END
+
+   LOOP BEGIN at sssp.cpp(600,3) inlined into sssp.cpp(788,16)
+   <Remainder>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at sssp.cpp(641,2) inlined into sssp.cpp(788,16)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at sssp.cpp(650,3) inlined into sssp.cpp(788,16)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at sssp.cpp(650,3) inlined into sssp.cpp(788,16)
+         remark #15389: vectorization support: reference new_frontier has unaligned access   [ sssp.cpp(651,4) ]
+         remark #15389: vectorization support: reference new_frontier_tmp has unaligned access   [ sssp.cpp(651,22) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+         remark #15305: vectorization support: vector length 16
+         remark #15309: vectorization support: normalized vectorization overhead 1.000
+         remark #15300: LOOP WAS VECTORIZED
+         remark #15450: unmasked unaligned unit stride loads: 1 
+         remark #15451: unmasked unaligned unit stride stores: 1 
+         remark #15475: --- begin vector cost summary ---
+         remark #15476: scalar cost: 5 
+         remark #15477: vector cost: 0.370 
+         remark #15478: estimated potential speedup: 5.000 
+         remark #15488: --- end vector cost summary ---
+      LOOP END
+
+      LOOP BEGIN at sssp.cpp(650,3) inlined into sssp.cpp(788,16)
+      <Remainder loop for vectorization>
+         remark #15389: vectorization support: reference new_frontier has unaligned access   [ sssp.cpp(651,4) ]
+         remark #15389: vectorization support: reference new_frontier_tmp has unaligned access   [ sssp.cpp(651,22) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+         remark #15305: vectorization support: vector length 16
+         remark #15309: vectorization support: normalized vectorization overhead 1.385
+         remark #15301: REMAINDER LOOP WAS VECTORIZED
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at sssp.cpp(193,1) inlined into sssp.cpp(761,5)
+<Peeled loop for vectorization>
+   remark #15389: vectorization support: reference h_graph_queue has unaligned access   [ sssp.cpp(195,24) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 0.090
+   remark #15301: PEEL LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at sssp.cpp(193,1) inlined into sssp.cpp(761,5)
+   remark #15389: vectorization support: reference h_graph_queue has unaligned access   [ sssp.cpp(195,24) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15416: vectorization support: irregularly indexed store was generated for the variable <h_graph_mask>, part of index is read from memory   [ sssp.cpp(196,3) ]
+   remark #15416: vectorization support: irregularly indexed store was generated for the variable <is_active_side>, part of index is nonlinearly computed   [ sssp.cpp(197,3) ]
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 0.067
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15442: entire loop may be executed in remainder
+   remark #15450: unmasked unaligned unit stride loads: 1 
+   remark #15463: unmasked indexed (or scatter) stores: 2 
+   remark #15475: --- begin vector cost summary ---
+   remark #15476: scalar cost: 30 
+   remark #15477: vector cost: 10.310 
+   remark #15478: estimated potential speedup: 2.580 
+   remark #15482: vectorized math library calls: 1 
+   remark #15488: --- end vector cost summary ---
+LOOP END
+
+LOOP BEGIN at sssp.cpp(193,1) inlined into sssp.cpp(761,5)
+<Remainder loop for vectorization>
+   remark #15389: vectorization support: reference h_graph_queue has unaligned access   [ sssp.cpp(195,24) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 0.090
+   remark #15301: REMAINDER LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at sssp.cpp(307,20) inlined into sssp.cpp(767,4)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+
+   LOOP BEGIN at sssp.cpp(297,2) inlined into sssp.cpp(767,4)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed ANTI dependence between dists (270:37) and dists (272:4)
+      remark #15346: vector dependence: assumed FLOW dependence between dists (272:4) and dists (270:37)
+
+      LOOP BEGIN at sssp.cpp(299,3) inlined into sssp.cpp(767,4)
+         remark #15344: loop was not vectorized: vector dependence prevents vectorization
+         remark #15346: vector dependence: assumed ANTI dependence between dists (270:37) and dists (272:4)
+         remark #15346: vector dependence: assumed FLOW dependence between dists (272:4) and dists (270:37)
+
+         LOOP BEGIN at sssp.cpp(264,2) inlined into sssp.cpp(767,4)
+            remark #15344: loop was not vectorized: vector dependence prevents vectorization
+            remark #15346: vector dependence: assumed ANTI dependence between dists (270:37) and dists (272:4)
+            remark #15346: vector dependence: assumed FLOW dependence between dists (272:4) and dists (270:37)
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at sssp.cpp(307,20) inlined into sssp.cpp(767,4)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+
+   LOOP BEGIN at sssp.cpp(297,2) inlined into sssp.cpp(767,4)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed ANTI dependence between dists (270:37) and dists (272:4)
+      remark #15346: vector dependence: assumed FLOW dependence between dists (272:4) and dists (270:37)
+
+      LOOP BEGIN at sssp.cpp(299,3) inlined into sssp.cpp(767,4)
+         remark #15344: loop was not vectorized: vector dependence prevents vectorization
+         remark #15346: vector dependence: assumed ANTI dependence between dists (270:37) and dists (272:4)
+         remark #15346: vector dependence: assumed FLOW dependence between dists (272:4) and dists (270:37)
+
+         LOOP BEGIN at sssp.cpp(264,2) inlined into sssp.cpp(767,4)
+            remark #15344: loop was not vectorized: vector dependence prevents vectorization
+            remark #15346: vector dependence: assumed ANTI dependence between dists (270:37) and dists (272:4)
+            remark #15346: vector dependence: assumed FLOW dependence between dists (272:4) and dists (270:37)
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at sssp.cpp(491,1) inlined into sssp.cpp(818,18)
+<Peeled loop for vectorization>
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(493,24) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 1.278
+   remark #15301: PEEL LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at sssp.cpp(491,1) inlined into sssp.cpp(818,18)
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(493,24) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15415: vectorization support: irregularly indexed load was generated for the variable <*graph_degrees[*(*h_graph_queue+i*4)]>, part of index is read from memory   [ sssp.cpp(494,17) ]
+   remark #15305: vectorization support: vector length 16
+   remark #15399: vectorization support: unroll factor set to 2
+   remark #15309: vectorization support: normalized vectorization overhead 0.759
+   remark #15300: LOOP WAS VECTORIZED
+   remark #15442: entire loop may be executed in remainder
+   remark #15450: unmasked unaligned unit stride loads: 1 
+   remark #15462: unmasked indexed (or gather) loads: 1 
+   remark #15475: --- begin vector cost summary ---
+   remark #15476: scalar cost: 6 
+   remark #15477: vector cost: 1.680 
+   remark #15478: estimated potential speedup: 2.830 
+   remark #15488: --- end vector cost summary ---
+LOOP END
+
+LOOP BEGIN at sssp.cpp(491,1) inlined into sssp.cpp(818,18)
+<Remainder loop for vectorization>
+   remark #15389: vectorization support: reference *h_graph_queue[i] has unaligned access   [ sssp.cpp(493,24) ]
+   remark #15381: vectorization support: unaligned access used inside loop body
+   remark #15305: vectorization support: vector length 16
+   remark #15309: vectorization support: normalized vectorization overhead 1.278
+   remark #15301: REMAINDER LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at sssp.cpp(213,2) inlined into sssp.cpp(803,4)
+   remark #15382: vectorization support: call to function memset(void *, int, size_t) cannot be vectorized   [ sssp.cpp(225,4) ]
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed ANTI dependence between at (241:5) and at (241:5)
+   remark #15346: vector dependence: assumed FLOW dependence between at (241:5) and at (241:5)
+
+   LOOP BEGIN at sssp.cpp(236,3) inlined into sssp.cpp(803,4)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed ANTI dependence between at (240:5) and at (240:5)
+      remark #15346: vector dependence: assumed FLOW dependence between at (240:5) and at (240:5)
+      remark #15346: vector dependence: assumed FLOW dependence between at (240:5) and at (240:5)
+      remark #15346: vector dependence: assumed ANTI dependence between at (240:5) and at (240:5)
+   LOOP END
+
+   LOOP BEGIN at sssp.cpp(236,3) inlined into sssp.cpp(803,4)
+   <Remainder>
+   LOOP END
+LOOP END
+
+
+Non-optimizable loops:
+
+
+LOOP BEGIN at sssp.cpp(811,4)
+   remark #15533: loop was not vectorized: loop exceeds complexity limits. Consider overriding limits (-override-limits) or using simd directive.
+LOOP END
+
+LOOP BEGIN at sssp.cpp(538,2) inlined into sssp.cpp(736,24)
+   remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ sssp.cpp(549,33) ]
+
+   LOOP BEGIN at sssp.cpp(538,2) inlined into sssp.cpp(736,24)
+      remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ sssp.cpp(549,33) ]
+
+      LOOP BEGIN at sssp.cpp(543,3) inlined into sssp.cpp(736,24)
+         remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ sssp.cpp(549,33) ]
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at sssp.cpp(538,2) inlined into sssp.cpp(788,16)
+   remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ sssp.cpp(549,33) ]
+
+   LOOP BEGIN at sssp.cpp(538,2) inlined into sssp.cpp(788,16)
+      remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ sssp.cpp(549,33) ]
+
+      LOOP BEGIN at sssp.cpp(543,3) inlined into sssp.cpp(788,16)
+         remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ sssp.cpp(549,33) ]
+      LOOP END
+   LOOP END
 LOOP END
 ===========================================================================
 
@@ -217,73 +1394,101 @@ Begin optimization report for: print(int *)
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at sssp.cpp(366,2)
-   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ sssp.cpp(367,3) ]
+LOOP BEGIN at sssp.cpp(984,2)
+   remark #15527: loop was not vectorized: function call to fprintf(FILE *, const char *, ...) cannot be vectorized   [ sssp.cpp(985,3) ]
 LOOP END
 ===========================================================================
 
-Begin optimization report for: sssp(unsigned int *, unsigned int *, unsigned int *, int *, int *, int *, int *, int *, int *)
+Begin optimization report for: sssp(unsigned int *, unsigned int *, unsigned int *, unsigned int *, unsigned int)
 
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at sssp.cpp(455,2)
+LOOP BEGIN at sssp.cpp(1090,2)
    remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-   LOOP BEGIN at sssp.cpp(459,3)
+   LOOP BEGIN at sssp.cpp(1094,3)
       remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
    LOOP END
 LOOP END
 
-LOOP BEGIN at sssp.cpp(413,2) inlined into sssp.cpp(464,4)
+LOOP BEGIN at sssp.cpp(1031,2) inlined into sssp.cpp(1099,4)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed ANTI dependence between SIDE_LENGTH (415:46) and is_updating_active_side (392:4)
-   remark #15346: vector dependence: assumed FLOW dependence between is_updating_active_side (392:4) and SIDE_LENGTH (415:46)
+   remark #15346: vector dependence: assumed ANTI dependence between dists (1007:3) and dists (1008:4)
+   remark #15346: vector dependence: assumed FLOW dependence between dists (1008:4) and dists (1007:3)
 
-   LOOP BEGIN at sssp.cpp(414,3) inlined into sssp.cpp(464,4)
+   LOOP BEGIN at sssp.cpp(1032,3) inlined into sssp.cpp(1099,4)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed ANTI dependence between SIDE_LENGTH (415:46) and is_updating_active_side (392:4)
-      remark #15346: vector dependence: assumed FLOW dependence between is_updating_active_side (392:4) and SIDE_LENGTH (415:46)
+      remark #15346: vector dependence: assumed ANTI dependence between dists (1007:3) and dists (1008:4)
+      remark #15346: vector dependence: assumed FLOW dependence between dists (1008:4) and dists (1007:3)
 
-      LOOP BEGIN at sssp.cpp(383,2) inlined into sssp.cpp(464,4)
+      LOOP BEGIN at sssp.cpp(1001,2) inlined into sssp.cpp(1099,4)
          remark #15344: loop was not vectorized: vector dependence prevents vectorization
-         remark #15346: vector dependence: assumed ANTI dependence between graph_heads (384:19) and is_updating_active_side (392:4)
-         remark #15346: vector dependence: assumed FLOW dependence between is_updating_active_side (392:4) and graph_heads (384:19)
+         remark #15346: vector dependence: assumed ANTI dependence between dists (1007:3) and dists (1008:4)
+         remark #15346: vector dependence: assumed FLOW dependence between dists (1008:4) and dists (1007:3)
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at sssp.cpp(413,2) inlined into sssp.cpp(479,4)
+LOOP BEGIN at sssp.cpp(1031,2) inlined into sssp.cpp(1114,4)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed ANTI dependence between SIDE_LENGTH (415:46) and is_updating_active_side (392:4)
-   remark #15346: vector dependence: assumed FLOW dependence between is_updating_active_side (392:4) and SIDE_LENGTH (415:46)
+   remark #15346: vector dependence: assumed ANTI dependence between dists (1007:3) and dists (1008:4)
+   remark #15346: vector dependence: assumed FLOW dependence between dists (1008:4) and dists (1007:3)
 
-   LOOP BEGIN at sssp.cpp(414,3) inlined into sssp.cpp(479,4)
+   LOOP BEGIN at sssp.cpp(1032,3) inlined into sssp.cpp(1114,4)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed ANTI dependence between SIDE_LENGTH (415:46) and is_updating_active_side (392:4)
-      remark #15346: vector dependence: assumed FLOW dependence between is_updating_active_side (392:4) and SIDE_LENGTH (415:46)
+      remark #15346: vector dependence: assumed ANTI dependence between dists (1007:3) and dists (1008:4)
+      remark #15346: vector dependence: assumed FLOW dependence between dists (1008:4) and dists (1007:3)
 
-      LOOP BEGIN at sssp.cpp(383,2) inlined into sssp.cpp(479,4)
+      LOOP BEGIN at sssp.cpp(1001,2) inlined into sssp.cpp(1114,4)
          remark #15344: loop was not vectorized: vector dependence prevents vectorization
-         remark #15346: vector dependence: assumed ANTI dependence between graph_heads (384:19) and is_updating_active_side (392:4)
-         remark #15346: vector dependence: assumed FLOW dependence between is_updating_active_side (392:4) and graph_heads (384:19)
+         remark #15346: vector dependence: assumed ANTI dependence between dists (1007:3) and dists (1008:4)
+         remark #15346: vector dependence: assumed FLOW dependence between dists (1008:4) and dists (1007:3)
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at sssp.cpp(493,3)
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between is_active_side[side_id] (495:5) and graph_active[vertex_id] (512:6)
-   remark #15346: vector dependence: assumed OUTPUT dependence between graph_active[vertex_id] (512:6) and is_active_side[side_id] (495:5)
+LOOP BEGIN at sssp.cpp(1128,3)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at sssp.cpp(507,4)
-      remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed OUTPUT dependence between graph_updating_active[vertex_id] (509:6) and graph_active[vertex_id] (512:6)
-      remark #15346: vector dependence: assumed OUTPUT dependence between graph_active[vertex_id] (512:6) and graph_updating_active[vertex_id] (509:6)
+   LOOP BEGIN at sssp.cpp(1142,4)
+   <Peeled loop for vectorization>
+      remark #15389: vectorization support: reference graph_updating_active has unaligned access   [ sssp.cpp(1144,6) ]
+      remark #15389: vectorization support: reference graph_active has unaligned access   [ sssp.cpp(1145,6) ]
+      remark #15389: vectorization support: reference graph_active has unaligned access   [ sssp.cpp(1147,6) ]
+      remark #15381: vectorization support: unaligned access used inside loop body
+      remark #15305: vectorization support: vector length 16
+      remark #15309: vectorization support: normalized vectorization overhead 0.324
+      remark #15301: PEEL LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at sssp.cpp(507,4)
-   <Remainder>
+   LOOP BEGIN at sssp.cpp(1142,4)
+      remark #15389: vectorization support: reference graph_updating_active has unaligned access   [ sssp.cpp(1144,6) ]
+      remark #15389: vectorization support: reference graph_active has unaligned access   [ sssp.cpp(1145,6) ]
+      remark #15389: vectorization support: reference graph_updating_active has unaligned access   [ sssp.cpp(1144,6) ]
+      remark #15381: vectorization support: unaligned access used inside loop body
+      remark #15305: vectorization support: vector length 16
+      remark #15309: vectorization support: normalized vectorization overhead 0.765
+      remark #15300: LOOP WAS VECTORIZED
+      remark #15442: entire loop may be executed in remainder
+      remark #15450: unmasked unaligned unit stride loads: 1 
+      remark #15451: unmasked unaligned unit stride stores: 2 
+      remark #15475: --- begin vector cost summary ---
+      remark #15476: scalar cost: 14 
+      remark #15477: vector cost: 1.060 
+      remark #15478: estimated potential speedup: 11.350 
+      remark #15488: --- end vector cost summary ---
+   LOOP END
+
+   LOOP BEGIN at sssp.cpp(1142,4)
+   <Remainder loop for vectorization>
+      remark #15389: vectorization support: reference graph_updating_active has unaligned access   [ sssp.cpp(1144,6) ]
+      remark #15389: vectorization support: reference graph_active has unaligned access   [ sssp.cpp(1145,6) ]
+      remark #15389: vectorization support: reference graph_active has unaligned access   [ sssp.cpp(1147,6) ]
+      remark #15381: vectorization support: unaligned access used inside loop body
+      remark #15305: vectorization support: vector length 16
+      remark #15309: vectorization support: normalized vectorization overhead 0.324
+      remark #15301: REMAINDER LOOP WAS VECTORIZED
    LOOP END
 LOOP END
 ===========================================================================
