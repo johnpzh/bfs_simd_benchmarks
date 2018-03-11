@@ -481,7 +481,6 @@ inline unsigned update_visited_sparse(
 	}
 	return out_degree;
 }
-//TOBEV
 inline void update_visited_sparse_reverse(
 		unsigned *h_graph_queue,
 		const unsigned &queue_size,

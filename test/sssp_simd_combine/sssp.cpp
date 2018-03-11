@@ -9,12 +9,15 @@
 #include <omp.h>
 #include <unistd.h>
 #include <getopt.h>
+#include <immintrin.h>
 using std::string;
 using std::getline;
 using std::cout;
 using std::endl;
 using std::to_string;
 
+#define NUM_P_INT 16 // Number of packed intergers in one __m512i variable
+#define ALIGNED_BYTES 64
 
 unsigned NNODES, NEDGES;
 unsigned NUM_THREADS; // Number of threads
@@ -22,6 +25,7 @@ unsigned TILE_WIDTH; // Width of tile
 unsigned SIDE_LENGTH; // Number of rows of tiles
 unsigned NUM_TILES; // Number of tiles
 unsigned ROW_STEP; // Number of rows of tiles in a Group
+unsigned SIZE_BUFFER_MAX;
 unsigned T_RATIO;
 unsigned WORK_LOAD;
  
@@ -190,12 +194,31 @@ inline void to_dense(
 {
 	memset(h_graph_mask, 0, NNODES * sizeof(int));
 	memset(is_active_side, 0, SIDE_LENGTH * sizeof(int));
+
+	unsigned remainder = frontier_size % NUM_P_INT;
+	unsigned bound_i = frontier_size - remainder;
 #pragma omp parallel for
-	for (unsigned i = 0; i< frontier_size; ++i) {
-		unsigned vertex_id = h_graph_queue[i];
-		h_graph_mask[vertex_id] = 1;
-		is_active_side[vertex_id / TILE_WIDTH] = 1;
+	for (unsigned i = 0; i < bound_i; i += NUM_P_INT) {
+		__m512i v_ids_v = _mm512_load_epi32(h_graph_queue + i);
+		_mm512_i32scatter_epi32(h_graph_mask, v_ids_v, _mm512_set1_epi32(1), sizeof(int));
+		__m512i tw_v = _mm512_set1_epi32(TILE_WIDTH);
+		__m512i side_id_v = _mm512_div_epi32(v_ids_v, tw_v);
+		_mm512_i32scatter_epi32(is_active_side, side_id_v, _mm512_set1_epi32(1), sizeof(int));
 	}
+	if (remainder) {
+		__mmask16 in_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
+		__m512i v_ids_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_m, h_graph_queue + bound_i);
+		_mm512_mask_i32scatter_epi32(h_graph_mask, in_m, v_ids_v, _mm512_set1_epi32(1), sizeof(int));
+		__m512i tw_v = _mm512_set1_epi32(TILE_WIDTH);
+		__m512i side_id_v = _mm512_mask_div_epi32(_mm512_undefined_epi32(), in_m, v_ids_v, tw_v);
+		_mm512_mask_i32scatter_epi32(is_active_side, in_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
+	}
+//#pragma omp parallel for
+//	for (unsigned i = 0; i< frontier_size; ++i) {
+//		unsigned vertex_id = h_graph_queue[i];
+//		h_graph_mask[vertex_id] = 1;
+//		is_active_side[vertex_id / TILE_WIDTH] = 1;
+//	}
 }
 
 inline void update_dense_weighted(
@@ -214,7 +237,7 @@ inline void update_dense_weighted(
 		if (!is_updating_active_side[side_id]) {
 			is_active_side[side_id] = 0;
 			unsigned width;
-			// Think about this bug. How did you find it? And, more importantly,
+			// think about this bug. how did you find it? and, more importantly,
 			// how to avoid it in the future?
 			//	memset(h_graph_mask + side_id * TILE_WIDTH, 0, TILE_WIDTH * sizeof(unsigned));
 			if (SIDE_LENGTH - 1 != side_id) {
@@ -227,22 +250,60 @@ inline void update_dense_weighted(
 		}
 		is_updating_active_side[side_id] = 0;
 		is_active_side[side_id] = 1;
+		unsigned start_vertex_id = side_id * TILE_WIDTH;
 		unsigned bound_vertex_id;
 		if (SIDE_LENGTH - 1 != side_id) {
 			bound_vertex_id = side_id * TILE_WIDTH + TILE_WIDTH;
 		} else {
 			bound_vertex_id = NNODES;
 		}
-		for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++vertex_id) {
-			if (1 == h_updating_graph_mask[vertex_id]) {
-				h_updating_graph_mask[vertex_id] = 0;
-				h_graph_mask[vertex_id] = 1;
-				frontier_size++;
-				out_degree += graph_degrees[vertex_id];
-			} else {
-				h_graph_mask[vertex_id] = 0;
+		unsigned remainder = (bound_vertex_id - start_vertex_id) % NUM_P_INT;
+		bound_vertex_id -= remainder;
+		for (unsigned vertex_id = start_vertex_id; 
+				vertex_id < bound_vertex_id; 
+				vertex_id += NUM_P_INT) {
+			__m512i updating_flag_v = _mm512_loadu_si512(h_updating_graph_mask + vertex_id);
+			__mmask16 is_updating_m = _mm512_test_epi32_mask(updating_flag_v, _mm512_set1_epi32(-1));
+			if (!is_updating_m) {
+				_mm512_storeu_si512(h_graph_mask + vertex_id, _mm512_set1_epi32(0));// IMPORTANT
+				continue;
 			}
+			_mm512_mask_storeu_epi32(h_updating_graph_mask + vertex_id, is_updating_m, _mm512_set1_epi32(0));
+			_mm512_storeu_si512(h_graph_mask + vertex_id, updating_flag_v);
+			__m512i num_active_v = _mm512_mask_set1_epi32(_mm512_set1_epi32(0), is_updating_m, 1);
+			unsigned num_active = _mm512_reduce_add_epi32(num_active_v);
+			frontier_size += num_active;
+			__m512i out_degrees_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), is_updating_m, graph_degrees + vertex_id);
+			out_degree += _mm512_reduce_add_epi32(out_degrees_v);
 		}
+
+		if (remainder > 0) {
+			unsigned short in_range_m_t = (unsigned short) 0xFFFF >> (NUM_P_INT - remainder);
+			__mmask16 in_range_m = (__mmask16) in_range_m_t;
+			__m512i updating_flag_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), in_range_m, h_updating_graph_mask + bound_vertex_id);
+			__mmask16 is_updating_m = _mm512_test_epi32_mask(updating_flag_v, _mm512_set1_epi32(-1));
+			if (!is_updating_m) {
+				_mm512_mask_storeu_epi32(h_graph_mask + bound_vertex_id, in_range_m, _mm512_set1_epi32(0));//addition
+				continue;
+			}
+			_mm512_mask_storeu_epi32(h_updating_graph_mask + bound_vertex_id, is_updating_m, _mm512_set1_epi32(0));
+			_mm512_mask_storeu_epi32(h_graph_mask + bound_vertex_id, in_range_m, updating_flag_v);
+			__m512i num_active_v = _mm512_mask_set1_epi32(_mm512_set1_epi32(0), is_updating_m, 1);
+			unsigned num_active = _mm512_reduce_add_epi32(num_active_v);
+			frontier_size += num_active;
+			__m512i out_degrees_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), is_updating_m, graph_degrees + bound_vertex_id);
+			out_degree += _mm512_reduce_add_epi32(out_degrees_v);
+		}
+		//for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++vertex_id) {
+		//	if (1 == h_updating_graph_mask[vertex_id]) {
+		//		h_updating_graph_mask[vertex_id] = 0;
+		//		h_graph_mask[vertex_id] = 1;
+		//		frontier_size++;
+		//		out_degree += graph_degrees[vertex_id];
+		//	} else {
+		//		h_graph_mask[vertex_id] = 0;
+		//	}
+		//}
 	}
 
 	_frontier_size = frontier_size;
@@ -250,40 +311,94 @@ inline void update_dense_weighted(
 }
 
 inline void sssp_kernel_dense_weighted(
-				unsigned *graph_heads, 
-				unsigned *graph_tails, 
-				unsigned *graph_weights,
-				int *graph_active, 
-				int *graph_updating_active,
+				unsigned *heads_buffer,
+				unsigned *tails_buffer,
+				unsigned *weights_buffer,
+				const unsigned &size_buffer,
+				int *h_graph_mask, 
+				int *h_updating_graph_mask,
 				int *is_active_side,
 				int *is_updating_active_side,
-				unsigned *dists, 
-				const unsigned &edge_i_start, 
-				const unsigned &edge_i_bound)
+				unsigned *dists) 
 {
-	for (unsigned edge_i = edge_i_start; edge_i < edge_i_bound; ++edge_i) {
-		unsigned head = graph_heads[edge_i];
-		if (0 == graph_active[head]) {
+	unsigned remainder = size_buffer % NUM_P_INT;
+	unsigned bound_edge_i = size_buffer - remainder;
+	for (unsigned edge_i = 0; edge_i < bound_edge_i; edge_i += NUM_P_INT) {
+		__m512i head_v = _mm512_load_epi32(heads_buffer + edge_i);
+		__m512i active_flag_v = _mm512_i32gather_epi32(head_v, h_graph_mask, sizeof(int));
+		__mmask16 is_active_m = _mm512_test_epi32_mask(active_flag_v, _mm512_set1_epi32(-1));
+		if (!is_active_m) {
 			continue;
 		}
-		unsigned end = graph_tails[edge_i];
-		unsigned new_dist = dists[head] + graph_weights[edge_i];
-		if (new_dist < dists[end]) {
-			dists[end] = new_dist;
-			graph_updating_active[end] = 1;
-			is_updating_active_side[end/TILE_WIDTH] = 1;
+		__m512i end_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), is_active_m, tails_buffer + edge_i);
+		__m512i dists_end_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), is_active_m, end_v, dists, sizeof(unsigned));
+		__m512i dists_head_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), is_active_m, head_v, dists, sizeof(unsigned));
+		__m512i weights_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), is_active_m, weights_buffer + edge_i);
+		__m512i dists_tmp_v = _mm512_mask_add_epi32(_mm512_undefined_epi32(), is_active_m, dists_head_v, weights_v);
+		__mmask16 is_minusone_m = _mm512_mask_cmpeq_epi32_mask(is_active_m, dists_end_v, _mm512_set1_epi32(-1));
+		__mmask16 is_shorter_m = _mm512_mask_cmplt_epi32_mask(is_active_m, dists_tmp_v, dists_end_v);
+		__mmask16 need_update_m = is_minusone_m | is_shorter_m;
+		if (!need_update_m) {
+			continue;
 		}
+		_mm512_mask_i32scatter_epi32(dists, need_update_m, end_v, dists_tmp_v, sizeof(unsigned));
+		_mm512_mask_i32scatter_epi32(h_updating_graph_mask, need_update_m, end_v, _mm512_set1_epi32(1), sizeof(int));
+		__m512i TILE_WIDTH_v = _mm512_set1_epi32(TILE_WIDTH);
+		__m512i side_id_v = _mm512_div_epi32(end_v, TILE_WIDTH_v);
+		_mm512_mask_i32scatter_epi32(is_updating_active_side, need_update_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
 	}
+
+	if (remainder > 0) {
+		__mmask16 in_range_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
+		__m512i head_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, heads_buffer + bound_edge_i);
+		__m512i active_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_range_m, head_v, h_graph_mask, sizeof(int));
+		__mmask16 is_active_m = _mm512_test_epi32_mask(active_flag_v, _mm512_set1_epi32(-1));
+		if (!is_active_m) {
+			return;
+		}
+		__m512i end_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), is_active_m, tails_buffer + bound_edge_i);
+		__m512i dists_end_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), is_active_m, end_v, dists, sizeof(unsigned));
+		__m512i dists_head_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), is_active_m, head_v, dists, sizeof(unsigned));
+		__m512i weights_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), is_active_m, weights_buffer + bound_edge_i);
+		__m512i dists_tmp_v = _mm512_mask_add_epi32(_mm512_undefined_epi32(), is_active_m, dists_head_v, weights_v);
+		__mmask16 is_minusone_m = _mm512_mask_cmpeq_epi32_mask(is_active_m, dists_end_v, _mm512_set1_epi32(-1));
+		__mmask16 is_shorter_m = _mm512_mask_cmplt_epi32_mask(is_active_m, dists_tmp_v, dists_end_v);
+		__mmask16 need_update_m = is_minusone_m | is_shorter_m;
+		if (!need_update_m) {
+			return;
+		}
+		_mm512_mask_i32scatter_epi32(dists, need_update_m, end_v, dists_tmp_v, sizeof(unsigned));
+		_mm512_mask_i32scatter_epi32(h_updating_graph_mask, need_update_m, end_v, _mm512_set1_epi32(1), sizeof(int));
+		__m512i TILE_WIDTH_v = _mm512_set1_epi32(TILE_WIDTH);
+		__m512i side_id_v = _mm512_div_epi32(end_v, TILE_WIDTH_v);
+		_mm512_mask_i32scatter_epi32(is_updating_active_side, need_update_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
+	}
+//	for (unsigned edge_i = edge_i_start; edge_i < edge_i_bound; ++edge_i) {
+//		unsigned head = heads_buffer[edge_i];
+//		if (0 == h_graph_mask[head]) {
+//			continue;
+//		}
+//		unsigned end = graph_tails[edge_i];
+//		unsigned new_dist = dists[head] + weights_buffer[edge_i];
+//		if (new_dist < dists[end]) {
+//			dists[end] = new_dist;
+//			h_updating_graph_mask[end] = 1;
+//			is_updating_active_side[end/TILE_WIDTH] = 1;
+//		}
+//	}
 }
 
 inline void scheduler_dense_weighted(
+					unsigned *heads_buffer,
+					unsigned *tails_buffer,
+					unsigned *weights_buffer,
 					unsigned *graph_heads, 
 					unsigned *graph_tails, 
 					unsigned *graph_weights,
 					unsigned *tile_offsets,
 					unsigned *tile_sizes,
-					int *graph_active, 
-					int *graph_updating_active,
+					int *h_graph_mask, 
+					int *h_updating_graph_mask,
 					int *is_active_side,
 					int *is_updating_active_side,
 					unsigned *dists, 
@@ -294,65 +409,85 @@ inline void scheduler_dense_weighted(
 	//unsigned bound_row_id = start_row_index + tile_step;
 	unsigned end_tile_id = start_tile_id + tile_step * SIDE_LENGTH;
 #pragma omp parallel for schedule(dynamic, 1)
+//#pragma omp parallel for
 	for (unsigned tile_index = start_tile_id; tile_index < end_tile_id; tile_index += tile_step) {
 		unsigned bound_tile_id = tile_index + tile_step;
+		unsigned tid = omp_get_thread_num();
+		unsigned *heads_buffer_base = heads_buffer + tid * SIZE_BUFFER_MAX;
+		unsigned *tails_buffer_base = tails_buffer + tid * SIZE_BUFFER_MAX;
+		unsigned *weights_buffer_base = tails_buffer + tid * SIZE_BUFFER_MAX;
+		unsigned size_buffer = 0;
+		unsigned capacity = SIZE_BUFFER_MAX;
 		for (unsigned tile_id = tile_index; tile_id < bound_tile_id; ++tile_id) {
 			unsigned row_id = (tile_id - start_tile_id) % tile_step + start_row_index;
 			if (0 == tile_sizes[tile_id] || !is_active_side[row_id]) {
 				continue;
 			}
-			// Kernel
-			unsigned bound_edge_i;
-			if (NUM_TILES - 1 != tile_id) {
-				bound_edge_i = tile_offsets[tile_id + 1];
-			} else {
-				bound_edge_i = NEDGES;
+			// Load to buffer
+			unsigned edge_i = tile_offsets[tile_id];
+			unsigned remain = tile_sizes[tile_id];
+			while (remain != 0) {
+				if (capacity > 0) {
+					if (capacity > remain) {
+						// Put all remain into the buffer
+						memcpy(heads_buffer_base + size_buffer, graph_heads + edge_i, remain * sizeof(unsigned));
+						memcpy(tails_buffer_base + size_buffer, graph_tails + edge_i, remain * sizeof(unsigned));
+						memcpy(weights_buffer_base + size_buffer, graph_weights + edge_i, remain * sizeof(unsigned));
+						edge_i += remain;
+						capacity -= remain;
+						size_buffer += remain;
+						remain = 0;
+					} else {
+						// Fill the buffer to full
+						memcpy(heads_buffer_base + size_buffer, graph_heads + edge_i, capacity * sizeof(unsigned));
+						memcpy(tails_buffer_base + size_buffer, graph_tails + edge_i, capacity * sizeof(unsigned));
+						memcpy(weights_buffer_base + size_buffer, graph_weights + edge_i, capacity * sizeof(unsigned));
+						edge_i += capacity;
+						remain -= capacity;
+						size_buffer += capacity;
+						capacity = 0;
+					}
+				} else {
+					// Process the full buffer
+					sssp_kernel_dense_weighted(
+							heads_buffer_base,
+							tails_buffer_base,
+							weights_buffer_base,
+							size_buffer,
+							h_graph_mask, 
+							h_updating_graph_mask,
+							is_active_side,
+							is_updating_active_side,
+							dists); 
+					capacity = SIZE_BUFFER_MAX;
+					size_buffer = 0;
+				}
 			}
-			sssp_kernel_dense_weighted(
-				graph_heads, 
-				graph_tails, 
-				graph_weights,
-				graph_active, 
-				graph_updating_active,
+			
+		}
+		// Process the remains in buffer
+		sssp_kernel_dense_weighted(
+				heads_buffer_base,
+				tails_buffer_base,
+				weights_buffer_base,
+				size_buffer,
+				h_graph_mask, 
+				h_updating_graph_mask,
 				is_active_side,
 				is_updating_active_side,
-				dists, 
-				tile_offsets[tile_id], 
-				bound_edge_i);
-		}
-
+				dists); 
+			//sssp_kernel_dense_weighted(
+			//	graph_heads, 
+			//	graph_tails, 
+			//	graph_weights,
+			//	h_graph_mask, 
+			//	h_updating_graph_mask,
+			//	is_active_side,
+			//	is_updating_active_side,
+			//	dists, 
+			//	tile_offsets[tile_id], 
+			//	bound_edge_i);
 	}
-////	Row-major tiles
-//	const unsigned bound_row_index = start_row_index + tile_step;
-//#pragma omp parallel for schedule(dynamic, 1)
-////#pragma omp parallel for
-//	for (unsigned col_id = 0; col_id < SIDE_LENGTH; ++col_id) {
-//		for (unsigned row_id = start_row_index; row_id < bound_row_index; ++row_id) {
-//			unsigned tile_id = row_id * SIDE_LENGTH + col_id;
-//			if (0 == tile_sizes[tile_id] || !is_active_side[row_id]) {
-//				continue;
-//			}
-//			//bfs_kernel();
-//			unsigned bound_edge_i;
-//			if (NUM_TILES - 1 != tile_id) {
-//				bound_edge_i = tile_offsets[tile_id + 1];
-//			} else {
-//				bound_edge_i = NEDGES;
-//			}
-//			sssp_kernel_dense_weighted(
-//				graph_heads, 
-//				graph_tails, 
-//				graph_weights,
-//				graph_active, 
-//				graph_updating_active,
-//				is_active_side,
-//				is_updating_active_side,
-//				dists, 
-//				tile_offsets[tile_id], 
-//				bound_edge_i);
-//		}
-//	}
-//// End Row-major tiles
 }
 inline void BFS_dense_weighted(
 					unsigned *graph_heads,
@@ -366,10 +501,16 @@ inline void BFS_dense_weighted(
 					int *is_updating_active_side,
 					unsigned *dists)
 {
+	unsigned *heads_buffer = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS, ALIGNED_BYTES);
+	unsigned *tails_buffer = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS, ALIGNED_BYTES);
+	unsigned *weights_buffer = (unsigned *) _mm_malloc(sizeof(unsigned) * SIZE_BUFFER_MAX * NUM_THREADS, ALIGNED_BYTES);
 	unsigned remainder = SIDE_LENGTH % ROW_STEP;
 	unsigned bound_side_id = SIDE_LENGTH - remainder;
 	for (unsigned side_id = 0; side_id < bound_side_id; side_id += ROW_STEP) {
 		scheduler_dense_weighted(
+				heads_buffer,
+				tails_buffer,
+				weights_buffer,
 				graph_heads, 
 				graph_tails, 
 				graph_weights,
@@ -386,6 +527,9 @@ inline void BFS_dense_weighted(
 	}
 	if (remainder > 0) {
 		scheduler_dense_weighted(
+				heads_buffer,
+				tails_buffer,
+				weights_buffer,
 				graph_heads, 
 				graph_tails, 
 				graph_weights,
@@ -399,13 +543,17 @@ inline void BFS_dense_weighted(
 				bound_side_id,
 				remainder);
 	}
+	_mm_free(heads_buffer);
+	_mm_free(tails_buffer);
+	_mm_free(weights_buffer);
+
 
 }
-// End Dense, Weighted Graph
+// end dense, weighted graph
 ////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////
-// Sparse, Weighted Graph
+// sparse, weighted graph
 
 inline unsigned get_chunk_size(unsigned amount)
 {
@@ -420,8 +568,8 @@ inline unsigned *to_sparse(
 		int *h_graph_mask,
 		const unsigned &frontier_size)
 {
-	unsigned *new_frontier = (unsigned *) malloc(frontier_size * sizeof(unsigned));
-
+	//unsigned *new_frontier = (unsigned *) malloc(frontier_size * sizeof(unsigned));
+	unsigned *new_frontier = (unsigned *) _mm_malloc(frontier_size * sizeof(unsigned), ALIGNED_BYTES);
 	const unsigned block_size = 1 << 12;
 	unsigned num_blocks = (NNODES - 1)/block_size + 1;
 	unsigned *nums_in_blocks = nullptr;
@@ -482,16 +630,33 @@ inline unsigned *to_sparse(
 	return new_frontier;
 }
 
-inline unsigned sparse_update_weighted(
+inline unsigned update_sparse_weighted(
 				unsigned *h_graph_queue,
 				const unsigned &queue_size,
 				unsigned *graph_degrees)
 {
+//	unsigned out_degree = 0;
+//#pragma omp parallel for reduction(+: out_degree)
+//	for (unsigned i = 0; i < queue_size; ++i) {
+//		unsigned vertex_id = h_graph_queue[i];
+//		out_degree += graph_degrees[vertex_id];
+//	}
 	unsigned out_degree = 0;
+	unsigned remainder = queue_size % NUM_P_INT;
+	unsigned bound_i = queue_size - remainder;
 #pragma omp parallel for reduction(+: out_degree)
-	for (unsigned i = 0; i < queue_size; ++i) {
-		unsigned vertex_id = h_graph_queue[i];
-		out_degree += graph_degrees[vertex_id];
+	for (unsigned i = 0; i < bound_i; i += NUM_P_INT) {
+		__m512i vertex_id_v = _mm512_load_epi32(h_graph_queue + i);
+		__m512i degrees_v = _mm512_i32gather_epi32(vertex_id_v, graph_degrees, sizeof(unsigned));
+		unsigned sum_degrees = _mm512_reduce_add_epi32(degrees_v);
+		out_degree += sum_degrees;
+	}
+	if (remainder) {
+		__mmask16 in_range_m = (__mmask16) ((unsigned short) 0xffff >> (NUM_P_INT - remainder));
+		__m512i vertex_id_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, h_graph_queue + bound_i);
+		__m512i degrees_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_range_m, vertex_id_v, graph_degrees, sizeof(unsigned));
+		unsigned sum_degrees = _mm512_reduce_add_epi32(degrees_v);
+		out_degree += sum_degrees;
 	}
 	return out_degree;
 }
@@ -507,23 +672,41 @@ inline unsigned *BFS_kernel_sparse_weighted(
 				//unsigned *num_paths,
 				unsigned *dists)
 {
-	// From h_graph_queue, get the degrees (para_for)
-	unsigned *degrees = (unsigned *) malloc(sizeof(unsigned) *  queue_size);
+	// from h_graph_queue, get the degrees (para_for)
+	unsigned *degrees = (unsigned *) _mm_malloc(sizeof(unsigned) *  queue_size, ALIGNED_BYTES);
 	unsigned new_queue_size = 0;
+	unsigned remainder = queue_size % NUM_P_INT;
+	unsigned bound_i = queue_size - remainder;
+//#pragma omp parallel for schedule(dynamic) reduction(+: new_queue_size)
 #pragma omp parallel for reduction(+: new_queue_size)
-	for (unsigned i = 0; i < queue_size; ++i) {
-		degrees[i] = graph_degrees[h_graph_queue[i]];
-		new_queue_size += degrees[i];
+	for (unsigned i = 0; i < bound_i; i += NUM_P_INT) {
+		__m512i v_ids = _mm512_load_epi32(h_graph_queue + i);
+		__m512i degrees_v = _mm512_i32gather_epi32(v_ids, graph_degrees, sizeof(unsigned));
+		_mm512_store_epi32(degrees + i, degrees_v);
+		unsigned sum_degrees = _mm512_reduce_add_epi32(degrees_v);
+		new_queue_size += sum_degrees;
 	}
+	if (remainder) {
+		__mmask16 in_m = (__mmask16) ((unsigned short) 0xffff >> (NUM_P_INT - remainder));
+		__m512i v_ids = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_m, h_graph_queue + bound_i);
+		__m512i degrees_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_m, v_ids, graph_degrees, sizeof(unsigned));
+		_mm512_mask_store_epi32(degrees + bound_i, in_m, degrees_v);
+		unsigned sum_degrees = _mm512_reduce_add_epi32(degrees_v);
+		new_queue_size += sum_degrees;
+	}
+//#pragma omp parallel for reduction(+: new_queue_size)
+//	for (unsigned i = 0; i < queue_size; ++i) {
+//		degrees[i] = graph_degrees[h_graph_queue[i]];
+//		new_queue_size += degrees[i];
+//	}
 	if (0 == new_queue_size) {
-		free(degrees);
+		_mm_free(degrees);
 		queue_size = 0;
-		//h_graph_queue = nullptr;
 		return nullptr;
 	}
 
-	// From degrees, get the offset (stored in degrees) (block_para_for)
-	// TODO: blocked parallel for
+	// from degrees, get the offset (stored in degrees) (block_para_for)
+	// todo: blocked parallel for
 	unsigned offset_sum = 0;
 	for (unsigned i = 0; i < queue_size; ++i) {
 		unsigned tmp = degrees[i];
@@ -531,10 +714,10 @@ inline unsigned *BFS_kernel_sparse_weighted(
 		offset_sum += tmp;
 	}
 
-	// From offset, get active vertices (para_for)
-	unsigned *new_frontier_tmp = (unsigned *) malloc(sizeof(unsigned) * new_queue_size);
-	unsigned CHUNK_SIZE_SPARSE = get_chunk_size(queue_size);
-#pragma omp parallel for schedule(dynamic, CHUNK_SIZE_SPARSE)
+	// from offset, get active vertices (para_for)
+	unsigned *new_frontier_tmp = (unsigned *) _mm_malloc(sizeof(unsigned) * new_queue_size, ALIGNED_BYTES);
+	unsigned chunk_size_sparse = get_chunk_size(queue_size);
+#pragma omp parallel for schedule(dynamic, chunk_size_sparse)
 	for (unsigned i = 0; i < queue_size; ++i) {
 		unsigned start = h_graph_queue[i];
 		unsigned offset = degrees[i];
@@ -557,32 +740,15 @@ inline unsigned *BFS_kernel_sparse_weighted(
 			} else {
 				new_frontier_tmp[frontier_i] = (unsigned) -1;
 			}
-			////////////////
-			//if (0 == h_graph_visited[end]) {
-			//	volatile unsigned old_val;
-			//	volatile unsigned new_val;
-			//	do {
-			//		old_val = num_paths[end];
-			//		new_val = old_val + num_paths[start];
-			//	} while (!__sync_bool_compare_and_swap(num_paths + end, old_val, new_val));
-			//	if (old_val == 0.0) {
-			//		new_frontier_tmp[offset + k] = end;
-			//	} else {
-			//		new_frontier_tmp[offset + k] = (unsigned) -1;
-			//	}
-			//} else {
-			//	new_frontier_tmp[offset + k] = (unsigned) -1;
-			//}
-			///////////////
 		}
 	}
 
 
-	// Refine active vertices, removing visited and redundant (block_para_for)
+	// refine active vertices, removing visited and redundant (block_para_for)
 	unsigned block_size = 1024 * 2;
 	unsigned num_blocks = (new_queue_size - 1)/block_size + 1;
 
-	unsigned *nums_in_blocks = NULL;
+	unsigned *nums_in_blocks = nullptr;
 	if (num_blocks > 1) {
 	nums_in_blocks = (unsigned *) malloc(sizeof(unsigned) * num_blocks);
 	unsigned new_queue_size_tmp = 0;
@@ -617,8 +783,8 @@ inline unsigned *BFS_kernel_sparse_weighted(
 	}
 	
 	if (0 == new_queue_size) {
-		free(degrees);
-		free(new_frontier_tmp);
+		_mm_free(degrees);
+		_mm_free(new_frontier_tmp);
 		if (nums_in_blocks) {
 			free(nums_in_blocks);
 		}
@@ -626,41 +792,65 @@ inline unsigned *BFS_kernel_sparse_weighted(
 		return nullptr;
 	}
 
-	// Get the final new frontier
-	unsigned *new_frontier = (unsigned *) malloc(sizeof(unsigned) * new_queue_size);
+	// get the final new frontier
+	unsigned *new_frontier = (unsigned *) _mm_malloc(sizeof(unsigned) * new_queue_size, ALIGNED_BYTES);
+	//unsigned *new_frontier = (unsigned *) malloc(sizeof(unsigned) * new_queue_size);
 	if (num_blocks > 1) {
-	//TODO: blocked parallel for
-	offset_sum = 0;
-	for (unsigned i = 0; i < num_blocks; ++i) {
-		unsigned tmp = nums_in_blocks[i];
-		nums_in_blocks[i] = offset_sum;
-		offset_sum += tmp;
-	}
-//#pragma omp parallel for schedule(dynamic)
+		//todo: blocked parallel for
+		offset_sum = 0;
+		for (unsigned i = 0; i < num_blocks; ++i) {
+			unsigned tmp = nums_in_blocks[i];
+			nums_in_blocks[i] = offset_sum;
+			offset_sum += tmp;
+		}
+		//#pragma omp parallel for schedule(dynamic)
 #pragma omp parallel for
-	for (unsigned block_i = 0; block_i < num_blocks; ++block_i) {
-		unsigned offset = nums_in_blocks[block_i];
-		unsigned bound;
-		if (num_blocks - 1 != block_i) {
-			bound = nums_in_blocks[block_i + 1];
-		} else {
-			bound = new_queue_size;
+		for (unsigned block_i = 0; block_i < num_blocks; ++block_i) {
+			unsigned offset = nums_in_blocks[block_i];
+			unsigned bound;
+			if (num_blocks - 1 != block_i) {
+				bound = nums_in_blocks[block_i + 1];
+			} else {
+				bound = new_queue_size;
+			}
+			unsigned base = block_i * block_size;
+			unsigned remainder = (bound - offset) % NUM_P_INT;
+			unsigned bound_i = bound - remainder;
+			for (unsigned i = offset; i < bound_i; i += NUM_P_INT) {
+				__m512i tmp = _mm512_load_epi32(new_frontier_tmp + base);
+				_mm512_storeu_si512(new_frontier + i, tmp);
+				base += NUM_P_INT;
+			}
+			if (remainder) {
+				__mmask16 in_range_m = (__mmask16) ((unsigned short) 0xffff >> (NUM_P_INT - remainder));
+				__m512i tmp = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, new_frontier_tmp + base);
+				_mm512_mask_storeu_epi32(new_frontier + bound_i, in_range_m, tmp);
+			}
+			//for (unsigned i = offset; i < bound; ++i) {
+			//	new_frontier[i] = new_frontier_tmp[base++];
+			//}
 		}
-		unsigned base = block_i * block_size;
-		for (unsigned i = offset; i < bound; ++i) {
-			new_frontier[i] = new_frontier_tmp[base++];
-		}
-	}
 	} else {
-		unsigned base = 0;
-		for (unsigned i = 0; i < new_queue_size; ++i) {
-			new_frontier[i] = new_frontier_tmp[base++];
+		unsigned remainder = new_queue_size % NUM_P_INT;
+		unsigned bound_i = new_queue_size - remainder;
+		for (unsigned i = 0; i < bound_i; i += NUM_P_INT) {
+			__m512i tmp = _mm512_load_epi32(new_frontier_tmp + i);
+			_mm512_store_epi32(new_frontier + i, tmp);
 		}
+		if (remainder) {
+			__mmask16 in_range_m = (__mmask16) ((unsigned short) 0xffff >> (NUM_P_INT - remainder));
+			__m512i tmp = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, new_frontier_tmp + bound_i);
+			_mm512_mask_store_epi32(new_frontier + bound_i, in_range_m, tmp);
+		}
+		//unsigned base = 0;
+		//for (unsigned i = 0; i < new_queue_size; ++i) {
+		//	new_frontier[i] = new_frontier_tmp[base++];
+		//}
 	}
 
-	// Return the results
-	free(degrees);
-	free(new_frontier_tmp);
+	// return the results
+	_mm_free(degrees);
+	_mm_free(new_frontier_tmp);
 	if (nums_in_blocks) {
 		free(nums_in_blocks);
 	}
@@ -689,7 +879,7 @@ inline unsigned *BFS_sparse_weighted(
 				//num_paths,
 				dists);
 }
-// End Sparse, Weighted Graph
+// end sparse, weighted graph
 ////////////////////////////////////////////////////////////
 
 void sssp_weighted(
@@ -697,12 +887,7 @@ void sssp_weighted(
 		unsigned *graph_tails, 
 		unsigned *graph_weights,
 		unsigned *tile_offsets,
-		//int *graph_active, 
-		//int *graph_updating_active,
-		//int *is_active_side,
-		//int *is_updating_active_side,
 		unsigned *tile_sizes,
-		//int *dists,
 		unsigned *graph_vertices,
 		unsigned *graph_edges,
 		unsigned *graph_weights_csr,
@@ -712,8 +897,6 @@ void sssp_weighted(
 	omp_set_num_threads(NUM_THREADS);
 
 	unsigned *dists = (unsigned *) malloc(NNODES * sizeof(int));
-	//int *graph_active = (int *) malloc(NNODES * sizeof(int));
-	//int *graph_updating_active = (int *) malloc(NNODES * sizeof(int));
 	int *h_graph_mask = (int *) malloc(NNODES * sizeof(int));
 	int *h_updating_graph_mask = (int *) malloc(NNODES * sizeof(int));
 	int *new_mask = nullptr;
@@ -731,7 +914,7 @@ void sssp_weighted(
 
 	// Fisrt is Sparse
 	frontier_size = 1;
-	h_graph_queue = (unsigned *) malloc(frontier_size *sizeof(unsigned));
+	h_graph_queue = (unsigned *) _mm_malloc(frontier_size *sizeof(unsigned), ALIGNED_BYTES);
 	h_graph_queue[0] = source;
 	unsigned *new_queue = BFS_sparse_weighted(
 								h_graph_queue,
@@ -740,14 +923,12 @@ void sssp_weighted(
 								graph_edges,
 								graph_degrees,
 								graph_weights_csr,
-								//h_graph_visited,
-								//num_paths
 								dists);
-	free(h_graph_queue);
+	_mm_free(h_graph_queue); 
 	h_graph_queue = new_queue;
 	last_is_dense = false;
 	// Get the sum of the number of active nodes and their out degrees
-	out_degree =  sparse_update_weighted(
+	out_degree =  update_sparse_weighted(
 							h_graph_queue,
 							frontier_size,
 							graph_degrees);
@@ -776,30 +957,6 @@ void sssp_weighted(
 					is_updating_active_side,
 					dists);
 			last_is_dense = true;
-		} else {
-			// Sparse
-			if (last_is_dense) {
-				new_queue = to_sparse(
-							h_graph_mask,
-							frontier_size);
-				free(h_graph_queue);
-				h_graph_queue = new_queue;
-			}
-			new_queue = BFS_sparse_weighted(
-									h_graph_queue,
-									frontier_size,
-									graph_vertices,
-									graph_edges,
-									graph_degrees,
-									graph_weights_csr,
-									//h_graph_visited,
-									//num_paths
-									dists);
-			free(h_graph_queue);
-			h_graph_queue = new_queue;
-			last_is_dense = false;
-		}
-		if (last_is_dense) {
 			update_dense_weighted(
 					frontier_size,
 					out_degree,
@@ -812,88 +969,44 @@ void sssp_weighted(
 				break;
 			}
 		} else {
+			// Sparse
+			if (last_is_dense) {
+				new_queue = to_sparse(
+							h_graph_mask,
+							frontier_size);
+				_mm_free(h_graph_queue);
+				h_graph_queue = new_queue;
+			}
+			new_queue = BFS_sparse_weighted(
+									h_graph_queue,
+									frontier_size,
+									graph_vertices,
+									graph_edges,
+									graph_degrees,
+									graph_weights_csr,
+									dists);
+			_mm_free(h_graph_queue);
+			h_graph_queue = new_queue;
+			last_is_dense = false;
 			if (0 == frontier_size) {
 				break;
 			}
-			out_degree =  sparse_update_weighted(
+			out_degree =  update_sparse_weighted(
 					h_graph_queue,
 					frontier_size,
 					graph_degrees);
 		}
-		///////////////////////////////////////
-		//unsigned remainder = SIDE_LENGTH % ROW_STEP;
-		//unsigned bound_side_id = SIDE_LENGTH - remainder;
-		//for (unsigned side_id = 0; side_id < bound_side_id; side_id += ROW_STEP) {
-		//	//if (!is_active_side[side_id]) {
-		//	//	++side_id;
-		//	//	continue;
-		//	//}
-		//	scheduler_weighted(
-		//		graph_heads, 
-		//		graph_tails, 
-		//		graph_weights,
-		//		tile_offsets,
-		//		graph_active, 
-		//		graph_updating_active,
-		//		is_active_side,
-		//		is_updating_active_side,
-		//		is_empty_tile,
-		//		dists, 
-		//		side_id,
-		//		ROW_STEP);
-		//	//side_id += ROW_STEP;
-		//}
-		//if (remainder > 0) {
-		//	scheduler_weighted(
-		//			graph_heads, 
-		//			graph_tails, 
-		//			graph_weights,
-		//			tile_offsets,
-		//			graph_active, 
-		//			graph_updating_active,
-		//			is_active_side,
-		//			is_updating_active_side,
-		//			is_empty_tile,
-		//			dists, 
-		//			bound_side_id,
-		//			remainder);
-		//}
-//#pragma omp parallel for
-//		for (unsigned side_id = 0; side_id < SIDE_LENGTH; ++side_id) {
-//			if (!is_updating_active_side[side_id]) {
-//				is_active_side[side_id] = 0;
-//				continue;
-//			}
-//			is_updating_active_side[side_id] = 0;
-//			is_active_side[side_id] = 1;
-//			unsigned bound_vertex_id;
-//			if (SIDE_LENGTH - 1 != side_id) {
-//				bound_vertex_id = side_id * TILE_WIDTH + TILE_WIDTH;
-//			} else {
-//				bound_vertex_id = NNODES;
-//			}
-//			for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++vertex_id) {
-//				if (1 == graph_updating_active[vertex_id]) {
-//					graph_updating_active[vertex_id] = 0;
-//					graph_active[vertex_id] = 1;
-//				} else {
-//					graph_active[vertex_id] = 0;
-//				}
-//			}
-//		}
 	}
 
 	double end_time = omp_get_wtime();
 	printf("%u %lf\n", NUM_THREADS, end_time - start_time);
 
 	free(dists);
-	//free(graph_active);
-	//free(graph_updating_active);
 	free(h_graph_mask);
 	free(h_updating_graph_mask);
 	free(is_active_side);
 	free(is_updating_active_side);
-	free(h_graph_queue);
+	_mm_free(h_graph_queue);
 }
 // End Weighted Graph
 ////////////////////////////////////////////////////////////
@@ -990,8 +1103,8 @@ void print(int *dists) {
 inline void sssp_kernel(
 				unsigned *graph_heads, 
 				unsigned *graph_tails, 
-				int *graph_active, 
-				int *graph_updating_active,
+				int *h_graph_mask, 
+				int *h_updating_graph_mask,
 				int *is_active_side,
 				int *is_updating_active_side,
 				int *dists, 
@@ -1000,13 +1113,13 @@ inline void sssp_kernel(
 {
 	for (unsigned edge_i = edge_i_start; edge_i < edge_i_bound; ++edge_i) {
 		unsigned head = graph_heads[edge_i];
-		if (0 == graph_active[head]) {
+		if (0 == h_graph_mask[head]) {
 			continue;
 		}
 		unsigned end = graph_tails[edge_i];
 		if (-1 == dists[end] || dists[head] + 1 < dists[end]) {
 			dists[end] = dists[head] + 1;
-			graph_updating_active[end] = 1;
+			h_updating_graph_mask[end] = 1;
 			is_updating_active_side[end/TILE_WIDTH] = 1;
 		}
 	}
@@ -1016,8 +1129,8 @@ inline void scheduler(
 					unsigned *graph_heads, 
 					unsigned *graph_tails, 
 					unsigned *tile_offsets,
-					int *graph_active, 
-					int *graph_updating_active,
+					int *h_graph_mask, 
+					int *h_updating_graph_mask,
 					int *is_active_side,
 					int *is_updating_active_side,
 					unsigned *tile_sizes,
@@ -1044,8 +1157,8 @@ inline void scheduler(
 			sssp_kernel(
 				graph_heads, 
 				graph_tails, 
-				graph_active, 
-				graph_updating_active,
+				h_graph_mask, 
+				h_updating_graph_mask,
 				is_active_side,
 				is_updating_active_side,
 				dists, 
@@ -1060,8 +1173,8 @@ void sssp(
 		unsigned *graph_heads, 
 		unsigned *graph_tails, 
 		unsigned *tile_offsets,
-		//int *graph_active, 
-		//int *graph_updating_active,
+		//int *h_graph_mask, 
+		//int *h_updating_graph_mask,
 		//int *is_active_side,
 		//int *is_updating_active_side,
 		unsigned *tile_sizes,
@@ -1071,16 +1184,16 @@ void sssp(
 	omp_set_num_threads(NUM_THREADS);
 
 	int *dists = (int *) malloc(NNODES * sizeof(int));
-	int *graph_active = (int *) malloc(NNODES * sizeof(int));
-	int *graph_updating_active = (int *) malloc(NNODES * sizeof(int));
+	int *h_graph_mask = (int *) malloc(NNODES * sizeof(int));
+	int *h_updating_graph_mask = (int *) malloc(NNODES * sizeof(int));
 	int *is_active_side = (int *) malloc(sizeof(int) * SIDE_LENGTH);
 	int *is_updating_active_side = (int *) malloc(sizeof(int) * SIDE_LENGTH);
 
 	memset(dists, -1, NNODES * sizeof(int));
 	dists[source] = 0;
-	memset(graph_active, 0, NNODES * sizeof(int));
-	graph_active[source] = 1;
-	memset(graph_updating_active, 0, NNODES * sizeof(int));
+	memset(h_graph_mask, 0, NNODES * sizeof(int));
+	h_graph_mask[source] = 1;
+	memset(h_updating_graph_mask, 0, NNODES * sizeof(int));
 	memset(is_active_side, 0, sizeof(int) * SIDE_LENGTH);
 	is_active_side[source/TILE_WIDTH] = 1;
 	memset(is_updating_active_side, 0, sizeof(int) * SIDE_LENGTH);
@@ -1100,8 +1213,8 @@ void sssp(
 				graph_heads, 
 				graph_tails, 
 				tile_offsets,
-				graph_active, 
-				graph_updating_active,
+				h_graph_mask, 
+				h_updating_graph_mask,
 				is_active_side,
 				is_updating_active_side,
 				tile_sizes,
@@ -1115,8 +1228,8 @@ void sssp(
 				graph_heads, 
 				graph_tails, 
 				tile_offsets,
-				graph_active, 
-				graph_updating_active,
+				h_graph_mask, 
+				h_updating_graph_mask,
 				is_active_side,
 				is_updating_active_side,
 				tile_sizes,
@@ -1140,11 +1253,11 @@ void sssp(
 				bound_vertex_id = NNODES;
 			}
 			for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++vertex_id) {
-				if (1 == graph_updating_active[vertex_id]) {
-					graph_updating_active[vertex_id] = 0;
-					graph_active[vertex_id] = 1;
+				if (1 == h_updating_graph_mask[vertex_id]) {
+					h_updating_graph_mask[vertex_id] = 0;
+					h_graph_mask[vertex_id] = 1;
 				} else {
-					graph_active[vertex_id] = 0;
+					h_graph_mask[vertex_id] = 0;
 				}
 			}
 		}
@@ -1154,8 +1267,8 @@ void sssp(
 	printf("%u %lf\n", NUM_THREADS, end_time - start_time);
 
 	free(dists);
-	free(graph_active);
-	free(graph_updating_active);
+	free(h_graph_mask);
+	free(h_updating_graph_mask);
 	free(is_active_side);
 	free(is_updating_active_side);
 }
@@ -1237,8 +1350,8 @@ int main(int argc, char *argv[])
 
 	// SSSP
 	//int *distances = (int *) malloc(NNODES * sizeof(int));
-	//int *graph_active = (int *) malloc(NNODES * sizeof(int));
-	//int *graph_updating_active = (int *) malloc(NNODES * sizeof(int));
+	//int *h_graph_mask = (int *) malloc(NNODES * sizeof(int));
+	//int *h_updating_graph_mask = (int *) malloc(NNODES * sizeof(int));
 	//int *is_active_side = (int *) malloc(sizeof(int) * SIDE_LENGTH);
 	//int *is_updating_active_side = (int *) malloc(sizeof(int) * SIDE_LENGTH);
 	unsigned source = 0;
@@ -1254,13 +1367,14 @@ int main(int argc, char *argv[])
 #endif
 	T_RATIO = 20;
 	WORK_LOAD = 30;
+	SIZE_BUFFER_MAX = 512;
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 		//memset(distances, -1, NNODES * sizeof(int));
 		//distances[source] = 0;
-		//memset(graph_active, 0, NNODES * sizeof(int));
-		//graph_active[source] = 1;
-		//memset(graph_updating_active, 0, NNODES * sizeof(int));
+		//memset(h_graph_mask, 0, NNODES * sizeof(int));
+		//h_graph_mask[source] = 1;
+		//memset(h_updating_graph_mask, 0, NNODES * sizeof(int));
 		//memset(is_active_side, 0, sizeof(int) * SIDE_LENGTH);
 		//is_active_side[source/TILE_WIDTH] = 1;
 		//memset(is_updating_active_side, 0, sizeof(int) * SIDE_LENGTH);
@@ -1272,12 +1386,7 @@ int main(int argc, char *argv[])
 				graph_tails, 
 				graph_weights,
 				tile_offsets,
-				//graph_active, 
-				//graph_updating_active,
-				//is_active_side,
-				//is_updating_active_side,
 				tile_sizes,
-				//distances,
 				graph_vertices,
 				graph_edges,
 				graph_weights_csr,
@@ -1288,8 +1397,8 @@ int main(int argc, char *argv[])
 				graph_heads, 
 				graph_tails, 
 				tile_offsets,
-				//graph_active, 
-				//graph_updating_active,
+				//h_graph_mask, 
+				//h_updating_graph_mask,
 				//is_active_side,
 				//is_updating_active_side,
 				tile_sizes,
@@ -1314,8 +1423,8 @@ int main(int argc, char *argv[])
 	free(tile_offsets);
 	free(tile_sizes);
 	//free(distances);
-	//free(graph_active);
-	//free(graph_updating_active);
+	//free(h_graph_mask);
+	//free(h_updating_graph_mask);
 	//free(is_active_side);
 	//free(is_updating_active_side);
 
