@@ -1,13 +1,13 @@
 ICPC = icpc
 
 ifeq (${debug}, 1)
-	CC_FLAGS = -Wall -Wextra -g -std=c++11 -qopenmp -DONEDEBUG
+	CPPFLAGS = -Wall -Wextra -g -std=c++14 -qopenmp -DONEDEBUG
 else
-	CC_FLAGS = -Wall -Wextra -g -std=c++11 -qopenmp -O3 -qopt-report=5 -qopt-report-phase=vec
+	CPPFLAGS = -Wall -Wextra -g -std=c++14 -qopenmp -O3 -qopt-report=5 -qopt-report-phase=vec
 endif
 
 ifeq (${serial}, 1)
-	CC_FLAGS += -DONESERIAL
+	CPPFLAGS += -DONESERIAL
 endif
 
 .PHONY: clean
@@ -15,7 +15,7 @@ endif
 all: bc
 
 bc: bc.cpp
-	$(ICPC) $(CC_FLAGS) -o $@ $^
+	$(ICPC) $(CPPFLAGS) -o $@ $^
 
 clean:
 	rm -f bc

@@ -186,8 +186,10 @@ void input(char filename[])
 	unsigned row_step = 8;
 	//CHUNK_SIZE = 512;
 	//unsigned row_step = 64;
-	for (unsigned i = 0; i < bound_i; ++i) {
+	for (int cz = 0; cz < 3; ++cz) {
+	for (unsigned i = 6; i < bound_i; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
+		for (int k = 0; k < 3; ++k) {
 #pragma omp parallel for num_threads(64)
 		for (unsigned i = 0; i < nnodes; i++) {
 			rank[i] = 1.0;
@@ -210,8 +212,9 @@ void input(char filename[])
 				row_step);
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
+		}
 	}
-	//}
+	}
 	fclose(time_out);
 
 #ifdef ONEDEBUG
@@ -334,13 +337,14 @@ void page_rank(\
 				side_length);
 	}
 
-	double end_time = omp_get_wtime();
-	printf("%u %lf\n", NUM_THREADS, end_time - start_time);
 
-#pragma omp parallel num_threads(64)
+#pragma omp parallel for
 	for(unsigned j = 0; j < nnodes; j++) {
 		rank[j] = (1 - DUMP) / nnodes + DUMP * sum[j]; 	
 	}
+
+	double end_time = omp_get_wtime();
+	printf("%u %lf\n", NUM_THREADS, end_time - start_time);
 
 }
 void print(float *rank) 

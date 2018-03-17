@@ -23,7 +23,7 @@ using std::to_string;
 #define NUM_P_INT 16 // Number of packed intergers in one __m512i variable
 #define ALIGNED_BYTES 64
 
-unsigned nnodes, nedges;
+unsigned NNODES, NEDGES;
 unsigned NUM_THREADS;
 unsigned TILE_WIDTH;
 unsigned CHUNK_SIZE;
@@ -43,7 +43,7 @@ char *time_file = "timeline.txt";
 //	double start_time = omp_get_wtime();
 //
 //#pragma omp parallel for num_threads(NUM_THREADS)
-//	for(unsigned j=0;j<nedges;j++) {
+//	for(unsigned j=0;j<NEDGES;j++) {
 //		int n1 = n1s[j];
 //		int n2 = n2s[j];
 //#pragma omp atomic
@@ -53,8 +53,8 @@ char *time_file = "timeline.txt";
 //	double end_time = omp_get_wtime();
 //	printf("%u %lf\n", NUM_THREADS, end_time - start_time);
 //
-//	for(unsigned j = 0; j < nnodes; j++) {
-//		rank[j] = (1 - DUMP) / nnodes + DUMP * sum[j]; 	
+//	for(unsigned j = 0; j < NNODES; j++) {
+//		rank[j] = (1 - DUMP) / NNODES + DUMP * sum[j]; 	
 //	}
 //	//}
 //}
@@ -81,7 +81,47 @@ inline void get_seq_sum(\
 	}
 }
 
+// Scan the data, accumulate the values with the same index.
+// Then, store the cumulative sum to the last element in the data with the same index.
+inline void scan_for_gather_add_scatter_conflict_safe_epi32(
+												__m512i &data,
+												__m512i indices)
+{
+	__m512i cd = _mm512_conflict_epi32(indices);
+	__mmask16 todo_mask = _mm512_test_epi32_mask(cd, _mm512_set1_epi32(-1));
+	if (todo_mask) {
+		__m512i lz = _mm512_lzcnt_epi32(cd);
+		__m512i lid = _mm512_sub_epi32(_mm512_set1_epi32(31), lz);
+		while (todo_mask) {
+			__m512i todo_bcast = _mm512_broadcastmw_epi32(todo_mask);
+			__mmask16 now_mask = _mm512_mask_testn_epi32_mask(todo_mask, cd, todo_bcast);
+			__m512i data_perm = _mm512_mask_permutexvar_epi32(_mm512_undefined_epi32(), now_mask, lid, data);
+			data = _mm512_mask_add_epi32(data, now_mask, data, data_perm);
+			todo_mask = _mm512_kxor(todo_mask, now_mask);
+		}
+	} 
+}
 
+// Scan the data, accumulate the values with the same index.
+// Then, store the cumulative sum to the last element in the data with the same index.
+inline void scan_for_gather_add_scatter_conflict_safe_ps(
+												__m512 &data,
+												__m512i indices)
+{
+	__m512i cd = _mm512_conflict_epi32(indices);
+	__mmask16 todo_mask = _mm512_test_epi32_mask(cd, _mm512_set1_epi32(-1));
+	if (todo_mask) {
+		__m512i lz = _mm512_lzcnt_epi32(cd);
+		__m512i lid = _mm512_sub_epi32(_mm512_set1_epi32(31), lz);
+		while (todo_mask) {
+			__m512i todo_bcast = _mm512_broadcastmw_epi32(todo_mask);
+			__mmask16 now_mask = _mm512_mask_testn_epi32_mask(todo_mask, cd, todo_bcast);
+			__m512 data_perm = _mm512_mask_permutexvar_ps(_mm512_undefined_ps(), now_mask, lid, data);
+			data = _mm512_mask_add_ps(data, now_mask, data, data_perm);
+			todo_mask = _mm512_kxor(todo_mask, now_mask);
+		}
+	} 
+}
 inline void kernel_pageRank(\
 //void kernel_pageRank(
 		unsigned *n1_buffer,\
@@ -91,34 +131,68 @@ inline void kernel_pageRank(\
 		float *rank,\
 		unsigned *graph_degrees)
 {
-	unsigned edge_i;
-	for (edge_i = 0; edge_i + NUM_P_INT <= size_buffer; edge_i += NUM_P_INT) {
-		// Full loaded SIMD lanes
+	unsigned remainder = size_buffer % NUM_P_INT;
+	unsigned bound_edge_i = size_buffer - remainder;
+	for (unsigned edge_i = 0; edge_i < bound_edge_i; edge_i += NUM_P_INT) {
 		__m512i n1_v = _mm512_load_epi32(n1_buffer + edge_i);
 		__m512i n2_v = _mm512_load_epi32(n2_buffer + edge_i);
-		__m512i conflict_n2 = _mm512_conflict_epi32(n2_v);
 
-		__mmask16 todo_mask = _mm512_test_epi32_mask(conflict_n2, _mm512_set1_epi32(-1));
 		__m512 rank_v = _mm512_i32gather_ps(n1_v, rank, sizeof(float));
 		__m512i graph_degrees_vi = _mm512_i32gather_epi32(n1_v, graph_degrees, sizeof(int));
 		__m512 graph_degrees_v = _mm512_cvtepi32_ps(graph_degrees_vi);
 		__m512 tmp_sum = _mm512_div_ps(rank_v, graph_degrees_v);
-		if (todo_mask) {
-			__m512i lz = _mm512_lzcnt_epi32(conflict_n2);
-			__m512i lid = _mm512_sub_epi32(_mm512_set1_epi32(31), lz);
-			while (todo_mask) {
-				__m512i todo_bcast = _mm512_broadcastmw_epi32(todo_mask);
-				__mmask16 now_mask = _mm512_mask_testn_epi32_mask(todo_mask, conflict_n2, todo_bcast);
-				__m512 tmp_sum_perm = _mm512_mask_permutexvar_ps(_mm512_undefined_ps(), now_mask, lid, tmp_sum);
-				tmp_sum = _mm512_mask_add_ps(tmp_sum, now_mask, tmp_sum, tmp_sum_perm);
-				todo_mask = _mm512_kxor(todo_mask, now_mask);
-			}
-		} 
+		scan_for_gather_add_scatter_conflict_safe_ps(tmp_sum, n2_v);
 		__m512 sum_n2_v = _mm512_i32gather_ps(n2_v, sum, sizeof(float));
 		tmp_sum = _mm512_add_ps(tmp_sum, sum_n2_v);
 		_mm512_i32scatter_ps(sum, n2_v, tmp_sum, sizeof(float));
+		//// Full loaded SIMD lanes
+		//__m512i n1_v = _mm512_load_epi32(n1_buffer + edge_i);
+		//__m512i n2_v = _mm512_load_epi32(n2_buffer + edge_i);
+		//__m512i conflict_n2 = _mm512_conflict_epi32(n2_v);
+
+		//__mmask16 todo_mask = _mm512_test_epi32_mask(conflict_n2, _mm512_set1_epi32(-1));
+		//__m512 rank_v = _mm512_i32gather_ps(n1_v, rank, sizeof(float));
+		//__m512i graph_degrees_vi = _mm512_i32gather_epi32(n1_v, graph_degrees, sizeof(int));
+		//__m512 graph_degrees_v = _mm512_cvtepi32_ps(graph_degrees_vi);
+		//__m512 tmp_sum = _mm512_div_ps(rank_v, graph_degrees_v);
+		//if (todo_mask) {
+		//	__m512i lz = _mm512_lzcnt_epi32(conflict_n2);
+		//	__m512i lid = _mm512_sub_epi32(_mm512_set1_epi32(31), lz);
+		//	while (todo_mask) {
+		//		__m512i todo_bcast = _mm512_broadcastmw_epi32(todo_mask);
+		//		__mmask16 now_mask = _mm512_mask_testn_epi32_mask(todo_mask, conflict_n2, todo_bcast);
+		//		__m512 tmp_sum_perm = _mm512_mask_permutexvar_ps(_mm512_undefined_ps(), now_mask, lid, tmp_sum);
+		//		tmp_sum = _mm512_mask_add_ps(tmp_sum, now_mask, tmp_sum, tmp_sum_perm);
+		//		todo_mask = _mm512_kxor(todo_mask, now_mask);
+		//	}
+		//} 
+		//__m512 sum_n2_v = _mm512_i32gather_ps(n2_v, sum, sizeof(float));
+		//tmp_sum = _mm512_add_ps(tmp_sum, sum_n2_v);
+		//_mm512_i32scatter_ps(sum, n2_v, tmp_sum, sizeof(float));
 	}
-	get_seq_sum(n1_buffer, n2_buffer, graph_degrees, rank, sum, edge_i, size_buffer);
+
+	if (remainder > 0) {
+		__mmask16 in_range_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
+		__m512i n1_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, n1_buffer + bound_edge_i);
+		__m512i n2_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, n2_buffer + bound_edge_i);
+
+		__m512 rank_v = _mm512_mask_i32gather_ps(_mm512_undefined_ps(), in_range_m, n1_v, rank, sizeof(float));
+		__m512i graph_degrees_vi = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(1), in_range_m, n1_v, graph_degrees, sizeof(int));
+		__m512 graph_degrees_v = _mm512_cvtepi32_ps(graph_degrees_vi);
+		__m512 tmp_sum = _mm512_mask_div_ps(_mm512_set1_ps(0), in_range_m, rank_v, graph_degrees_v);
+		scan_for_gather_add_scatter_conflict_safe_ps(tmp_sum, n2_v);
+		__m512 sum_n2_v = _mm512_mask_i32gather_ps(_mm512_undefined_ps(), in_range_m, n2_v, sum, sizeof(float));
+		tmp_sum = _mm512_mask_add_ps(_mm512_undefined_ps(), in_range_m, tmp_sum, sum_n2_v);
+		_mm512_mask_i32scatter_ps(sum, in_range_m, n2_v, tmp_sum, sizeof(float));
+	}
+	//get_seq_sum(n1_buffer, n2_buffer, graph_degrees, rank, sum, edge_i, size_buffer);
+//#pragma omp parallel for num_threads(NUM_THREADS)
+//	for(unsigned j=0;j<NEDGES;j++) {
+//		int n1 = n1s[j];
+//		int n2 = n2s[j];
+//#pragma omp atomic
+//		sum[n2] += rank[n1]/graph_degrees[n1];
+//	}
 }
 
 inline void scheduler(
@@ -338,13 +412,33 @@ void page_rank(\
 				side_length);
 	}
 
+
+//#pragma omp parallel num_threads(64)
+//	for(unsigned j = 0; j < NNODES; j++) {
+//		rank[j] = (1 - DUMP) / NNODES + DUMP * sum[j]; 	
+//	}
+	remainder = NNODES % NUM_P_INT;
+	unsigned bound_v_i = NNODES - remainder;
+	__m512 dump_v = _mm512_set1_ps(DUMP);
+	__m512 one_minus_dump_v = _mm512_sub_ps(_mm512_set1_ps(1.0), dump_v);
+	__m512 first_term = _mm512_div_ps(one_minus_dump_v, _mm512_set1_ps((float) NNODES));
+#pragma omp parallel for
+	for (unsigned v_i = 0; v_i < bound_v_i; v_i += NUM_P_INT) {
+		__m512 sum_v = _mm512_load_ps(sum + v_i);
+		__m512 second_term = _mm512_mul_ps(dump_v, sum_v);
+		_mm512_store_ps(rank + v_i, _mm512_add_ps(first_term, second_term));
+	}
+	if (remainder > 0) {
+		unsigned short in_range_m_t = (unsigned short) 0xFFFF >> (NUM_P_INT - remainder);
+		__mmask16 in_range_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
+		__m512 sum_v = _mm512_mask_load_ps(_mm512_undefined_ps(), in_range_m, sum + bound_v_i);
+		__m512 second_term = _mm512_mask_mul_ps(_mm512_undefined_ps(), in_range_m, dump_v, sum_v);
+		_mm512_mask_store_ps(rank + bound_v_i, in_range_m, 
+							_mm512_mask_add_ps(_mm512_undefined_ps(), in_range_m, first_term, second_term));
+	}
+
 	double end_time = omp_get_wtime();
 	printf("%u %lf\n", NUM_THREADS, end_time - start_time);
-
-#pragma omp parallel num_threads(64)
-	for(unsigned j = 0; j < nnodes; j++) {
-		rank[j] = (1 - DUMP) / nnodes + DUMP * sum[j]; 	
-	}
 
 	_mm_free(n1_buffer);
 	_mm_free(n2_buffer);
@@ -353,7 +447,7 @@ void page_rank(\
 void print(float *rank) 
 {
 	FILE *fout = fopen("ranks.txt", "w");
-	for(unsigned i=0;i<nnodes;i++) {
+	for(unsigned i=0;i<NNODES;i++) {
 		//cout << rank[i] << " ";
 		fprintf(fout, "%lf\n", rank[i]);
 	}
@@ -374,14 +468,14 @@ void input(char filename[])
 		fprintf(stderr, "cannot open file: %s\n", fname.c_str());
 		exit(1);
 	}
-	fscanf(fin, "%u %u", &nnodes, &nedges);
+	fscanf(fin, "%u %u", &NNODES, &NEDGES);
 	fclose(fin);
 	unsigned num_tiles;
 	unsigned side_length;
-	if (nnodes % TILE_WIDTH) {
-		side_length = nnodes / TILE_WIDTH + 1;
+	if (NNODES % TILE_WIDTH) {
+		side_length = NNODES / TILE_WIDTH + 1;
 	} else {
-		side_length = nnodes / TILE_WIDTH;
+		side_length = NNODES / TILE_WIDTH;
 	}
 	num_tiles = side_length * side_length;
 	// Read the offset and number of edges for every tile
@@ -402,7 +496,7 @@ void input(char filename[])
 		if (i != num_tiles - 1) {
 			tile_sizes[i] = tile_offsets[i + 1] - tile_offsets[i];
 		} else {
-			tile_sizes[i] = nedges - tile_offsets[i];
+			tile_sizes[i] = NEDGES - tile_offsets[i];
 		}
 	}
 	// Read graph_degrees
@@ -412,15 +506,15 @@ void input(char filename[])
 		fprintf(stderr, "cannot open file: %s\n", fname.c_str());
 		exit(1);
 	}
-	unsigned *graph_degrees = (unsigned *) malloc(nnodes * sizeof(unsigned));
-	for (unsigned i = 0; i < nnodes; ++i) {
+	unsigned *graph_degrees = (unsigned *) malloc(NNODES * sizeof(unsigned));
+	for (unsigned i = 0; i < NNODES; ++i) {
 		fscanf(fin, "%u", graph_degrees + i);
 	}
 	fclose(fin);
 	// Read tiles
-	unsigned *graph_heads = (unsigned *) _mm_malloc(nedges * sizeof(unsigned), ALIGNED_BYTES);
-	unsigned *graph_tails = (unsigned *) _mm_malloc(nedges * sizeof(unsigned), ALIGNED_BYTES);
-	unsigned edge_bound = nedges / ALIGNED_BYTES;
+	unsigned *graph_heads = (unsigned *) _mm_malloc(NEDGES * sizeof(unsigned), ALIGNED_BYTES);
+	unsigned *graph_tails = (unsigned *) _mm_malloc(NEDGES * sizeof(unsigned), ALIGNED_BYTES);
+	unsigned edge_bound = NEDGES / ALIGNED_BYTES;
 	NUM_THREADS = 64;
 #pragma omp parallel num_threads(NUM_THREADS) private(fname, fin)
 {
@@ -433,13 +527,13 @@ void input(char filename[])
 		exit(1);
 	}
 	if (0 == tid) {
-		fscanf(fin, "%u %u", &nnodes, &nedges);
+		fscanf(fin, "%u %u", &NNODES, &NEDGES);
 	}
 	unsigned bound_index;
 	if (NUM_THREADS - 1 != tid) {
 		bound_index = edge_bound + offset;
 	} else {
-		bound_index = nedges;
+		bound_index = NEDGES;
 	}
 	for (unsigned index = offset; index < bound_index; ++index) {
 		unsigned n1;
@@ -456,8 +550,8 @@ void input(char filename[])
 	fclose(fin);
 }
 
-	float *rank = (float *) malloc(nnodes * sizeof(float));
-	float *sum = (float *) malloc(nnodes * sizeof(float));
+	float *rank = (float *) _mm_malloc(NNODES * sizeof(float), ALIGNED_BYTES);
+	float *sum = (float *) _mm_malloc(NNODES * sizeof(float), ALIGNED_BYTES);
 	now = omp_get_wtime();
 	time_out = fopen(time_file, "w");
 	fprintf(time_out, "input end: %lf\n", now - start);
@@ -473,10 +567,12 @@ void input(char filename[])
 	//unsigned ROW_STEP = 128;
 	//CHUNK_SIZE = 512;
 	//unsigned ROW_STEP = 64;
+	for (int cz = 0; cz < 3; ++cz) {
 	for (unsigned i = 6; i < bound_i; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
+		for (int k = 0; k < 3; ++k) {
 #pragma omp parallel for num_threads(64)
-		for (unsigned i = 0; i < nnodes; i++) {
+		for (unsigned i = 0; i < NNODES; i++) {
 			rank[i] = 1.0;
 			sum[i] = 0.0;
 		}
@@ -495,6 +591,9 @@ void input(char filename[])
 				side_length);
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
+
+		}
+	}
 	}
 	fclose(time_out);
 
@@ -507,8 +606,8 @@ void input(char filename[])
 	free(graph_degrees);
 	free(tile_offsets);
 	free(tile_sizes);
-	free(rank);
-	free(sum);
+	_mm_free(rank);
+	_mm_free(sum);
 }
 int main(int argc, char *argv[]) 
 {

@@ -738,14 +738,14 @@ void MIS(
 	}
 
 	printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
-	unsigned mis_count = 0;
-#pragma omp parallel for reduction(+: mis_count)
-	for (unsigned i = 0; i < NNODES; ++i) {
-		if (IN == h_graph_flags[i]) {
-			mis_count++;
-		}
-	}
-	printf("mis_count: %u\n", mis_count);
+//	unsigned mis_count = 0;
+//#pragma omp parallel for reduction(+: mis_count)
+//	for (unsigned i = 0; i < NNODES; ++i) {
+//		if (IN == h_graph_flags[i]) {
+//			mis_count++;
+//		}
+//	}
+//	printf("mis_count: %u\n", mis_count);
 	//if (!mis_check(
 	//		graph_vertices,
 	//		graph_edges,
@@ -803,16 +803,18 @@ int main(int argc, char *argv[])
 	printf("Input finished: %s\n", filename);
 	unsigned run_count = 7;
 #else
-	unsigned run_count = 7;
+	unsigned run_count = 9;
 #endif
 	T_RATIO = 20;
 	CHUNK_SIZE = 2048;
 	// BFS
+	for (int cz = 0; cz < 3; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
 		//sleep(10);
 #endif
+		for (int k = 0; k < 3; ++k) {
 		MIS(
 			graph_heads, 
 			graph_tails, 
@@ -825,6 +827,8 @@ int main(int argc, char *argv[])
 		//// Re-initializing
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
+		}
+	}
 	}
 	fclose(time_out);
 

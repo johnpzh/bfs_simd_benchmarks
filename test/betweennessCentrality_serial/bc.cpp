@@ -1417,16 +1417,18 @@ int main(int argc, char *argv[])
 	printf("Input finished: %s\n", filename);
 	unsigned run_count = 7;
 #else
-	unsigned run_count = 7;
+	unsigned run_count = 9;
 #endif
-	T_RATIO = 100;
+	T_RATIO = 40;
 	CHUNK_SIZE = 2048;
 	// BFS
+	for (int cz = 0; cz < 25; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
 		//sleep(10);
 #endif
+		for (int k = 0; k < 3; ++k) {
 		BC(
 			graph_heads, 
 			graph_tails, 
@@ -1446,6 +1448,8 @@ int main(int argc, char *argv[])
 		//// Re-initializing
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
+		}
+	}
 	}
 	fclose(time_out);
 

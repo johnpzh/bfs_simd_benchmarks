@@ -2211,17 +2211,17 @@ int main(int argc, char *argv[])
 	//CHUNK_SIZE = 2048;
 	//CHUNK_SIZE_DENSE = 32768;
 	//SIZE_BUFFER_MAX = 512;
-	for (unsigned v = 5; v < 101; v += 5) {
-	T_RATIO = v;
+	//for (unsigned v = 5; v < 51; v += 5) {
+	T_RATIO = 40;
 	WORK_LOAD = 10;
 	//CHUNK_SIZE_SPARSE = v;
 	CHUNK_SIZE_DENSE = 1024;
 	//CHUNK_SIZE_BLOCK = v;
 	SIZE_BUFFER_MAX = 800;
-	printf("T_RATIO: %u\n", v);
+	//printf("T_RATIO: %u\n", v);
 	//SIZE_BUFFER_MAX = 1024;
 	// BFS
-	for (unsigned cz = 0; cz < 3; ++cz) {
+	for (unsigned cz = 0; cz < 25; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 #ifndef ONEDEBUG
@@ -2250,7 +2250,7 @@ int main(int argc, char *argv[])
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 	}
 	}
-	}
+	//}
 	fclose(time_out);
 
 	// Free memory

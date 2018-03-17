@@ -534,7 +534,9 @@ int main(int argc, char *argv[])
 #endif
 	//ROW_STEP = 16;
 	SIZE_BUFFER_MAX = 512;
+	for (int cz = 0; cz < 3; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
+		for (int k = 0; k < 3; ++k) {
 		NUM_THREADS = (unsigned) pow(2, i);
 		for (unsigned k = 0; k < NNODES; ++k) {
 			graph_active[k] = 1;
@@ -560,6 +562,8 @@ int main(int argc, char *argv[])
 			graph_component);
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
+		}
+	}
 	}
 	fclose(time_out);
 #ifdef ONEDEBUG

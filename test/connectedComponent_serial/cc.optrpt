@@ -4,80 +4,88 @@ See "https://software.intel.com/en-us/intel-advisor-xe" for details.
 
 Intel(R) C++ Intel(R) 64 Compiler for applications running on Intel(R) 64, Version 17.0.1.132 Build 20161005
 
-Compiler options: -Wall -Wextra -g -std=c++11 -qopenmp -O3 -qopt-report=5 -qopt-report-phase=vec -o cc
+Compiler options: -Wall -Wextra -g -std=c++14 -qopenmp -O3 -qopt-report=5 -qopt-report-phase=vec -o cc
 
 Begin optimization report for: main(int, char **)
 
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at cc.cpp(357,2)
+LOOP BEGIN at cc.cpp(385,2)
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cc.cpp(359,3)
-   <Peeled loop for vectorization>
-   LOOP END
+   LOOP BEGIN at cc.cpp(386,2)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cc.cpp(359,3)
-      remark #15388: vectorization support: reference graph_active[k] has aligned access   [ cc.cpp(360,4) ]
-      remark #15305: vectorization support: vector length 4
-      remark #15309: vectorization support: normalized vectorization overhead 3.333
-      remark #15300: LOOP WAS VECTORIZED
-      remark #15442: entire loop may be executed in remainder
-      remark #15449: unmasked aligned unit stride stores: 1 
-      remark #15475: --- begin vector cost summary ---
-      remark #15476: scalar cost: 3 
-      remark #15477: vector cost: 0.750 
-      remark #15478: estimated potential speedup: 3.680 
-      remark #15488: --- end vector cost summary ---
-   LOOP END
+      LOOP BEGIN at cc.cpp(388,3)
+         remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cc.cpp(359,3)
-   <Remainder loop for vectorization>
-   LOOP END
+         LOOP BEGIN at cc.cpp(389,3)
+         <Peeled loop for vectorization>
+         LOOP END
 
-   LOOP BEGIN at cc.cpp(363,3)
-   <Peeled loop for vectorization>
-   LOOP END
+         LOOP BEGIN at cc.cpp(389,3)
+            remark #15388: vectorization support: reference graph_active[k] has aligned access   [ cc.cpp(390,4) ]
+            remark #15305: vectorization support: vector length 4
+            remark #15309: vectorization support: normalized vectorization overhead 3.333
+            remark #15300: LOOP WAS VECTORIZED
+            remark #15442: entire loop may be executed in remainder
+            remark #15449: unmasked aligned unit stride stores: 1 
+            remark #15475: --- begin vector cost summary ---
+            remark #15476: scalar cost: 3 
+            remark #15477: vector cost: 0.750 
+            remark #15478: estimated potential speedup: 3.680 
+            remark #15488: --- end vector cost summary ---
+         LOOP END
 
-   LOOP BEGIN at cc.cpp(363,3)
-      remark #15388: vectorization support: reference is_active_side[k] has aligned access   [ cc.cpp(364,4) ]
-      remark #15305: vectorization support: vector length 4
-      remark #15309: vectorization support: normalized vectorization overhead 3.333
-      remark #15300: LOOP WAS VECTORIZED
-      remark #15442: entire loop may be executed in remainder
-      remark #15449: unmasked aligned unit stride stores: 1 
-      remark #15475: --- begin vector cost summary ---
-      remark #15476: scalar cost: 3 
-      remark #15477: vector cost: 0.750 
-      remark #15478: estimated potential speedup: 3.680 
-      remark #15488: --- end vector cost summary ---
-   LOOP END
+         LOOP BEGIN at cc.cpp(389,3)
+         <Remainder loop for vectorization>
+         LOOP END
 
-   LOOP BEGIN at cc.cpp(363,3)
-   <Remainder loop for vectorization>
-   LOOP END
+         LOOP BEGIN at cc.cpp(393,3)
+         <Peeled loop for vectorization>
+         LOOP END
 
-   LOOP BEGIN at cc.cpp(367,3)
-   <Peeled loop for vectorization>
-   LOOP END
+         LOOP BEGIN at cc.cpp(393,3)
+            remark #15388: vectorization support: reference is_active_side[k] has aligned access   [ cc.cpp(394,4) ]
+            remark #15305: vectorization support: vector length 4
+            remark #15309: vectorization support: normalized vectorization overhead 3.333
+            remark #15300: LOOP WAS VECTORIZED
+            remark #15442: entire loop may be executed in remainder
+            remark #15449: unmasked aligned unit stride stores: 1 
+            remark #15475: --- begin vector cost summary ---
+            remark #15476: scalar cost: 3 
+            remark #15477: vector cost: 0.750 
+            remark #15478: estimated potential speedup: 3.680 
+            remark #15488: --- end vector cost summary ---
+         LOOP END
 
-   LOOP BEGIN at cc.cpp(367,3)
-      remark #15388: vectorization support: reference graph_component[k] has aligned access   [ cc.cpp(368,4) ]
-      remark #15305: vectorization support: vector length 4
-      remark #15309: vectorization support: normalized vectorization overhead 3.667
-      remark #15300: LOOP WAS VECTORIZED
-      remark #15442: entire loop may be executed in remainder
-      remark #15449: unmasked aligned unit stride stores: 1 
-      remark #15475: --- begin vector cost summary ---
-      remark #15476: scalar cost: 3 
-      remark #15477: vector cost: 0.750 
-      remark #15478: estimated potential speedup: 3.670 
-      remark #15488: --- end vector cost summary ---
-   LOOP END
+         LOOP BEGIN at cc.cpp(393,3)
+         <Remainder loop for vectorization>
+         LOOP END
 
-   LOOP BEGIN at cc.cpp(367,3)
-   <Remainder loop for vectorization>
+         LOOP BEGIN at cc.cpp(397,3)
+         <Peeled loop for vectorization>
+         LOOP END
+
+         LOOP BEGIN at cc.cpp(397,3)
+            remark #15388: vectorization support: reference graph_component[k] has aligned access   [ cc.cpp(398,4) ]
+            remark #15305: vectorization support: vector length 4
+            remark #15309: vectorization support: normalized vectorization overhead 3.667
+            remark #15300: LOOP WAS VECTORIZED
+            remark #15442: entire loop may be executed in remainder
+            remark #15449: unmasked aligned unit stride stores: 1 
+            remark #15475: --- begin vector cost summary ---
+            remark #15476: scalar cost: 3 
+            remark #15477: vector cost: 0.750 
+            remark #15478: estimated potential speedup: 3.670 
+            remark #15488: --- end vector cost summary ---
+         LOOP END
+
+         LOOP BEGIN at cc.cpp(397,3)
+         <Remainder loop for vectorization>
+         LOOP END
+      LOOP END
    LOOP END
 LOOP END
 ===========================================================================
@@ -87,76 +95,68 @@ Begin optimization report for: cc(unsigned int *, unsigned int *, unsigned int *
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at cc.cpp(237,2)
+LOOP BEGIN at cc.cpp(264,2)
    remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-   LOOP BEGIN at cc.cpp(240,3)
+   LOOP BEGIN at cc.cpp(267,3)
       remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
    LOOP END
 LOOP END
 
-LOOP BEGIN at cc.cpp(205,20) inlined into cc.cpp(245,4)
+LOOP BEGIN at cc.cpp(232,20) inlined into cc.cpp(272,4)
    remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
 
-   LOOP BEGIN at cc.cpp(196,2) inlined into cc.cpp(245,4)
+   LOOP BEGIN at cc.cpp(223,2) inlined into cc.cpp(272,4)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed ANTI dependence between SIDE_LENGTH (198:46) and graph_component (177:4)
-      remark #15346: vector dependence: assumed FLOW dependence between graph_component (177:4) and SIDE_LENGTH (198:46)
+      remark #15346: vector dependence: assumed ANTI dependence between SIDE_LENGTH (225:46) and is_updating_active_side (196:5)
+      remark #15346: vector dependence: assumed FLOW dependence between is_updating_active_side (196:5) and SIDE_LENGTH (225:46)
 
-      LOOP BEGIN at cc.cpp(197,3) inlined into cc.cpp(245,4)
+      LOOP BEGIN at cc.cpp(224,3) inlined into cc.cpp(272,4)
          remark #15344: loop was not vectorized: vector dependence prevents vectorization
-         remark #15346: vector dependence: assumed ANTI dependence between SIDE_LENGTH (198:46) and graph_component (177:4)
-         remark #15346: vector dependence: assumed FLOW dependence between graph_component (177:4) and SIDE_LENGTH (198:46)
+         remark #15346: vector dependence: assumed ANTI dependence between SIDE_LENGTH (225:46) and is_updating_active_side (196:5)
+         remark #15346: vector dependence: assumed FLOW dependence between is_updating_active_side (196:5) and SIDE_LENGTH (225:46)
 
-         LOOP BEGIN at cc.cpp(169,2) inlined into cc.cpp(245,4)
+         LOOP BEGIN at cc.cpp(189,2) inlined into cc.cpp(272,4)
             remark #15344: loop was not vectorized: vector dependence prevents vectorization
-            remark #15346: vector dependence: assumed ANTI dependence between graph_heads (170:19) and graph_component (177:4)
-            remark #15346: vector dependence: assumed FLOW dependence between graph_component (177:4) and graph_heads (170:19)
-         LOOP END
-
-         LOOP BEGIN at cc.cpp(169,2) inlined into cc.cpp(245,4)
-         <Remainder>
+            remark #15346: vector dependence: assumed ANTI dependence between graph_heads (190:19) and is_updating_active_side (196:5)
+            remark #15346: vector dependence: assumed FLOW dependence between is_updating_active_side (196:5) and graph_heads (190:19)
          LOOP END
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at cc.cpp(205,20) inlined into cc.cpp(259,3)
+LOOP BEGIN at cc.cpp(232,20) inlined into cc.cpp(286,3)
    remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
 
-   LOOP BEGIN at cc.cpp(196,2) inlined into cc.cpp(259,3)
+   LOOP BEGIN at cc.cpp(223,2) inlined into cc.cpp(286,3)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed ANTI dependence between SIDE_LENGTH (198:46) and graph_component (177:4)
-      remark #15346: vector dependence: assumed FLOW dependence between graph_component (177:4) and SIDE_LENGTH (198:46)
+      remark #15346: vector dependence: assumed ANTI dependence between SIDE_LENGTH (225:46) and is_updating_active_side (196:5)
+      remark #15346: vector dependence: assumed FLOW dependence between is_updating_active_side (196:5) and SIDE_LENGTH (225:46)
 
-      LOOP BEGIN at cc.cpp(197,3) inlined into cc.cpp(259,3)
+      LOOP BEGIN at cc.cpp(224,3) inlined into cc.cpp(286,3)
          remark #15523: loop was not vectorized: loop control variable row_id was found, but loop iteration count cannot be computed before executing the loop
 
-         LOOP BEGIN at cc.cpp(169,2) inlined into cc.cpp(259,3)
+         LOOP BEGIN at cc.cpp(189,2) inlined into cc.cpp(286,3)
             remark #15344: loop was not vectorized: vector dependence prevents vectorization
-            remark #15346: vector dependence: assumed ANTI dependence between graph_heads (170:19) and graph_component (177:4)
-            remark #15346: vector dependence: assumed FLOW dependence between graph_component (177:4) and graph_heads (170:19)
-         LOOP END
-
-         LOOP BEGIN at cc.cpp(169,2) inlined into cc.cpp(259,3)
-         <Remainder>
+            remark #15346: vector dependence: assumed ANTI dependence between graph_heads (190:19) and is_updating_active_side (196:5)
+            remark #15346: vector dependence: assumed FLOW dependence between is_updating_active_side (196:5) and graph_heads (190:19)
          LOOP END
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at cc.cpp(281,3)
+LOOP BEGIN at cc.cpp(308,3)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between is_active_side[side_id] (283:5) and graph_active[vertex_id] (300:6)
-   remark #15346: vector dependence: assumed OUTPUT dependence between graph_active[vertex_id] (300:6) and is_active_side[side_id] (283:5)
+   remark #15346: vector dependence: assumed OUTPUT dependence between is_active_side[side_id] (310:5) and graph_active[vertex_id] (327:6)
+   remark #15346: vector dependence: assumed OUTPUT dependence between graph_active[vertex_id] (327:6) and is_active_side[side_id] (310:5)
 
-   LOOP BEGIN at cc.cpp(295,4)
+   LOOP BEGIN at cc.cpp(322,4)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
-      remark #15346: vector dependence: assumed OUTPUT dependence between graph_updating_active[vertex_id] (297:6) and graph_active[vertex_id] (300:6)
-      remark #15346: vector dependence: assumed OUTPUT dependence between graph_active[vertex_id] (300:6) and graph_updating_active[vertex_id] (297:6)
+      remark #15346: vector dependence: assumed OUTPUT dependence between graph_updating_active[vertex_id] (324:6) and graph_active[vertex_id] (327:6)
+      remark #15346: vector dependence: assumed OUTPUT dependence between graph_active[vertex_id] (327:6) and graph_updating_active[vertex_id] (324:6)
    LOOP END
 
-   LOOP BEGIN at cc.cpp(295,4)
+   LOOP BEGIN at cc.cpp(322,4)
    <Remainder>
    LOOP END
 LOOP END
@@ -167,19 +167,19 @@ Begin optimization report for: input(char *, unsigned int *&, unsigned int *&, u
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at cc.cpp(67,2)
+LOOP BEGIN at cc.cpp(70,2)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 
-LOOP BEGIN at cc.cpp(78,2)
+LOOP BEGIN at cc.cpp(81,2)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 
-LOOP BEGIN at cc.cpp(110,2)
-   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ cc.cpp(113,3) ]
+LOOP BEGIN at cc.cpp(113,2)
+   remark #15382: vectorization support: call to function fscanf(FILE *, const char *, ...) cannot be vectorized   [ cc.cpp(116,3) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
-   remark #15346: vector dependence: assumed OUTPUT dependence between call:fscanf(FILE *, const char *, ...) (113:3) and *(graph_ends+index*4) (120:3)
-   remark #15346: vector dependence: assumed OUTPUT dependence between *(graph_ends+index*4) (120:3) and call:fscanf(FILE *, const char *, ...) (113:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (116:3) and n2 (118:3)
+   remark #15346: vector dependence: assumed OUTPUT dependence between n2 (118:3) and n2 (116:3)
 LOOP END
 ===========================================================================
 
@@ -190,5 +190,95 @@ Begin optimization report for: input_serial(char *, unsigned int *&, unsigned in
 
 LOOP BEGIN at cc.cpp(138,2)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+===========================================================================
+
+Begin optimization report for: print(unsigned int *)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at cc.cpp(154,2)
+   remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
+
+   LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1140,7) inlined into cc.cpp(157,19)
+      remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+   LOOP END
+
+   LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1321,7) inlined into cc.cpp(158,18)
+      remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+   LOOP END
+
+   LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1140,7) inlined into cc.cpp(159,10)
+      remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+   LOOP END
+LOOP END
+
+LOOP BEGIN at cc.cpp(167,36)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1123,7) inlined into cc.cpp(174,2)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+===========================================================================
+
+Begin optimization report for: std::_Rb_tree<std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::key_type, std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::value_type, std::_Select1st<std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::value_type>, std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::key_compare, std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::_Pair_alloc_type>::_M_get_insert_hint_unique_pos(std::_Rb_tree<std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::key_type, std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::value_type, std::_Select1st<std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::value_type>, std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::key_compare, std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::_Pair_alloc_type> *, std::_Rb_tree<std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::key_type, std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::value_type, std::_Select1st<std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::value_type>, std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::key_compare, std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::_Pair_alloc_type>::const_iterator, const std::_Rb_tree<std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::key_type, std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::value_type, std::_Select1st<std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::value_type>, std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::key_compare, std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::_Pair_alloc_type>::key_type &)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1321,7) inlined into /usr/include/c++/4.8.5/bits/stl_tree.h(1426,38)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1321,7) inlined into /usr/include/c++/4.8.5/bits/stl_tree.h(1442,38)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1321,7) inlined into /usr/include/c++/4.8.5/bits/stl_tree.h(1458,38)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+===========================================================================
+
+Begin optimization report for: std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::operator[](std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>> *, const std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::key_type &)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1140,7) inlined into /usr/include/c++/4.8.5/bits/stl_map.h(462,29)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1321,7) inlined into /usr/include/c++/4.8.5/bits/stl_map.h(468,10)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1321,7) inlined into /usr/include/c++/4.8.5/bits/stl_map.h(468,10)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1321,7) inlined into /usr/include/c++/4.8.5/bits/stl_map.h(468,10)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+===========================================================================
+
+Begin optimization report for: std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::~map(std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>> *)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1123,7) inlined into /usr/include/c++/4.8.5/bits/stl_map.h(97,11)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+===========================================================================
+
+Begin optimization report for: std::_Rb_tree<std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::key_type, std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::value_type, std::_Select1st<std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::value_type>, std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::key_compare, std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::_Pair_alloc_type>::_M_erase(std::_Rb_tree<std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::key_type, std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::value_type, std::_Select1st<std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::value_type>, std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::key_compare, std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::_Pair_alloc_type> *, std::_Rb_tree<std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::key_type, std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::value_type, std::_Select1st<std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::value_type>, std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::key_compare, std::map<unsigned int, unsigned int, std::less<unsigned int>, std::allocator<std::pair<const unsigned int, unsigned int>>>::_Pair_alloc_type>::_Link_type)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at /usr/include/c++/4.8.5/bits/stl_tree.h(1123,7)
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
 LOOP END
 ===========================================================================

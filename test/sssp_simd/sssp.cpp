@@ -672,6 +672,7 @@ inline unsigned *BFS_kernel_sparse_weighted(
 				//unsigned *num_paths,
 				unsigned *dists)
 {
+	int *visited = (int *) calloc(NNODES, sizeof(int));
 	// from h_graph_queue, get the degrees (para_for)
 	unsigned *degrees = (unsigned *) _mm_malloc(sizeof(unsigned) *  queue_size, ALIGNED_BYTES);
 	unsigned new_queue_size = 0;
@@ -728,21 +729,43 @@ inline unsigned *BFS_kernel_sparse_weighted(
 			unsigned edge_i = base + k;
 			unsigned end = graph_edges[edge_i];
 			unsigned new_dist = dists[start] + graph_weights_csr[edge_i];
-			if (new_dist < dists[end]) {
-				volatile unsigned old_val = dists[end];
-				volatile unsigned new_val = new_dist;
-				bool dist_updated = __sync_bool_compare_and_swap(dists + end, old_val, new_val);
-				if (dist_updated) {
-					new_frontier_tmp[frontier_i] = end;
-				} else {
-					new_frontier_tmp[frontier_i] = (unsigned) -1;
-				}
+
+			bool dist_written = false;
+			volatile unsigned old_val;
+			volatile unsigned new_val;
+			do {
+				old_val = dists[end];
+				new_val = new_dist;
+			} while (old_val > new_val 
+					&& !(dist_written = __sync_bool_compare_and_swap(dists + end, old_val, new_val)));
+			//if (dist_written && __sync_bool_compare_and_swap(visited + end, 0, 1)) {
+			//	new_frontier_tmp[frontier_i] = end;
+			//} else {
+			//	new_frontier_tmp[frontier_i] = (unsigned) -1;
+			//}
+			if (dist_written && !visited[end]) {
+				visited[end] = 1;
+				new_frontier_tmp[frontier_i] = end;
 			} else {
 				new_frontier_tmp[frontier_i] = (unsigned) -1;
 			}
+
+			//if (new_dist < dists[end]) {
+			//	volatile unsigned old_val = dists[end];
+			//	volatile unsigned new_val = new_dist;
+			//	bool dist_updated = __sync_bool_compare_and_swap(dists + end, old_val, new_val);
+			//	if (dist_updated) {
+			//		new_frontier_tmp[frontier_i] = end;
+			//	} else {
+			//		new_frontier_tmp[frontier_i] = (unsigned) -1;
+			//	}
+			//} else {
+			//	new_frontier_tmp[frontier_i] = (unsigned) -1;
+			//}
 		}
 	}
 
+	free(visited);
 
 	// refine active vertices, removing visited and redundant (block_para_for)
 	unsigned block_size = 1024 * 2;
@@ -1368,6 +1391,7 @@ int main(int argc, char *argv[])
 	T_RATIO = 20;
 	WORK_LOAD = 30;
 	SIZE_BUFFER_MAX = 512;
+	for (int cz = 0; cz < 3; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 		//memset(distances, -1, NNODES * sizeof(int));
@@ -1380,6 +1404,7 @@ int main(int argc, char *argv[])
 		//memset(is_updating_active_side, 0, sizeof(int) * SIDE_LENGTH);
 
 		//sleep(10);
+		for (int k = 0; k < 3; ++k) {
 		if (is_weighted_graph) {
 			sssp_weighted(
 				graph_heads, 
@@ -1407,6 +1432,8 @@ int main(int argc, char *argv[])
 		}
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
+		}
+	}
 	}
 	fclose(time_out);
 
