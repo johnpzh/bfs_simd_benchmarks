@@ -11,6 +11,8 @@
 #include <omp.h>
 #include <unistd.h>
 #include <algorithm>
+#include "../../include/peg.h"
+
 using std::string;
 using std::getline;
 using std::cout;
@@ -1337,16 +1339,18 @@ void BC(
 		}
 	}
 
-	printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
+	double run_time;
+	printf("%u %f\n", NUM_THREADS, run_time = omp_get_wtime() - start_time);
+	record_best_performance(run_time, NUM_THREADS);
 
-	////Test
-	////puts("After:");
-	FILE *fout = fopen("output.txt", "w");
-	for (unsigned i = 0; i < NNODES; ++i) {
-		fprintf(fout, "d[%u]: %f\n", i, dependencies[i]);
-	}
-	fclose(fout);
-	////End Test
+	//////Test
+	//////puts("After:");
+	//FILE *fout = fopen("output.txt", "w");
+	//for (unsigned i = 0; i < NNODES; ++i) {
+	//	fprintf(fout, "d[%u]: %f\n", i, dependencies[i]);
+	//}
+	//fclose(fout);
+	//////End Test
 	
 	// Free memory
 	for (auto f = frontiers.begin(); f != frontiers.end(); ++f) {
@@ -1451,6 +1455,7 @@ int main(int argc, char *argv[])
 		}
 	}
 	}
+	print_best_performance();
 	fclose(time_out);
 
 	// Free memory

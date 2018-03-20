@@ -10,6 +10,7 @@
 #include <cmath>
 #include <omp.h>
 #include <unistd.h>
+#include "../../include/peg.h"
 using std::ifstream;
 using std::string;
 using std::getline;
@@ -331,7 +332,9 @@ void cc(
 	}
 
 	double end_time = omp_get_wtime();
-	printf("%u %lf\n", NUM_THREADS, end_time - start_time);
+	double rt;
+	printf("%u %lf\n", NUM_THREADS, rt = end_time - start_time);
+	record_best_performance(rt, NUM_THREADS);
 }
 
 
@@ -414,6 +417,7 @@ int main(int argc, char *argv[])
 	}
 	}
 	fclose(time_out);
+	print_best_performance();
 #ifdef ONEDEBUG
 	print(graph_component);
 #endif

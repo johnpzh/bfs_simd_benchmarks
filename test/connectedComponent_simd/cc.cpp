@@ -11,6 +11,7 @@
 #include <omp.h>
 #include <unistd.h>
 #include <immintrin.h>
+#include "../../include/peg.h"
 using std::string;
 using std::getline;
 using std::cout;
@@ -206,8 +207,11 @@ inline void cc_kernel(
 	//		}
 	//	}
 	//}
+	unsigned load_length = edge_i_bound - edge_i_start;
+	unsigned remainder = load_length % NUM_P_INT;
+	unsigned bound_i = edge_i_start + load_length - remainder;
 	unsigned edge_i;
-	for (edge_i = edge_i_start; edge_i + NUM_P_INT <= edge_i_bound; edge_i += NUM_P_INT) {
+	for (edge_i = edge_i_start; edge_i < bound_i; edge_i += NUM_P_INT) {
 		__m512i head_v = _mm512_load_epi32(graph_heads + edge_i);
 		__m512i end_v = _mm512_load_epi32(graph_ends + edge_i);
 		__m512i active_v = _mm512_i32gather_epi32(head_v, graph_active, sizeof(int));
@@ -235,25 +239,22 @@ inline void cc_kernel(
 		//	_mm512_mask_i32scatter_epi32(is_updating_active_side, end_lt_head_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
 		//}
 	}
-	__m512i edge_i_v = _mm512_set_epi32(edge_i + 15, edge_i + 14, edge_i + 13, edge_i + 12,\
-										edge_i + 11, edge_i + 10, edge_i + 9, edge_i + 8,\
-										edge_i + 7, edge_i + 6, edge_i + 5, edge_i + 4,\
-										edge_i + 3, edge_i + 2, edge_i + 1, edge_i);
-	__m512i edge_i_bound_v = _mm512_set1_epi32(edge_i_bound);
-	__mmask16 in_range_m = _mm512_cmplt_epi32_mask(edge_i_v, edge_i_bound_v);
-	__m512i head_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, graph_heads + edge_i);
-	__m512i end_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, graph_ends + edge_i);
-	__m512i active_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_range_m, head_v, graph_active, sizeof(int));
-	__mmask16 is_active_m = _mm512_test_epi32_mask(active_v, _mm512_set1_epi32(-1));
-	if (is_active_m) {
-		__m512i component_head_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), is_active_m, head_v, graph_component, sizeof(unsigned));
-		__m512i component_end_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), is_active_m, end_v, graph_component, sizeof(unsigned));
-		__mmask16 head_lt_end_m = _mm512_cmplt_epi32_mask(component_head_v, component_end_v);
-		_mm512_mask_i32scatter_epi32(graph_updating_active, head_lt_end_m, end_v, _mm512_set1_epi32(1), sizeof(int));
-		_mm512_mask_i32scatter_epi32(graph_component, head_lt_end_m, end_v, component_head_v, sizeof(unsigned));
-		__m512i tile_width_v = _mm512_set1_epi32(TILE_WIDTH);
-		__m512i side_id_v = _mm512_div_epi32(end_v, tile_width_v);
-		_mm512_mask_i32scatter_epi32(is_updating_active_side, head_lt_end_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
+	if (remainder > 0) {
+		__mmask16 in_range_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
+		__m512i head_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, graph_heads + edge_i);
+		__m512i end_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, graph_ends + edge_i);
+		__m512i active_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_range_m, head_v, graph_active, sizeof(int));
+		__mmask16 is_active_m = _mm512_test_epi32_mask(active_v, _mm512_set1_epi32(-1));
+		if (is_active_m) {
+			__m512i component_head_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), is_active_m, head_v, graph_component, sizeof(unsigned));
+			__m512i component_end_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), is_active_m, end_v, graph_component, sizeof(unsigned));
+			__mmask16 head_lt_end_m = _mm512_cmplt_epi32_mask(component_head_v, component_end_v);
+			_mm512_mask_i32scatter_epi32(graph_updating_active, head_lt_end_m, end_v, _mm512_set1_epi32(1), sizeof(int));
+			_mm512_mask_i32scatter_epi32(graph_component, head_lt_end_m, end_v, component_head_v, sizeof(unsigned));
+			__m512i tile_width_v = _mm512_set1_epi32(TILE_WIDTH);
+			__m512i side_id_v = _mm512_div_epi32(end_v, tile_width_v);
+			_mm512_mask_i32scatter_epi32(is_updating_active_side, head_lt_end_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
+		}
 	}
 	//active_v =  _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_range_m, end_v, graph_active, sizeof(int));
 	//is_active_m = _mm512_test_epi32_mask(active_v, _mm512_set1_epi32(-1));
@@ -434,9 +435,10 @@ void cc(
 			is_updating_active_side[side_id] = 0;
 			is_active_side[side_id] = 1;
 			stop = 0;
+			unsigned start_vertex_id = side_id * TILE_WIDTH;
 			unsigned bound_vertex_id;
 			if (SIDE_LENGTH - 1 != side_id) {
-				bound_vertex_id = side_id * TILE_WIDTH + TILE_WIDTH;
+				bound_vertex_id = start_vertex_id + TILE_WIDTH;
 			} else {
 				bound_vertex_id = NNODES;
 			}
@@ -448,37 +450,39 @@ void cc(
 			//		graph_active[vertex_id] = 0;
 			//	}
 			//}
+			unsigned remainder = (bound_vertex_id - start_vertex_id) % NUM_P_INT;
+			bound_vertex_id -= remainder;
 			unsigned vertex_id;
-			for (vertex_id = side_id * TILE_WIDTH;
-					vertex_id + NUM_P_INT <= bound_vertex_id;
+			for (vertex_id = start_vertex_id;
+					vertex_id < bound_vertex_id;
 					vertex_id += NUM_P_INT) {
 				__m512i updating_v = _mm512_loadu_si512(graph_updating_active + vertex_id);
 				__mmask16 is_updating_m = _mm512_test_epi32_mask(updating_v, _mm512_set1_epi32(-1));
 				if (!is_updating_m) {
+					_mm512_storeu_si512(graph_active + vertex_id, _mm512_set1_epi32(0));
 					continue;
 				}
 				_mm512_mask_storeu_epi32(graph_updating_active + vertex_id, is_updating_m, _mm512_set1_epi32(0));
 				_mm512_storeu_si512(graph_active + vertex_id, updating_v);
 			}
-			__m512i vertex_id_v = _mm512_set_epi32(
-											vertex_id + 15, vertex_id + 14, vertex_id + 13, vertex_id + 12,\
-											vertex_id + 11, vertex_id + 10, vertex_id + 9, vertex_id + 8,\
-											vertex_id + 7, vertex_id + 6, vertex_id + 5, vertex_id + 4,\
-											vertex_id + 3, vertex_id + 2, vertex_id + 1, vertex_id);
-			__m512i bound_vertex_id_v = _mm512_set1_epi32(bound_vertex_id);
-			__mmask16 in_range_m = _mm512_cmplt_epi32_mask(vertex_id_v, bound_vertex_id_v);
-			__m512i updating_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), in_range_m, graph_updating_active + vertex_id);
-			__mmask16 is_updating_m = _mm512_test_epi32_mask(updating_v, _mm512_set1_epi32(-1));
-			if (!is_updating_m) {
-				continue;
+			if (remainder > 0) {
+				__mmask16 in_range_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
+				__m512i updating_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), in_range_m, graph_updating_active + vertex_id);
+				__mmask16 is_updating_m = _mm512_test_epi32_mask(updating_v, _mm512_set1_epi32(-1));
+				if (!is_updating_m) {
+					_mm512_mask_storeu_epi32(graph_active + vertex_id, in_range_m, _mm512_set1_epi32(0));
+					continue;
+				}
+				_mm512_mask_storeu_epi32(graph_updating_active + vertex_id, is_updating_m, _mm512_set1_epi32(0));
+				_mm512_mask_storeu_epi32(graph_active + vertex_id, in_range_m, updating_v);
 			}
-			_mm512_mask_storeu_epi32(graph_updating_active + vertex_id, is_updating_m, _mm512_set1_epi32(0));
-			_mm512_storeu_si512(graph_active + vertex_id, updating_v);
 		}
 	}
 
 	double end_time = omp_get_wtime();
-	printf("%u %lf\n", NUM_THREADS, end_time - start_time);
+	double rt;
+	printf("%u %lf\n", NUM_THREADS, rt = end_time - start_time);
+	record_best_performance(rt, NUM_THREADS);
 	_mm_free(heads_buffer);
 	_mm_free(ends_buffer);
 }
@@ -566,6 +570,7 @@ int main(int argc, char *argv[])
 	}
 	}
 	fclose(time_out);
+	print_best_performance();
 #ifdef ONEDEBUG
 	print(graph_component);
 #endif

@@ -1,0 +1,15 @@
+input end: 90.673423
+Thread 256 end: 100.214027
+Thread 256 end: 105.201305
+Thread 256 end: 108.027832
+Thread 256 end: 109.702019
+Thread 256 end: 110.826448
+Thread 256 end: 111.674976
+Thread 256 end: 112.500112
+Thread 256 end: 113.358687
+Thread 256 end: 114.249736
+Thread 256 end: 115.178084
+Thread 256 end: 116.261834
+Thread 256 end: 117.590893
+Thread 256 end: 119.160382
+Thread 256 end: 120.879363

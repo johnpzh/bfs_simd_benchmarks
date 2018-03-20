@@ -1,14 +1,17 @@
 #ifndef PEG_H
 #define PEG_H
-#include <papi.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <vector>
 #include <float.h>
+#include <string.h>
+#include <papi.h>
 
 ////////////////////////////////////////////////
 // For PAPI, cache miss rate
 // PAPI test results
 class CacheMissRate {
-	public:
+public:
 	void measure_start()
 	{
 		int retval;
@@ -23,9 +26,13 @@ class CacheMissRate {
 			test_fail(__FILE__, __LINE__, "PAPI_stop_counters", retval);
 		}
 	}
-	void print()
+	void print(unsigned metrics = (unsigned) -1)
 	{
-		printf("cache access: %lld, cache misses: %lld, miss rate: %.2f%%\n", values[0], values[1], 100.0* values[1]/values[0]);
+		if (metrics == (unsigned) -1) {
+			printf("cache access: %lld, cache misses: %lld, miss rate: %.2f%%\n", values[0], values[1], 100.0* values[1]/values[0]);
+		} else {
+			printf("%u %.2f\n", metrics, 1.0 * values[1]/values[0]);
+		}
 	}
 
 private:
@@ -51,6 +58,7 @@ private:
 		exit(1);
 	}
 };
+static CacheMissRate bot_miss_rate;
 // End For PAPI
 /////////////////////////////////////////////////////
 
@@ -58,21 +66,68 @@ private:
 
 /////////////////////////////////////////////////////
 // For the Minimum Running time
-unsigned NUM_THREADS_MIN;
-unsigned RUNNING_TIME_MIN = LDBL_MAX;
-void record_best_performance(double rt, unsigned num_thd)
-{
-	if (rt < runnindg_time_min) {
-		RUNNING_TIME_MIN = rt;
-		NUM_THREADS_MIN = num_thd;
-	}
-}
+//unsigned NUM_THREADS_MIN;
+//double RUNNING_TIME_MIN = DBL_MAX;
+//void record_best_performance(double rt, unsigned num_thd)
+//{
+//	if (rt < RUNNING_TIME_MIN) {
+//		RUNNING_TIME_MIN = rt;
+//		NUM_THREADS_MIN = num_thd;
+//	}
+//}
+//
+//void print_best_performance()
+//{
+//	printf("Best_Performance:\n");
+//	printf("%u %f\n", NUM_THREADS_MIN, RUNNING_TIME_MIN);
+//}
 
-void print_best_performance()
-{
-	printf("Best_Performance:\n");
-	printf("%u %f\n", NUM_THREADS_MIN, RUNNING_TIME_MIN);
-}
+class BestPerform {
+private:
+	unsigned NUM_THREADS_MIN;
+	double RUNNING_TIME_MIN = DBL_MAX;
+
+public:
+	void record_best_performance(double rt, unsigned num_thd)
+	{
+		if (rt < RUNNING_TIME_MIN) {
+			RUNNING_TIME_MIN = rt;
+			NUM_THREADS_MIN = num_thd;
+		}
+	}
+
+	void print_best_performance()
+	{
+		printf("Best_Performance:\n");
+		printf("%u %f\n", NUM_THREADS_MIN, RUNNING_TIME_MIN);
+	}
+};
+static BestPerform bot_best_perform;
 // End For the Minimum Running time
 /////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////
+// SIMD Utilization
+class SIMDUtil {
+private:
+	unsigned effect = 0;
+	unsigned total = 0;
+
+public:
+	void record_simd(unsigned eff, unsigned all) {
+		effect += eff;
+		total += all;
+	}
+	void print(unsigned metrics) {
+		if (metrics == (unsigned) -1) {
+			printf("SIMD Utilization: %.2f%%\n", 100.0 * effect/total);
+		} else {
+			printf("%u %f\n", metrics, 1.0 * effect/total);
+		}
+	}
+};
+static SIMDUtil bot_simd_util;
+// End SIMD Utilization
+////////////////////////////////////////////////////////////
 #endif
