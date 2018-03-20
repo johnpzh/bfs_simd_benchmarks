@@ -137,6 +137,7 @@ inline void kernel_pageRank(\
 	unsigned remainder = size_buffer % NUM_P_INT;
 	unsigned bound_edge_i = size_buffer - remainder;
 	for (unsigned edge_i = 0; edge_i < bound_edge_i; edge_i += NUM_P_INT) {
+		bot_simd_util.record_simd(NUM_P_INT, NUM_P_INT);
 		__m512i n1_v = _mm512_load_epi32(n1_buffer + edge_i);
 		__m512i n2_v = _mm512_load_epi32(n2_buffer + edge_i);
 
@@ -175,6 +176,7 @@ inline void kernel_pageRank(\
 	}
 
 	if (remainder > 0) {
+		bot_simd_util.record_simd(remainder, NUM_P_INT);
 		__mmask16 in_range_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
 		__m512i n1_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, n1_buffer + bound_edge_i);
 		__m512i n2_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, n2_buffer + bound_edge_i);
@@ -585,6 +587,8 @@ void input(char filename[])
 		}
 		// Cache miss
 		//bot_miss_rate.measure_start();
+		// SIMD Utilization
+		bot_simd_util.reset();
 		page_rank(
 				graph_heads, 
 				graph_tails, 
@@ -595,6 +599,8 @@ void input(char filename[])
 				tile_offsets, 
 				num_tiles, 
 				side_length);
+		// SIMD Utilization
+		bot_simd_util.print();
 		// Cache Miss
 		//bot_miss_rate.measure_stop();
 		//bot_miss_rate.print(ROW_STEP);

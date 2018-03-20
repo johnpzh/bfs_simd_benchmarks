@@ -115,16 +115,23 @@ private:
 	unsigned total = 0;
 
 public:
-	void record_simd(unsigned eff, unsigned all) {
+	void record_simd(unsigned eff, unsigned all) 
+	{
 		effect += eff;
 		total += all;
 	}
-	void print(unsigned metrics) {
+	void print(unsigned metrics = (unsigned) -1) 
+	{
 		if (metrics == (unsigned) -1) {
 			printf("SIMD Utilization: %.2f%%\n", 100.0 * effect/total);
 		} else {
 			printf("%u %f\n", metrics, 1.0 * effect/total);
 		}
+	}
+	void reset() 
+	{
+		effect = 0;
+		total = 0;
 	}
 };
 static SIMDUtil bot_simd_util;
