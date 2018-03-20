@@ -1,5 +1,5 @@
-#ifndef PEG_H
-#define PEG_H
+#ifndef PEG_PROFILING_H
+#define PEG_PROFILING_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
@@ -111,19 +111,24 @@ static BestPerform bot_best_perform;
 // SIMD Utilization
 class SIMDUtil {
 private:
-	unsigned effect = 0;
-	unsigned total = 0;
+	unsigned long effect = 0;
+	unsigned long total = 0;
+	void CAS()
 
 public:
-	void record_simd(unsigned eff, unsigned all) 
+	void record_simd(unsigned long eff, unsigned long all) 
 	{
 		effect += eff;
 		total += all;
+		if (eff > all) {
+			printf("Crazy: eff: %u, all: %u\n", eff, all);
+		}
 	}
 	void print(unsigned metrics = (unsigned) -1) 
 	{
+		printf("effect: %lu, total: %lu\n", effect, total);//test;
 		if (metrics == (unsigned) -1) {
-			printf("SIMD Utilization: %.2f%%\n", 100.0 * effect/total);
+			printf("SIMD Utilization: %.2f%%\n", (double) effect/total * 100.0);
 		} else {
 			printf("%u %f\n", metrics, 1.0 * effect/total);
 		}
@@ -137,4 +142,5 @@ public:
 static SIMDUtil bot_simd_util;
 // End SIMD Utilization
 ////////////////////////////////////////////////////////////
+
 #endif
