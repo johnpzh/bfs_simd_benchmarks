@@ -392,11 +392,11 @@ void input(char filename[]) {
 		side_length = nnodes / TILE_WIDTH;
 	}
 	num_tiles = side_length * side_length;
-	if (nedges/num_tiles < 1) {
-		printf("nedges: %u, num_tiles: %u, average: %u\n", nedges, num_tiles, nedges/num_tiles);
-		fprintf(stderr, "Error: the tile width %u is too small.\n", TILE_WIDTH);
-		exit(2);
-	}
+	//if (nedges/num_tiles < 1) {
+	//	printf("nedges: %u, num_tiles: %u, average: %u\n", nedges, num_tiles, nedges/num_tiles);
+	//	fprintf(stderr, "Error: the tile width %u is too small.\n", TILE_WIDTH);
+	//	exit(2);
+	//}
 	vector< vector<unsigned> > tiles_n1v;
 	tiles_n1v.resize(num_tiles);
 	vector< vector<unsigned> > tiles_n2v;
