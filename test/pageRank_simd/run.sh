@@ -5,7 +5,7 @@ make
 data_file="/data/zpeng/pokec_combine/tiled_2-power/soc-pokec"
 output="output_$(date +%Y%m%d-%H%M%S)_pokec.txt"
 :> $output
-for ((i = 32; i < 2049; i *= 2)); do
+for ((i = 8192; i < 65537; i *= 2)); do
 	./page_rank ${data_file} ${i} 16 &>> $output
 done
 
@@ -13,6 +13,6 @@ done
 data_file="/data/zpeng/twt_combine/tiled_2-power/out.twitter"
 output="output_$(date +%Y%m%d-%H%M%S)_twt.txt"
 :> $output
-for ((i = 1024; i < 8193; i *= 2)); do
+for ((i = 16384; i < 524289; i *= 2)); do
 	./page_rank ${data_file} ${i} 40 &>> $output
 done
