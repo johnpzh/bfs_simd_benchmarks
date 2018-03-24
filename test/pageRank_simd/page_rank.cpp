@@ -11,7 +11,7 @@
 #include <omp.h>
 #include <immintrin.h>
 #include <unistd.h>
-#include "peg.h"
+#include "../../include/peg_util.h"
 //#include <papi.h>
 
 using std::ifstream;
@@ -215,6 +215,7 @@ inline void scheduler(
 	unsigned *sizes_buffers = (unsigned *) calloc(NUM_THREADS, sizeof(unsigned));
 	unsigned bound_row_id = row_index + tile_step;
 #pragma omp parallel for schedule(dynamic, CHUNK_SIZE)
+//#pragma omp parallel for
 	for (unsigned col_id = 0; col_id < side_length; ++col_id) {
 		unsigned tid = omp_get_thread_num();
 		unsigned *n1_buffer_base = n1_buffer + tid * SIZE_BUFFER_MAX;
@@ -445,7 +446,9 @@ void page_rank(\
 	}
 
 	double end_time = omp_get_wtime();
-	printf("%u %lf\n", NUM_THREADS, end_time - start_time);
+	double rt;
+	printf("%u %lf\n", NUM_THREADS, rt = end_time - start_time);
+	bot_best_perform.record_best_performance(rt, NUM_THREADS);
 
 	_mm_free(n1_buffer);
 	_mm_free(n2_buffer);
@@ -569,11 +572,9 @@ void input(char filename[])
 #endif
 	// PageRank
 	CHUNK_SIZE = 1;
-	//ROW_STEP = 16;
-	SIZE_BUFFER_MAX = 512;
-	//unsigned ROW_STEP = 128;
-	//CHUNK_SIZE = 512;
-	//unsigned ROW_STEP = 64;
+	//SIZE_BUFFER_MAX = 512;
+	SIZE_BUFFER_MAX = 400;
+	printf("tile_size: %u\n", TILE_WIDTH);//test
 	for (int cz = 0; cz < 3; ++cz) {
 	for (unsigned i = 6; i < bound_i; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
@@ -602,10 +603,11 @@ void input(char filename[])
 		}
 	}
 	}
+	bot_best_perform.print();
 	fclose(time_out);
 
 #ifdef ONEDEBUG
-	print(rank);
+	//print(rank);
 #endif
 	// Free memory
 	_mm_free(graph_heads);

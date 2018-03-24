@@ -10,6 +10,7 @@
 #include <cmath>
 #include <omp.h>
 #include <unistd.h>
+#include "../../include/peg_util.h"
 using std::ifstream;
 using std::string;
 using std::getline;
@@ -26,24 +27,24 @@ unsigned nnodes, nedges;
 unsigned NUM_THREADS;
 unsigned TILE_WIDTH;
 unsigned CHUNK_SIZE;
+unsigned ROW_STEP;
 
 double start;
 double now;
 FILE *time_out;
 char *time_file = "timeline.txt";
 
-void page_rank(\
-		unsigned *tiles_n1, \
-		unsigned *tiles_n2, \
-		unsigned *nneibor, \
-		unsigned *tops, \
-		float *rank, \
-		float *sum, \
-		unsigned *offsets, \
-		unsigned num_tiles, \
-		unsigned side_length, \
-		unsigned *not_empty_tile, \
-		unsigned row_step);
+void page_rank(
+		unsigned *tiles_n1, 
+		unsigned *tiles_n2, 
+		unsigned *nneibor, 
+		unsigned *tops, 
+		float *rank, 
+		float *sum, 
+		unsigned *offsets, 
+		unsigned num_tiles, 
+		unsigned side_length, 
+		unsigned *not_empty_tile);
 void print(float *rank);
 
 void input(char filename[])
@@ -172,20 +173,15 @@ void input(char filename[])
 	time_out = fopen(time_file, "w");
 	fprintf(time_out, "input end: %lf\n", now - start);
 #ifdef ONEDEBUG
-	unsigned bound_i = 2;
+	unsigned bound_i = 7;
 #else
 	unsigned bound_i = 9;
 #endif
 	// PageRank
-	//for (unsigned row_step = 1; row_step < 10000; row_step *= 2) {
-	//	printf("row_step: %u\n", row_step);//test
-	//for (unsigned i = 0; i < 21; ++i) {
-	//CHUNK_SIZE = (unsigned) pow(2, i);
-	//printf("CHUNK_SIZE: %u\n", CHUNK_SIZE);//test
 	CHUNK_SIZE = 1;
-	unsigned row_step = 8;
+	unsigned ROW_STEP = 16;
 	//CHUNK_SIZE = 512;
-	//unsigned row_step = 64;
+	//unsigned ROW_STEP = 64;
 	for (int cz = 0; cz < 3; ++cz) {
 	for (unsigned i = 6; i < bound_i; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
@@ -208,13 +204,13 @@ void input(char filename[])
 				offsets, \
 				num_tiles, \
 				side_length, \
-				not_empty_tile, \
-				row_step);
+				not_empty_tile);
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 		}
 	}
 	}
+	bot_best_perform.print();
 	fclose(time_out);
 
 #ifdef ONEDEBUG
@@ -279,6 +275,17 @@ inline void scheduler(\
 			for (unsigned edge_i = offsets[tile_id]; edge_i < bound_edge_i; ++edge_i) {
 				unsigned n1 = tiles_n1[edge_i];
 				unsigned n2 = tiles_n2[edge_i];
+
+				////////////////////////////////////
+				// Don't need CAS, because threads among different stripes do not have conflicts.
+				//float addition = rank[n1]/nneibor[n1];
+				//float old_val;
+				//float new_val;
+				//do {
+				//	old_val = sum[n2];
+				//	new_val = old_val + addition;
+				//} while (!peg_CAS(sum + n2, old_val, new_val));
+				///////////////////////
 				sum[n2] += rank[n1]/nneibor[n1];
 			}
 		}
@@ -295,22 +302,21 @@ void page_rank(\
 		unsigned *offsets, \
 		unsigned num_tiles, \
 		unsigned side_length, \
-		unsigned *not_empty_tile, \
-		unsigned row_step)
+		unsigned *not_empty_tile)
 {
-	//unsigned row_step = 1;
-	if (side_length < row_step) {
-		printf("Error: row_step (%u) is to large, larger than side_length (%u)\n", \
-				row_step, side_length);
+	//unsigned ROW_STEP = 1;
+	if (side_length < ROW_STEP) {
+		printf("Error: ROW_STEP (%u) is to large, larger than side_length (%u)\n", \
+				ROW_STEP, side_length);
 		exit(3);
 	}
 	omp_set_num_threads(NUM_THREADS);
 	unsigned row_index;
 	double start_time = omp_get_wtime(); // Timer Starts
-	for (row_index = 0; row_index <= side_length - row_step; row_index += row_step) {
+	for (row_index = 0; row_index <= side_length - ROW_STEP; row_index += ROW_STEP) {
 		scheduler(\
 				row_index,\
-				row_index + row_step,\
+				row_index + ROW_STEP,\
 				not_empty_tile,\
 				tiles_n1,\
 				tiles_n2,\
@@ -322,7 +328,7 @@ void page_rank(\
 				side_length);
 	}
 
-	if (row_step > 1) {
+	if (ROW_STEP > 1) {
 		scheduler(\
 				row_index,\
 				side_length,\
@@ -344,7 +350,9 @@ void page_rank(\
 	}
 
 	double end_time = omp_get_wtime();
-	printf("%u %lf\n", NUM_THREADS, end_time - start_time);
+	double rt;
+	printf("%u %lf\n", NUM_THREADS, rt = end_time - start_time);
+	bot_best_perform.record_best_performance(rt, NUM_THREADS);
 
 }
 void print(float *rank) 
@@ -365,9 +373,11 @@ int main(int argc, char *argv[])
 	if (argc > 2) {
 		filename = argv[1];
 		TILE_WIDTH = strtoul(argv[2], NULL, 0);
+		ROW_STEP = strtoul(argv[3], NULL, 0);
 	} else {
-		filename = "/home/zpeng/benchmarks/data/pokec/coo_tiled_bak/soc-pokec";
+		filename = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
 		TILE_WIDTH = 1024;
+		ROW_STEP = 16;
 	}
 	input(filename);
 	return 0;

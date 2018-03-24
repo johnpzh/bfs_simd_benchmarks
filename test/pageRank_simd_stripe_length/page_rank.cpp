@@ -11,7 +11,7 @@
 #include <omp.h>
 #include <immintrin.h>
 #include <unistd.h>
-#include "../../include/peg.h"
+#include "../../include/peg_util.h"
 //#include <papi.h>
 
 using std::ifstream;
@@ -444,7 +444,7 @@ void page_rank(\
 
 	double end_time = omp_get_wtime();
 	double run_time = 0;
-	//printf("%u %lf\n", NUM_THREADS, run_time = end_time - start_time);
+	printf("%u %lf\n", ROW_STEP, run_time = end_time - start_time);
 	bot_best_perform.record_best_performance(run_time, NUM_THREADS);
 	_mm_free(n1_buffer);
 	_mm_free(n2_buffer);
@@ -574,8 +574,8 @@ void input(char filename[])
 	//////////////////////////////////////////
 	// Miss Rate
 	NUM_THREADS = 256;
-	for (int v = 1; v < 8193; v *= 2) {
-		ROW_STEP = v;
+	//for (int v = 1; v < 8193; v *= 2) {
+	//	ROW_STEP = v;
 		//ROW_STEP = 40;
 		//printf("ROW_STEP: %u\n", v);
 #pragma omp parallel for num_threads(64)
@@ -584,8 +584,8 @@ void input(char filename[])
 			sum[i] = 0.0;
 		}
 		// Cache miss
-		CacheMissRate miss_rate;
-		miss_rate.measure_start();
+		//CacheMissRate miss_rate;
+		//miss_rate.measure_start();
 		page_rank(
 				graph_heads, 
 				graph_tails, 
@@ -597,12 +597,12 @@ void input(char filename[])
 				num_tiles, 
 				side_length);
 		// Cache Miss
-		miss_rate.measure_stop();
-		miss_rate.print(ROW_STEP);
+		//miss_rate.measure_stop();
+		//miss_rate.print(ROW_STEP);
 
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
-	}
+	//}
 	// End Miss Rate
 	//////////////////////////////////////////
 	//////////////////////////////////////////

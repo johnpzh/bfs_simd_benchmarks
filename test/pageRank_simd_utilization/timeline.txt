@@ -1,2 +1,2 @@
-input end: 2.339247
-Thread 256 end: 2.577639
+input end: 2.304079
+Thread 256 end: 10.904501

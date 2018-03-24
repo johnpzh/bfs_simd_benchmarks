@@ -11,7 +11,7 @@
 #include <omp.h>
 #include <immintrin.h>
 #include <unistd.h>
-#include "../../include/peg_profiling.h"
+#include "../../include/peg_util.h"
 //#include <papi.h>
 
 using std::ifstream;
