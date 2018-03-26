@@ -12,6 +12,7 @@ make debug=1
 #done
 
 # Tile Size
+data_file="/data/zpeng/twt_combine/tiled_2-power/out.twitter"
 for ((i = 1024; i < 524289; i *= 2)); do
 	report_dir="report_$(date +%Y%m%d-%H%M%S)_tile-size-${i}_hpc"
 	amplxe-cl -collect hpc-performance -result-dir ${report_dir} -data-limit=0 -- numactl -m 0 ./page_rank ${data_file} ${i} 40
