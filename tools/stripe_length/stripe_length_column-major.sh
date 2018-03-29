@@ -23,7 +23,7 @@ max_stripe_length=$4
 #done
 
 # Column-major
-cd /sciclone/home2/zpeng01/benchmarks/test/column_major_tile
+cd /sciclone/home2/zpeng01/benchmarks/tools/column_major_tile
 make clean
 make
 for((stripe_length = min_stripe_length; stripe_length <= max_stripe_length; stripe_length *= 2)); do
