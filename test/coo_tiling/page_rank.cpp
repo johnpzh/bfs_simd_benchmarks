@@ -321,6 +321,10 @@ void input(char filename[]) {
 	//string prefix = string(filename) + "_reordered";
 	string fname = prefix + "-0";
 	FILE *fin = fopen(fname.c_str(), "r");
+	if (NULL == fin) {
+		printf("Error: cannot open file %s.\n", fname.c_str());
+		exit(1);
+	}
 	fscanf(fin, "%u %u", &nnodes, &nedges);
 	fclose(fin);
 	
