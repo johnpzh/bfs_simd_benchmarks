@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <immintrin.h>
 #include <papi.h>
+#include "../../include/peg_util.h"
 
 using std::string;
 using std::to_string;
@@ -918,7 +919,8 @@ void graph_prepare(
 	//}
 	//printf("cache access: %lld, cache misses: %lld, miss rate: %.2f%%\n", values[0], values[1], 100.0* values[1]/values[0]);
 	//// End PAPI results
-	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
+	printf("%u %lf\n", NUM_THREADS, run_time = (end_time - start_time));
+	bot_best_perform.record(run_time, NUM_THREADS);
 	//print_time();//test
 	
 	//Store the result into a file
@@ -1169,14 +1171,15 @@ int main( int argc, char** argv)
 	//T_RATIO = 100;
 	T_RATIO = 20;
 	CHUNK_SIZE = 2048;
-	for (unsigned cz = 0; cz < 3; ++cz) {
+	printf("tile_size: %u\n", TILE_WIDTH);
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
+		bot_best_perform.reset();
 #ifndef ONEDEBUG
 		//sleep(10);
 #endif
 		// Re-initializing
-		for (unsigned k = 0; k < 3; ++k) {
+		for (unsigned k = 0; k < 10; ++k) {
 
 		graph_prepare(
 				graph_vertices,
@@ -1193,7 +1196,7 @@ int main( int argc, char** argv)
 		printf("Thread %u finished.\n", NUM_THREADS);
 #endif
 		}
-	}
+		bot_best_perform.print_average(NUM_THREADS);
 	}
 	fclose(time_out);
 
