@@ -574,6 +574,7 @@ void input(char filename[])
 	//////////////////////////////////////////
 	// Miss Rate
 	NUM_THREADS = 256;
+	for (int cz = 0; cz < 2; ++cz) {
 	//for (int v = 1; v < 8193; v *= 2) {
 	//	ROW_STEP = v;
 		//ROW_STEP = 40;
@@ -602,6 +603,8 @@ void input(char filename[])
 
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
+	}
+	bot_best_perform.print();
 	//}
 	// End Miss Rate
 	//////////////////////////////////////////

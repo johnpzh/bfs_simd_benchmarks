@@ -26,22 +26,40 @@ inline bool peg_CAS(V_T *ptr, V_T old_val, V_T new_val)
 // For the Minimum Running time
 class BestPerform {
 private:
-	unsigned NUM_THREADS_MIN;
-	double RUNNING_TIME_MIN = DBL_MAX;
+	unsigned num_threads_min;
+	double running_time_min = DBL_MAX;
+	unsigned count = 0;
+	double total = 0;
 
 public:
-	void record_best_performance(double rt, unsigned num_thd)
+	void record(double rt, unsigned num_thd)
 	{
-		if (rt < RUNNING_TIME_MIN) {
-			RUNNING_TIME_MIN = rt;
-			NUM_THREADS_MIN = num_thd;
+		if (rt < running_time_min) {
+			running_time_min = rt;
+			num_threads_min = num_thd;
+		}
+		total += rt;
+		++count;
+	}
+
+	void print_best()
+	{
+		printf("Best_Performance: %f\n", running_time_min);
+	}
+
+	void print_average(unsigned metrics = (unsigned) -1)
+	{
+		if (metrics == (unsigned) -1) {
+			printf("Average: %f\n", total/count);
+		} else {
+			printf("Average: %u %f\n", metrics, total/count);
 		}
 	}
 
-	void print()
+	void reset()
 	{
-		printf("Best_Performance:\n");
-		printf("%u %f\n", NUM_THREADS_MIN, RUNNING_TIME_MIN);
+		count = 0;
+		total = 0;
 	}
 };
 static BestPerform bot_best_perform;
