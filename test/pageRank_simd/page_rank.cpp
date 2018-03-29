@@ -572,9 +572,10 @@ void input(char filename[])
 #endif
 	// PageRank
 	CHUNK_SIZE = 1;
-	//SIZE_BUFFER_MAX = 512;
-	SIZE_BUFFER_MAX = 400;
+	SIZE_BUFFER_MAX = 512;
+	//SIZE_BUFFER_MAX = 400;
 	printf("tile_size: %u\n", TILE_WIDTH);//test
+	printf("stripe_length: %u\n", ROW_STEP);
 	for (unsigned i = 6; i < bound_i; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 		bot_best_perform.reset();

@@ -18,8 +18,8 @@ graph16M_d64.txt
 *.optrpt
 
 # Ignore vim swp files
-*.cpp.swp
-*.cpp.swo
+*.swp
+*.swo
 
 # Ignore those useless result files
 path/
