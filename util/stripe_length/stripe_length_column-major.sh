@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 if [[ $# -lt 4 ]]; then
-	echo "Usage: ./process.sh <data_file> <tile_size> <min_stripe_length> <max_stripe_length>"
+	echo "Usage: ./stripe_length_column-major.sh <data_file> <tile_size> <min_stripe_length> <max_stripe_length>"
 	exit
 fi
 
