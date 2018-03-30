@@ -422,7 +422,7 @@ void input_weighted(char filename[]) {
 	}
 
 	fscanf(fin, "%u%u", &nnodes, &nedges);
-#ifdef ONESYMMETRIC
+#ifdef UNDIRECTED
 	nedges *= 2;
 #endif
 	unsigned *nneibor = (unsigned *) malloc(nnodes * sizeof(unsigned));
@@ -432,7 +432,7 @@ void input_weighted(char filename[]) {
 	unsigned *weights = (unsigned *) malloc(nedges * sizeof(unsigned));
 	vector< vector<unsigned> > n1sv(nnodes);
 	vector< vector<unsigned> > wt_v(nnodes);
-#ifdef ONESYMMETRIC
+#ifdef UNDIRECTED
 	unsigned bound_i = nedges/2;
 #else
 	unsigned bound_i = nedges;
@@ -442,9 +442,11 @@ void input_weighted(char filename[]) {
 		unsigned n2;
 		unsigned wt;
 		fscanf(fin, "%u%u%u", &n1, &n2, &wt);
-#ifdef ONESYMMETRIC
+#ifdef UNDIRECTED
 		n1sv[n1-1].push_back(n2);
 		n1sv[n2-1].push_back(n1);
+		wt_v[n1-1].push_back(wt);
+		wt_v[n2-1].push_back(wt);
 		nneibor[n1-1]++;
 		nneibor[n2-1]++;
 #else
@@ -519,7 +521,7 @@ void input_untiled(char filename[]) {
 	}
 
 	fscanf(fin, "%u %u", &nnodes, &nedges);
-#ifdef ONESYMMETRIC
+#ifdef UNDIRECTED
 	nedges *= 2;
 #endif
 	unsigned *nneibor = (unsigned *) malloc(nnodes * sizeof(unsigned));
@@ -527,7 +529,7 @@ void input_untiled(char filename[]) {
 	unsigned *n1s = (unsigned *) malloc(nedges * sizeof(unsigned));
 	unsigned *n2s = (unsigned *) malloc(nedges * sizeof(unsigned));
 	vector< vector<unsigned> > n1sv(nnodes);
-#ifdef ONESYMMETRIC
+#ifdef UNDIRECTED
 	unsigned bound_i = nedges/2;
 #else
 	unsigned bound_i = nedges;
@@ -539,7 +541,7 @@ void input_untiled(char filename[]) {
 		//n1s[i] = n1;
 		//n2s[i] = n2;
 		//insert_sort(n1s, n2s, n1, n2, i);
-#ifdef ONESYMMETRIC
+#ifdef UNDIRECTED
 		n1sv[n1-1].push_back(n2);
 		n1sv[n2-1].push_back(n1);
 		nneibor[n1-1]++;
@@ -611,15 +613,10 @@ int main(int argc, char *argv[]) {
 		filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec";
 		//TILE_WIDTH = 1024;
 	}
-#ifdef UNTILE
 #ifdef WEIGHTED
 	input_weighted(filename);
 #else	
 	input_untiled(filename);
-#endif
-#else
-	//input(filename);
-	printf("Error: need define UNTILE.\n");
 #endif
 	return 0;
 }

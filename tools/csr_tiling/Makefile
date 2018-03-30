@@ -6,12 +6,8 @@ else
 	CPPFLAGS = -Wall -Wextra -g -std=c++14 -qopenmp -O3 -qopt-report=5 -qopt-report-phase=vec
 endif
 
-ifeq (${untile}, 1)
-	CPPFLAGS += -DUNTILE
-endif
-
-ifeq (${symmetric}, 1)
-	CPPFLAGS += -DONESYMMETRIC
+ifeq (${undirected}, 1)
+	CPPFLAGS += -DUNDIRECTED
 endif
 
 ifeq (${weighted}, 1)
