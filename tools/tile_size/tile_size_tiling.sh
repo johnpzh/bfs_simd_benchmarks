@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 if [[ $# -lt 4 ]]; then
-	echo "Usage: ./process.sh <data_file> <min_tile_size> <max_tile_size> <stripe_length>"
+	echo "Usage: ./tile_size_tiling.sh <data_file> <min_tile_size> <max_tile_size> <stripe_length>"
 	exit
 fi
 

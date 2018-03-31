@@ -13,10 +13,10 @@ endif
 
 .PHONY: clean, all
 
-all: bc
+all: bfs
 
-bc: bc.cpp 
+bfs: bfs.cpp 
 	$(ICPC) $(CPPFLAGS) $^ -o $@ 
 
 clean:
-	rm -f bc
+	rm -f bfs

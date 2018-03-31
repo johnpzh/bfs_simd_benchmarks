@@ -10,20 +10,26 @@ stripe_length=$3
 ## CSR tiling
 #cd /home/zpeng/benchmarks/tools/csr_tiling
 #make clean
-#make untile=1
+#make
 #./page_rank $data_file 
 
 # COO tiling
 cd /home/zpeng/benchmarks/tools/coo_tiling
 make clean
-make untile=1
+make 
 ./page_rank $data_file $tile_size $tile_size
 
 # Column-major
 cd /home/zpeng/benchmarks/tools/column_major_tile
 make clean
-make untile=1
+make 
 ./kcore $data_file $tile_size $stripe_length $stripe_length
+
+# Reorder
+cd /home/zpeng/benchmarks/tools/vetex_id_remap
+make clean
+make 
+./bc $data_file $tile_size $stripe_length
 
 ## CSR Tiling reverse
 #cd /home/zpeng/benchmarks/tools/csr_tiling_reverse
