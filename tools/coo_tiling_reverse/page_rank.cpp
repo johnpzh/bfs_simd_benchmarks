@@ -26,7 +26,7 @@ unsigned TILE_WIDTH;
 double start;
 double now;
 
-void input(char filename[]) {
+void input_data(char filename[], unsigned min_tile_width, unsigned max_tile_width) {
 #ifdef ONEDEBUG
 	printf("input: %s\n", filename);
 #endif
@@ -71,6 +71,10 @@ void input(char filename[]) {
 }
 	printf("Got origin data: %s\n", filename);
 
+	////////////////////////////////////////////////////////////	
+	// Multi-version output
+	for (TILE_WIDTH = min_tile_width; TILE_WIDTH <= max_tile_width; TILE_WIDTH *= 2) {
+
 	unsigned *nneibor = (unsigned *) malloc(nnodes * sizeof(unsigned));
 	memset(nneibor, 0, nnodes * sizeof(unsigned));
 	unsigned num_tiles;
@@ -107,8 +111,6 @@ void input(char filename[]) {
 		tiles_n1v[tile_id].push_back(n1);
 		tiles_n2v[tile_id].push_back(n2);
 	}
-	free(n1s);
-	free(n2s);
 	unsigned *tiles_n1 = (unsigned *) malloc(nedges * sizeof(unsigned));
 	unsigned *tiles_n2 = (unsigned *) malloc(nedges * sizeof(unsigned));
 	unsigned edge_i = 0;
@@ -168,17 +170,30 @@ void input(char filename[]) {
 	//fclose(fin);
 	fclose(fout);
 	free(nneibor);
+	free(tiles_n1);
+	free(tiles_n2);
+	}
+	// ENd Multi-version output
+	////////////////////////////////////////////////////////////
+	free(n1s);
+	free(n2s);
 }
 
 int main(int argc, char *argv[]) {
 	char *filename;
-	if (argc > 2) {
+	unsigned min_tile_width;
+	unsigned max_tile_width;
+	if (argc > 3) {
 		filename = argv[1];
-		TILE_WIDTH = strtoul(argv[2], NULL, 0);
+		//TILE_WIDTH = strtoul(argv[2], NULL, 0);
+		min_tile_width = strtoul(argv[2], NULL, 0);
+		max_tile_width = strtoul(argv[3], NULL, 0);
 	} else {
-		filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec";
-		TILE_WIDTH = 1024;
+		//filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec";
+		//TILE_WIDTH = 1024;
+		printf("Usage: ./page_rank <data_file> <min_tile_width> <max_tile_width>\n");
+		exit(1);
 	}
-	input(filename);
+	input_data(filename, min_tile_width, max_tile_width);
 	return 0;
 }

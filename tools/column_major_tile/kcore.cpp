@@ -470,15 +470,22 @@ int main(int argc, char *argv[])
 {
 	start = omp_get_wtime();
 	char *filename;
-	if (argc > 3) {
+	unsigned min_row_step;
+	unsigned max_row_step;
+
+	if (argc > 4) {
 		filename = argv[1];
 		TILE_WIDTH = strtoul(argv[2], NULL, 0);
-		ROW_STEP = strtoul(argv[3], NULL, 0);
+		//ROW_STEP = strtoul(argv[3], NULL, 0);
+		min_row_step = strtoul(argv[3], NULL, 0);
+		max_row_step = strtoul(argv[4], NULL, 0);
 	} else {
-		//filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec";
-		filename = "/home/zpeng/benchmarks/data/skitter/out.skitter";
-		TILE_WIDTH = 1024;
-		ROW_STEP = 16;
+		////filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec";
+		//filename = "/home/zpeng/benchmarks/data/skitter/out.skitter";
+		//TILE_WIDTH = 1024;
+		//ROW_STEP = 16;
+		printf("Usage: ./kcore <data_file> <tile_width> <min_stripe_length> <max_stripe_length>\n");
+		exit(1);
 	}
 	// Input
 	unsigned *graph_heads;
@@ -499,6 +506,7 @@ int main(int argc, char *argv[])
 		nneibor,
 		is_empty_tile);
 
+	for (ROW_STEP = min_row_step; ROW_STEP <= max_row_step; ROW_STEP *= 2) {
 	convert_to_col_major_weight(
 						filename,
 						graph_heads, 
@@ -506,6 +514,7 @@ int main(int argc, char *argv[])
 						graph_weights,
 						tile_offsets,
 						nneibor);
+	}
 #else
 	input(
 		filename, 
@@ -515,12 +524,14 @@ int main(int argc, char *argv[])
 		nneibor,
 		is_empty_tile);
 
+	for (ROW_STEP = min_row_step; ROW_STEP <= max_row_step; ROW_STEP *= 2) {
 	convert_to_col_major(
 						filename,
 						graph_heads, 
 						graph_ends, 
 						tile_offsets,
 						nneibor);
+	}
 #endif
 
 

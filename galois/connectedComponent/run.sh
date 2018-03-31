@@ -1,11 +1,13 @@
 #!/usr/bin/bash
-bin_address="/home/zpeng/code/Galois/build/release/apps/connectedcomponents"
-#data_address="/home/zpeng/benchmarks/data/pokec"
-data_address="/home/zpeng/benchmarks/data/twt"
+if [[ $# -lt 1 ]]; then
+	echo "Usage: ./run.sh <data_file>"
+	exit
+fi
+data_file=$1
+app="/home/zpeng/code/galois_set/build/release/apps/connectedcomponents/connectedcomponents"
 output_file="output_twt_$(date +%Y%m%d-%H%M%S).txt"
 :> $output_file
-for ((i = 0; i < 9; ++i)); do
+for ((i = 6; i < 9; ++i)); do
 	power=$((2**${i}))
-#	(set -x; numactl -m 0 ${bin_address}/connectedcomponents ${data_address}/soc-pokec_nohead.gr  -t=${power} >> $output_file)
-	(set -x; numactl -m 0 ${bin_address}/connectedcomponents ${data_address}/out.twitter_nohead.gr  -t=${power} >> $output_file)
+	(set -x; numactl -m 0 $app $data_file  -t=${power} -algo=async -noverify >> $output_file)
 done

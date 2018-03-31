@@ -26,9 +26,10 @@ max_stripe_length=$4
 cd /sciclone/home2/zpeng01/benchmarks/tools/column_major_tile
 make clean
 make
-for((stripe_length = min_stripe_length; stripe_length <= max_stripe_length; stripe_length *= 2)); do
-	./kcore $data_file $tile_size $stripe_length
-done
+#for((stripe_length = min_stripe_length; stripe_length <= max_stripe_length; stripe_length *= 2)); do
+#	./kcore $data_file $tile_size $stripe_length
+#done
+./kcore $data_file $tile_size $min_stripe_length $max_stripe_length
 
 # CSR Tiling reverse
 
