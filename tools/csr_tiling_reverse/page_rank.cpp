@@ -155,11 +155,6 @@ int main(int argc, char *argv[]) {
 		filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec";
 		//TILE_WIDTH = 1024;
 	}
-#ifdef UNTILE
 	input_untiled(filename);
-#else
-	//input(filename);
-	printf("Error: need define UNTILE.\n");
-#endif
 	return 0;
 }

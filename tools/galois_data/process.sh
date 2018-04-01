@@ -19,7 +19,7 @@ ${tools_dir}/vertex_id_sub_one/page_rank $data_file
 # Edge list -> binary void gr
 #/home/zpeng/code/galois_set/build/release/tools/graph-convert/graph-convert ${nohead_data} ${data_file}.vgr -edgelist2vgr
 ${galois_dir}/graph-convert ${nohead_data} ${data_file}.vgr -edgelist2vgr
-rm $nohead_data
+#rm $nohead_data
 echo "Got ${data_file}.vgr"
 
 # Binary void gr -> binary weighted gr
@@ -45,6 +45,7 @@ echo "Got ${weighted_data}.adj"
 ${galois_dir}/graph-convert ${data_file}.gr ${weighted_data} -gr2intpbbsedges
 #/home/zpeng/benchmarks/tools/vertex_id_add_one/page_rank ${weighted_data} $nnodes $nedges
 ${tools_dir}/vertex_id_add_one/page_rank ${weighted_data} $nnodes $nedges
-rm ${weighted_data}
+#rm ${weighted_data}
+mv ${weighted_data} ${weighted_data}.bak
 mv ${weighted_data}_weighted ${weighted_data}
 echo "Got ${weighted_data}"

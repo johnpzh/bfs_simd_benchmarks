@@ -6,9 +6,6 @@ else
 	CC_FLAGS = -Wall -Wextra -g -std=c++11 -qopenmp -O3 -qopt-report=5 -qopt-report-phase=vec
 endif
 
-ifeq (${untile}, 1)
-	CC_FLAGS += -DUNTILE
-endif
 
 ifeq (${symmetric}, 1)
 	CC_FLAGS += -DONESYMMETRIC
