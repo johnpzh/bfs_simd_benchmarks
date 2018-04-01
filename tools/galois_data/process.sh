@@ -12,6 +12,8 @@ nedges=$5
 nohead_data=${data_file}_nohead
 weighted_data=${data_file}_weighted
 
+set -x
+
 # Vertex id subtract 1 and delete the first line
 #/home/zpeng/benchmarks/tools/vertex_id_sub_one/page_rank $data_file
 ${tools_dir}/vertex_id_sub_one/page_rank $data_file
@@ -49,3 +51,5 @@ ${tools_dir}/vertex_id_add_one/page_rank ${weighted_data} $nnodes $nedges
 mv ${weighted_data} ${weighted_data}.bak
 mv ${weighted_data}_weighted ${weighted_data}
 echo "Got ${weighted_data}"
+
+set +x
