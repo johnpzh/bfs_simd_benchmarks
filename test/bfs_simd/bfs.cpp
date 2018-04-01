@@ -6,7 +6,6 @@
 #include <string>
 #include <unistd.h>
 #include <immintrin.h>
-#include <papi.h>
 #include "../../include/peg_util.h"
 
 using std::string;
@@ -31,24 +30,24 @@ double now;
 FILE *time_out;
 char *time_file = "timeline.txt";
 
-// PAPI test results
-static void test_fail(char *file, int line, char *call, int retval){
-	printf("%s\tFAILED\nLine # %d\n", file, line);
-	if ( retval == PAPI_ESYS ) {
-		char buf[128];
-		memset( buf, '\0', sizeof(buf) );
-		sprintf(buf, "System error in %s:", call );
-		perror(buf);
-	}
-	else if ( retval > 0 ) {
-		printf("Error calculating: %s\n", call );
-	}
-	else {
-		printf("Error in %s: %s\n", call, PAPI_strerror(retval) );
-	}
-	printf("\n");
-	exit(1);
-}
+//// PAPI test results
+//static void test_fail(char *file, int line, char *call, int retval){
+//	printf("%s\tFAILED\nLine # %d\n", file, line);
+//	if ( retval == PAPI_ESYS ) {
+//		char buf[128];
+//		memset( buf, '\0', sizeof(buf) );
+//		sprintf(buf, "System error in %s:", call );
+//		perror(buf);
+//	}
+//	else if ( retval > 0 ) {
+//		printf("Error calculating: %s\n", call );
+//	}
+//	else {
+//		printf("Error in %s: %s\n", call, PAPI_strerror(retval) );
+//	}
+//	printf("\n");
+//	exit(1);
+//}
 //////////////////////////////////////////////////////////////////
 // Dense (bottom-up)
 
