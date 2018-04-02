@@ -1,0 +1,9 @@
+Warning: no access to tty (Bad file descriptor).
+Thus no job control in this shell.
+++ date +%Y%m%d-%H%M%S
++ output=output_20180401-004217.txt
++ :
++ (( i = min_stripe_length ))
++ (( i <= max_stripe_length ))
++ /sciclone/home2/zpeng01/benchmarks/test/bfs_simd/bfs /sciclone/scr-mlt/zpeng01/rmat27/rmat27_reorder 16384 1
+Terminated
