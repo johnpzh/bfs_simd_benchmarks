@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <immintrin.h>
+#include "../../include/peg_util.h"
 using std::string;
 using std::getline;
 using std::cout;
@@ -49,7 +50,8 @@ void input_weighted(
 		unsigned *&graph_degrees)
 {
 	//string prefix = string(filename) + "_untiled";
-	string prefix = string(filename) + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH);
+	string file_name_pre = string(filename) + "_weighted_reorder";
+	string prefix = file_name_pre + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH);
 	//string prefix = string(filename) + "_coo-tiled-" + to_string(TILE_WIDTH);
 	string fname = prefix + "-0";
 	FILE *fin = fopen(fname.c_str(), "r");
@@ -129,7 +131,7 @@ void input_weighted(
 	fclose(fin);
 }
 	//For graph CSR
-	prefix = string(filename) + "_untiled";
+	prefix = file_name_pre + "_untiled";
 
 	// Read degrees
 	fname = prefix + "-nneibor";
@@ -1022,7 +1024,9 @@ void sssp_weighted(
 	}
 
 	double end_time = omp_get_wtime();
-	printf("%u %lf\n", NUM_THREADS, end_time - start_time);
+	double run_time;
+	printf("%u %lf\n", NUM_THREADS, run_time = end_time - start_time);
+	bot_best_perform.record(run_time, NUM_THREADS);
 
 	free(dists);
 	free(h_graph_mask);
@@ -1035,7 +1039,7 @@ void sssp_weighted(
 ////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////
-// Unweighted Graph
+// Unweighted Graph (DEPRECATED!)
 void input(
 		char filename[], 
 		unsigned *&graph_heads, 
@@ -1391,9 +1395,9 @@ int main(int argc, char *argv[])
 	T_RATIO = 20;
 	WORK_LOAD = 30;
 	SIZE_BUFFER_MAX = 512;
-	for (int cz = 0; cz < 3; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
+		bot_best_perform.reset();
 		//memset(distances, -1, NNODES * sizeof(int));
 		//distances[source] = 0;
 		//memset(h_graph_mask, 0, NNODES * sizeof(int));
@@ -1404,7 +1408,7 @@ int main(int argc, char *argv[])
 		//memset(is_updating_active_side, 0, sizeof(int) * SIDE_LENGTH);
 
 		//sleep(10);
-		for (int k = 0; k < 3; ++k) {
+		for (int k = 0; k < 10; ++k) {
 		if (is_weighted_graph) {
 			sssp_weighted(
 				graph_heads, 
@@ -1433,7 +1437,7 @@ int main(int argc, char *argv[])
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 		}
-	}
+		bot_best_perform.print_average(NUM_THREADS);
 	}
 	fclose(time_out);
 

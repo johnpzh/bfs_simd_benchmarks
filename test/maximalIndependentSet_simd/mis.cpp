@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <algorithm>
 #include <immintrin.h>
+#include "../../include/peg_util.h"
 using std::string;
 using std::getline;
 using std::cout;
@@ -89,7 +90,8 @@ void input(
 		unsigned *&tile_sizes)
 {
 	//printf("data: %s\n", filename);
-	string prefix = string(filename) + "_coo-tiled-" + to_string(TILE_WIDTH);
+	string file_name_pre = string(filename) + "_reorder";
+	string prefix = file_name_pre + "_coo-tiled-" + to_string(TILE_WIDTH);
 	string fname = prefix + "-0";
 	FILE *fin = fopen(fname.c_str(), "r");
 	if (!fin) {
@@ -167,7 +169,7 @@ void input(
 }
 
 	//For graph CSR
-	prefix = string(filename) + "_untiled";
+	prefix = file_name_pre + "_untiled";
 
 	// Read degrees
 	fname = prefix + "-nneibor";
@@ -919,7 +921,9 @@ void MIS(
 		//printf("frontier_size: %u\n", frontier_size);//test
 	}
 
-	printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
+	double run_time;
+	printf("%u %f\n", NUM_THREADS, run_time = omp_get_wtime() - start_time);
+	bot_best_perform.record(run_time, NUM_THREADS);
 #ifdef ONEDEBUG
 	unsigned mis_count = 0;
 #pragma omp parallel for reduction(+: mis_count)
@@ -993,10 +997,10 @@ int main(int argc, char *argv[])
 	SIZE_BUFFER_MAX = 800;
 	CHUNK_SIZE = 2048;
 	// MIS
-	for (int cz = 0; cz < 3; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
-		for (int k = 0; k < 3; ++k) {
+		for (int k = 0; k < 10; ++k) {
 		NUM_THREADS = (unsigned) pow(2, i);
+		bot_best_perform.reset();
 #ifndef ONEDEBUG
 		//sleep(10);
 #endif
@@ -1013,7 +1017,7 @@ int main(int argc, char *argv[])
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 		}
-	}
+		bot_best_perform.print_average(NUM_THREADS);
 	}
 	fclose(time_out);
 

@@ -980,7 +980,8 @@ void graph_input(
 	/////////////////////////////////////////////////////////////////////
 	//string prefix = string(input_f) + "_untiled";
 	//string prefix = string(input_f) + "_coo-tiled-" + to_string(TILE_WIDTH);
-	string prefix = string(input_f) + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH);
+	string file_name_pre = string(input_f) + "_reorder";
+	string prefix = file_name_pre + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH);
 	//string prefix = string(input_f) + "_col-2-coo-tiled-" + to_string(TILE_WIDTH);
 	string fname = prefix + "-0";
 	FILE *fin = fopen(fname.c_str(), "r");
@@ -1055,7 +1056,7 @@ void graph_input(
 
 
 	// For Sparse
-	prefix = string(input_f) + "_untiled";
+	prefix = file_name_pre + "_untiled";
 	graph_edges = (unsigned *) malloc(sizeof(unsigned) * NEDGES);
 	graph_degrees = (unsigned *) malloc(sizeof(unsigned) * NNODES);
 

@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <immintrin.h>
 #include <papi.h>
+#include "../../include/peg_util.h"
 
 using std::string;
 using std::getline;
@@ -100,8 +101,9 @@ void input(
 		unsigned *&tile_sizes_reverse)
 {
 	//printf("data: %s\n", filename);
-	string prefix = string(filename) + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH);
-	string prefix_reverse = string(filename) + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH) + "_reverse";
+	string file_name_pre = string(filename) + "_reorder";
+	string prefix = file_name_pre + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH);
+	string prefix_reverse = string(filename) + "_reorder" + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH) + "_reverse";
 	string fname = prefix + "-0";
 	FILE *fin = fopen(fname.c_str(), "r");
 	if (!fin) {
@@ -235,8 +237,8 @@ void input(
 }
 
 	//For graph CSR
-	prefix = string(filename) + "_untiled";
-	prefix_reverse = string(filename) + "_untiled_reverse";
+	prefix = file_name_pre + "_untiled";
+	prefix_reverse = file_name_pre + "_untiled_reverse";
 
 	// Read degrees
 	fname = prefix + "-nneibor";
@@ -2108,6 +2110,7 @@ void BC(
 
 	//printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
 	printf("%u %f\n", NUM_THREADS, run_time = omp_get_wtime() - start_time);
+	bot_best_perform.record(run_time, NUM_THREADS);
 	//// PAPI results
 	//long long values[2];
 	//if ((retval = PAPI_stop_counters(values, 2)) < PAPI_OK) {
@@ -2221,13 +2224,13 @@ int main(int argc, char *argv[])
 	//printf("T_RATIO: %u\n", v);
 	//SIZE_BUFFER_MAX = 1024;
 	// BFS
-	for (unsigned cz = 0; cz < 25; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
+		bot_best_perform.reset();
 #ifndef ONEDEBUG
 		//sleep(10);
 #endif
-		for (unsigned k = 0; k < 3; ++k) {
+		for (unsigned k = 0; k < 10; ++k) {
 		BC(
 			graph_heads, 
 			graph_tails, 
@@ -2244,11 +2247,11 @@ int main(int argc, char *argv[])
 			tile_offsets_reverse,
 			tile_sizes_reverse,
 			source);
-		}
 		//// Re-initializing
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
-	}
+		}
+		bot_best_perform.print_average(NUM_THREADS);
 	}
 	//}
 	fclose(time_out);

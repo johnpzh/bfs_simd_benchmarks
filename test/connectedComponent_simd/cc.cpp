@@ -11,7 +11,7 @@
 #include <omp.h>
 #include <unistd.h>
 #include <immintrin.h>
-#include "../../include/peg.h"
+#include "../../include/peg_util.h"
 using std::string;
 using std::getline;
 using std::cout;
@@ -47,7 +47,8 @@ void input(
 {
 	//printf("data: %s\n", filename);
 	//string prefix = string(filename) + "_untiled";
-	string prefix = string(filename) + "_coo-tiled-" + to_string(TILE_WIDTH);
+	string file_name_pre = string(filename) + "_reorder";
+	string prefix = file_name_pre + "_coo-tiled-" + to_string(TILE_WIDTH);
 	string fname = prefix + "-0";
 	FILE *fin = fopen(fname.c_str(), "r");
 	if (!fin) {
@@ -482,7 +483,7 @@ void cc(
 	double end_time = omp_get_wtime();
 	double rt;
 	printf("%u %lf\n", NUM_THREADS, rt = end_time - start_time);
-	record_best_performance(rt, NUM_THREADS);
+	bot_best_perform.record(rt, NUM_THREADS);
 	_mm_free(heads_buffer);
 	_mm_free(ends_buffer);
 }
@@ -538,10 +539,10 @@ int main(int argc, char *argv[])
 #endif
 	//ROW_STEP = 16;
 	SIZE_BUFFER_MAX = 512;
-	for (int cz = 0; cz < 3; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
-		for (int k = 0; k < 3; ++k) {
 		NUM_THREADS = (unsigned) pow(2, i);
+		bot_best_perform.reset();
+		for (int k = 0; k < 10; ++k) {
 		for (unsigned k = 0; k < NNODES; ++k) {
 			graph_active[k] = 1;
 		}
@@ -567,10 +568,9 @@ int main(int argc, char *argv[])
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 		}
-	}
+		bot_best_perform.print_average(NUM_THREADS);
 	}
 	fclose(time_out);
-	print_best_performance();
 #ifdef ONEDEBUG
 	print(graph_component);
 #endif

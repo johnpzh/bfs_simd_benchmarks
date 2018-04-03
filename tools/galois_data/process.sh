@@ -14,40 +14,34 @@ weighted_data=${data_file}_weighted
 
 set -x
 
-## Vertex id subtract 1 and delete the first line
-##/home/zpeng/benchmarks/tools/vertex_id_sub_one/page_rank $data_file
-#${tools_dir}/vertex_id_sub_one/page_rank $data_file
-#
-## Edge list -> binary void gr
-##/home/zpeng/code/galois_set/build/release/tools/graph-convert/graph-convert ${nohead_data} ${data_file}.vgr -edgelist2vgr
-#${galois_dir}/graph-convert ${nohead_data} ${data_file}.vgr -edgelist2vgr
-##rm $nohead_data
-#echo "Got ${data_file}.vgr"
-#
-## Binary void gr -> binary weighted gr
-##/home/zpeng/code/galois_set/build/release/tools/graph-convert/graph-convert ${data_file}.vgr ${data_file}.gr -vgr2intgr
-#${galois_dir}/graph-convert ${data_file}.vgr ${data_file}.gr -vgr2intgr
-#echo "Got ${data_file}.gr"
-#
-## Binary weighted gr transpose
-##/home/zpeng/code/galois_set/build/release/tools/graph-convert/graph-convert ${data_file}.gr ${data_file}.tgr -vgr2intgr
-#${galois_dir}/graph-convert ${data_file}.gr ${data_file}.tgr -vgr2intgr
-#echo "Got ${data_file}.tgr"
-#
-## Galois format -> Ligra (pbbs) format
-##/home/zpeng/code/galois_set/build/release/tools/graph-convert/graph-convert ${data_file}.vgr ${data_file}.adj -vgr2pbbs
-#${galois_dir}/graph-convert ${data_file}.vgr ${data_file}.adj -vgr2pbbs
-#echo "Got ${data_file}.adj"
-##/home/zpeng/code/galois_set/build/release/tools/graph-convert/graph-convert ${data_file}.gr ${weighted_data}.adj -gr2intpbbs
-#${galois_dir}/graph-convert ${data_file}.gr ${weighted_data}.adj -gr2intpbbs
-#echo "Got ${weighted_data}.adj"
+# Vertex id subtract 1 and delete the first line
+${tools_dir}/vertex_id_sub_one/page_rank $data_file
+
+# Edge list -> binary void gr
+${galois_dir}/graph-convert-standalone ${nohead_data} ${data_file}.vgr -edgelist2vgr
+echo "Got ${data_file}.vgr"
+
+# Binary void gr -> binary weighted gr
+${galois_dir}/graph-convert-standalone ${data_file}.vgr ${data_file}.gr -vgr2intgr
+echo "Got ${data_file}.gr"
+
+# Binray void gr transpose
+${galois_dir}/graph-convert-standalone ${data_file}.vgr ${data_file}.tvgr -vgr2tvgr
+echo "Got ${data_file}.gr"
+
+# Binary weighted gr transpose
+${galois_dir}/graph-convert-standalone ${data_file}.gr ${data_file}.tgr -gr2tintgr
+echo "Got ${data_file}.tgr"
+
+# Galois format -> Ligra (pbbs) format
+${galois_dir}/graph-convert-standalone ${data_file}.vgr ${data_file}.adj -vgr2pbbs
+echo "Got ${data_file}.adj"
+${galois_dir}/graph-convert-standalone ${data_file}.gr ${weighted_data}.adj -gr2intpbbs
+echo "Got ${weighted_data}.adj"
 
 # Binary Weighted gr -> weighted Edge List
-#/home/zpeng/code/galois_set/build/release/tools/graph-convert/graph-convert ${data_file}.gr ${weighted_data} -gr2intpbbsedges
 ${galois_dir}/graph-convert-standalone ${data_file}.gr ${weighted_data} -gr2intpbbsedges
-#/home/zpeng/benchmarks/tools/vertex_id_add_one/page_rank ${weighted_data} $nnodes $nedges
 ${tools_dir}/vertex_id_add_one/page_rank ${weighted_data} $nnodes $nedges
-#rm ${weighted_data}
 mv ${weighted_data} ${weighted_data}.pdds
 mv ${weighted_data}_weighted ${weighted_data}
 echo "Got ${weighted_data}"
