@@ -13,13 +13,13 @@ set -x
 #./process.sh $galois_dir $tools_dir /data/zpeng/rmat24/rmat24 16777216 268435456
 
 ## usa_road
-#./process.sh $galois_dir $tools_dir /data/zpeng/road_usa/road_usa 23947347 28854312
-#
+./process.sh $galois_dir $tools_dir /data/zpeng/road_usa/road_usa 23947347 28854312
+
 ## Twt
 #./process.sh $galois_dir $tools_dir /data/zpeng/twt/out.twitter 41652230 1468365182
 
-# rmat27
-./process.sh $galois_dir $tools_dir /data/zpeng/rmat27/rmat27 134217728 2147483648
+## rmat27
+#./process.sh $galois_dir $tools_dir /data/zpeng/rmat27/rmat27 134217728 2147483648
 
 
 set +x

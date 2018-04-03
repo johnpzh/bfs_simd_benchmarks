@@ -1,5 +1,5 @@
 #! /usr/bin/bash
-galois_dir="/home/zpeng/code/galois_set/build/release/tools/graph-convert"
+galois_dir="/home/zpeng/code/galois/build/release/tools/graph-convert-standalone"
 tools_dir="/home/zpeng/benchmarks/tools"
 set -x
 
