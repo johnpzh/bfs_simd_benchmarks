@@ -491,7 +491,6 @@ void cc(
 
 int main(int argc, char *argv[]) 
 {
-	start = omp_get_wtime();
 	char *filename;
 	if (argc > 2) {
 		filename = argv[1];
@@ -528,9 +527,6 @@ int main(int argc, char *argv[])
 	int *is_updating_active_side = (int *) malloc(sizeof(int) * SIDE_LENGTH);
 	unsigned *graph_component = (unsigned *) malloc(NNODES * sizeof(unsigned));
 	
-	now = omp_get_wtime();
-	time_out = fopen(time_file, "w");
-	fprintf(time_out, "input end: %lf\n", now - start);
 #ifdef ONEDEBUG
 	unsigned run_count = 2;
 	printf("Start cc...\n");
@@ -565,12 +561,9 @@ int main(int argc, char *argv[])
 			is_updating_active_side,
 			is_empty_tile,
 			graph_component);
-		now = omp_get_wtime();
-		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 		}
 		bot_best_perform.print_average(NUM_THREADS);
 	}
-	fclose(time_out);
 #ifdef ONEDEBUG
 	print(graph_component);
 #endif

@@ -25,10 +25,10 @@ unsigned CHUNK_SIZE;
 unsigned SIZE_BUFFER_MAX;
 unsigned T_RATIO;
 
-double start;
-double now;
-FILE *time_out;
-char *time_file = "timeline.txt";
+//double start;
+//double now;
+//FILE *time_out;
+//char *time_file = "timeline.txt";
 
 //// PAPI test results
 //static void test_fail(char *file, int line, char *call, int retval){
@@ -1120,7 +1120,6 @@ void graph_input(
 ///////////////////////////////////////////////////////////////////////////////
 int main( int argc, char** argv) 
 {
-	start = omp_get_wtime();
 	char *input_f;
 	
 	if(argc < 4){
@@ -1156,9 +1155,6 @@ int main( int argc, char** argv)
 
 	unsigned source = 0;
 
-	now = omp_get_wtime();
-	time_out = fopen(time_file, "w");
-	fprintf(time_out, "input end: %lf\n", now - start);
 #ifdef ONEDEBUG
 	printf("Input finished: %s\n", input_f);
 	unsigned run_count = 9;
@@ -1191,15 +1187,12 @@ int main( int argc, char** argv)
 				tile_offsets,
 				tile_sizes,
 				source);
-		now = omp_get_wtime();
-		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 #ifdef ONEDEBUG
 		printf("Thread %u finished.\n", NUM_THREADS);
 #endif
 		}
 		bot_best_perform.print_average(NUM_THREADS);
 	}
-	fclose(time_out);
 
 	// cleanup memory
 	free( graph_heads);

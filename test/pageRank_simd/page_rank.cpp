@@ -33,10 +33,10 @@ unsigned CHUNK_SIZE;
 unsigned SIZE_BUFFER_MAX;
 unsigned ROW_STEP;
 
-double start;
-double now;
-FILE *time_out;
-char *time_file = "timeline.txt";
+//double start;
+//double now;
+//FILE *time_out;
+//char *time_file = "timeline.txt";
 
 
 /////////////////////
@@ -563,9 +563,6 @@ void input(char filename[])
 
 	float *rank = (float *) _mm_malloc(NNODES * sizeof(float), ALIGNED_BYTES);
 	float *sum = (float *) _mm_malloc(NNODES * sizeof(float), ALIGNED_BYTES);
-	now = omp_get_wtime();
-	time_out = fopen(time_file, "w");
-	fprintf(time_out, "input end: %lf\n", now - start);
 #ifdef ONEDEBUG
 	unsigned bound_i = 7;
 #else
@@ -599,13 +596,10 @@ void input(char filename[])
 				tile_offsets, \
 				num_tiles, \
 				side_length);
-		now = omp_get_wtime();
-		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 
 		}
 		bot_best_perform.print_average(NUM_THREADS);
 	}
-	fclose(time_out);
 
 #ifdef ONEDEBUG
 	//print(rank);
@@ -621,7 +615,6 @@ void input(char filename[])
 }
 int main(int argc, char *argv[]) 
 {
-	start = omp_get_wtime();
 	char *filename;
 	if (argc > 3) {
 		filename = argv[1];

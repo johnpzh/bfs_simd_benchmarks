@@ -34,10 +34,10 @@ unsigned SIZE_BUFFER_MAX;
 unsigned CHUNK_SIZE;
 unsigned T_RATIO;
 
-double start;
-double now;
-FILE *time_out;
-char *time_file = "timeline.txt";
+//double start;
+//double now;
+//FILE *time_out;
+//char *time_file = "timeline.txt";
 
 enum Status {
 		UNDECIDED,
@@ -951,7 +951,6 @@ void MIS(
 
 int main(int argc, char *argv[]) 
 {
-	start = omp_get_wtime();
 	char *filename;
 	if (argc > 3) {
 		filename = argv[1];
@@ -984,9 +983,6 @@ int main(int argc, char *argv[])
 
 	unsigned source = 0;
 
-	now = omp_get_wtime();
-	time_out = fopen(time_file, "w");
-	fprintf(time_out, "input end: %lf\n", now - start);
 #ifdef ONEDEBUG
 	printf("Input finished: %s\n", filename);
 	unsigned run_count = 7;
@@ -1014,12 +1010,9 @@ int main(int argc, char *argv[])
 			tile_sizes,
 			source);
 		//// Re-initializing
-		now = omp_get_wtime();
-		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 		}
 		bot_best_perform.print_average(NUM_THREADS);
 	}
-	fclose(time_out);
 
 	// Free memory
 	free(graph_heads);

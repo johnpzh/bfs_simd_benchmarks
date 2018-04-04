@@ -39,10 +39,10 @@ unsigned SIZE_BUFFER_MAX;
 unsigned T_RATIO;
 unsigned WORK_LOAD;
 
-double start;
-double now;
-FILE *time_out;
-char *time_file = "timeline.txt";
+//double start;
+//double now;
+//FILE *time_out;
+//char *time_file = "timeline.txt";
 
 // PAPI test results
 static void test_fail(char *file, int line, char *call, int retval){
@@ -1708,27 +1708,27 @@ inline void BFS_dense_reverse(
 // End Dense
 ////////////////////////////////////////////////////////////////////////
 
-double dense_time;
-double to_dense_time;
-double sparse_time;
-double to_sparse_time;
-double update_time;
-double other_time;
-double run_time;
+//double dense_time;
+//double to_dense_time;
+//double sparse_time;
+//double to_sparse_time;
+//double update_time;
+//double other_time;
+//double run_time;
 
-void print_time()
-{
-	auto percent = [=] (double t) {
-		return t/run_time * 100.0;
-	};
-	printf("dense_time: %f (%.2f%%)\n", dense_time, percent(dense_time));
-	printf("to_dense_time: %f (%.2f%%)\n", to_dense_time, percent(to_dense_time));
-	printf("sparse_time: %f (%.2f%%)\n", sparse_time, percent(sparse_time));
-	printf("to_sparse_time: %f (%.2f%%)\n", to_sparse_time, percent(to_sparse_time));
-	printf("update_time: %f (%.2f%%)\n", update_time, percent(update_time));
-	printf("other_time: %f (%.2f%%)\n", other_time, percent(other_time));
-	printf("=========================\n");
-}
+//void print_time()
+//{
+//	auto percent = [=] (double t) {
+//		return t/run_time * 100.0;
+//	};
+//	printf("dense_time: %f (%.2f%%)\n", dense_time, percent(dense_time));
+//	printf("to_dense_time: %f (%.2f%%)\n", to_dense_time, percent(to_dense_time));
+//	printf("sparse_time: %f (%.2f%%)\n", sparse_time, percent(sparse_time));
+//	printf("to_sparse_time: %f (%.2f%%)\n", to_sparse_time, percent(to_sparse_time));
+//	printf("update_time: %f (%.2f%%)\n", update_time, percent(update_time));
+//	printf("other_time: %f (%.2f%%)\n", other_time, percent(other_time));
+//	printf("=========================\n");
+//}
 
 void BC(
 		unsigned *graph_heads, 
@@ -1747,11 +1747,11 @@ void BC(
 		unsigned *tile_sizes_reverse,
 		const unsigned &source)
 {
-	dense_time = 0.0;
-	to_dense_time = 0.0;
-	sparse_time = 0.0 ;
-	to_sparse_time = 0.0;
-	update_time = 0.0;
+	//dense_time = 0.0;
+	//to_dense_time = 0.0;
+	//sparse_time = 0.0 ;
+	//to_sparse_time = 0.0;
+	//update_time = 0.0;
 
 	omp_set_num_threads(NUM_THREADS);
 	//unsigned *num_paths = (unsigned *) calloc(NNODES, sizeof(unsigned));
@@ -1773,8 +1773,8 @@ void BC(
 
 	num_paths[source] = 1;
 	// First is the Sparse
-	double time_now = omp_get_wtime();
-	double last_time = omp_get_wtime();
+	//double time_now = omp_get_wtime();
+	//double last_time = omp_get_wtime();
 	frontier_size = 1;
 	h_graph_visited[source] = 1;
 	unsigned *h_graph_queue = (unsigned *) _mm_malloc(frontier_size * sizeof(unsigned), ALIGNED_BYTES);
@@ -1805,15 +1805,13 @@ void BC(
 	frontier_sizes.push_back(frontier_size);
 	bool last_is_dense = false;
 	is_dense_frontier.push_back(last_is_dense);
-	sparse_time += omp_get_wtime() - last_time;
+	//sparse_time += omp_get_wtime() - last_time;
 	// Update the h_graph_visited, get the sum of the number of active nodes and their out degrees.
-	last_time = omp_get_wtime();
 	unsigned out_degree = update_visited_sparse(
 											h_graph_visited,
 											h_graph_queue,
 											frontier_size,
 											graph_degrees);
-	update_time += omp_get_wtime() - last_time;
 //	unsigned out_degree = 0;
 //#pragma omp parallel for reduction(+: out_degree)
 //	for (unsigned i = 0; i < frontier_size; ++i)
@@ -1827,16 +1825,13 @@ void BC(
 	while (true) {
 		if (frontier_size + out_degree > bfs_threshold) {
 			if (!last_is_dense) {
-				last_time = omp_get_wtime();
 				free(is_active_side);
 				is_active_side = (int *) calloc(NNODES, sizeof(int));
 				h_graph_mask = to_dense(
 					is_active_side, 
 					h_graph_queue, 
 					frontier_size);
-				to_dense_time += omp_get_wtime() - last_time;
 			}
-			last_time = omp_get_wtime();
 			unsigned *new_mask = BFS_dense(
 					graph_heads,
 					graph_tails,
@@ -1858,17 +1853,13 @@ void BC(
 			last_is_dense = true;
 			frontiers.push_back(h_graph_mask);
 			is_dense_frontier.push_back(last_is_dense);
-			dense_time += omp_get_wtime() - last_time;
 		} else {
 			// Sparse
 			if (last_is_dense) {
-				last_time = omp_get_wtime();
 				h_graph_queue = to_sparse(
 					frontier_size,
 					h_graph_mask);
-				to_sparse_time += omp_get_wtime() - last_time;
 			}
-			last_time = omp_get_wtime();
 			new_queue = BFS_sparse(
 								h_graph_queue,
 								frontier_size,
@@ -1885,11 +1876,9 @@ void BC(
 			last_is_dense = false;
 			frontiers.push_back(h_graph_queue);
 			is_dense_frontier.push_back(last_is_dense);
-			sparse_time += omp_get_wtime() - last_time;
 		}
 		// Update h_graph_visited; Get the sum again.
 		if (last_is_dense) {
-			last_time = omp_get_wtime();
 			update_visited_dense(
 					frontier_size,
 					out_degree,
@@ -1899,12 +1888,10 @@ void BC(
 					is_updating_active_side,
 					graph_degrees);
 			frontier_sizes.push_back(frontier_size);
-			update_time += omp_get_wtime() - last_time;
 			if (0 == frontier_size) {
 				break;
 			}
 		} else {
-			last_time = omp_get_wtime();
 			frontier_sizes.push_back(frontier_size);
 			if (0 == frontier_size) {
 				break;
@@ -1914,7 +1901,6 @@ void BC(
 										h_graph_queue,
 										frontier_size,
 										graph_degrees);
-			update_time += omp_get_wtime() - last_time;
 //			out_degree = 0;
 //#pragma omp parallel for reduction(+: out_degree)
 //			for (unsigned i = 0; i < frontier_size; ++i) {
@@ -1925,8 +1911,6 @@ void BC(
 		}
 	}
 
-	double first_phase_time = omp_get_wtime() - time_now;
-	time_now = omp_get_wtime();
 		
 	//// First phase
 	//while (0 != frontier_size) {
@@ -2028,15 +2012,12 @@ void BC(
 	for (int lc = level_count - 1; lc >= 0; --lc) {
 		frontier = frontiers[lc];
 		if (is_dense_frontier[lc]) {
-			last_time = omp_get_wtime();
 			update_visited_dense_reverse(
 										frontier,
 										h_graph_visited,
 										is_active_side,
 										dependencies,
 										inverse_num_paths);
-			update_time += omp_get_wtime() - last_time;
-			last_time = omp_get_wtime();
 			BFS_dense_reverse(
 					graph_heads_reverse,
 					graph_tails_reverse,
@@ -2046,18 +2027,14 @@ void BC(
 					tile_sizes_reverse,
 					is_active_side,
 					dependencies);
-			dense_time += omp_get_wtime() - last_time;
 		} else {
 			unsigned queue_size = frontier_sizes[lc];
-			last_time = omp_get_wtime();
 			update_visited_sparse_reverse(
 										frontier,
 										queue_size,
 										h_graph_visited,
 										dependencies,
 										inverse_num_paths);
-			update_time += omp_get_wtime() - last_time;
-			last_time = omp_get_wtime();
 			BFS_sparse_reverse(
 							frontier,
 							queue_size,
@@ -2066,7 +2043,6 @@ void BC(
 							graph_degrees_reverse,
 							h_graph_visited,
 							dependencies);
-			sparse_time += omp_get_wtime() - last_time;
 		}
 	}
 	////Test
@@ -2106,9 +2082,9 @@ void BC(
 		_mm512_mask_store_ps(dependencies + bound_i, in_m, new_dep_v);
 	}
 
-	double second_phase_time = omp_get_wtime() - time_now;
 
 	//printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
+	double run_time;
 	printf("%u %f\n", NUM_THREADS, run_time = omp_get_wtime() - start_time);
 	bot_best_perform.record(run_time, NUM_THREADS);
 	//// PAPI results
@@ -2152,7 +2128,6 @@ void BC(
 
 int main(int argc, char *argv[]) 
 {
-	start = omp_get_wtime();
 	char *filename;
 	if (argc > 3) {
 		filename = argv[1];
@@ -2200,9 +2175,6 @@ int main(int argc, char *argv[])
 
 	unsigned source = 0;
 
-	now = omp_get_wtime();
-	time_out = fopen(time_file, "w");
-	fprintf(time_out, "input end: %lf\n", now - start);
 #ifdef ONEDEBUG
 	printf("Input finished: %s\n", filename);
 	unsigned run_count = 9;
@@ -2248,13 +2220,10 @@ int main(int argc, char *argv[])
 			tile_sizes_reverse,
 			source);
 		//// Re-initializing
-		now = omp_get_wtime();
-		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 		}
 		bot_best_perform.print_average(NUM_THREADS);
 	}
 	//}
-	fclose(time_out);
 
 	// Free memory
 	free(graph_heads);

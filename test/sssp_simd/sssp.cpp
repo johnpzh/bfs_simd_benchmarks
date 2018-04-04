@@ -1306,7 +1306,6 @@ int main(int argc, char *argv[])
 {
 	int is_weighted_graph = 0;
 	// Process the options
-	start = omp_get_wtime();
 	char *filename;
 	if (argc > 3) {
 		filename = argv[1];
@@ -1383,9 +1382,6 @@ int main(int argc, char *argv[])
 	//int *is_updating_active_side = (int *) malloc(sizeof(int) * SIDE_LENGTH);
 	unsigned source = 0;
 	
-	now = omp_get_wtime();
-	time_out = fopen(time_file, "w");
-	fprintf(time_out, "input end: %lf\n", now - start);
 #ifdef ONEDEBUG
 	printf("SSSP starts...\n");
 	unsigned run_count = 9;
@@ -1434,12 +1430,9 @@ int main(int argc, char *argv[])
 				//distances,
 				source);
 		}
-		now = omp_get_wtime();
-		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 		}
 		bot_best_perform.print_average(NUM_THREADS);
 	}
-	fclose(time_out);
 
 	// Free memory
 	free(graph_heads);

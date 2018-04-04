@@ -12,7 +12,7 @@ bfs_stripe_length=$4
 pr_tile_size=$5
 pr_stripe_length=$6
 
-output=output_$(date +%Y%m%d-%H%M%S)_${mark}.txt
+output=output_$(date +%Y%m%d-%H%M%S)_graphPhi_${mark}.txt
 :> $output
 
 set -x
