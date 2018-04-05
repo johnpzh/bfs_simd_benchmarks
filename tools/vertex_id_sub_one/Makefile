@@ -6,8 +6,8 @@ else
 	CPPFLAGS = -Wall -Wextra -g -std=c++14 -qopenmp -O3 -qopt-report=5 -qopt-report-phase=vec
 endif
 
-ifeq (${symmetric}, 1)
-	CPPFLAGS += -DONESYMMETRIC
+ifeq (${weighted}, 1)
+	CPPFLAGS += -DWEIGHTED
 endif
 
 .PHONY: clean

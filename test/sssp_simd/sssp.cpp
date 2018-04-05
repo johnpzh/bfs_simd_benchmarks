@@ -337,17 +337,26 @@ inline void sssp_kernel_dense_weighted(
 		__m512i dists_head_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), is_active_m, head_v, dists, sizeof(unsigned));
 		__m512i weights_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), is_active_m, weights_buffer + edge_i);
 		__m512i dists_tmp_v = _mm512_mask_add_epi32(_mm512_undefined_epi32(), is_active_m, dists_head_v, weights_v);
-		__mmask16 is_minusone_m = _mm512_mask_cmpeq_epi32_mask(is_active_m, dists_end_v, _mm512_set1_epi32(-1));
+		//__mmask16 is_minusone_m = _mm512_mask_cmpeq_epi32_mask(is_active_m, dists_end_v, _mm512_set1_epi32(-1));
 		__mmask16 is_shorter_m = _mm512_mask_cmplt_epi32_mask(is_active_m, dists_tmp_v, dists_end_v);
-		__mmask16 need_update_m = is_minusone_m | is_shorter_m;
-		if (!need_update_m) {
+		//__mmask16 need_update_m = is_minusone_m | is_shorter_m;
+		//if (!need_update_m) {
+		//	continue;
+		//}
+		if (!is_shorter_m) {
 			continue;
 		}
 		_mm512_mask_i32scatter_epi32(dists, need_update_m, end_v, dists_tmp_v, sizeof(unsigned));
-		_mm512_mask_i32scatter_epi32(h_updating_graph_mask, need_update_m, end_v, _mm512_set1_epi32(1), sizeof(int));
+
+		__m512i updating_active_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), is_shorter_m, end_v, h_updating_graph_mask, sizeof(int));
+		__mmask16 not_updating_active_m = _mm512_testn_epi32_mask(updating_active_v, _mm512_set1_epi32(-1));
+		if (!not_updating_active_m) {
+			continue;
+		}
+		_mm512_mask_i32scatter_epi32(h_updating_graph_mask, not_updating_active_m, end_v, _mm512_set1_epi32(1), sizeof(int));
 		__m512i TILE_WIDTH_v = _mm512_set1_epi32(TILE_WIDTH);
 		__m512i side_id_v = _mm512_div_epi32(end_v, TILE_WIDTH_v);
-		_mm512_mask_i32scatter_epi32(is_updating_active_side, need_update_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
+		_mm512_mask_i32scatter_epi32(is_updating_active_side, not_updating_active_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
 	}
 
 	if (remainder > 0) {
@@ -363,17 +372,26 @@ inline void sssp_kernel_dense_weighted(
 		__m512i dists_head_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), is_active_m, head_v, dists, sizeof(unsigned));
 		__m512i weights_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), is_active_m, weights_buffer + bound_edge_i);
 		__m512i dists_tmp_v = _mm512_mask_add_epi32(_mm512_undefined_epi32(), is_active_m, dists_head_v, weights_v);
-		__mmask16 is_minusone_m = _mm512_mask_cmpeq_epi32_mask(is_active_m, dists_end_v, _mm512_set1_epi32(-1));
+		//__mmask16 is_minusone_m = _mm512_mask_cmpeq_epi32_mask(is_active_m, dists_end_v, _mm512_set1_epi32(-1));
 		__mmask16 is_shorter_m = _mm512_mask_cmplt_epi32_mask(is_active_m, dists_tmp_v, dists_end_v);
-		__mmask16 need_update_m = is_minusone_m | is_shorter_m;
-		if (!need_update_m) {
-			return;
+		//__mmask16 need_update_m = is_minusone_m | is_shorter_m;
+		//if (!need_update_m) {
+		//	return;
+		//}
+		if (!is_shorter_m) {
+			continue;
 		}
 		_mm512_mask_i32scatter_epi32(dists, need_update_m, end_v, dists_tmp_v, sizeof(unsigned));
-		_mm512_mask_i32scatter_epi32(h_updating_graph_mask, need_update_m, end_v, _mm512_set1_epi32(1), sizeof(int));
+
+		__m512i updating_active_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), is_shorter_m, end_v, h_updating_graph_mask, sizeof(int));
+		__mmask16 not_updating_active_m = _mm512_testn_epi32_mask(updating_active_v, _mm512_set1_epi32(-1));
+		if (!not_updating_active_m) {
+			continue;
+		}
+		_mm512_mask_i32scatter_epi32(h_updating_graph_mask, not_updating_active_m, end_v, _mm512_set1_epi32(1), sizeof(int));
 		__m512i TILE_WIDTH_v = _mm512_set1_epi32(TILE_WIDTH);
 		__m512i side_id_v = _mm512_div_epi32(end_v, TILE_WIDTH_v);
-		_mm512_mask_i32scatter_epi32(is_updating_active_side, need_update_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
+		_mm512_mask_i32scatter_epi32(is_updating_active_side, not_updating_active_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
 	}
 //	for (unsigned edge_i = edge_i_start; edge_i < edge_i_bound; ++edge_i) {
 //		unsigned head = heads_buffer[edge_i];
@@ -635,7 +653,8 @@ inline unsigned *to_sparse(
 inline unsigned update_sparse_weighted(
 				unsigned *h_graph_queue,
 				const unsigned &queue_size,
-				unsigned *graph_degrees)
+				unsigned *graph_degrees,
+				int *h_updating_graph_mask)
 {
 //	unsigned out_degree = 0;
 //#pragma omp parallel for reduction(+: out_degree)
@@ -652,6 +671,7 @@ inline unsigned update_sparse_weighted(
 		__m512i degrees_v = _mm512_i32gather_epi32(vertex_id_v, graph_degrees, sizeof(unsigned));
 		unsigned sum_degrees = _mm512_reduce_add_epi32(degrees_v);
 		out_degree += sum_degrees;
+		_mm512_i32scatter_epi32(h_updating_graph_mask, vertex_id_v, sizeof(int));
 	}
 	if (remainder) {
 		__mmask16 in_range_m = (__mmask16) ((unsigned short) 0xffff >> (NUM_P_INT - remainder));
@@ -659,6 +679,7 @@ inline unsigned update_sparse_weighted(
 		__m512i degrees_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_range_m, vertex_id_v, graph_degrees, sizeof(unsigned));
 		unsigned sum_degrees = _mm512_reduce_add_epi32(degrees_v);
 		out_degree += sum_degrees;
+		_mm512_mask_i32scatter_epi32(h_updating_graph_mask, in_range_m, vertex_id_v, sizeof(int));
 	}
 	return out_degree;
 }
@@ -672,9 +693,10 @@ inline unsigned *BFS_kernel_sparse_weighted(
 				unsigned *h_graph_queue,
 				unsigned &queue_size,
 				//unsigned *num_paths,
+				int *visited,
 				unsigned *dists)
 {
-	int *visited = (int *) calloc(NNODES, sizeof(int));
+	//int *visited = (int *) calloc(NNODES, sizeof(int));
 	// from h_graph_queue, get the degrees (para_for)
 	unsigned *degrees = (unsigned *) _mm_malloc(sizeof(unsigned) *  queue_size, ALIGNED_BYTES);
 	unsigned new_queue_size = 0;
@@ -767,7 +789,7 @@ inline unsigned *BFS_kernel_sparse_weighted(
 		}
 	}
 
-	free(visited);
+	//free(visited);
 
 	// refine active vertices, removing visited and redundant (block_para_for)
 	unsigned block_size = 1024 * 2;
@@ -891,6 +913,7 @@ inline unsigned *BFS_sparse_weighted(
 				unsigned *graph_weights_csr,
 				//int *h_graph_visited,
 				//unsigned *num_paths
+				int *h_updating_graph_mask,
 				unsigned *dists)
 {
 	return BFS_kernel_sparse_weighted(
@@ -902,6 +925,7 @@ inline unsigned *BFS_sparse_weighted(
 				h_graph_queue,
 				queue_size,
 				//num_paths,
+				h_updating_graph_mask,
 				dists);
 }
 // end sparse, weighted graph
@@ -948,6 +972,7 @@ void sssp_weighted(
 								graph_edges,
 								graph_degrees,
 								graph_weights_csr,
+								h_updating_graph_mask,
 								dists);
 	_mm_free(h_graph_queue); 
 	h_graph_queue = new_queue;
@@ -956,7 +981,8 @@ void sssp_weighted(
 	out_degree =  update_sparse_weighted(
 							h_graph_queue,
 							frontier_size,
-							graph_degrees);
+							graph_degrees,
+							h_updating_graph_mask);
 
 	unsigned pattern_threshold = NEDGES / T_RATIO;
 
@@ -1009,6 +1035,7 @@ void sssp_weighted(
 									graph_edges,
 									graph_degrees,
 									graph_weights_csr,
+									h_updating_graph_mask,
 									dists);
 			_mm_free(h_graph_queue);
 			h_graph_queue = new_queue;
@@ -1019,7 +1046,8 @@ void sssp_weighted(
 			out_degree =  update_sparse_weighted(
 					h_graph_queue,
 					frontier_size,
-					graph_degrees);
+					graph_degrees,
+					h_updating_graph_mask);
 		}
 	}
 

@@ -4,8 +4,8 @@ set -x
 #./ligra_run.sh pokec /data/zpeng/pokec/soc-pokec 
 #./ligra_run.sh livejournal /data/zpeng/livejournal/livejournal
 #./ligra_run.sh rmat24 /data/zpeng/rmat24/rmat24 
-#./ligra_run.sh road_usa /data/zpeng/road_usa/road_usa -s 
-./ligra_run.sh twt /data/zpeng/twt/out.twitter 
-./ligra_run.sh rmat27 ~/data/rmat27/rmat27
+./ligra_run.sh road_usa /data/zpeng/road_usa/road_usa -s 
+#./ligra_run.sh twt /data/zpeng/twt/out.twitter 
+#./ligra_run.sh rmat27 ~/data/rmat27/rmat27
 
 set +x

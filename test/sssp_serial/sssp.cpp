@@ -270,8 +270,10 @@ inline void sssp_kernel_dense_weighted(
 		unsigned new_dist = dists[head] + graph_weights[edge_i];
 		if (new_dist < dists[end]) {
 			dists[end] = new_dist;
-			graph_updating_active[end] = 1;
-			is_updating_active_side[end/TILE_WIDTH] = 1;
+			if (!graph_updating_active[end]) {
+				graph_updating_active[end] = 1;
+				is_updating_active_side[end/TILE_WIDTH] = 1;
+			}
 		}
 	}
 }
@@ -485,13 +487,15 @@ inline unsigned *to_sparse(
 inline unsigned sparse_update_weighted(
 				unsigned *h_graph_queue,
 				const unsigned &queue_size,
-				unsigned *graph_degrees)
+				unsigned *graph_degrees,
+				int *visited)
 {
 	unsigned out_degree = 0;
 #pragma omp parallel for reduction(+: out_degree)
 	for (unsigned i = 0; i < queue_size; ++i) {
 		unsigned vertex_id = h_graph_queue[i];
 		out_degree += graph_degrees[vertex_id];
+		visited[vertex_id] = 0;
 	}
 	return out_degree;
 }
@@ -506,9 +510,10 @@ inline unsigned *BFS_kernel_sparse_weighted(
 				unsigned *h_graph_queue,
 				unsigned &queue_size,
 				//unsigned *num_paths,
+				int *visited,
 				unsigned *dists)
 {
-	int *visited = (int *) calloc(NNODES, sizeof(int));
+	//int *visited = (int *) calloc(NNODES, sizeof(int));
 	// From h_graph_queue, get the degrees (para_for)
 	unsigned *degrees = (unsigned *) malloc(sizeof(unsigned) *  queue_size);
 	unsigned new_queue_size = 0;
@@ -599,7 +604,7 @@ inline unsigned *BFS_kernel_sparse_weighted(
 		}
 	}
 
-	free(visited);
+	//free(visited);
 
 	// Refine active vertices, removing visited and redundant (block_para_for)
 	unsigned block_size = 1024 * 2;
@@ -697,6 +702,7 @@ inline unsigned *BFS_sparse_weighted(
 				unsigned *graph_weights_csr,
 				//int *h_graph_visited,
 				//unsigned *num_paths
+				int *h_updating_graph_mask,
 				unsigned *dists)
 {
 	return BFS_kernel_sparse_weighted(
@@ -708,6 +714,7 @@ inline unsigned *BFS_sparse_weighted(
 				h_graph_queue,
 				queue_size,
 				//num_paths,
+				h_updating_graph_mask,
 				dists);
 }
 // End Sparse, Weighted Graph
@@ -762,6 +769,7 @@ void sssp_weighted(
 								graph_degrees,
 								graph_weights_csr,
 								//h_graph_visited,
+								h_updating_graph_mask,
 								//num_paths
 								dists);
 	free(h_graph_queue);
@@ -771,7 +779,8 @@ void sssp_weighted(
 	out_degree =  sparse_update_weighted(
 							h_graph_queue,
 							frontier_size,
-							graph_degrees);
+							graph_degrees,
+							h_updating_graph_mask);
 
 	unsigned pattern_threshold = NEDGES / T_RATIO;
 
@@ -815,6 +824,7 @@ void sssp_weighted(
 									graph_weights_csr,
 									//h_graph_visited,
 									//num_paths
+									h_updating_graph_mask,
 									dists);
 			free(h_graph_queue);
 			h_graph_queue = new_queue;
@@ -839,7 +849,8 @@ void sssp_weighted(
 			out_degree =  sparse_update_weighted(
 					h_graph_queue,
 					frontier_size,
-					graph_degrees);
+					graph_degrees,
+					h_updating_graph_mask);
 		}
 		///////////////////////////////////////
 		//unsigned remainder = SIDE_LENGTH % ROW_STEP;

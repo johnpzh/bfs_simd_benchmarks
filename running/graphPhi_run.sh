@@ -17,34 +17,34 @@ output=output_$(date +%Y%m%d-%H%M%S)_graphPhi_${mark}.txt
 
 set -x
 
-# BFS
-echo "BFS:" >> $output
-${apps_dir}/bfs_simd/bfs $data_file $bfs_tile_size $bfs_stripe_length >> $output
-echo "" >> $output
-
-# PageRank
-echo "PageRank:" >> $output
-${apps_dir}/pageRank_simd/page_rank $data_file $pr_tile_size $pr_stripe_length >> $output
-echo "" >> $output
+## BFS
+#echo "BFS:" >> $output
+#${apps_dir}/bfs_simd/bfs $data_file $bfs_tile_size $bfs_stripe_length >> $output
+#echo "" >> $output
+#
+## PageRank
+#echo "PageRank:" >> $output
+#${apps_dir}/pageRank_simd/page_rank $data_file $pr_tile_size $pr_stripe_length >> $output
+#echo "" >> $output
 
 # SSSP
 echo "SSSP:" >> $output
 ${apps_dir}/sssp_simd/sssp ${data_file} $bfs_tile_size $bfs_stripe_length -w >> $output
 echo "" >> $output
 
-# CC
-echo "CC:" >> $output
-${apps_dir}/connectedComponent_simd/cc $data_file $bfs_tile_size $bfs_stripe_length >> $output
-echo "" >> $output
-
-# BC
-echo "BC:" >> $output
-${apps_dir}/betweennessCentrality_simd/bc ${data_file} $bfs_tile_size $bfs_stripe_length >> $output
-echo "" >> $output
-
-# MIS
-echo "MIS:" >> $output
-${apps_dir}/maximalIndependentSet_simd/mis $data_file $bfs_tile_size $bfs_stripe_length >> $output
-echo "" >> $output
+## CC
+#echo "CC:" >> $output
+#${apps_dir}/connectedComponent_simd/cc $data_file $bfs_tile_size $bfs_stripe_length >> $output
+#echo "" >> $output
+#
+## BC
+#echo "BC:" >> $output
+#${apps_dir}/betweennessCentrality_simd/bc ${data_file} $bfs_tile_size $bfs_stripe_length >> $output
+#echo "" >> $output
+#
+## MIS
+#echo "MIS:" >> $output
+#${apps_dir}/maximalIndependentSet_simd/mis $data_file $bfs_tile_size $bfs_stripe_length >> $output
+#echo "" >> $output
 
 set +x
