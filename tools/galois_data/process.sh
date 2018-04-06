@@ -17,13 +17,13 @@ set -x
 ## Vertex id subtract 1 and delete the first line
 #${tools_dir}/vertex_id_sub_one/page_rank $data_file
 #
-## Edge list -> binary void gr
-#${galois_dir}/graph-convert-standalone ${nohead_data} ${data_file}.vgr -edgelist2vgr
-#echo "Got ${data_file}.vgr"
-#
-## Binary void gr -> binary weighted gr
-#${galois_dir}/graph-convert-standalone ${data_file}.vgr ${data_file}.gr -vgr2intgr
-#echo "Got ${data_file}.gr"
+# Edge list -> binary void gr
+${galois_dir}/graph-convert-standalone ${nohead_data} ${data_file}.vgr -edgelist2vgr
+echo "Got ${data_file}.vgr"
+
+# Binary void gr -> binary weighted gr
+${galois_dir}/graph-convert-standalone ${data_file}.vgr ${data_file}.gr -vgr2intgr
+echo "Got ${data_file}.gr"
 
 # Binray void gr transpose
 ${galois_dir}/graph-convert-standalone ${data_file}.vgr ${data_file}.tvgr -vgr2tvgr

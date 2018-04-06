@@ -7,7 +7,7 @@ fi
 mark=$1
 data_file=$2
 opt=$3
-apps_dir=/home/zpeng/code/ligra/apps
+apps_dir=/sciclone/home2/zpeng01/code/ligra/apps
 rounds=10
 
 output=output_$(date +%Y%m%d-%H%M%S)_ligra_${mark}.txt

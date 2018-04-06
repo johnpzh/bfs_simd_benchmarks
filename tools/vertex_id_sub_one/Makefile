@@ -10,6 +10,10 @@ ifeq (${weighted}, 1)
 	CPPFLAGS += -DWEIGHTED
 endif
 
+ifeq (${undirected}, 1)
+	CPPFLAGS += -DUNDIRECTED
+endif
+
 .PHONY: clean
 
 all: page_rank

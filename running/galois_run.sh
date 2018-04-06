@@ -8,7 +8,7 @@ fi
 mark=$1
 data_file=$2
 opt=$3
-galois_dir="/home/zpeng/code/galois/build/release/apps"
+galois_dir="/sciclone/home2/zpeng01/code/galois/build/release/apps"
 rounds=10
 threads=9
 
@@ -66,12 +66,12 @@ for ((i = 6; i < threads; ++i)); do
 done
 echo "" >> $output
 
-## MIS
-#echo "MIS:" >> $output
-#for ((i = 6; i < threads; ++i)); do
-#	power=$((2**${i}))
-#	for ((k = 0; k < rounds; ++k)); do
-#		(set -x; ${galois_dir}/independentset/independentset ${data_file}.vgr -t=${power} -nondet -noverify >> $output)
-#	done
-#done
-#echo "" >> $output
+# MIS
+echo "MIS:" >> $output
+for ((i = 6; i < threads; ++i)); do
+	power=$((2**${i}))
+	for ((k = 0; k < rounds; ++k)); do
+		(set -x; ${galois_dir}/independentset/independentset ${data_file}.vgr -t=${power} -nondet -noverify >> $output)
+	done
+done
+echo "" >> $output
