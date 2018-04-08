@@ -8,7 +8,7 @@ fi
 mark=$1
 data_file=$2
 opt=$3
-galois_dir="/sciclone/home2/zpeng01/code/galois/build/release/apps"
+galois_dir="/home/zpeng/code/galois/build/release/apps"
 rounds=10
 threads=9
 

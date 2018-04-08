@@ -2192,7 +2192,7 @@ int main(int argc, char *argv[])
 	//CHUNK_SIZE_SPARSE = v;
 	CHUNK_SIZE_DENSE = 1024;
 	//CHUNK_SIZE_BLOCK = v;
-	SIZE_BUFFER_MAX = 800;
+	SIZE_BUFFER_MAX = 512;
 	//printf("T_RATIO: %u\n", v);
 	//SIZE_BUFFER_MAX = 1024;
 	// BFS

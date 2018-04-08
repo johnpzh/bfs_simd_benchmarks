@@ -79,7 +79,6 @@ public:
 	{
 		unsigned long old_val;
 		unsigned long new_val;
-		//TODO peg_CAS()
 		do {
 			old_val = effect;
 			new_val = effect + eff;

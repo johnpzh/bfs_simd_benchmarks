@@ -1162,8 +1162,8 @@ int main( int argc, char** argv)
 	unsigned run_count = 9;
 #endif
 	// BFS
-	//SIZE_BUFFER_MAX = 1024;
-	SIZE_BUFFER_MAX = 512;
+	SIZE_BUFFER_MAX = 1024;
+	//SIZE_BUFFER_MAX = 512;
 	//T_RATIO = 100;
 	T_RATIO = 20;
 	CHUNK_SIZE = 2048;

@@ -346,7 +346,7 @@ inline void sssp_kernel_dense_weighted(
 		if (!is_shorter_m) {
 			continue;
 		}
-		_mm512_mask_i32scatter_epi32(dists, need_update_m, end_v, dists_tmp_v, sizeof(unsigned));
+		_mm512_mask_i32scatter_epi32(dists, is_shorter_m, end_v, dists_tmp_v, sizeof(unsigned));
 
 		__m512i updating_active_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), is_shorter_m, end_v, h_updating_graph_mask, sizeof(int));
 		__mmask16 not_updating_active_m = _mm512_testn_epi32_mask(updating_active_v, _mm512_set1_epi32(-1));
@@ -379,14 +379,14 @@ inline void sssp_kernel_dense_weighted(
 		//	return;
 		//}
 		if (!is_shorter_m) {
-			continue;
+			return;
 		}
-		_mm512_mask_i32scatter_epi32(dists, need_update_m, end_v, dists_tmp_v, sizeof(unsigned));
+		_mm512_mask_i32scatter_epi32(dists, is_shorter_m, end_v, dists_tmp_v, sizeof(unsigned));
 
 		__m512i updating_active_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), is_shorter_m, end_v, h_updating_graph_mask, sizeof(int));
 		__mmask16 not_updating_active_m = _mm512_testn_epi32_mask(updating_active_v, _mm512_set1_epi32(-1));
 		if (!not_updating_active_m) {
-			continue;
+			return;
 		}
 		_mm512_mask_i32scatter_epi32(h_updating_graph_mask, not_updating_active_m, end_v, _mm512_set1_epi32(1), sizeof(int));
 		__m512i TILE_WIDTH_v = _mm512_set1_epi32(TILE_WIDTH);
@@ -661,6 +661,7 @@ inline unsigned update_sparse_weighted(
 //	for (unsigned i = 0; i < queue_size; ++i) {
 //		unsigned vertex_id = h_graph_queue[i];
 //		out_degree += graph_degrees[vertex_id];
+//		visited[vertex_id] = 0;
 //	}
 	unsigned out_degree = 0;
 	unsigned remainder = queue_size % NUM_P_INT;
@@ -671,7 +672,7 @@ inline unsigned update_sparse_weighted(
 		__m512i degrees_v = _mm512_i32gather_epi32(vertex_id_v, graph_degrees, sizeof(unsigned));
 		unsigned sum_degrees = _mm512_reduce_add_epi32(degrees_v);
 		out_degree += sum_degrees;
-		_mm512_i32scatter_epi32(h_updating_graph_mask, vertex_id_v, sizeof(int));
+		_mm512_i32scatter_epi32(h_updating_graph_mask, vertex_id_v, _mm512_set1_epi32(0), sizeof(int));
 	}
 	if (remainder) {
 		__mmask16 in_range_m = (__mmask16) ((unsigned short) 0xffff >> (NUM_P_INT - remainder));
@@ -679,7 +680,7 @@ inline unsigned update_sparse_weighted(
 		__m512i degrees_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_range_m, vertex_id_v, graph_degrees, sizeof(unsigned));
 		unsigned sum_degrees = _mm512_reduce_add_epi32(degrees_v);
 		out_degree += sum_degrees;
-		_mm512_mask_i32scatter_epi32(h_updating_graph_mask, in_range_m, vertex_id_v, sizeof(int));
+		_mm512_mask_i32scatter_epi32(h_updating_graph_mask, in_range_m, vertex_id_v, _mm512_set1_epi32(0), sizeof(int));
 	}
 	return out_degree;
 }
