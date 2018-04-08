@@ -7,7 +7,11 @@ fi
 data_file=$1
 tile_size=$2
 stripe_length=$3
+
+tools_dir=
 set -x
+
+
 
 ## CSR tiling
 #cd /home/zpeng/benchmarks/tools/csr_tiling
@@ -43,7 +47,7 @@ set -x
 
 
 # CSR Tiling reverse
-cd /home/zpeng/benchmarks/tools/csr_tiling_reverse
+cd ${tools_dir}/csr_tiling_reverse
 make clean
 make
 ./page_rank $data_file 
@@ -51,13 +55,13 @@ make
 #reversed_data=${data_file}_reverse
 
 # COO Tiling reverse
-cd /home/zpeng/benchmarks/tools/coo_tiling_reverse
+cd ${tools_dir}/coo_tiling_reverse
 make clean
 make
 ./page_rank $data_file $tile_size $tile_size
 
 # Column-major
-cd /home/zpeng/benchmarks/tools/column_major_tile_reverse
+cd ${tools_dir}/column_major_tile_reverse
 make clean
 make
 ./kcore $data_file $tile_size $stripe_length $stripe_length

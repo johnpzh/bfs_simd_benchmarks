@@ -15,6 +15,7 @@ dir=$1
 # Livejournal
 ./non-reorder.sh ${dir}/livejournal/livejournal 16384 256
 ./non-reorder.sh ${dir}/livejournal/livejournal_weighted 16384 256 weighted=1
+./reverse_for_bc.sh ${dir}/livejournal/livejournal 16384 256
 
 ## rmat24
 #./non-reorder.sh ${dir}/rmat24/rmat24 16384 128
@@ -28,8 +29,9 @@ dir=$1
 
 # Twt
 ./non-reorder.sh ${dir}/twt/out.twitter 16384 1024
-./non-reorder.sh ${dir}/twt/out.twitter_weighted 16384 1024 weighted=1
 ./non-reorder.sh ${dir}/twt/out.twitter 32768 1024
+./reverse_for_bc.sh ${dir}/twt/out.twitter 16384 1024
+./non-reorder.sh ${dir}/twt/out.twitter_weighted 16384 1024 weighted=1
 
 ## Friendster
 #./non-reorder.sh ${dir}/friendster/friendster 65536 512

@@ -18,13 +18,15 @@ dir=$1
 
 # rmat24
 ./non-reorder.sh ${dir}/rmat24/rmat24 16384 128
-./non-reorder.sh ${dir}/rmat24/rmat24_weighted 16384 128 weighted=1
 ./non-reorder.sh ${dir}/rmat24/rmat24 32768 512
+./reverse_for_bc.sh ${dir}/rmat24/rmat24 16384 128
+./non-reorder.sh ${dir}/rmat24/rmat24_weighted 16384 128 weighted=1
 
 # rmat27
 ./non-reorder.sh ${dir}/rmat27/rmat27 16384 256
-./non-reorder.sh ${dir}/rmat27/rmat27_weighted 16384 256 weighted=1
 ./non-reorder.sh ${dir}/rmat27/rmat27 16384 8192
+./reverse_for_bc.sh ${dir}/rmat27/rmat27 16384 256
+./non-reorder.sh ${dir}/rmat27/rmat27_weighted 16384 256 weighted=1
 
 ## Twt
 #./non-reorder.sh ${dir}/twt/out.twitter 16384 1024

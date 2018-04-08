@@ -9,8 +9,9 @@ dir=$1
 
 # Pokec
 ./non-reorder.sh ${dir}/pokec/soc-pokec 8192 128
-./non-reorder.sh ${dir}/pokec/soc-pokec_weighted 8192 128 weighted=1
 ./non-reorder.sh ${dir}/pokec/soc-pokec 4096 16
+./reverse_for_bc.sh ${dir}/pokec/soc-pokec 8192 128
+./non-reorder.sh ${dir}/pokec/soc-pokec_weighted 8192 128 weighted=1
 
 ## Livejournal
 #./non-reorder.sh ${dir}/livejournal/livejournal 16384 256
@@ -33,5 +34,6 @@ dir=$1
 
 # Friendster
 ./non-reorder.sh ${dir}/friendster/friendster 65536 512
-./non-reorder.sh ${dir}/friendster/friendster_weighted 65536 512 weighted=1
 ./non-reorder.sh ${dir}/friendster/friendster 131072 512
+./reverse_for_bc.sh ${dir}/friendster/friendster 65536 512
+./non-reorder.sh ${dir}/friendster/friendster_weighted 65536 512 weighted=1
