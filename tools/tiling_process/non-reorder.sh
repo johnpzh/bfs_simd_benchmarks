@@ -9,7 +9,7 @@ tile_size=$2
 stripe_length=$3
 weighted=$4
 
-tool_dir=
+tool_dir=/sciclone/home2/zpeng01/benchmarks/tools
 
 set -x
 

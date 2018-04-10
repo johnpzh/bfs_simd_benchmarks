@@ -2,6 +2,7 @@
 #define PEG_UTIL_H
 #include <stdio.h>
 #include <float.h>
+#include <immintrin.h>
 
 ////////////////////////////////////////////////////////////
 // Campare and Swap
@@ -110,5 +111,57 @@ public:
 };
 static SIMDUtil bot_simd_util;
 // End SIMD Utilization
+////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////
+// Necessary Access Ratio
+class NecessaryAccess {
+private:
+	unsigned long effect = 0;
+	unsigned long total = 0;
+
+	unsigned mmask16_count_one(__mmask16 m)
+	{
+		__m512i ones = _mm512_mask_set1_epi32(_mm512_set1_epi32(0), m, 1);
+		return _mm512_reduce_add_epi32(ones);
+	}
+
+public:
+	void record(__mmask16 active_mask, unsigned long all) 
+	{
+		unsigned long eff = mmask16_count_one(active_mask);
+		unsigned long old_val;
+		unsigned long new_val;
+		do {
+			old_val = effect;
+			new_val = effect + eff;
+		} while (!peg_CAS(&effect, old_val, new_val));
+
+		do {
+			old_val = total;
+			new_val = total + all;
+		} while (!peg_CAS(&total, old_val, new_val));
+
+		////////////////////////////////////
+		//effect += eff;
+		//total += all;
+	}
+	void print(unsigned metrics = (unsigned) -1) 
+	{
+		printf("effect: %lu, total: %lu\n", effect, total);//test;
+		if (metrics == (unsigned) -1) {
+			printf("Necessary Access: %.2f%%\n", (double) effect/total * 100.0);
+		} else {
+			printf("%u %f\n", metrics, 1.0 * effect/total);
+		}
+	}
+	void reset() 
+	{
+		effect = 0;
+		total = 0;
+	}
+};
+static NecessaryAccess bot_necessary_access;
+// End Necessary Access Ratio
 ////////////////////////////////////////////////////////////
 #endif

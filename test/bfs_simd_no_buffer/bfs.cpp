@@ -6,7 +6,7 @@
 #include <string>
 #include <unistd.h>
 #include <immintrin.h>
-#include <papi.h>
+#include "../../include/peg_util.h"
 
 using std::string;
 using std::to_string;
@@ -30,24 +30,6 @@ double now;
 FILE *time_out;
 char *time_file = "timeline.txt";
 
-// PAPI test results
-static void test_fail(char *file, int line, char *call, int retval){
-	printf("%s\tFAILED\nLine # %d\n", file, line);
-	if ( retval == PAPI_ESYS ) {
-		char buf[128];
-		memset( buf, '\0', sizeof(buf) );
-		sprintf(buf, "System error in %s:", call );
-		perror(buf);
-	}
-	else if ( retval > 0 ) {
-		printf("Error calculating: %s\n", call );
-	}
-	else {
-		printf("Error in %s: %s\n", call, PAPI_strerror(retval) );
-	}
-	printf("\n");
-	exit(1);
-}
 //////////////////////////////////////////////////////////////////
 // Dense (bottom-up)
 
@@ -192,6 +174,7 @@ inline void bfs_kernel_dense(
 	unsigned remainder = size_buffer % NUM_P_INT;
 	unsigned bound_edge_i = size_buffer - remainder;
 	for (unsigned edge_i = 0; edge_i < bound_edge_i; edge_i += NUM_P_INT) {
+		bot_simd_util.record(NUM_P_INT, NUM_P_INT);
 		__m512i head_v = _mm512_loadu_si512(heads_buffer + edge_i);
 		__m512i active_flag_v = _mm512_i32gather_epi32(head_v, h_graph_mask, sizeof(int));
 		__mmask16 is_active_m = _mm512_test_epi32_mask(active_flag_v, _mm512_set1_epi32(-1));
@@ -217,6 +200,7 @@ inline void bfs_kernel_dense(
 	}
 
 	if (remainder) {
+		bot_simd_util.record(0, NUM_P_INT);
 		unsigned short in_range_m_t = (unsigned short) 0xFFFF >> (NUM_P_INT - remainder);
 		__mmask16 in_range_m = (__mmask16) in_range_m_t;
 		__m512i head_v = _mm512_mask_loadu_epi32(_mm512_undefined_epi32(), in_range_m, heads_buffer + bound_edge_i);
@@ -835,13 +819,6 @@ void graph_prepare(
 	unsigned frontier_size = 1;
 	unsigned *frontier = (unsigned *) _mm_malloc(sizeof(unsigned) * frontier_size, ALIGNED_BYTES);
 	frontier[0] = source;
-	//// PAPI
-	//int events[2] = { PAPI_L2_TCA, PAPI_L2_TCM};
-	//int retval;
-	//if ((retval = PAPI_start_counters(events, 2)) < PAPI_OK) {
-	//	test_fail(__FILE__, __LINE__, "PAPI_start_counters", retval);
-	//}
-	//// End PAPI
 	double last_time = omp_get_wtime();
 	double start_time = omp_get_wtime();
 	unsigned *new_frontier = BFS_sparse(
@@ -951,46 +928,11 @@ void graph_prepare(
 		//printf("frontier_size: %u\n", frontier_size);//test
 	}
 	double end_time = omp_get_wtime();
-	//// PAPI results
-	//long long values[2];
-	//if ((retval = PAPI_stop_counters(values, 2)) < PAPI_OK) {
-	//	test_fail(__FILE__, __LINE__, "PAPI_stop_counters", retval);
-	//}
-	//printf("cache access: %lld, cache misses: %lld, miss rate: %.2f%%\n", values[0], values[1], 100.0* values[1]/values[0]);
-	//// End PAPI results
-	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
+	//printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
+	bot_simd_util.print();
 	//print_time();//test
 	
 	//Store the result into a file
-
-#ifdef ONEDEBUG
-	NUM_THREADS = 64;
-	omp_set_num_threads(NUM_THREADS);
-	unsigned num_lines = NNODES / NUM_THREADS;
-#pragma omp parallel
-{
-	unsigned tid = omp_get_thread_num();
-	unsigned offset = tid * num_lines;
-	string file_prefix = "path/path";
-	string file_name = file_prefix + to_string(tid) + ".txt";
-	FILE *fpo = fopen(file_name.c_str(), "w");
-	if (!fpo) {
-		fprintf(stderr, "Error: cannot open file %s.\n", file_name.c_str());
-		exit(1);
-	}
-	unsigned bound_index;
-	if (tid != NUM_THREADS - 1) {
-		bound_index = offset + num_lines;
-	} else {
-		bound_index = NNODES;
-	}
-	for (unsigned index = offset; index < bound_index; ++index) {
-		fprintf(fpo, "%d) cost:%d\n", index, h_cost[index]);
-	}
-
-	fclose(fpo);
-}
-#endif
 
 	free(frontier);
 	free( h_graph_mask);
@@ -1158,7 +1100,6 @@ void graph_input(
 ///////////////////////////////////////////////////////////////////////////////
 int main( int argc, char** argv) 
 {
-	start = omp_get_wtime();
 	char *input_f;
 	
 	if(argc < 4){
@@ -1194,48 +1135,26 @@ int main( int argc, char** argv)
 
 	unsigned source = 0;
 
-	now = omp_get_wtime();
-	time_out = fopen(time_file, "w");
-	fprintf(time_out, "input end: %lf\n", now - start);
-#ifdef ONEDEBUG
-	printf("Input finished: %s\n", input_f);
-	unsigned run_count = 9;
-#else
-	unsigned run_count = 9;
-#endif
 	// BFS
 	//SIZE_BUFFER_MAX = 1024;
 	SIZE_BUFFER_MAX = 512;
 	//T_RATIO = 100;
 	T_RATIO = 20;
 	CHUNK_SIZE = 2048;
-	for (unsigned cz = 0; cz < 3; ++cz) {
-	for (unsigned i = 6; i < run_count; ++i) {
-		NUM_THREADS = (unsigned) pow(2, i);
+	NUM_THREADS = 256;
 #ifndef ONEDEBUG
 		//sleep(10);
 #endif
-		// Re-initializing
-		for (unsigned k = 0; k < 3; ++k) {
 
-		graph_prepare(
-				graph_vertices,
-				graph_edges,
-				graph_heads,
-				graph_tails, 
-				graph_degrees,
-				tile_offsets,
-				tile_sizes,
-				source);
-		now = omp_get_wtime();
-		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
-#ifdef ONEDEBUG
-		printf("Thread %u finished.\n", NUM_THREADS);
-#endif
-		}
-	}
-	}
-	fclose(time_out);
+	graph_prepare(
+			graph_vertices,
+			graph_edges,
+			graph_heads,
+			graph_tails, 
+			graph_degrees,
+			tile_offsets,
+			tile_sizes,
+			source);
 
 	// cleanup memory
 	free( graph_heads);

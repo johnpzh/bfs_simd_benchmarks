@@ -1,0 +1,20 @@
+Warning: no access to tty (Bad file descriptor).
+Thus no job control in this shell.
+++ date +%Y%m%d-%H%M%S
++ output=output_20180407-110002.txt
++ :
++ (( i = min_tile_size ))
++ (( i <= max_tile_size ))
++ /sciclone/home2/zpeng01/benchmarks/test/bfs_simd/bfs /sciclone/scr-mlt/zpeng01/friendster/friendster 131072 16
++ (( i *= 2 ))
++ (( i <= max_tile_size ))
++ /sciclone/home2/zpeng01/benchmarks/test/bfs_simd/bfs /sciclone/scr-mlt/zpeng01/friendster/friendster 262144 16
++ (( i *= 2 ))
++ (( i <= max_tile_size ))
++ /sciclone/home2/zpeng01/benchmarks/test/bfs_simd/bfs /sciclone/scr-mlt/zpeng01/friendster/friendster 524288 16
++ (( i *= 2 ))
++ (( i <= max_tile_size ))
++ /sciclone/home2/zpeng01/benchmarks/test/bfs_simd/bfs /sciclone/scr-mlt/zpeng01/friendster/friendster 1048576 16
++ (( i *= 2 ))
++ (( i <= max_tile_size ))
++ set +x

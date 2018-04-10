@@ -1,0 +1,18 @@
+Warning: no access to tty (Bad file descriptor).
+Thus no job control in this shell.
+rm -f bfs
+icpc -Wall -Wextra -g -std=c++14 -qopenmp -DONEDEBUG -o bfs bfs.cpp 
+1 20.076516
+2 19.195239
+4 28.794380
+8 22.250265
+16 17.324319
+32 23.393100
+64 262.399455
+128 46.184230
+256 5.233790
+512 16.025499
+1024 99.856254
+2048 34.191519
+4096 18.372591
+8192 13.031716
