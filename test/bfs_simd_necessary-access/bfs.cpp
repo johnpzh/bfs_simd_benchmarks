@@ -195,9 +195,13 @@ inline void bfs_kernel_dense(
 		__m512i head_v = _mm512_load_epi32(heads_buffer + edge_i);
 		__m512i active_flag_v = _mm512_i32gather_epi32(head_v, h_graph_mask, sizeof(int));
 		__mmask16 is_active_m = _mm512_test_epi32_mask(active_flag_v, _mm512_set1_epi32(-1));
+
+		bot_necessary_access.record(is_active_m, NUM_P_INT);
+
 		if (!is_active_m) {
 			continue;
 		}
+		bot_necessary_access.record(_mm512)
 		__m512i tail_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), is_active_m, tails_buffer + edge_i);
 		//__m512i visited_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(1), is_active_m, tail_v, h_graph_visited, sizeof(int));
 		//__mmask16 not_visited_m = _mm512_testn_epi32_mask(visited_flag_v, _mm512_set1_epi32(1));
@@ -222,6 +226,9 @@ inline void bfs_kernel_dense(
 		__m512i head_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, heads_buffer + bound_edge_i);
 		__m512i active_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_range_m, head_v, h_graph_mask, sizeof(int));
 		__mmask16 is_active_m = _mm512_test_epi32_mask(active_flag_v, _mm512_set1_epi32(-1));
+
+		bot_necessary_access.record(is_active_m, remainder);
+
 		if (!is_active_m) {
 			return;
 		}
@@ -918,40 +925,12 @@ void graph_prepare(
 	//}
 	//printf("cache access: %lld, cache misses: %lld, miss rate: %.2f%%\n", values[0], values[1], 100.0* values[1]/values[0]);
 	//// End PAPI results
-	printf("%u %lf\n", NUM_THREADS, run_time = (end_time - start_time));
-	bot_best_perform.record(run_time, NUM_THREADS);
+	//printf("%u %lf\n", NUM_THREADS, run_time = (end_time - start_time));
+	//bot_best_perform.record(run_time, NUM_THREADS);
 	//print_time();//test
 	
 	//Store the result into a file
 
-#ifdef ONEDEBUG
-	NUM_THREADS = 64;
-	omp_set_num_threads(NUM_THREADS);
-	unsigned num_lines = NNODES / NUM_THREADS;
-#pragma omp parallel
-{
-	unsigned tid = omp_get_thread_num();
-	unsigned offset = tid * num_lines;
-	string file_prefix = "path/path";
-	string file_name = file_prefix + to_string(tid) + ".txt";
-	FILE *fpo = fopen(file_name.c_str(), "w");
-	if (!fpo) {
-		fprintf(stderr, "Error: cannot open file %s.\n", file_name.c_str());
-		exit(1);
-	}
-	unsigned bound_index;
-	if (tid != NUM_THREADS - 1) {
-		bound_index = offset + num_lines;
-	} else {
-		bound_index = NNODES;
-	}
-	for (unsigned index = offset; index < bound_index; ++index) {
-		fprintf(fpo, "%d) cost:%d\n", index, h_cost[index]);
-	}
-
-	fclose(fpo);
-}
-#endif
 
 	free(frontier);
 	free( h_graph_mask);
@@ -980,8 +959,8 @@ void graph_input(
 	/////////////////////////////////////////////////////////////////////
 	//string prefix = string(input_f) + "_untiled";
 	//string prefix = string(input_f) + "_coo-tiled-" + to_string(TILE_WIDTH);
-	string file_name_pre = string(input_f) + "_reorder";
-	//string file_name_pre = string(input_f);
+	//string file_name_pre = string(input_f) + "_reorder";
+	string file_name_pre = string(input_f);
 	string prefix = file_name_pre + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH);
 	//string prefix = string(input_f) + "_col-2-coo-tiled-" + to_string(TILE_WIDTH);
 	string fname = prefix + "-0";
@@ -1168,32 +1147,19 @@ int main( int argc, char** argv)
 	//T_RATIO = 100;
 	T_RATIO = 20;
 	CHUNK_SIZE = 2048;
-	printf("tile_size: %u\n", TILE_WIDTH);
-	printf("stripe_length: %u\n", ROW_STEP);
-	for (unsigned i = 6; i < run_count; ++i) {
-		NUM_THREADS = (unsigned) pow(2, i);
-		bot_best_perform.reset();
-#ifndef ONEDEBUG
-		//sleep(10);
-#endif
+	NUM_THREADS = 64;
 		// Re-initializing
-		for (unsigned k = 0; k < 10; ++k) {
 
-		graph_prepare(
-				graph_vertices,
-				graph_edges,
-				graph_heads,
-				graph_tails, 
-				graph_degrees,
-				tile_offsets,
-				tile_sizes,
-				source);
-#ifdef ONEDEBUG
-		printf("Thread %u finished.\n", NUM_THREADS);
-#endif
-		}
-		bot_best_perform.print_average(NUM_THREADS);
-	}
+	graph_prepare(
+			graph_vertices,
+			graph_edges,
+			graph_heads,
+			graph_tails, 
+			graph_degrees,
+			tile_offsets,
+			tile_sizes,
+			source);
+	bot_necessary_access.print();
 
 	// cleanup memory
 	free( graph_heads);

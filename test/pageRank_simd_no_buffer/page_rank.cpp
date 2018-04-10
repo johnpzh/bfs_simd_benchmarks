@@ -11,6 +11,7 @@
 #include <omp.h>
 #include <immintrin.h>
 #include <unistd.h>
+#include "../../include/peg_util.h"
 //#include "peg.h"
 //#include <papi.h>
 
@@ -120,6 +121,7 @@ inline void kernel_pageRank(
 	unsigned remainder = size_buffer % NUM_P_INT;
 	unsigned bound_edge_i = size_buffer - remainder;
 	for (unsigned edge_i = 0; edge_i < bound_edge_i; edge_i += NUM_P_INT) {
+		bot_simd_util.record(NUM_P_INT, NUM_P_INT);
 		__m512i n1_v = _mm512_load_epi32(n1_buffer + edge_i);
 		__m512i n2_v = _mm512_load_epi32(n2_buffer + edge_i);
 
@@ -134,6 +136,7 @@ inline void kernel_pageRank(
 	}
 
 	if (remainder > 0) {
+		bot_simd_util.record(0, NUM_P_INT);
 		__mmask16 in_range_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
 		__m512i n1_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, n1_buffer + bound_edge_i);
 		__m512i n2_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, n2_buffer + bound_edge_i);
@@ -325,7 +328,8 @@ void page_rank(\
 	}
 
 	double end_time = omp_get_wtime();
-	printf("%u %lf\n", NUM_THREADS, end_time - start_time);
+	//printf("%u %lf\n", NUM_THREADS, end_time - start_time);
+	bot_simd_util.print();
 
 	_mm_free(n1_buffer);
 	_mm_free(n2_buffer);
@@ -348,7 +352,7 @@ inline void scheduler_no_buffer(
 		unsigned *graph_degrees,
 		const unsigned &side_length)
 {
-	unsigned bound_row_id = row_index + side_length;
+	unsigned bound_row_id = row_index + tile_step;
 #pragma omp parallel for schedule(dynamic, 1)
 	for (unsigned col_id = 0; col_id < side_length; ++col_id) {
 		for (unsigned row_id = row_index; row_id < bound_row_id; ++row_id) {
@@ -358,6 +362,9 @@ inline void scheduler_no_buffer(
 			}
 			unsigned *heads_start = graph_heads + tile_offsets[tile_id];
 			unsigned *tails_start = graph_tails + tile_offsets[tile_id];
+			if (tile_id == 159740) {
+				printf("tile_id: %u\n", tile_id);//test
+			}
 			kernel_pageRank(
 					heads_start,
 					tails_start,
@@ -531,7 +538,8 @@ void page_rank_no_buffer(\
 	}
 
 	double end_time = omp_get_wtime();
-	printf("%u %lf\n", NUM_THREADS, end_time - start_time);
+	//printf("%u %lf\n", NUM_THREADS, end_time - start_time);
+	bot_simd_util.print();
 
 	//_mm_free(n1_buffer);
 	//_mm_free(n2_buffer);
@@ -553,9 +561,6 @@ void print(float *rank)
 
 void input(char filename[])
 {
-#ifdef ONEDEBUG
-	printf("input: %s\n", filename);
-#endif
 	//string prefix = string(filename) + "_tiled-" + to_string(TILE_WIDTH);
 	string prefix = string(filename) + "_coo-tiled-" + to_string(TILE_WIDTH);
 	string fname = prefix + "-" + to_string(0);
@@ -648,14 +653,6 @@ void input(char filename[])
 
 	float *rank = (float *) _mm_malloc(NNODES * sizeof(float), ALIGNED_BYTES);
 	float *sum = (float *) _mm_malloc(NNODES * sizeof(float), ALIGNED_BYTES);
-	now = omp_get_wtime();
-	time_out = fopen(time_file, "w");
-	fprintf(time_out, "input end: %lf\n", now - start);
-#ifdef ONEDEBUG
-	unsigned bound_i = 7;
-#else
-	unsigned bound_i = 9;
-#endif
 	// PageRank
 	CHUNK_SIZE = 1;
 	//ROW_STEP = 16;
@@ -663,39 +660,25 @@ void input(char filename[])
 	//unsigned ROW_STEP = 128;
 	//CHUNK_SIZE = 512;
 	//unsigned ROW_STEP = 64;
-	for (int cz = 0; cz < 3; ++cz) {
-	for (unsigned i = 6; i < bound_i; ++i) {
-		NUM_THREADS = (unsigned) pow(2, i);
-		for (int k = 0; k < 3; ++k) {
+	NUM_THREADS = 256;
 #pragma omp parallel for num_threads(64)
-		for (unsigned i = 0; i < NNODES; i++) {
-			rank[i] = 1.0;
-			sum[i] = 0.0;
-		}
-#ifndef ONEDEBUG
-		//sleep(10);
-#endif
-		page_rank(\
-				graph_heads, \
-				graph_tails, \
-				graph_degrees, \
-				tile_sizes, \
-				rank, \
-				sum, \
-				tile_offsets, \
-				num_tiles, \
-				side_length);
-		now = omp_get_wtime();
-		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
-
-		}
+	for (unsigned i = 0; i < NNODES; i++) {
+		rank[i] = 1.0;
+		sum[i] = 0.0;
 	}
-	}
-	fclose(time_out);
 
-#ifdef ONEDEBUG
-	print(rank);
-#endif
+	bot_simd_util.reset();
+	page_rank_no_buffer(\
+			graph_heads, \
+			graph_tails, \
+			graph_degrees, \
+			tile_sizes, \
+			rank, \
+			sum, \
+			tile_offsets, \
+			num_tiles, \
+			side_length);
+
 	// Free memory
 	_mm_free(graph_heads);
 	_mm_free(graph_tails);
@@ -707,7 +690,6 @@ void input(char filename[])
 }
 int main(int argc, char *argv[]) 
 {
-	start = omp_get_wtime();
 	char *filename;
 	if (argc > 3) {
 		filename = argv[1];

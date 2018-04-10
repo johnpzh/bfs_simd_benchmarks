@@ -980,8 +980,8 @@ void graph_input(
 	/////////////////////////////////////////////////////////////////////
 	//string prefix = string(input_f) + "_untiled";
 	//string prefix = string(input_f) + "_coo-tiled-" + to_string(TILE_WIDTH);
-	string file_name_pre = string(input_f) + "_reorder";
-	//string file_name_pre = string(input_f);
+	//string file_name_pre = string(input_f) + "_reorder";
+	string file_name_pre = string(input_f);
 	string prefix = file_name_pre + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH);
 	//string prefix = string(input_f) + "_col-2-coo-tiled-" + to_string(TILE_WIDTH);
 	string fname = prefix + "-0";

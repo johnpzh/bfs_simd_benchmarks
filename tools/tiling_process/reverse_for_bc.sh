@@ -8,7 +8,7 @@ data_file=$1
 tile_size=$2
 stripe_length=$3
 
-tools_dir=
+tools_dir=/sciclone/home2/zpeng01/benchmarks/tools
 set -x
 
 
