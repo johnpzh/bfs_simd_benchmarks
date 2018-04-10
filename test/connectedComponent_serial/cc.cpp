@@ -10,7 +10,7 @@
 #include <cmath>
 #include <omp.h>
 #include <unistd.h>
-#include "../../include/peg.h"
+#include "../../include/peg_util.h"
 using std::ifstream;
 using std::string;
 using std::getline;
@@ -334,7 +334,7 @@ void cc(
 	double end_time = omp_get_wtime();
 	double rt;
 	printf("%u %lf\n", NUM_THREADS, rt = end_time - start_time);
-	record_best_performance(rt, NUM_THREADS);
+	bot_best_perform.record(rt, NUM_THREADS);
 }
 
 
@@ -342,13 +342,16 @@ int main(int argc, char *argv[])
 {
 	start = omp_get_wtime();
 	char *filename;
-	if (argc > 2) {
+	if (argc > 3) {
 		filename = argv[1];
 		TILE_WIDTH = strtoul(argv[2], NULL, 0);
+		ROW_STEP = strtoul(argv[3], NULL, 0);
 	} else {
+		printf("Usage: ./cc <data> <tile_width> <row_step>\n");
+		exit(1);
 		//filename = "/home/zpeng/benchmarks/data/pokec/coo_tiled_bak/soc-pokec";
-		filename = "/home/zpeng/benchmarks/data/skitter/coo_tiled_bak/out.skitter";
-		TILE_WIDTH = 1024;
+		//filename = "/home/zpeng/benchmarks/data/skitter/coo_tiled_bak/out.skitter";
+		//TILE_WIDTH = 1024;
 	}
 	// Input
 	unsigned *graph_heads;
@@ -384,7 +387,6 @@ int main(int argc, char *argv[])
 #else
 	unsigned run_count = 9;
 #endif
-	ROW_STEP = 16;
 	for (int cz = 0; cz < 3; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
@@ -417,7 +419,7 @@ int main(int argc, char *argv[])
 	}
 	}
 	fclose(time_out);
-	print_best_performance();
+	bot_best_perform.print_best();
 #ifdef ONEDEBUG
 	print(graph_component);
 #endif

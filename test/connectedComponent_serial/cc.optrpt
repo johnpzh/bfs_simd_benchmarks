@@ -11,21 +11,21 @@ Begin optimization report for: main(int, char **)
     Report from: Vector optimizations [vec]
 
 
-LOOP BEGIN at cc.cpp(388,2)
+LOOP BEGIN at cc.cpp(390,2)
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at cc.cpp(389,2)
+   LOOP BEGIN at cc.cpp(391,2)
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at cc.cpp(391,3)
+      LOOP BEGIN at cc.cpp(393,3)
          remark #15542: loop was not vectorized: inner loop was already vectorized
 
-         LOOP BEGIN at cc.cpp(392,3)
+         LOOP BEGIN at cc.cpp(394,3)
          <Peeled loop for vectorization>
          LOOP END
 
-         LOOP BEGIN at cc.cpp(392,3)
-            remark #15388: vectorization support: reference graph_active[k] has aligned access   [ cc.cpp(393,4) ]
+         LOOP BEGIN at cc.cpp(394,3)
+            remark #15388: vectorization support: reference graph_active[k] has aligned access   [ cc.cpp(395,4) ]
             remark #15305: vectorization support: vector length 4
             remark #15309: vectorization support: normalized vectorization overhead 3.333
             remark #15300: LOOP WAS VECTORIZED
@@ -38,16 +38,16 @@ LOOP BEGIN at cc.cpp(388,2)
             remark #15488: --- end vector cost summary ---
          LOOP END
 
-         LOOP BEGIN at cc.cpp(392,3)
+         LOOP BEGIN at cc.cpp(394,3)
          <Remainder loop for vectorization>
          LOOP END
 
-         LOOP BEGIN at cc.cpp(396,3)
+         LOOP BEGIN at cc.cpp(398,3)
          <Peeled loop for vectorization>
          LOOP END
 
-         LOOP BEGIN at cc.cpp(396,3)
-            remark #15388: vectorization support: reference is_active_side[k] has aligned access   [ cc.cpp(397,4) ]
+         LOOP BEGIN at cc.cpp(398,3)
+            remark #15388: vectorization support: reference is_active_side[k] has aligned access   [ cc.cpp(399,4) ]
             remark #15305: vectorization support: vector length 4
             remark #15309: vectorization support: normalized vectorization overhead 3.333
             remark #15300: LOOP WAS VECTORIZED
@@ -60,16 +60,16 @@ LOOP BEGIN at cc.cpp(388,2)
             remark #15488: --- end vector cost summary ---
          LOOP END
 
-         LOOP BEGIN at cc.cpp(396,3)
+         LOOP BEGIN at cc.cpp(398,3)
          <Remainder loop for vectorization>
          LOOP END
 
-         LOOP BEGIN at cc.cpp(400,3)
+         LOOP BEGIN at cc.cpp(402,3)
          <Peeled loop for vectorization>
          LOOP END
 
-         LOOP BEGIN at cc.cpp(400,3)
-            remark #15388: vectorization support: reference graph_component[k] has aligned access   [ cc.cpp(401,4) ]
+         LOOP BEGIN at cc.cpp(402,3)
+            remark #15388: vectorization support: reference graph_component[k] has aligned access   [ cc.cpp(403,4) ]
             remark #15305: vectorization support: vector length 4
             remark #15309: vectorization support: normalized vectorization overhead 3.667
             remark #15300: LOOP WAS VECTORIZED
@@ -82,7 +82,7 @@ LOOP BEGIN at cc.cpp(388,2)
             remark #15488: --- end vector cost summary ---
          LOOP END
 
-         LOOP BEGIN at cc.cpp(400,3)
+         LOOP BEGIN at cc.cpp(402,3)
          <Remainder loop for vectorization>
          LOOP END
       LOOP END

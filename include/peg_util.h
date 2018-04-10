@@ -75,7 +75,7 @@ private:
 	unsigned long total = 0;
 
 public:
-	void record_simd(unsigned long eff, unsigned long all) 
+	void record(unsigned long eff, unsigned long all) 
 	{
 		unsigned long old_val;
 		unsigned long new_val;
