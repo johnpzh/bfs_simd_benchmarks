@@ -6,6 +6,7 @@
 #include <string>
 #include <unistd.h>
 #include <immintrin.h>
+#include "../../include/peg_util.h"
 
 using std::string;
 using std::to_string;
@@ -857,6 +858,7 @@ void graph_prepare(
 	double run_time;
 	//printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
 	printf("%d %lf\n", ROW_STEP, run_time = (end_time - start_time));
+	bot_best_perform.record(run_time, ROW_STEP);
 	//print_time();//test
 	
 	//Store the result into a file
@@ -1069,12 +1071,10 @@ int main( int argc, char** argv)
 	//T_RATIO = 100;
 	T_RATIO = 20;
 	CHUNK_SIZE = 2048;
-	for (unsigned cz = 0; cz < 1; ++cz) {
-	for (unsigned i = 8; i < run_count; ++i) {
-		NUM_THREADS = (unsigned) pow(2, i);
-		// Re-initializing
-		for (unsigned k = 0; k < 1; ++k) {
+	NUM_THREADS = 64;
+	// Re-initializing
 
+	for (int k = 0; k < 4; ++k) {
 		graph_prepare(
 				graph_vertices,
 				graph_edges,
@@ -1084,9 +1084,8 @@ int main( int argc, char** argv)
 				tile_offsets,
 				tile_sizes,
 				source);
-		}
 	}
-	}
+	bot_best_perform.print_best();
 
 	// cleanup memory
 	free( graph_heads);
