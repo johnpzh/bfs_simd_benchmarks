@@ -445,26 +445,26 @@ void page_rank(\
 	double end_time = omp_get_wtime();
 	double run_time = 0;
 	printf("%u %lf\n", ROW_STEP, run_time = end_time - start_time);
-	bot_best_perform.record_best_performance(run_time, NUM_THREADS);
+	//bot_best_perform.record(run_time, NUM_THREADS);
 	_mm_free(n1_buffer);
 	_mm_free(n2_buffer);
 
 }
-void print(float *rank) 
-{
-	FILE *fout = fopen("ranks.txt", "w");
-	for(unsigned i=0;i<NNODES;i++) {
-		//cout << rank[i] << " ";
-		fprintf(fout, "%lf\n", rank[i]);
-	}
-	//cout << endl;
-	fclose(fout);
-}
+//void print(float *rank) 
+//{
+//	FILE *fout = fopen("ranks.txt", "w");
+//	for(unsigned i=0;i<NNODES;i++) {
+//		//cout << rank[i] << " ";
+//		fprintf(fout, "%lf\n", rank[i]);
+//	}
+//	//cout << endl;
+//	fclose(fout);
+//}
 
 void input(char filename[])
 {
 #ifdef ONEDEBUG
-	printf("input: %s\n", filename);
+	//printf("input: %s\n", filename);
 #endif
 	//string prefix = string(filename) + "_tiled-" + to_string(TILE_WIDTH);
 	string prefix = string(filename) + "_coo-tiled-" + to_string(TILE_WIDTH);
@@ -558,9 +558,6 @@ void input(char filename[])
 
 	float *rank = (float *) _mm_malloc(NNODES * sizeof(float), ALIGNED_BYTES);
 	float *sum = (float *) _mm_malloc(NNODES * sizeof(float), ALIGNED_BYTES);
-	now = omp_get_wtime();
-	time_out = fopen(time_file, "w");
-	fprintf(time_out, "input end: %lf\n", now - start);
 #ifdef ONEDEBUG
 	unsigned bound_i = 7;
 #else
@@ -568,13 +565,13 @@ void input(char filename[])
 #endif
 	// PageRank
 	CHUNK_SIZE = 1;
-	//SIZE_BUFFER_MAX = 512;
-	SIZE_BUFFER_MAX = 400; // 03/18/2018
+	SIZE_BUFFER_MAX = 512; // 04/09/2018
+	//SIZE_BUFFER_MAX = 400; // 03/18/2018
 
 	//////////////////////////////////////////
 	// Miss Rate
 	NUM_THREADS = 256;
-	for (int cz = 0; cz < 2; ++cz) {
+	for (int cz = 0; cz < 1; ++cz) {
 	//for (int v = 1; v < 8193; v *= 2) {
 	//	ROW_STEP = v;
 		//ROW_STEP = 40;
@@ -601,10 +598,8 @@ void input(char filename[])
 		//miss_rate.measure_stop();
 		//miss_rate.print(ROW_STEP);
 
-		now = omp_get_wtime();
-		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 	}
-	bot_best_perform.print();
+	//bot_best_perform.print();
 	//}
 	// End Miss Rate
 	//////////////////////////////////////////
@@ -642,7 +637,6 @@ void input(char filename[])
 //	print_best_performance();
 	// End Performance
 	//////////////////////////////////////////
-	fclose(time_out);
 
 #ifdef ONEDEBUG
 	//print(rank);
@@ -658,7 +652,6 @@ void input(char filename[])
 }
 int main(int argc, char *argv[]) 
 {
-	start = omp_get_wtime();
 	char *filename;
 	if (argc > 3) {
 		filename = argv[1];

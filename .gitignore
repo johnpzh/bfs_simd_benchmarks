@@ -26,6 +26,7 @@ path/
 0path/
 vtune/
 report*/
+*.txt
 *path.txt
 *result.txt
 *report*

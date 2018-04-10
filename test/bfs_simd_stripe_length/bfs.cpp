@@ -711,25 +711,7 @@ inline unsigned *BFS_sparse(
 ///////////////////////////////////////////////////////////////////////////////
 
 
-double dense_time;
-double to_dense_time;
-double sparse_time;
-double to_sparse_time;
-double update_time;
-double run_time;
 
-void print_time()
-{
-	auto percent = [=] (double t) {
-		return t/run_time * 100.0;
-	};
-	printf("dense_time: %f (%.2f%%)\n", dense_time, percent(dense_time));
-	printf("to_dense_time: %f (%.2f%%)\n", to_dense_time, percent(to_dense_time));
-	printf("sparse_time: %f (%.2f%%)\n", sparse_time, percent(sparse_time));
-	printf("to_sparse_time: %f (%.2f%%)\n", to_sparse_time, percent(to_sparse_time));
-	printf("update_time: %f (%.2f%%)\n", update_time, percent(update_time));
-	printf("==========================\n");
-}
 
 void graph_prepare(
 		unsigned *graph_vertices,
@@ -741,12 +723,6 @@ void graph_prepare(
 		unsigned *tile_sizes,
 		const unsigned &source)
 {
-	dense_time = 0;
-	to_dense_time = 0;
-	sparse_time = 0;
-	to_sparse_time = 0;
-	update_time = 0;
-	run_time = 0;
 
 	// Set up
 	omp_set_num_threads(NUM_THREADS);
@@ -787,7 +763,6 @@ void graph_prepare(
 								frontier_size);
 	_mm_free(frontier);
 	frontier = new_frontier;
-	sparse_time += omp_get_wtime() - last_time;
 	last_time = omp_get_wtime();
 
 	unsigned out_degree = 0;
@@ -799,7 +774,6 @@ void graph_prepare(
 		h_cost[end] = h_cost[start] + 1;
 		out_degree += graph_degrees[end];
 	}
-	update_time += omp_get_wtime() - last_time;
 	bool last_is_dense = false;
 	// According the sum, determine to run Sparse or Dense, and then change the last_is_dense.
 	//unsigned bfs_threshold = NEDGES / 20 / T_RATIO; // Determined according to Ligra
@@ -814,7 +788,6 @@ void graph_prepare(
 					is_active_side, 
 					frontier, 
 					frontier_size);
-				to_dense_time += omp_get_wtime() - last_time;
 			}
 			last_time = omp_get_wtime();
 			BFS_dense(
@@ -829,7 +802,6 @@ void graph_prepare(
 					//is_empty_tile,
 					is_active_side,
 					is_updating_active_side);
-			dense_time += omp_get_wtime() - last_time;
 			last_is_dense = true;
 		} else {
 			// Sparse
@@ -841,7 +813,6 @@ void graph_prepare(
 					h_graph_mask);
 				_mm_free(frontier);
 				frontier = new_frontier;
-				to_sparse_time += omp_get_wtime() - last_time;
 			}
 			last_time = omp_get_wtime();
 			new_frontier = BFS_sparse(
@@ -854,7 +825,6 @@ void graph_prepare(
 			_mm_free(frontier);
 			frontier = new_frontier;
 			last_is_dense = false;
-			sparse_time += omp_get_wtime() - last_time;
 		}
 		// Update the parents, also get the sum again.
 		last_time = omp_get_wtime();
@@ -881,43 +851,15 @@ void graph_prepare(
 								h_graph_parents,
 								h_cost);
 		}
-		update_time += omp_get_wtime() - last_time;
 		//printf("frontier_size: %u\n", frontier_size);//test
 	}
 	double end_time = omp_get_wtime();
-	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
+	double run_time;
+	//printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
+	printf("%d %lf\n", ROW_STEP, run_time = (end_time - start_time));
 	//print_time();//test
 	
 	//Store the result into a file
-
-#ifdef ONEDEBUG
-	NUM_THREADS = 64;
-	omp_set_num_threads(NUM_THREADS);
-	unsigned num_lines = NNODES / NUM_THREADS;
-#pragma omp parallel
-{
-	unsigned tid = omp_get_thread_num();
-	unsigned offset = tid * num_lines;
-	string file_prefix = "path/path";
-	string file_name = file_prefix + to_string(tid) + ".txt";
-	FILE *fpo = fopen(file_name.c_str(), "w");
-	if (!fpo) {
-		fprintf(stderr, "Error: cannot open file %s.\n", file_name.c_str());
-		exit(1);
-	}
-	unsigned bound_index;
-	if (tid != NUM_THREADS - 1) {
-		bound_index = offset + num_lines;
-	} else {
-		bound_index = NNODES;
-	}
-	for (unsigned index = offset; index < bound_index; ++index) {
-		fprintf(fpo, "%d) cost:%d\n", index, h_cost[index]);
-	}
-
-	fclose(fpo);
-}
-#endif
 
 	free(frontier);
 	free( h_graph_mask);
@@ -1085,7 +1027,6 @@ void graph_input(
 ///////////////////////////////////////////////////////////////////////////////
 int main( int argc, char** argv) 
 {
-	start = omp_get_wtime();
 	char *input_f;
 	
 	if(argc < 4){
@@ -1121,15 +1062,7 @@ int main( int argc, char** argv)
 
 	unsigned source = 0;
 
-	now = omp_get_wtime();
-	time_out = fopen(time_file, "w");
-	fprintf(time_out, "input end: %lf\n", now - start);
-#ifdef ONEDEBUG
-	printf("Input finished: %s\n", input_f);
 	unsigned run_count = 9;
-#else
-	unsigned run_count = 9;
-#endif
 	// BFS
 	//SIZE_BUFFER_MAX = 1024;
 	SIZE_BUFFER_MAX = 512;
@@ -1139,9 +1072,6 @@ int main( int argc, char** argv)
 	for (unsigned cz = 0; cz < 1; ++cz) {
 	for (unsigned i = 8; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
-#ifndef ONEDEBUG
-		//sleep(10);
-#endif
 		// Re-initializing
 		for (unsigned k = 0; k < 1; ++k) {
 
@@ -1154,15 +1084,9 @@ int main( int argc, char** argv)
 				tile_offsets,
 				tile_sizes,
 				source);
-		now = omp_get_wtime();
-		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
-#ifdef ONEDEBUG
-		printf("Thread %u finished.\n", NUM_THREADS);
-#endif
 		}
 	}
 	}
-	fclose(time_out);
 
 	// cleanup memory
 	free( graph_heads);
