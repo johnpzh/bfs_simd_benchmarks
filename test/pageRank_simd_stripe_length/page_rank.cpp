@@ -461,7 +461,9 @@ void page_rank(\
 //	fclose(fout);
 //}
 
-void input(char filename[])
+void input(char filename[],
+		unsigned min_stripe_length,
+		unsigned max_stripe_length)
 {
 #ifdef ONEDEBUG
 	//printf("input: %s\n", filename);
@@ -571,7 +573,7 @@ void input(char filename[])
 	//////////////////////////////////////////
 	// Miss Rate
 	NUM_THREADS = 256;
-	for (int cz = 0; cz < 1; ++cz) {
+	for (ROW_STEP = min_stripe_length; ROW_STEP <= max_stripe_length; ROW_STEP *= 2) {
 	//for (int v = 1; v < 8193; v *= 2) {
 	//	ROW_STEP = v;
 		//ROW_STEP = 40;
@@ -653,15 +655,18 @@ void input(char filename[])
 int main(int argc, char *argv[]) 
 {
 	char *filename;
-	if (argc > 3) {
+	unsigned min_stripe_length;
+	unsigned max_stripe_length;
+	if (argc > 4) {
 		filename = argv[1];
 		TILE_WIDTH = strtoul(argv[2], NULL, 0);
-		ROW_STEP = strtoul(argv[3], NULL, 0);
+		//ROW_STEP = strtoul(argv[3], NULL, 0);
+		min_stripe_length = strtoul(argv[3], NULL, 0);
+		max_stripe_length = strtoul(argv[4], NULL, 0);
 	} else {
-		filename = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
-		TILE_WIDTH = 1024;
-		ROW_STEP = 16;
+		puts("Usage: ./page_rank <data> <tile_size> <min_stripe_length> <max_stripe_length>");
+		exit(1);
 	}
-	input(filename);
+	input(filename, min_stripe_length, max_stripe_length);
 	return 0;
 }
