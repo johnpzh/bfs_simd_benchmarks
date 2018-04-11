@@ -535,7 +535,7 @@ int main(int argc, char *argv[])
 #endif
 	//ROW_STEP = 16;
 	SIZE_BUFFER_MAX = 512;
-	for (unsigned i = 6; i < run_count; ++i) {
+	for (unsigned i = 0; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 		bot_best_perform.reset();
 		for (int k = 0; k < 10; ++k) {

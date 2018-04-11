@@ -1420,7 +1420,7 @@ int main(int argc, char *argv[])
 	T_RATIO = 20;
 	WORK_LOAD = 30;
 	SIZE_BUFFER_MAX = 512;
-	for (unsigned i = 6; i < run_count; ++i) {
+	for (unsigned i = 0; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 		bot_best_perform.reset();
 		//memset(distances, -1, NNODES * sizeof(int));

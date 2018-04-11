@@ -993,7 +993,7 @@ int main(int argc, char *argv[])
 	SIZE_BUFFER_MAX = 800;
 	CHUNK_SIZE = 2048;
 	// MIS
-	for (unsigned i = 6; i < run_count; ++i) {
+	for (unsigned i = 0; i < run_count; ++i) {
 		for (int k = 0; k < 10; ++k) {
 		NUM_THREADS = (unsigned) pow(2, i);
 		bot_best_perform.reset();

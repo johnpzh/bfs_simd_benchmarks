@@ -201,7 +201,6 @@ inline void bfs_kernel_dense(
 		if (!is_active_m) {
 			continue;
 		}
-		bot_necessary_access.record(_mm512)
 		__m512i tail_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), is_active_m, tails_buffer + edge_i);
 		//__m512i visited_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(1), is_active_m, tail_v, h_graph_visited, sizeof(int));
 		//__mmask16 not_visited_m = _mm512_testn_epi32_mask(visited_flag_v, _mm512_set1_epi32(1));
