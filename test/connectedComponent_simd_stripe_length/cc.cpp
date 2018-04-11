@@ -47,7 +47,8 @@ void input(
 {
 	//printf("data: %s\n", filename);
 	//string prefix = string(filename) + "_untiled";
-	string file_name_pre = string(filename) + "_reorder";
+	//string file_name_pre = string(filename) + "_reorder";
+	string file_name_pre = string(filename);
 	string prefix = file_name_pre + "_coo-tiled-" + to_string(TILE_WIDTH);
 	string fname = prefix + "-0";
 	FILE *fin = fopen(fname.c_str(), "r");
@@ -482,8 +483,7 @@ void cc(
 
 	double end_time = omp_get_wtime();
 	double rt;
-	printf("%u %lf\n", NUM_THREADS, rt = end_time - start_time);
-	bot_best_perform.record(rt, NUM_THREADS);
+	printf("%u %lf\n", ROW_STEP, rt = end_time - start_time);
 	_mm_free(heads_buffer);
 	_mm_free(ends_buffer);
 }
@@ -508,17 +508,12 @@ int main(int argc, char *argv[])
 	unsigned *tile_offsets;
 	int *is_empty_tile;
 	//unsigned *nneibor;
-#ifdef ONESERIAL
-	//input_serial("/home/zpeng/benchmarks/data/fake/data.txt", graph_heads, graph_ends);
-	input_serial("/home/zpeng/benchmarks/data/fake/mun_twitter", graph_heads, graph_ends);
-#else
 	input(
 		filename, 
 		graph_heads, 
 		graph_ends,
 		tile_offsets,
 		is_empty_tile);
-#endif
 
 	// Connected Component
 	int *graph_active = (int *) malloc(NNODES * sizeof(int));
@@ -527,18 +522,9 @@ int main(int argc, char *argv[])
 	int *is_updating_active_side = (int *) malloc(sizeof(int) * SIDE_LENGTH);
 	unsigned *graph_component = (unsigned *) malloc(NNODES * sizeof(unsigned));
 	
-#ifdef ONEDEBUG
-	unsigned run_count = 2;
-	printf("Start cc...\n");
-#else
-	unsigned run_count = 9;
-#endif
 	//ROW_STEP = 16;
 	SIZE_BUFFER_MAX = 512;
-	for (unsigned i = 0; i < run_count; ++i) {
-		NUM_THREADS = (unsigned) pow(2, i);
-		bot_best_perform.reset();
-		for (int k = 0; k < 10; ++k) {
+	NUM_THREADS = 256;
 		for (unsigned k = 0; k < NNODES; ++k) {
 			graph_active[k] = 1;
 		}
@@ -552,21 +538,15 @@ int main(int argc, char *argv[])
 		}
 		//sleep(10);
 		cc(
-			graph_heads, 
-			graph_ends, 
-			tile_offsets,
-			graph_active, 
-			graph_updating_active, 
-			is_active_side,
-			is_updating_active_side,
-			is_empty_tile,
-			graph_component);
-		}
-		bot_best_perform.print_average(NUM_THREADS);
-	}
-#ifdef ONEDEBUG
-	print(graph_component);
-#endif
+				graph_heads, 
+				graph_ends, 
+				tile_offsets,
+				graph_active, 
+				graph_updating_active, 
+				is_active_side,
+				is_updating_active_side,
+				is_empty_tile,
+				graph_component);
 
 	// Free memory
 	free(graph_heads);

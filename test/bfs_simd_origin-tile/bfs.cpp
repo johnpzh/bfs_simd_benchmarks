@@ -195,9 +195,6 @@ inline void bfs_kernel_dense(
 		__m512i head_v = _mm512_load_epi32(heads_buffer + edge_i);
 		__m512i active_flag_v = _mm512_i32gather_epi32(head_v, h_graph_mask, sizeof(int));
 		__mmask16 is_active_m = _mm512_test_epi32_mask(active_flag_v, _mm512_set1_epi32(-1));
-
-		bot_necessary_access.record(is_active_m, NUM_P_INT);
-
 		if (!is_active_m) {
 			continue;
 		}
@@ -225,9 +222,6 @@ inline void bfs_kernel_dense(
 		__m512i head_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, heads_buffer + bound_edge_i);
 		__m512i active_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_range_m, head_v, h_graph_mask, sizeof(int));
 		__mmask16 is_active_m = _mm512_test_epi32_mask(active_flag_v, _mm512_set1_epi32(-1));
-
-		bot_necessary_access.record(is_active_m, remainder);
-
 		if (!is_active_m) {
 			return;
 		}
@@ -808,7 +802,7 @@ void graph_prepare(
 	//	test_fail(__FILE__, __LINE__, "PAPI_start_counters", retval);
 	//}
 	//// End PAPI
-	double last_time = omp_get_wtime();
+	//double last_time = omp_get_wtime();
 	double start_time = omp_get_wtime();
 	//unsigned *new_frontier = BFS_sparse(
 	//							frontier,
@@ -823,7 +817,7 @@ void graph_prepare(
 	//last_time = omp_get_wtime();
 
 	unsigned out_degree = 0;
-//	// When update the parents, get the sum of the number of active nodes and their out degree.
+	// When update the parents, get the sum of the number of active nodes and their out degree.
 //#pragma omp parallel for reduction(+: out_degree)
 //	for (unsigned i = 0; i < frontier_size; ++i) {
 //		unsigned end = frontier[i];
@@ -833,24 +827,24 @@ void graph_prepare(
 //	}
 //	update_time += omp_get_wtime() - last_time;
 //	bool last_is_dense = false;
-//	// According the sum, determine to run Sparse or Dense, and then change the last_is_dense.
-//	//unsigned bfs_threshold = NEDGES / 20 / T_RATIO; // Determined according to Ligra
+	// According the sum, determine to run Sparse or Dense, and then change the last_is_dense.
+	//unsigned bfs_threshold = NEDGES / 20 / T_RATIO; // Determined according to Ligra
 //	unsigned bfs_threshold = NEDGES / T_RATIO; // Determined according to Ligra
 	h_graph_mask[source] = 1;
 	is_active_side[source/TILE_WIDTH] = 1;
 	while (true) {
 		//if (frontier_size + out_degree > bfs_threshold) {
-			// Dense
-			//if (!last_is_dense) {
-			//	last_time = omp_get_wtime();
-			//	to_dense(
-			//		h_graph_mask, 
-			//		is_active_side, 
-			//		frontier, 
-			//		frontier_size);
-			//	to_dense_time += omp_get_wtime() - last_time;
-			//}
-			//last_time = omp_get_wtime();
+		//	// Dense
+		//	if (!last_is_dense) {
+		//		last_time = omp_get_wtime();
+		//		to_dense(
+		//			h_graph_mask, 
+		//			is_active_side, 
+		//			frontier, 
+		//			frontier_size);
+		//		to_dense_time += omp_get_wtime() - last_time;
+		//	}
+		//	last_time = omp_get_wtime();
 			BFS_dense(
 					graph_heads,
 					graph_tails,
@@ -863,8 +857,8 @@ void graph_prepare(
 					//is_empty_tile,
 					is_active_side,
 					is_updating_active_side);
-			//dense_time += omp_get_wtime() - last_time;
-			//last_is_dense = true;
+		//	dense_time += omp_get_wtime() - last_time;
+		//	last_is_dense = true;
 		//} else {
 		//	// Sparse
 		//	if (last_is_dense) {
@@ -926,14 +920,14 @@ void graph_prepare(
 	//}
 	//printf("cache access: %lld, cache misses: %lld, miss rate: %.2f%%\n", values[0], values[1], 100.0* values[1]/values[0]);
 	//// End PAPI results
-	//printf("%u %lf\n", NUM_THREADS, run_time = (end_time - start_time));
-	//bot_best_perform.record(run_time, NUM_THREADS);
+	printf("%u %lf\n", ROW_STEP, run_time = (end_time - start_time));
+	bot_best_perform.record(run_time, ROW_STEP);
 	//print_time();//test
 	
 	//Store the result into a file
 
 
-	//free(frontier);
+//	free(frontier);
 	free( h_graph_mask);
 	free( h_updating_graph_mask);
 	free( h_graph_parents);
@@ -962,7 +956,8 @@ void graph_input(
 	//string prefix = string(input_f) + "_coo-tiled-" + to_string(TILE_WIDTH);
 	//string file_name_pre = string(input_f) + "_reorder";
 	string file_name_pre = string(input_f);
-	string prefix = file_name_pre + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH);
+	//string prefix = file_name_pre + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH);
+	string prefix = string(input_f) + "_coo-tiled-" + to_string(TILE_WIDTH);
 	//string prefix = string(input_f) + "_col-2-coo-tiled-" + to_string(TILE_WIDTH);
 	string fname = prefix + "-0";
 	FILE *fin = fopen(fname.c_str(), "r");
@@ -1102,16 +1097,18 @@ void graph_input(
 int main( int argc, char** argv) 
 {
 	char *input_f;
+	unsigned min_row_step;
+	unsigned max_row_step;
 	
-	if(argc < 4){
-		input_f = "/home/zpeng/benchmarks/data/pokec_combine/soc-pokec";
-		//input_f = "/sciclone/scr-mlt/zpeng01/pokec_combine/soc-pokec";
-		TILE_WIDTH = 1024;
-		ROW_STEP = 16;
-	} else {
+	if(argc > 4){
 		input_f = argv[1];
 		TILE_WIDTH = strtoul(argv[2], NULL, 0);
-		ROW_STEP = strtoul(argv[3], NULL, 0);
+		//ROW_STEP = strtoul(argv[3], NULL, 0);
+		min_row_step = strtoul(argv[3], NULL, 0);
+		max_row_step = strtoul(argv[4], NULL, 0);
+	} else {
+		puts("Usage: ./bfs <data> <tile_width> <min_stripe_length> <max_stripe_length>");
+		exit(1);
 	}
 
 	// Input
@@ -1148,19 +1145,24 @@ int main( int argc, char** argv)
 	//T_RATIO = 100;
 	T_RATIO = 20;
 	CHUNK_SIZE = 2048;
-	NUM_THREADS = 64;
+	NUM_THREADS = 256;
 		// Re-initializing
 
-	graph_prepare(
-			graph_vertices,
-			graph_edges,
-			graph_heads,
-			graph_tails, 
-			graph_degrees,
-			tile_offsets,
-			tile_sizes,
-			source);
-	bot_necessary_access.print();
+	for (ROW_STEP = min_row_step; ROW_STEP <= max_row_step; ROW_STEP *= 2) {
+		bot_best_perform.reset();
+		for (int k = 0; k < 3; ++k) {
+		graph_prepare(
+				graph_vertices,
+				graph_edges,
+				graph_heads,
+				graph_tails, 
+				graph_degrees,
+				tile_offsets,
+				tile_sizes,
+				source);
+		}
+		bot_best_perform.print_best();
+	}
 
 	// cleanup memory
 	free( graph_heads);

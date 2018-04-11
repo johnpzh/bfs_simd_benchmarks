@@ -101,7 +101,8 @@ void input(
 		unsigned *&tile_sizes_reverse)
 {
 	//printf("data: %s\n", filename);
-	string file_name_pre = string(filename) + "_reorder";
+	//string file_name_pre = string(filename) + "_reorder";
+	string file_name_pre = string(filename);
 	string prefix = file_name_pre + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH);
 	string prefix_reverse = string(filename) + "_reorder" + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH) + "_reverse";
 	string fname = prefix + "-0";
@@ -2086,7 +2087,6 @@ void BC(
 	//printf("%u %f\n", NUM_THREADS, omp_get_wtime() - start_time);
 	double run_time;
 	printf("%u %f\n", NUM_THREADS, run_time = omp_get_wtime() - start_time);
-	bot_best_perform.record(run_time, NUM_THREADS);
 	//// PAPI results
 	//long long values[2];
 	//if ((retval = PAPI_stop_counters(values, 2)) < PAPI_OK) {
@@ -2175,12 +2175,6 @@ int main(int argc, char *argv[])
 
 	unsigned source = 0;
 
-#ifdef ONEDEBUG
-	printf("Input finished: %s\n", filename);
-	unsigned run_count = 9;
-#else
-	unsigned run_count = 9;
-#endif
 	//T_RATIO = 81;
 	//T_RATIO = 60;
 	//CHUNK_SIZE = 2048;
@@ -2196,14 +2190,8 @@ int main(int argc, char *argv[])
 	//printf("T_RATIO: %u\n", v);
 	//SIZE_BUFFER_MAX = 1024;
 	// BFS
-	for (unsigned i = 0; i < run_count; ++i) {
-		NUM_THREADS = (unsigned) pow(2, i);
-		bot_best_perform.reset();
-#ifndef ONEDEBUG
-		//sleep(10);
-#endif
-		for (unsigned k = 0; k < 10; ++k) {
-		BC(
+	NUM_THREADS = 256;
+	BC(
 			graph_heads, 
 			graph_tails, 
 			graph_vertices,
@@ -2219,11 +2207,6 @@ int main(int argc, char *argv[])
 			tile_offsets_reverse,
 			tile_sizes_reverse,
 			source);
-		//// Re-initializing
-		}
-		bot_best_perform.print_average(NUM_THREADS);
-	}
-	//}
 
 	// Free memory
 	free(graph_heads);
