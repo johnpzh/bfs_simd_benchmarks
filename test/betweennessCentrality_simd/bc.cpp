@@ -2196,7 +2196,7 @@ int main(int argc, char *argv[])
 	//printf("T_RATIO: %u\n", v);
 	//SIZE_BUFFER_MAX = 1024;
 	// BFS
-	for (unsigned i = 0; i < run_count; ++i) {
+	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 		bot_best_perform.reset();
 #ifndef ONEDEBUG

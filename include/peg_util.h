@@ -129,13 +129,13 @@ private:
 public:
 	void record(__mmask16 active_mask, unsigned long all) 
 	{
-		unsigned long eff = mmask16_count_one(active_mask);
 		unsigned long old_val;
 		unsigned long new_val;
-		do {
-			old_val = effect;
-			new_val = effect + eff;
-		} while (!peg_CAS(&effect, old_val, new_val));
+		//unsigned long eff = mmask16_count_one(active_mask);
+		//do {
+		//	old_val = effect;
+		//	new_val = effect + eff;
+		//} while (!peg_CAS(&effect, old_val, new_val));
 
 		do {
 			old_val = total;
@@ -150,7 +150,8 @@ public:
 	{
 		printf("effect: %lu, total: %lu\n", effect, total);//test;
 		if (metrics == (unsigned) -1) {
-			printf("Necessary Access: %.2f%%\n", (double) effect/total * 100.0);
+			//printf("Necessary Access: %.2f%%\n", (double) effect/total * 100.0);
+			printf("Total Access: %lu\n", total);
 		} else {
 			printf("%u %f\n", metrics, 1.0 * effect/total);
 		}
