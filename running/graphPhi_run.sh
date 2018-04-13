@@ -37,10 +37,10 @@ echo "CC:" >> $output
 ${apps_dir}/connectedComponent_simd/cc $data_file $bfs_tile_size $bfs_stripe_length >> $output
 echo "" >> $output
 
-# BC
-echo "BC:" >> $output
-${apps_dir}/betweennessCentrality_simd/bc ${data_file} $bfs_tile_size $bfs_stripe_length >> $output
-echo "" >> $output
+## BC
+#echo "BC:" >> $output
+#${apps_dir}/betweennessCentrality_simd/bc ${data_file} $bfs_tile_size $bfs_stripe_length >> $output
+#echo "" >> $output
 
 # MIS
 echo "MIS:" >> $output
