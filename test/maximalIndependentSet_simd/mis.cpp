@@ -993,13 +993,11 @@ int main(int argc, char *argv[])
 	SIZE_BUFFER_MAX = 800;
 	CHUNK_SIZE = 2048;
 	// MIS
-	for (unsigned i = 0; i < run_count; ++i) {
+	for (int cz = 0; cz < 3; ++cz) {
+	for (unsigned i = 6; i < run_count; ++i) {
 		for (int k = 0; k < 10; ++k) {
 		NUM_THREADS = (unsigned) pow(2, i);
 		bot_best_perform.reset();
-#ifndef ONEDEBUG
-		//sleep(10);
-#endif
 		MIS(
 			graph_heads, 
 			graph_tails, 
@@ -1012,6 +1010,8 @@ int main(int argc, char *argv[])
 		//// Re-initializing
 		}
 		bot_best_perform.print_average(NUM_THREADS);
+	}
+
 	}
 
 	// Free memory

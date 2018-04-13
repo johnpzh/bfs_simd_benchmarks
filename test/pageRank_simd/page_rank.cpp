@@ -471,7 +471,8 @@ void input(char filename[])
 	printf("input: %s\n", filename);
 #endif
 	//string prefix = string(filename) + "_tiled-" + to_string(TILE_WIDTH);
-	string file_name_pre = string(filename) + "_reorder";
+	//string file_name_pre = string(filename) + "_reorder";
+	string file_name_pre = string(filename);
 	string prefix = file_name_pre + "_coo-tiled-" + to_string(TILE_WIDTH);
 	string fname = prefix + "-" + to_string(0);
 	FILE *fin = fopen(fname.c_str(), "r");

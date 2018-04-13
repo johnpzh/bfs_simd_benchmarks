@@ -10,8 +10,8 @@ ifeq (${serial}, 1)
 	CPPFLAGS += -DONESERIAL
 endif
 
-INCLUDE = -I/home/zpeng/lib/include
-LIB = /home/zpeng/lib/lib/libpapi.a
+#INCLUDE = -I/home/zpeng/lib/include
+#LIB = /home/zpeng/lib/lib/libpapi.a
 
 .PHONY: clean
 

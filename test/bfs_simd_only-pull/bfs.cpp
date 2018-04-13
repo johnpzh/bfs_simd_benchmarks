@@ -196,7 +196,7 @@ inline void bfs_kernel_dense(
 		__m512i active_flag_v = _mm512_i32gather_epi32(head_v, h_graph_mask, sizeof(int));
 		__mmask16 is_active_m = _mm512_test_epi32_mask(active_flag_v, _mm512_set1_epi32(-1));
 
-		bot_necessary_access.record(is_active_m, NUM_P_INT);
+		//bot_necessary_access.record(is_active_m, NUM_P_INT);
 
 		if (!is_active_m) {
 			continue;
@@ -226,7 +226,7 @@ inline void bfs_kernel_dense(
 		__m512i active_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_range_m, head_v, h_graph_mask, sizeof(int));
 		__mmask16 is_active_m = _mm512_test_epi32_mask(active_flag_v, _mm512_set1_epi32(-1));
 
-		bot_necessary_access.record(is_active_m, remainder);
+		//bot_necessary_access.record(is_active_m, remainder);
 
 		if (!is_active_m) {
 			return;
@@ -926,7 +926,7 @@ void graph_prepare(
 	//}
 	//printf("cache access: %lld, cache misses: %lld, miss rate: %.2f%%\n", values[0], values[1], 100.0* values[1]/values[0]);
 	//// End PAPI results
-	//printf("%u %lf\n", NUM_THREADS, run_time = (end_time - start_time));
+	printf("%u %lf\n", NUM_THREADS, run_time = (end_time - start_time));
 	//bot_best_perform.record(run_time, NUM_THREADS);
 	//print_time();//test
 	
@@ -1160,7 +1160,7 @@ int main( int argc, char** argv)
 			tile_offsets,
 			tile_sizes,
 			source);
-	bot_necessary_access.print();
+	//bot_necessary_access.print();
 
 	// cleanup memory
 	free( graph_heads);

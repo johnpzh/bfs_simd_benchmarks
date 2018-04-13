@@ -12,7 +12,6 @@
 #include <unistd.h>
 #include <algorithm>
 #include <immintrin.h>
-#include <papi.h>
 #include "../../include/peg_util.h"
 
 using std::string;
@@ -44,24 +43,6 @@ unsigned WORK_LOAD;
 //FILE *time_out;
 //char *time_file = "timeline.txt";
 
-// PAPI test results
-static void test_fail(char *file, int line, char *call, int retval){
-	printf("%s\tFAILED\nLine # %d\n", file, line);
-	if ( retval == PAPI_ESYS ) {
-		char buf[128];
-		memset( buf, '\0', sizeof(buf) );
-		sprintf(buf, "System error in %s:", call );
-		perror(buf);
-	}
-	else if ( retval > 0 ) {
-		printf("Error calculating: %s\n", call );
-	}
-	else {
-		printf("Error in %s: %s\n", call, PAPI_strerror(retval) );
-	}
-	printf("\n");
-	exit(1);
-}
 
 void print_m512i(__m512i v)
 {
@@ -1783,13 +1764,6 @@ void BC(
 	is_dense_frontier.push_back(false);
 	frontier_sizes.push_back(1);
 
-	//// PAPI
-	//int events[2] = { PAPI_L2_TCA, PAPI_L2_TCM};
-	//int retval;
-	//if ((retval = PAPI_start_counters(events, 2)) < PAPI_OK) {
-	//	test_fail(__FILE__, __LINE__, "PAPI_start_counters", retval);
-	//}
-	//// End PAPI
 	double start_time = omp_get_wtime();
 	// First Phase
 	unsigned *new_queue = BFS_sparse(
@@ -2087,13 +2061,6 @@ void BC(
 	double run_time;
 	printf("%u %f\n", NUM_THREADS, run_time = omp_get_wtime() - start_time);
 	bot_best_perform.record(run_time, NUM_THREADS);
-	//// PAPI results
-	//long long values[2];
-	//if ((retval = PAPI_stop_counters(values, 2)) < PAPI_OK) {
-	//	test_fail(__FILE__, __LINE__, "PAPI_stop_counters", retval);
-	//}
-	//printf("cache access: %lld, cache misses: %lld, miss rate: %.2f%%\n", values[0], values[1], 100.0* values[1]/values[0]);
-	//// End PAPI results
 
 	//printf("first_phase_time: %f\n", first_phase_time);
 	//printf("second_phase_time: %f\n", second_phase_time);
@@ -2192,12 +2159,12 @@ int main(int argc, char *argv[])
 	//CHUNK_SIZE_SPARSE = v;
 	CHUNK_SIZE_DENSE = 1024;
 	//CHUNK_SIZE_BLOCK = v;
-	SIZE_BUFFER_MAX = 512;
+	SIZE_BUFFER_MAX = 1024;
 	//printf("T_RATIO: %u\n", v);
 	//SIZE_BUFFER_MAX = 1024;
 	// BFS
-	for (int cz = 0; cz < 10; ++cz) {
-	for (unsigned i = 0; i < run_count; ++i) {
+	for (int cz = 0; cz < 5; ++cz) {
+	for (unsigned i = 5; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 		bot_best_perform.reset();
 #ifndef ONEDEBUG

@@ -312,6 +312,31 @@ inline void update_dense_weighted(
 	_out_degree = out_degree;
 }
 
+// Scan the data, accumulate the values with the same index.
+// Then, store the cumulative sum to the last element in the data with the same index.
+inline void mask_min_conflict_safe_epi32(
+									__mmask16 valid_m,
+									__m512i &data,
+									__m512i indices)
+{
+	//__m512i cd = _mm512_conflict_epi32(indices);
+	__m512i cd = _mm512_mask_conflict_epi32(_mm512_set1_epi32(0), valid_m, indices);
+	__mmask16 todo_mask = _mm512_test_epi32_mask(cd, _mm512_set1_epi32(-1));
+	if (todo_mask) {
+		__m512i lz = _mm512_lzcnt_epi32(cd);
+		__m512i lid = _mm512_sub_epi32(_mm512_set1_epi32(31), lz);
+		while (todo_mask) {
+			__m512i todo_bcast = _mm512_broadcastmw_epi32(todo_mask);
+			__mmask16 now_mask = _mm512_mask_testn_epi32_mask(todo_mask, cd, todo_bcast);
+			__m512i data_perm = _mm512_mask_permutexvar_epi32(_mm512_undefined_epi32(), now_mask, lid, data);
+			__mmask16 shorter_m = _mm512_mask_cmplt_epi32_mask(now_mask, data_perm, data);
+			data = _mm512_mask_mov_epi32(data, shorter_m, data_perm);
+			//data = _mm512_mask_add_epi32(data, now_mask, data, data_perm);
+			todo_mask = _mm512_kxor(todo_mask, now_mask);
+		}
+	} 
+}
+
 inline void sssp_kernel_dense_weighted(
 				unsigned *heads_buffer,
 				unsigned *tails_buffer,
@@ -337,18 +362,20 @@ inline void sssp_kernel_dense_weighted(
 		__m512i dists_head_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), is_active_m, head_v, dists, sizeof(unsigned));
 		__m512i weights_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), is_active_m, weights_buffer + edge_i);
 		__m512i dists_tmp_v = _mm512_mask_add_epi32(_mm512_undefined_epi32(), is_active_m, dists_head_v, weights_v);
-		//__mmask16 is_minusone_m = _mm512_mask_cmpeq_epi32_mask(is_active_m, dists_end_v, _mm512_set1_epi32(-1));
+		__mmask16 is_minusone_m = _mm512_mask_cmpeq_epi32_mask(is_active_m, dists_end_v, _mm512_set1_epi32(-1));
 		__mmask16 is_shorter_m = _mm512_mask_cmplt_epi32_mask(is_active_m, dists_tmp_v, dists_end_v);
-		//__mmask16 need_update_m = is_minusone_m | is_shorter_m;
-		//if (!need_update_m) {
-		//	continue;
-		//}
-		if (!is_shorter_m) {
+		__mmask16 need_update_m = is_minusone_m | is_shorter_m;
+		if (!need_update_m) {
 			continue;
 		}
-		_mm512_mask_i32scatter_epi32(dists, is_shorter_m, end_v, dists_tmp_v, sizeof(unsigned));
+		//if (!is_shorter_m) {
+		//	continue;
+		//}
+		mask_min_conflict_safe_epi32(need_update_m, dists_tmp_v, end_v);
 
-		__m512i updating_active_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), is_shorter_m, end_v, h_updating_graph_mask, sizeof(int));
+		_mm512_mask_i32scatter_epi32(dists, need_update_m, end_v, dists_tmp_v, sizeof(unsigned));
+
+		__m512i updating_active_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), need_update_m, end_v, h_updating_graph_mask, sizeof(int));
 		__mmask16 not_updating_active_m = _mm512_testn_epi32_mask(updating_active_v, _mm512_set1_epi32(-1));
 		if (!not_updating_active_m) {
 			continue;
@@ -372,18 +399,19 @@ inline void sssp_kernel_dense_weighted(
 		__m512i dists_head_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), is_active_m, head_v, dists, sizeof(unsigned));
 		__m512i weights_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), is_active_m, weights_buffer + bound_edge_i);
 		__m512i dists_tmp_v = _mm512_mask_add_epi32(_mm512_undefined_epi32(), is_active_m, dists_head_v, weights_v);
-		//__mmask16 is_minusone_m = _mm512_mask_cmpeq_epi32_mask(is_active_m, dists_end_v, _mm512_set1_epi32(-1));
+		__mmask16 is_minusone_m = _mm512_mask_cmpeq_epi32_mask(is_active_m, dists_end_v, _mm512_set1_epi32(-1));
 		__mmask16 is_shorter_m = _mm512_mask_cmplt_epi32_mask(is_active_m, dists_tmp_v, dists_end_v);
-		//__mmask16 need_update_m = is_minusone_m | is_shorter_m;
-		//if (!need_update_m) {
-		//	return;
-		//}
-		if (!is_shorter_m) {
+		__mmask16 need_update_m = is_minusone_m | is_shorter_m;
+		if (!need_update_m) {
 			return;
 		}
-		_mm512_mask_i32scatter_epi32(dists, is_shorter_m, end_v, dists_tmp_v, sizeof(unsigned));
+		//if (!is_shorter_m) {
+		//	return;
+		//}
+		mask_min_conflict_safe_epi32(need_update_m, dists_tmp_v, end_v);
+		_mm512_mask_i32scatter_epi32(dists, need_update_m, end_v, dists_tmp_v, sizeof(unsigned));
 
-		__m512i updating_active_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), is_shorter_m, end_v, h_updating_graph_mask, sizeof(int));
+		__m512i updating_active_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), need_update_m, end_v, h_updating_graph_mask, sizeof(int));
 		__mmask16 not_updating_active_m = _mm512_testn_epi32_mask(updating_active_v, _mm512_set1_epi32(-1));
 		if (!not_updating_active_m) {
 			return;
