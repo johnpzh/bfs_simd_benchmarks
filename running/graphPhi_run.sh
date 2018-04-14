@@ -27,24 +27,24 @@ set -x
 #${apps_dir}/pageRank_simd/page_rank $data_file $pr_tile_size $pr_stripe_length >> $output
 #echo "" >> $output
 #
-## SSSP
-#echo "SSSP:" >> $output
-#${apps_dir}/sssp_simd/sssp ${data_file} $bfs_tile_size $bfs_stripe_length -w >> $output
-#echo "" >> $output
-
-# CC
-echo "CC:" >> $output
-${apps_dir}/connectedComponent_simd/cc $data_file $bfs_tile_size $bfs_stripe_length >> $output
+# SSSP
+echo "SSSP:" >> $output
+${apps_dir}/sssp_simd/sssp ${data_file} $bfs_tile_size $bfs_stripe_length -w >> $output
 echo "" >> $output
+
+## CC
+#echo "CC:" >> $output
+#${apps_dir}/connectedComponent_simd/cc $data_file $bfs_tile_size $bfs_stripe_length >> $output
+#echo "" >> $output
 
 ## BC
 #echo "BC:" >> $output
 #${apps_dir}/betweennessCentrality_simd/bc ${data_file} $bfs_tile_size $bfs_stripe_length >> $output
 #echo "" >> $output
 
-# MIS
-echo "MIS:" >> $output
-${apps_dir}/maximalIndependentSet_simd/mis $data_file $bfs_tile_size $bfs_stripe_length >> $output
-echo "" >> $output
+## MIS
+#echo "MIS:" >> $output
+#${apps_dir}/maximalIndependentSet_simd/mis $data_file $bfs_tile_size $bfs_stripe_length >> $output
+#echo "" >> $output
 
 set +x

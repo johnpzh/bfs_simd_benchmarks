@@ -176,7 +176,7 @@ inline void kernel_pageRank(\
 	}
 
 	if (remainder > 0) {
-		bot_simd_util.record(0, NUM_P_INT);
+		bot_simd_util.record(0, remainder);
 		__mmask16 in_range_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
 		__m512i n1_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, n1_buffer + bound_edge_i);
 		__m512i n2_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, n2_buffer + bound_edge_i);

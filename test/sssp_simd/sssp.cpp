@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cmath>
+#include <limits.h>
 #include <omp.h>
 #include <unistd.h>
 #include <getopt.h>
@@ -255,10 +256,11 @@ inline void update_dense_weighted(
 		unsigned start_vertex_id = side_id * TILE_WIDTH;
 		unsigned bound_vertex_id;
 		if (SIDE_LENGTH - 1 != side_id) {
-			bound_vertex_id = side_id * TILE_WIDTH + TILE_WIDTH;
+			bound_vertex_id = start_vertex_id + TILE_WIDTH;
 		} else {
 			bound_vertex_id = NNODES;
 		}
+
 		unsigned remainder = (bound_vertex_id - start_vertex_id) % NUM_P_INT;
 		bound_vertex_id -= remainder;
 		for (unsigned vertex_id = start_vertex_id; 
@@ -296,7 +298,8 @@ inline void update_dense_weighted(
 			__m512i out_degrees_v = _mm512_mask_loadu_epi32(_mm512_set1_epi32(0), is_updating_m, graph_degrees + bound_vertex_id);
 			out_degree += _mm512_reduce_add_epi32(out_degrees_v);
 		}
-		//for (unsigned vertex_id = side_id * TILE_WIDTH; vertex_id < bound_vertex_id; ++vertex_id) {
+
+		//for (unsigned vertex_id = start_vertex_id; vertex_id < bound_vertex_id; ++vertex_id) {
 		//	if (1 == h_updating_graph_mask[vertex_id]) {
 		//		h_updating_graph_mask[vertex_id] = 0;
 		//		h_graph_mask[vertex_id] = 1;
@@ -344,7 +347,6 @@ inline void sssp_kernel_dense_weighted(
 				const unsigned &size_buffer,
 				int *h_graph_mask, 
 				int *h_updating_graph_mask,
-				int *is_active_side,
 				int *is_updating_active_side,
 				unsigned *dists) 
 {
@@ -371,8 +373,8 @@ inline void sssp_kernel_dense_weighted(
 		//if (!is_shorter_m) {
 		//	continue;
 		//}
+		dists_tmp_v = _mm512_mask_mov_epi32(_mm512_set1_epi32(INT_MAX), need_update_m, dists_tmp_v);
 		mask_min_conflict_safe_epi32(need_update_m, dists_tmp_v, end_v);
-
 		_mm512_mask_i32scatter_epi32(dists, need_update_m, end_v, dists_tmp_v, sizeof(unsigned));
 
 		__m512i updating_active_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), need_update_m, end_v, h_updating_graph_mask, sizeof(int));
@@ -408,6 +410,7 @@ inline void sssp_kernel_dense_weighted(
 		//if (!is_shorter_m) {
 		//	return;
 		//}
+		dists_tmp_v = _mm512_mask_mov_epi32(_mm512_set1_epi32(INT_MAX), need_update_m, dists_tmp_v);
 		mask_min_conflict_safe_epi32(need_update_m, dists_tmp_v, end_v);
 		_mm512_mask_i32scatter_epi32(dists, need_update_m, end_v, dists_tmp_v, sizeof(unsigned));
 
@@ -421,12 +424,12 @@ inline void sssp_kernel_dense_weighted(
 		__m512i side_id_v = _mm512_div_epi32(end_v, TILE_WIDTH_v);
 		_mm512_mask_i32scatter_epi32(is_updating_active_side, not_updating_active_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
 	}
-//	for (unsigned edge_i = edge_i_start; edge_i < edge_i_bound; ++edge_i) {
+//	for (unsigned edge_i = 0; edge_i < size_buffer; ++edge_i) {
 //		unsigned head = heads_buffer[edge_i];
 //		if (0 == h_graph_mask[head]) {
 //			continue;
 //		}
-//		unsigned end = graph_tails[edge_i];
+//		unsigned end = tails_buffer[edge_i];
 //		unsigned new_dist = dists[head] + weights_buffer[edge_i];
 //		if (new_dist < dists[end]) {
 //			dists[end] = new_dist;
@@ -463,7 +466,7 @@ inline void scheduler_dense_weighted(
 		unsigned tid = omp_get_thread_num();
 		unsigned *heads_buffer_base = heads_buffer + tid * SIZE_BUFFER_MAX;
 		unsigned *tails_buffer_base = tails_buffer + tid * SIZE_BUFFER_MAX;
-		unsigned *weights_buffer_base = tails_buffer + tid * SIZE_BUFFER_MAX;
+		unsigned *weights_buffer_base = weights_buffer + tid * SIZE_BUFFER_MAX;
 		unsigned size_buffer = 0;
 		unsigned capacity = SIZE_BUFFER_MAX;
 		for (unsigned tile_id = tile_index; tile_id < bound_tile_id; ++tile_id) {
@@ -504,7 +507,6 @@ inline void scheduler_dense_weighted(
 							size_buffer,
 							h_graph_mask, 
 							h_updating_graph_mask,
-							is_active_side,
 							is_updating_active_side,
 							dists); 
 					capacity = SIZE_BUFFER_MAX;
@@ -521,7 +523,6 @@ inline void scheduler_dense_weighted(
 				size_buffer,
 				h_graph_mask, 
 				h_updating_graph_mask,
-				is_active_side,
 				is_updating_active_side,
 				dists); 
 			//sssp_kernel_dense_weighted(
@@ -983,7 +984,7 @@ void sssp_weighted(
 	unsigned *h_graph_queue = nullptr;
 	unsigned frontier_size;
 	unsigned out_degree;
-	bool last_is_dense;
+	bool last_is_dense = true;
 
 	memset(dists, -1, NNODES * sizeof(int));
 	dists[source] = 0;
@@ -1012,6 +1013,8 @@ void sssp_weighted(
 							frontier_size,
 							graph_degrees,
 							h_updating_graph_mask);
+	h_graph_mask[source] = 1;
+	is_active_side[source/TILE_WIDTH] = 1;
 
 	unsigned pattern_threshold = NEDGES / T_RATIO;
 
@@ -1084,6 +1087,13 @@ void sssp_weighted(
 	double run_time;
 	printf("%u %lf\n", NUM_THREADS, run_time = end_time - start_time);
 	bot_best_perform.record(run_time, NUM_THREADS);
+
+	////test
+	//FILE *fout = fopen("results.txt", "w");
+	//for (unsigned i = 0; i < NNODES; ++i) {
+	//	fprintf(fout, "%u: %u\n", i, dists[i]);
+	//}
+	//fclose(fout);
 
 	free(dists);
 	free(h_graph_mask);
@@ -1448,7 +1458,7 @@ int main(int argc, char *argv[])
 	T_RATIO = 20;
 	WORK_LOAD = 30;
 	SIZE_BUFFER_MAX = 512;
-	for (unsigned i = 0; i < run_count; ++i) {
+	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 		bot_best_perform.reset();
 		//memset(distances, -1, NNODES * sizeof(int));

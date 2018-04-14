@@ -277,7 +277,7 @@ void convert_to_col_major_weight(
 				for (unsigned edge_i = tile_offsets[tile_id]; edge_i < bound_edge_i; ++edge_i) {
 					new_heads[edge_index] = graph_heads[edge_i] + 1;
 					new_ends[edge_index] = graph_ends[edge_i] + 1;
-					new_weights[edge_index] = graph_weights[edge_i] + 1;
+					new_weights[edge_index] = graph_weights[edge_i];
 					++edge_index;
 				}
 			}
@@ -297,7 +297,7 @@ void convert_to_col_major_weight(
 				for (unsigned edge_i = tile_offsets[tile_id]; edge_i < bound_edge_i; ++edge_i) {
 					new_heads[edge_index] = graph_heads[edge_i] + 1;
 					new_ends[edge_index] = graph_ends[edge_i] + 1;
-					new_weights[edge_index] = graph_weights[edge_i] + 1;
+					new_weights[edge_index] = graph_weights[edge_i];
 					++edge_index;
 				}
 			}

@@ -534,7 +534,8 @@ int main(int argc, char *argv[])
 	unsigned run_count = 9;
 #endif
 	//ROW_STEP = 16;
-	SIZE_BUFFER_MAX = 512;
+	//SIZE_BUFFER_MAX = 512;
+	SIZE_BUFFER_MAX = 256;
 	for (int cz = 0; cz < 5; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);

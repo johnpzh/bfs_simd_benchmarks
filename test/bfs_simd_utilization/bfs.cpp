@@ -200,7 +200,7 @@ inline void bfs_kernel_dense(
 	}
 
 	if (remainder) {
-		bot_simd_util.record(0, NUM_P_INT);
+		bot_simd_util.record(0, remainder);
 		unsigned short in_range_m_t = (unsigned short) 0xFFFF >> (NUM_P_INT - remainder);
 		__mmask16 in_range_m = (__mmask16) in_range_m_t;
 		__m512i head_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, heads_buffer + bound_edge_i);
@@ -753,46 +753,48 @@ void graph_prepare(
 
 	// The first time, running the Sparse
 	unsigned frontier_size = 1;
-	unsigned *frontier = (unsigned *) _mm_malloc(sizeof(unsigned) * frontier_size, ALIGNED_BYTES);
-	frontier[0] = source;
+	//unsigned *frontier = (unsigned *) _mm_malloc(sizeof(unsigned) * frontier_size, ALIGNED_BYTES);
+	//frontier[0] = source;
 	double last_time = omp_get_wtime();
 	double start_time = omp_get_wtime();
-	unsigned *new_frontier = BFS_sparse(
-								frontier,
-								graph_vertices,
-								graph_edges,
-								graph_degrees,
-								h_graph_parents,
-								frontier_size);
-	_mm_free(frontier);
-	frontier = new_frontier;
-	last_time = omp_get_wtime();
+	//unsigned *new_frontier = BFS_sparse(
+	//							frontier,
+	//							graph_vertices,
+	//							graph_edges,
+	//							graph_degrees,
+	//							h_graph_parents,
+	//							frontier_size);
+	//_mm_free(frontier);
+	//frontier = new_frontier;
+	//last_time = omp_get_wtime();
 
 	unsigned out_degree = 0;
 	// When update the parents, get the sum of the number of active nodes and their out degree.
-#pragma omp parallel for reduction(+: out_degree)
-	for (unsigned i = 0; i < frontier_size; ++i) {
-		unsigned end = frontier[i];
-		unsigned start = h_graph_parents[end];
-		h_cost[end] = h_cost[start] + 1;
-		out_degree += graph_degrees[end];
-	}
-	bool last_is_dense = false;
+//#pragma omp parallel for reduction(+: out_degree)
+//	for (unsigned i = 0; i < frontier_size; ++i) {
+//		unsigned end = frontier[i];
+//		unsigned start = h_graph_parents[end];
+//		h_cost[end] = h_cost[start] + 1;
+//		out_degree += graph_degrees[end];
+//	}
+//	bool last_is_dense = false;
+	h_graph_mask[source] = 1;
+	is_active_side[source/TILE_WIDTH] = 1;
 	// According the sum, determine to run Sparse or Dense, and then change the last_is_dense.
 	//unsigned bfs_threshold = NEDGES / 20 / T_RATIO; // Determined according to Ligra
 	unsigned bfs_threshold = NEDGES / T_RATIO; // Determined according to Ligra
 	while (true) {
-		if (frontier_size + out_degree > bfs_threshold) {
-			// Dense
-			if (!last_is_dense) {
-				last_time = omp_get_wtime();
-				to_dense(
-					h_graph_mask, 
-					is_active_side, 
-					frontier, 
-					frontier_size);
-			}
-			last_time = omp_get_wtime();
+		//if (frontier_size + out_degree > bfs_threshold) {
+		//	// Dense
+		//	if (!last_is_dense) {
+		//		last_time = omp_get_wtime();
+		//		to_dense(
+		//			h_graph_mask, 
+		//			is_active_side, 
+		//			frontier, 
+		//			frontier_size);
+		//	}
+		//	last_time = omp_get_wtime();
 			BFS_dense(
 					graph_heads,
 					graph_tails,
@@ -805,33 +807,33 @@ void graph_prepare(
 					//is_empty_tile,
 					is_active_side,
 					is_updating_active_side);
-			last_is_dense = true;
-		} else {
-			// Sparse
-			if (last_is_dense) {
-				last_time = omp_get_wtime();
-				new_frontier = to_sparse(
-					frontier,
-					frontier_size,
-					h_graph_mask);
-				_mm_free(frontier);
-				frontier = new_frontier;
-			}
-			last_time = omp_get_wtime();
-			new_frontier = BFS_sparse(
-								frontier,
-								graph_vertices,
-								graph_edges,
-								graph_degrees,
-								h_graph_parents,
-								frontier_size);
-			_mm_free(frontier);
-			frontier = new_frontier;
-			last_is_dense = false;
-		}
-		// Update the parents, also get the sum again.
-		last_time = omp_get_wtime();
-		if (last_is_dense) {
+		//	last_is_dense = true;
+		//} else {
+		//	// Sparse
+		//	if (last_is_dense) {
+		//		last_time = omp_get_wtime();
+		//		new_frontier = to_sparse(
+		//			frontier,
+		//			frontier_size,
+		//			h_graph_mask);
+		//		_mm_free(frontier);
+		//		frontier = new_frontier;
+		//	}
+		//	last_time = omp_get_wtime();
+		//	new_frontier = BFS_sparse(
+		//						frontier,
+		//						graph_vertices,
+		//						graph_edges,
+		//						graph_degrees,
+		//						h_graph_parents,
+		//						frontier_size);
+		//	_mm_free(frontier);
+		//	frontier = new_frontier;
+		//	last_is_dense = false;
+		//}
+		//// Update the parents, also get the sum again.
+		//last_time = omp_get_wtime();
+		//if (last_is_dense) {
 			update_dense(
 					frontier_size,
 					out_degree,
@@ -843,17 +845,17 @@ void graph_prepare(
 			if (0 == frontier_size) {
 				break;
 			}
-		} else {
-			if (0 == frontier_size) {
-				break;
-			}
-			out_degree = update_sparse(
-								frontier,
-								frontier_size,
-								graph_degrees,
-								h_graph_parents,
-								h_cost);
-		}
+		//} else {
+		//	if (0 == frontier_size) {
+		//		break;
+		//	}
+		//	out_degree = update_sparse(
+		//						frontier,
+		//						frontier_size,
+		//						graph_degrees,
+		//						h_graph_parents,
+		//						h_cost);
+		//}
 		//printf("frontier_size: %u\n", frontier_size);//test
 	}
 	double end_time = omp_get_wtime();
@@ -865,7 +867,7 @@ void graph_prepare(
 	
 	//Store the result into a file
 
-	free(frontier);
+	//free(frontier);
 	free( h_graph_mask);
 	free( h_updating_graph_mask);
 	free( h_graph_parents);
