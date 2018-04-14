@@ -1149,6 +1149,8 @@ int main( int argc, char** argv)
 	NUM_THREADS = 64;
 		// Re-initializing
 
+	for (NUM_THREADS = 64; NUM_THREADS <= 256; NUM_THREADS *= 2) {
+	for (int k = 0; k < 10; ++k) {
 	graph_prepare(
 			graph_vertices,
 			graph_edges,
@@ -1158,6 +1160,8 @@ int main( int argc, char** argv)
 			tile_offsets,
 			tile_sizes,
 			source);
+	}
+	}
 	//bot_necessary_access.print();
 
 	// cleanup memory

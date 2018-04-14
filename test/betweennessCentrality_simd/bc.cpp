@@ -2164,7 +2164,7 @@ int main(int argc, char *argv[])
 	//SIZE_BUFFER_MAX = 1024;
 	// BFS
 	for (int cz = 0; cz < 1; ++cz) {
-	for (unsigned i = 0; i < run_count; ++i) {
+	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 		bot_best_perform.reset();
 #ifndef ONEDEBUG

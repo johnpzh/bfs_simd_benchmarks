@@ -1286,7 +1286,6 @@ int main(int argc, char *argv[])
 #endif
 	T_RATIO = 20;
 	WORK_LOAD = 30;
-	for (int cz = 0; cz < 3; ++cz) {
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 		//memset(distances, -1, NNODES * sizeof(int));
@@ -1299,7 +1298,7 @@ int main(int argc, char *argv[])
 		//memset(is_updating_active_side, 0, sizeof(int) * SIDE_LENGTH);
 
 		//sleep(10);
-		for (int k = 0; k < 3; ++k) {
+		for (int k = 0; k < 1; ++k) {
 		if (is_weighted_graph) {
 			sssp_weighted(
 				graph_heads, 
@@ -1333,7 +1332,6 @@ int main(int argc, char *argv[])
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 		}
-	}
 	}
 
 	fclose(time_out);

@@ -364,9 +364,11 @@ inline void sssp_kernel_dense_weighted(
 		__m512i dists_head_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), is_active_m, head_v, dists, sizeof(unsigned));
 		__m512i weights_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), is_active_m, weights_buffer + edge_i);
 		__m512i dists_tmp_v = _mm512_mask_add_epi32(_mm512_undefined_epi32(), is_active_m, dists_head_v, weights_v);
-		__mmask16 is_minusone_m = _mm512_mask_cmpeq_epi32_mask(is_active_m, dists_end_v, _mm512_set1_epi32(-1));
-		__mmask16 is_shorter_m = _mm512_mask_cmplt_epi32_mask(is_active_m, dists_tmp_v, dists_end_v);
-		__mmask16 need_update_m = is_minusone_m | is_shorter_m;
+		//__mmask16 is_minusone_m = _mm512_mask_cmpeq_epi32_mask(is_active_m, dists_end_v, _mm512_set1_epi32(-1));
+		__mmask16 need_update_m = _mm512_mask_cmplt_epi32_mask(is_active_m, dists_tmp_v, dists_end_v);
+		//__mmask16 is_shorter_m = _mm512_mask_cmplt_epi32_mask(is_active_m, dists_tmp_v, dists_end_v);
+		//__mmask16 need_update_m = is_minusone_m | is_shorter_m;
+		//__mmask16 need_update_m = is_shorter_m;
 		if (!need_update_m) {
 			continue;
 		}
@@ -401,9 +403,11 @@ inline void sssp_kernel_dense_weighted(
 		__m512i dists_head_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), is_active_m, head_v, dists, sizeof(unsigned));
 		__m512i weights_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), is_active_m, weights_buffer + bound_edge_i);
 		__m512i dists_tmp_v = _mm512_mask_add_epi32(_mm512_undefined_epi32(), is_active_m, dists_head_v, weights_v);
-		__mmask16 is_minusone_m = _mm512_mask_cmpeq_epi32_mask(is_active_m, dists_end_v, _mm512_set1_epi32(-1));
-		__mmask16 is_shorter_m = _mm512_mask_cmplt_epi32_mask(is_active_m, dists_tmp_v, dists_end_v);
-		__mmask16 need_update_m = is_minusone_m | is_shorter_m;
+		//__mmask16 is_minusone_m = _mm512_mask_cmpeq_epi32_mask(is_active_m, dists_end_v, _mm512_set1_epi32(-1));
+		__mmask16 need_update_m = _mm512_mask_cmplt_epi32_mask(is_active_m, dists_tmp_v, dists_end_v);
+		//__mmask16 is_shorter_m = _mm512_mask_cmplt_epi32_mask(is_active_m, dists_tmp_v, dists_end_v);
+		//__mmask16 need_update_m = is_minusone_m | is_shorter_m;
+		//__mmask16 need_update_m = is_shorter_m;
 		if (!need_update_m) {
 			return;
 		}
@@ -986,7 +990,10 @@ void sssp_weighted(
 	unsigned out_degree;
 	bool last_is_dense = true;
 
-	memset(dists, -1, NNODES * sizeof(int));
+	//memset(dists, -1, NNODES * sizeof(int));
+	for (unsigned i = 0; i < NNODES; ++i) {
+		dists[i] = INT_MAX;
+	}
 	dists[source] = 0;
 
 	double start_time = omp_get_wtime();
