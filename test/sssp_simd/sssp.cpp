@@ -1465,6 +1465,8 @@ int main(int argc, char *argv[])
 	T_RATIO = 20;
 	WORK_LOAD = 30;
 	SIZE_BUFFER_MAX = 512;
+	printf("tile_size: %u\n", TILE_WIDTH);
+	printf("stripe_length: %u\n", ROW_STEP);
 	for (unsigned i = 6; i < run_count; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
 		bot_best_perform.reset();

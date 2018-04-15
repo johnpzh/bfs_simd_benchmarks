@@ -1,0 +1,9 @@
+Warning: no access to tty (Bad file descriptor).
+Thus no job control in this shell.
+++ date +%Y%m%d-%H%M%S
++ output=output_20180414-170529.txt
++ :
++ (( i = min_tile_size ))
++ (( i <= max_tile_size ))
++ /sciclone/home2/zpeng01/benchmarks/test/sssp_simd/sssp /sciclone/scr-mlt/zpeng01/twt/out.twitter 4096 1024 -w
+Terminated

@@ -15,7 +15,7 @@ set -x
 output="output_$(date +%Y%m%d-%H%M%S).txt"
 :> $output
 for ((i = min_tile_size; i <= max_tile_size; i *= 2)); do
-	$app ${data_file} ${i} 16 &>> $output
+	$app ${data_file} ${i} 1024 -w &>> $output
 done
 
 # Twt

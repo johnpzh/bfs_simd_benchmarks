@@ -1,0 +1,38 @@
+Warning: no access to tty (Bad file descriptor).
+Thus no job control in this shell.
+++ date +%Y%m%d-%H%M%S
++ output=output_20180415-043729.txt
++ :
++ (( i = min_stripe_length ))
++ (( i <= max_stripe_length ))
++ /sciclone/home2/zpeng01/benchmarks/test/sssp_simd/sssp /sciclone/home2/zpeng01/scr-mlt/twt/out.twitter 65536 1 -w
++ (( i *= 2 ))
++ (( i <= max_stripe_length ))
++ /sciclone/home2/zpeng01/benchmarks/test/sssp_simd/sssp /sciclone/home2/zpeng01/scr-mlt/twt/out.twitter 65536 2 -w
++ (( i *= 2 ))
++ (( i <= max_stripe_length ))
++ /sciclone/home2/zpeng01/benchmarks/test/sssp_simd/sssp /sciclone/home2/zpeng01/scr-mlt/twt/out.twitter 65536 4 -w
++ (( i *= 2 ))
++ (( i <= max_stripe_length ))
++ /sciclone/home2/zpeng01/benchmarks/test/sssp_simd/sssp /sciclone/home2/zpeng01/scr-mlt/twt/out.twitter 65536 8 -w
++ (( i *= 2 ))
++ (( i <= max_stripe_length ))
++ /sciclone/home2/zpeng01/benchmarks/test/sssp_simd/sssp /sciclone/home2/zpeng01/scr-mlt/twt/out.twitter 65536 16 -w
++ (( i *= 2 ))
++ (( i <= max_stripe_length ))
++ /sciclone/home2/zpeng01/benchmarks/test/sssp_simd/sssp /sciclone/home2/zpeng01/scr-mlt/twt/out.twitter 65536 32 -w
++ (( i *= 2 ))
++ (( i <= max_stripe_length ))
++ /sciclone/home2/zpeng01/benchmarks/test/sssp_simd/sssp /sciclone/home2/zpeng01/scr-mlt/twt/out.twitter 65536 64 -w
++ (( i *= 2 ))
++ (( i <= max_stripe_length ))
++ /sciclone/home2/zpeng01/benchmarks/test/sssp_simd/sssp /sciclone/home2/zpeng01/scr-mlt/twt/out.twitter 65536 128 -w
++ (( i *= 2 ))
++ (( i <= max_stripe_length ))
++ /sciclone/home2/zpeng01/benchmarks/test/sssp_simd/sssp /sciclone/home2/zpeng01/scr-mlt/twt/out.twitter 65536 256 -w
++ (( i *= 2 ))
++ (( i <= max_stripe_length ))
++ /sciclone/home2/zpeng01/benchmarks/test/sssp_simd/sssp /sciclone/home2/zpeng01/scr-mlt/twt/out.twitter 65536 512 -w
++ (( i *= 2 ))
++ (( i <= max_stripe_length ))
++ set +x

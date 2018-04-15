@@ -2,7 +2,7 @@ Intel(R) Advisor can now assist with vectorization and show optimization
   report messages with your source code.
 See "https://software.intel.com/en-us/intel-advisor-xe" for details.
 
-Intel(R) C++ Intel(R) 64 Compiler for applications running on Intel(R) 64, Version 17.0.1.132 Build 20161005
+Intel(R) C++ Intel(R) 64 Compiler for applications running on Intel(R) 64, Version 17.0.2.174 Build 20170213
 
 Compiler options: -Wall -Wextra -g -std=c++14 -qopenmp -O3 -xMIC-AVX512 -qopt-report=5 -qopt-report-phase=vec -inline-level=2 -inline-forceinline -o sssp
 
@@ -15,13 +15,13 @@ LOOP BEGIN at sssp.cpp(1385,3)
    remark #15522: loop was not vectorized: loop control flow is too complex. Try using canonical loop form from OpenMP specification
 LOOP END
 
-LOOP BEGIN at sssp.cpp(1468,2)
+LOOP BEGIN at sssp.cpp(1470,2)
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at sssp.cpp(1481,3)
+   LOOP BEGIN at sssp.cpp(1483,3)
       remark #15542: loop was not vectorized: inner loop was already vectorized
 
-      LOOP BEGIN at sssp.cpp(994,2) inlined into sssp.cpp(1483,4)
+      LOOP BEGIN at sssp.cpp(994,2) inlined into sssp.cpp(1485,4)
       <Peeled loop for vectorization>
          remark #15389: vectorization support: reference dists[i] has unaligned access   [ sssp.cpp(995,3) ]
          remark #15381: vectorization support: unaligned access used inside loop body
@@ -30,7 +30,7 @@ LOOP BEGIN at sssp.cpp(1468,2)
          remark #15301: PEEL LOOP WAS VECTORIZED
       LOOP END
 
-      LOOP BEGIN at sssp.cpp(994,2) inlined into sssp.cpp(1483,4)
+      LOOP BEGIN at sssp.cpp(994,2) inlined into sssp.cpp(1485,4)
          remark #15389: vectorization support: reference dists[i] has unaligned access   [ sssp.cpp(995,3) ]
          remark #15381: vectorization support: unaligned access used inside loop body
          remark #15305: vectorization support: vector length 16
@@ -45,7 +45,7 @@ LOOP BEGIN at sssp.cpp(1468,2)
          remark #15488: --- end vector cost summary ---
       LOOP END
 
-      LOOP BEGIN at sssp.cpp(994,2) inlined into sssp.cpp(1483,4)
+      LOOP BEGIN at sssp.cpp(994,2) inlined into sssp.cpp(1485,4)
       <Remainder loop for vectorization>
          remark #15389: vectorization support: reference dists[i] has unaligned access   [ sssp.cpp(995,3) ]
          remark #15381: vectorization support: unaligned access used inside loop body
@@ -54,73 +54,73 @@ LOOP BEGIN at sssp.cpp(1468,2)
          remark #15301: REMAINDER LOOP WAS VECTORIZED
       LOOP END
 
-      LOOP BEGIN at sssp.cpp(770,2) inlined into sssp.cpp(1483,4)
+      LOOP BEGIN at sssp.cpp(770,2) inlined into sssp.cpp(1485,4)
          remark #15344: loop was not vectorized: vector dependence prevents vectorization
          remark #15346: vector dependence: assumed FLOW dependence between offset_sum (773:3) and offset_sum (772:3)
          remark #15346: vector dependence: assumed ANTI dependence between offset_sum (772:3) and offset_sum (773:3)
          remark #15346: vector dependence: assumed ANTI dependence between offset_sum (772:3) and offset_sum (773:3)
       LOOP END
 
-      LOOP BEGIN at sssp.cpp(770,2) inlined into sssp.cpp(1483,4)
+      LOOP BEGIN at sssp.cpp(770,2) inlined into sssp.cpp(1485,4)
       <Remainder>
       LOOP END
 
-      LOOP BEGIN at sssp.cpp(858,3) inlined into sssp.cpp(1483,4)
+      LOOP BEGIN at sssp.cpp(858,3) inlined into sssp.cpp(1485,4)
          remark #15344: loop was not vectorized: vector dependence prevents vectorization
          remark #15346: vector dependence: assumed FLOW dependence between base (860:22) and base (860:5)
          remark #15346: vector dependence: assumed ANTI dependence between base (860:5) and base (860:22)
          remark #15346: vector dependence: assumed ANTI dependence between base (860:5) and base (860:22)
       LOOP END
 
-      LOOP BEGIN at sssp.cpp(858,3) inlined into sssp.cpp(1483,4)
+      LOOP BEGIN at sssp.cpp(858,3) inlined into sssp.cpp(1485,4)
       <Remainder>
       LOOP END
 
-      LOOP BEGIN at sssp.cpp(882,3) inlined into sssp.cpp(1483,4)
+      LOOP BEGIN at sssp.cpp(882,3) inlined into sssp.cpp(1485,4)
          remark #15344: loop was not vectorized: vector dependence prevents vectorization
          remark #15346: vector dependence: assumed FLOW dependence between offset_sum (885:4) and offset_sum (884:4)
          remark #15346: vector dependence: assumed ANTI dependence between offset_sum (884:4) and offset_sum (885:4)
          remark #15346: vector dependence: assumed ANTI dependence between offset_sum (884:4) and offset_sum (885:4)
       LOOP END
 
-      LOOP BEGIN at sssp.cpp(882,3) inlined into sssp.cpp(1483,4)
+      LOOP BEGIN at sssp.cpp(882,3) inlined into sssp.cpp(1485,4)
       <Remainder>
       LOOP END
 
-      LOOP BEGIN at sssp.cpp(917,3) inlined into sssp.cpp(1483,4)
+      LOOP BEGIN at sssp.cpp(917,3) inlined into sssp.cpp(1485,4)
          remark #15310: loop was not vectorized: operation cannot be vectorized   [ sssp.cpp(919,23) ]
       LOOP END
 
-      LOOP BEGIN at sssp.cpp(917,3) inlined into sssp.cpp(1483,4)
+      LOOP BEGIN at sssp.cpp(917,3) inlined into sssp.cpp(1485,4)
       <Remainder>
       LOOP END
 
-      LOOP BEGIN at sssp.cpp(1029,7) inlined into sssp.cpp(1483,4)
+      LOOP BEGIN at sssp.cpp(1029,7) inlined into sssp.cpp(1485,4)
          remark #15542: loop was not vectorized: inner loop was already vectorized
 
-         LOOP BEGIN at sssp.cpp(562,2) inlined into sssp.cpp(1483,4)
+         LOOP BEGIN at sssp.cpp(562,2) inlined into sssp.cpp(1485,4)
             remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
          LOOP END
 
-         LOOP BEGIN at sssp.cpp(652,3) inlined into sssp.cpp(1483,4)
+         LOOP BEGIN at sssp.cpp(652,3) inlined into sssp.cpp(1485,4)
             remark #15344: loop was not vectorized: vector dependence prevents vectorization
             remark #15346: vector dependence: assumed FLOW dependence between offset_sum (655:4) and offset_sum (654:4)
             remark #15346: vector dependence: assumed ANTI dependence between offset_sum (654:4) and offset_sum (655:4)
             remark #15346: vector dependence: assumed ANTI dependence between offset_sum (654:4) and offset_sum (655:4)
          LOOP END
 
-         LOOP BEGIN at sssp.cpp(652,3) inlined into sssp.cpp(1483,4)
+         LOOP BEGIN at sssp.cpp(652,3) inlined into sssp.cpp(1485,4)
          <Remainder>
          LOOP END
 
-         LOOP BEGIN at sssp.cpp(677,3) inlined into sssp.cpp(1483,4)
+         LOOP BEGIN at sssp.cpp(677,3) inlined into sssp.cpp(1485,4)
          <Peeled loop for vectorization>
             remark #15305: vectorization support: vector length 16
             remark #15309: vectorization support: normalized vectorization overhead 0.826
             remark #15301: PEEL LOOP WAS VECTORIZED
          LOOP END
 
-         LOOP BEGIN at sssp.cpp(677,3) inlined into sssp.cpp(1483,4)
+         LOOP BEGIN at sssp.cpp(677,3) inlined into sssp.cpp(1485,4)
             remark #15305: vectorization support: vector length 16
             remark #15309: vectorization support: normalized vectorization overhead 1.000
             remark #15300: LOOP WAS VECTORIZED
@@ -135,76 +135,76 @@ LOOP BEGIN at sssp.cpp(1468,2)
             remark #15497: vector compress: 1 
          LOOP END
 
-         LOOP BEGIN at sssp.cpp(677,3) inlined into sssp.cpp(1483,4)
+         LOOP BEGIN at sssp.cpp(677,3) inlined into sssp.cpp(1485,4)
          <Remainder loop for vectorization>
             remark #15305: vectorization support: vector length 16
             remark #15309: vectorization support: normalized vectorization overhead 0.826
             remark #15301: REMAINDER LOOP WAS VECTORIZED
          LOOP END
 
-         LOOP BEGIN at sssp.cpp(770,2) inlined into sssp.cpp(1483,4)
+         LOOP BEGIN at sssp.cpp(770,2) inlined into sssp.cpp(1485,4)
             remark #15344: loop was not vectorized: vector dependence prevents vectorization
             remark #15346: vector dependence: assumed FLOW dependence between offset_sum (773:3) and offset_sum (772:3)
             remark #15346: vector dependence: assumed ANTI dependence between offset_sum (772:3) and offset_sum (773:3)
             remark #15346: vector dependence: assumed ANTI dependence between offset_sum (772:3) and offset_sum (773:3)
          LOOP END
 
-         LOOP BEGIN at sssp.cpp(770,2) inlined into sssp.cpp(1483,4)
+         LOOP BEGIN at sssp.cpp(770,2) inlined into sssp.cpp(1485,4)
          <Remainder>
          LOOP END
 
-         LOOP BEGIN at sssp.cpp(858,3) inlined into sssp.cpp(1483,4)
+         LOOP BEGIN at sssp.cpp(858,3) inlined into sssp.cpp(1485,4)
             remark #15344: loop was not vectorized: vector dependence prevents vectorization
             remark #15346: vector dependence: assumed FLOW dependence between base (860:22) and base (860:5)
             remark #15346: vector dependence: assumed ANTI dependence between base (860:5) and base (860:22)
             remark #15346: vector dependence: assumed ANTI dependence between base (860:5) and base (860:22)
          LOOP END
 
-         LOOP BEGIN at sssp.cpp(858,3) inlined into sssp.cpp(1483,4)
+         LOOP BEGIN at sssp.cpp(858,3) inlined into sssp.cpp(1485,4)
          <Remainder>
          LOOP END
 
-         LOOP BEGIN at sssp.cpp(882,3) inlined into sssp.cpp(1483,4)
+         LOOP BEGIN at sssp.cpp(882,3) inlined into sssp.cpp(1485,4)
             remark #15344: loop was not vectorized: vector dependence prevents vectorization
             remark #15346: vector dependence: assumed FLOW dependence between offset_sum (885:4) and offset_sum (884:4)
             remark #15346: vector dependence: assumed ANTI dependence between offset_sum (884:4) and offset_sum (885:4)
             remark #15346: vector dependence: assumed ANTI dependence between offset_sum (884:4) and offset_sum (885:4)
          LOOP END
 
-         LOOP BEGIN at sssp.cpp(882,3) inlined into sssp.cpp(1483,4)
+         LOOP BEGIN at sssp.cpp(882,3) inlined into sssp.cpp(1485,4)
          <Remainder>
          LOOP END
 
-         LOOP BEGIN at sssp.cpp(917,3) inlined into sssp.cpp(1483,4)
+         LOOP BEGIN at sssp.cpp(917,3) inlined into sssp.cpp(1485,4)
             remark #15310: loop was not vectorized: operation cannot be vectorized   [ sssp.cpp(919,23) ]
          LOOP END
 
-         LOOP BEGIN at sssp.cpp(917,3) inlined into sssp.cpp(1483,4)
+         LOOP BEGIN at sssp.cpp(917,3) inlined into sssp.cpp(1485,4)
          <Remainder>
          LOOP END
       LOOP END
 
-      LOOP BEGIN at sssp.cpp(1304,2) inlined into sssp.cpp(1495,4)
+      LOOP BEGIN at sssp.cpp(1304,2) inlined into sssp.cpp(1497,4)
          remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-         LOOP BEGIN at sssp.cpp(1308,3) inlined into sssp.cpp(1495,4)
+         LOOP BEGIN at sssp.cpp(1308,3) inlined into sssp.cpp(1497,4)
             remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
          LOOP END
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at sssp.cpp(1245,2) inlined into sssp.cpp(1495,4)
+LOOP BEGIN at sssp.cpp(1245,2) inlined into sssp.cpp(1497,4)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
    remark #15346: vector dependence: assumed ANTI dependence between dists (1221:3) and dists (1222:4)
    remark #15346: vector dependence: assumed FLOW dependence between dists (1222:4) and dists (1221:3)
 
-   LOOP BEGIN at sssp.cpp(1246,3) inlined into sssp.cpp(1495,4)
+   LOOP BEGIN at sssp.cpp(1246,3) inlined into sssp.cpp(1497,4)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
       remark #15346: vector dependence: assumed ANTI dependence between dists (1221:3) and dists (1222:4)
       remark #15346: vector dependence: assumed FLOW dependence between dists (1222:4) and dists (1221:3)
 
-      LOOP BEGIN at sssp.cpp(1215,2) inlined into sssp.cpp(1495,4)
+      LOOP BEGIN at sssp.cpp(1215,2) inlined into sssp.cpp(1497,4)
          remark #15344: loop was not vectorized: vector dependence prevents vectorization
          remark #15346: vector dependence: assumed ANTI dependence between dists (1221:3) and dists (1222:4)
          remark #15346: vector dependence: assumed FLOW dependence between dists (1222:4) and dists (1221:3)
@@ -212,17 +212,17 @@ LOOP BEGIN at sssp.cpp(1245,2) inlined into sssp.cpp(1495,4)
    LOOP END
 LOOP END
 
-LOOP BEGIN at sssp.cpp(1245,2) inlined into sssp.cpp(1495,4)
+LOOP BEGIN at sssp.cpp(1245,2) inlined into sssp.cpp(1497,4)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
    remark #15346: vector dependence: assumed ANTI dependence between dists (1221:3) and dists (1222:4)
    remark #15346: vector dependence: assumed FLOW dependence between dists (1222:4) and dists (1221:3)
 
-   LOOP BEGIN at sssp.cpp(1246,3) inlined into sssp.cpp(1495,4)
+   LOOP BEGIN at sssp.cpp(1246,3) inlined into sssp.cpp(1497,4)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
       remark #15346: vector dependence: assumed ANTI dependence between dists (1221:3) and dists (1222:4)
       remark #15346: vector dependence: assumed FLOW dependence between dists (1222:4) and dists (1221:3)
 
-      LOOP BEGIN at sssp.cpp(1215,2) inlined into sssp.cpp(1495,4)
+      LOOP BEGIN at sssp.cpp(1215,2) inlined into sssp.cpp(1497,4)
          remark #15344: loop was not vectorized: vector dependence prevents vectorization
          remark #15346: vector dependence: assumed ANTI dependence between dists (1221:3) and dists (1222:4)
          remark #15346: vector dependence: assumed FLOW dependence between dists (1222:4) and dists (1221:3)
@@ -230,10 +230,10 @@ LOOP BEGIN at sssp.cpp(1245,2) inlined into sssp.cpp(1495,4)
    LOOP END
 LOOP END
 
-LOOP BEGIN at sssp.cpp(1342,3) inlined into sssp.cpp(1495,4)
+LOOP BEGIN at sssp.cpp(1342,3) inlined into sssp.cpp(1497,4)
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at sssp.cpp(1356,4) inlined into sssp.cpp(1495,4)
+   LOOP BEGIN at sssp.cpp(1356,4) inlined into sssp.cpp(1497,4)
    <Peeled loop for vectorization>
       remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ sssp.cpp(1358,6) ]
       remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ sssp.cpp(1359,6) ]
@@ -244,7 +244,7 @@ LOOP BEGIN at sssp.cpp(1342,3) inlined into sssp.cpp(1495,4)
       remark #15301: PEEL LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at sssp.cpp(1356,4) inlined into sssp.cpp(1495,4)
+   LOOP BEGIN at sssp.cpp(1356,4) inlined into sssp.cpp(1497,4)
       remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ sssp.cpp(1358,6) ]
       remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ sssp.cpp(1359,6) ]
       remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ sssp.cpp(1358,6) ]
@@ -262,7 +262,7 @@ LOOP BEGIN at sssp.cpp(1342,3) inlined into sssp.cpp(1495,4)
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at sssp.cpp(1356,4) inlined into sssp.cpp(1495,4)
+   LOOP BEGIN at sssp.cpp(1356,4) inlined into sssp.cpp(1497,4)
    <Remainder loop for vectorization>
       remark #15389: vectorization support: reference h_updating_graph_mask has unaligned access   [ sssp.cpp(1358,6) ]
       remark #15389: vectorization support: reference h_graph_mask has unaligned access   [ sssp.cpp(1359,6) ]
@@ -274,73 +274,73 @@ LOOP BEGIN at sssp.cpp(1342,3) inlined into sssp.cpp(1495,4)
    LOOP END
 LOOP END
 
-LOOP BEGIN at sssp.cpp(740,1) inlined into sssp.cpp(1483,4)
+LOOP BEGIN at sssp.cpp(740,1) inlined into sssp.cpp(1485,4)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
    remark #15346: vector dependence: assumed ANTI dependence between at (746:3) and at (746:3)
    remark #15346: vector dependence: assumed FLOW dependence between at (746:3) and at (746:3)
 LOOP END
 
-LOOP BEGIN at sssp.cpp(838,2) inlined into sssp.cpp(1483,4)
+LOOP BEGIN at sssp.cpp(838,2) inlined into sssp.cpp(1485,4)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
    remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (849:5) and new_frontier_tmp (849:5)
    remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (849:5) and new_frontier_tmp (849:5)
 
-   LOOP BEGIN at sssp.cpp(847,3) inlined into sssp.cpp(1483,4)
+   LOOP BEGIN at sssp.cpp(847,3) inlined into sssp.cpp(1485,4)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
       remark #15346: vector dependence: assumed FLOW dependence between new_frontier_tmp (849:5) and new_frontier_tmp (849:5)
       remark #15346: vector dependence: assumed ANTI dependence between new_frontier_tmp (849:5) and new_frontier_tmp (849:5)
    LOOP END
 
-   LOOP BEGIN at sssp.cpp(847,3) inlined into sssp.cpp(1483,4)
+   LOOP BEGIN at sssp.cpp(847,3) inlined into sssp.cpp(1485,4)
    <Remainder>
    LOOP END
 LOOP END
 
-LOOP BEGIN at sssp.cpp(889,3) inlined into sssp.cpp(1483,4)
+LOOP BEGIN at sssp.cpp(889,3) inlined into sssp.cpp(1485,4)
    remark #15382: vectorization support: call to function _mm512_mask_storeu_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ sssp.cpp(908,5) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
    remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier (902:5) and new_frontier (902:5)
    remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier (902:5) and new_frontier (902:5)
 
-   LOOP BEGIN at sssp.cpp(900,4) inlined into sssp.cpp(1483,4)
+   LOOP BEGIN at sssp.cpp(900,4) inlined into sssp.cpp(1485,4)
       remark #15310: loop was not vectorized: operation cannot be vectorized   [ sssp.cpp(902,25) ]
    LOOP END
 
-   LOOP BEGIN at sssp.cpp(900,4) inlined into sssp.cpp(1483,4)
+   LOOP BEGIN at sssp.cpp(900,4) inlined into sssp.cpp(1485,4)
    <Remainder>
    LOOP END
 LOOP END
 
-LOOP BEGIN at sssp.cpp(702,1) inlined into sssp.cpp(1483,4)
+LOOP BEGIN at sssp.cpp(702,1) inlined into sssp.cpp(1485,4)
    remark #15382: vectorization support: call to function _mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ sssp.cpp(708,3) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
    remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_i32extgather_epi32(__m512i, const void *, unsigned i (705:23) and call:_mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsign (708:3)
    remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsign (708:3) and call:_mm512_i32extgather_epi32(__m512i, const void *, unsigned i (705:23)
 LOOP END
 
-LOOP BEGIN at sssp.cpp(635,3) inlined into sssp.cpp(1483,4)
+LOOP BEGIN at sssp.cpp(635,3) inlined into sssp.cpp(1485,4)
    remark #15541: outer loop was not auto-vectorized: consider using SIMD directive   [ sssp.cpp(643,4) ]
 
-   LOOP BEGIN at sssp.cpp(643,4) inlined into sssp.cpp(1483,4)
+   LOOP BEGIN at sssp.cpp(643,4) inlined into sssp.cpp(1485,4)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization   [ sssp.cpp(644,5) ]
    LOOP END
 
-   LOOP BEGIN at sssp.cpp(643,4) inlined into sssp.cpp(1483,4)
+   LOOP BEGIN at sssp.cpp(643,4) inlined into sssp.cpp(1485,4)
    <Remainder>
    LOOP END
 LOOP END
 
-LOOP BEGIN at sssp.cpp(659,3) inlined into sssp.cpp(1483,4)
+LOOP BEGIN at sssp.cpp(659,3) inlined into sssp.cpp(1485,4)
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at sssp.cpp(668,4) inlined into sssp.cpp(1483,4)
+   LOOP BEGIN at sssp.cpp(668,4) inlined into sssp.cpp(1485,4)
    <Peeled loop for vectorization>
       remark #15305: vectorization support: vector length 16
       remark #15309: vectorization support: normalized vectorization overhead 0.826
       remark #15301: PEEL LOOP WAS VECTORIZED
    LOOP END
 
-   LOOP BEGIN at sssp.cpp(668,4) inlined into sssp.cpp(1483,4)
+   LOOP BEGIN at sssp.cpp(668,4) inlined into sssp.cpp(1485,4)
       remark #15305: vectorization support: vector length 16
       remark #15309: vectorization support: normalized vectorization overhead 1.000
       remark #15300: LOOP WAS VECTORIZED
@@ -355,7 +355,7 @@ LOOP BEGIN at sssp.cpp(659,3) inlined into sssp.cpp(1483,4)
       remark #15497: vector compress: 1 
    LOOP END
 
-   LOOP BEGIN at sssp.cpp(668,4) inlined into sssp.cpp(1483,4)
+   LOOP BEGIN at sssp.cpp(668,4) inlined into sssp.cpp(1485,4)
    <Remainder loop for vectorization>
       remark #15305: vectorization support: vector length 16
       remark #15309: vectorization support: normalized vectorization overhead 0.826
@@ -363,51 +363,51 @@ LOOP BEGIN at sssp.cpp(659,3) inlined into sssp.cpp(1483,4)
    LOOP END
 LOOP END
 
-LOOP BEGIN at sssp.cpp(740,1) inlined into sssp.cpp(1483,4)
+LOOP BEGIN at sssp.cpp(740,1) inlined into sssp.cpp(1485,4)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
    remark #15346: vector dependence: assumed ANTI dependence between at (746:3) and at (746:3)
    remark #15346: vector dependence: assumed FLOW dependence between at (746:3) and at (746:3)
 LOOP END
 
-LOOP BEGIN at sssp.cpp(838,2) inlined into sssp.cpp(1483,4)
+LOOP BEGIN at sssp.cpp(838,2) inlined into sssp.cpp(1485,4)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
    remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (849:5) and new_frontier_tmp (849:5)
    remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier_tmp (849:5) and new_frontier_tmp (849:5)
 
-   LOOP BEGIN at sssp.cpp(847,3) inlined into sssp.cpp(1483,4)
+   LOOP BEGIN at sssp.cpp(847,3) inlined into sssp.cpp(1485,4)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
       remark #15346: vector dependence: assumed FLOW dependence between new_frontier_tmp (849:5) and new_frontier_tmp (849:5)
       remark #15346: vector dependence: assumed ANTI dependence between new_frontier_tmp (849:5) and new_frontier_tmp (849:5)
    LOOP END
 
-   LOOP BEGIN at sssp.cpp(847,3) inlined into sssp.cpp(1483,4)
+   LOOP BEGIN at sssp.cpp(847,3) inlined into sssp.cpp(1485,4)
    <Remainder>
    LOOP END
 LOOP END
 
-LOOP BEGIN at sssp.cpp(889,3) inlined into sssp.cpp(1483,4)
+LOOP BEGIN at sssp.cpp(889,3) inlined into sssp.cpp(1485,4)
    remark #15382: vectorization support: call to function _mm512_mask_storeu_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ sssp.cpp(908,5) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
    remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier (902:5) and new_frontier (902:5)
    remark #15346: vector dependence: assumed OUTPUT dependence between new_frontier (902:5) and new_frontier (902:5)
 
-   LOOP BEGIN at sssp.cpp(900,4) inlined into sssp.cpp(1483,4)
+   LOOP BEGIN at sssp.cpp(900,4) inlined into sssp.cpp(1485,4)
       remark #15310: loop was not vectorized: operation cannot be vectorized   [ sssp.cpp(902,25) ]
    LOOP END
 
-   LOOP BEGIN at sssp.cpp(900,4) inlined into sssp.cpp(1483,4)
+   LOOP BEGIN at sssp.cpp(900,4) inlined into sssp.cpp(1485,4)
    <Remainder>
    LOOP END
 LOOP END
 
-LOOP BEGIN at sssp.cpp(702,1) inlined into sssp.cpp(1483,4)
+LOOP BEGIN at sssp.cpp(702,1) inlined into sssp.cpp(1485,4)
    remark #15382: vectorization support: call to function _mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ sssp.cpp(708,3) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
    remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_i32extgather_epi32(__m512i, const void *, unsigned i (705:23) and call:_mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsign (708:3)
    remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsign (708:3) and call:_mm512_i32extgather_epi32(__m512i, const void *, unsigned i (705:23)
 LOOP END
 
-LOOP BEGIN at sssp.cpp(203,1) inlined into sssp.cpp(1483,4)
+LOOP BEGIN at sssp.cpp(203,1) inlined into sssp.cpp(1485,4)
    remark #15382: vectorization support: call to function _mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ sssp.cpp(206,3) ]
    remark #15382: vectorization support: call to function _mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsigned int, int, int) cannot be vectorized   [ sssp.cpp(209,3) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization
@@ -415,90 +415,90 @@ LOOP BEGIN at sssp.cpp(203,1) inlined into sssp.cpp(1483,4)
    remark #15346: vector dependence: assumed OUTPUT dependence between call:_mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsign (209:3) and call:_mm512_i32extscatter_epi32(void *, __m512i, __m512i, unsign (206:3)
 LOOP END
 
-LOOP BEGIN at sssp.cpp(490,49) inlined into sssp.cpp(1483,4)
+LOOP BEGIN at sssp.cpp(490,49) inlined into sssp.cpp(1485,4)
    remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-   LOOP BEGIN at sssp.cpp(468,2) inlined into sssp.cpp(1483,4)
+   LOOP BEGIN at sssp.cpp(468,2) inlined into sssp.cpp(1485,4)
       remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-      LOOP BEGIN at sssp.cpp(476,3) inlined into sssp.cpp(1483,4)
+      LOOP BEGIN at sssp.cpp(476,3) inlined into sssp.cpp(1485,4)
          remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-         LOOP BEGIN at sssp.cpp(484,4) inlined into sssp.cpp(1483,4)
+         LOOP BEGIN at sssp.cpp(484,4) inlined into sssp.cpp(1485,4)
             remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-            LOOP BEGIN at sssp.cpp(355,2) inlined into sssp.cpp(1483,4)
+            LOOP BEGIN at sssp.cpp(355,2) inlined into sssp.cpp(1485,4)
                remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-               LOOP BEGIN at sssp.cpp(331,3) inlined into sssp.cpp(1483,4)
+               LOOP BEGIN at sssp.cpp(331,3) inlined into sssp.cpp(1485,4)
                   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
                LOOP END
             LOOP END
 
-            LOOP BEGIN at sssp.cpp(331,3) inlined into sssp.cpp(1483,4)
+            LOOP BEGIN at sssp.cpp(331,3) inlined into sssp.cpp(1485,4)
                remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
             LOOP END
          LOOP END
       LOOP END
 
-      LOOP BEGIN at sssp.cpp(355,2) inlined into sssp.cpp(1483,4)
+      LOOP BEGIN at sssp.cpp(355,2) inlined into sssp.cpp(1485,4)
          remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-         LOOP BEGIN at sssp.cpp(331,3) inlined into sssp.cpp(1483,4)
+         LOOP BEGIN at sssp.cpp(331,3) inlined into sssp.cpp(1485,4)
             remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
          LOOP END
       LOOP END
 
-      LOOP BEGIN at sssp.cpp(331,3) inlined into sssp.cpp(1483,4)
+      LOOP BEGIN at sssp.cpp(331,3) inlined into sssp.cpp(1485,4)
          remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at sssp.cpp(490,49) inlined into sssp.cpp(1483,4)
+LOOP BEGIN at sssp.cpp(490,49) inlined into sssp.cpp(1485,4)
    remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-   LOOP BEGIN at sssp.cpp(468,2) inlined into sssp.cpp(1483,4)
+   LOOP BEGIN at sssp.cpp(468,2) inlined into sssp.cpp(1485,4)
       remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-      LOOP BEGIN at sssp.cpp(476,3) inlined into sssp.cpp(1483,4)
+      LOOP BEGIN at sssp.cpp(476,3) inlined into sssp.cpp(1485,4)
          remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-         LOOP BEGIN at sssp.cpp(484,4) inlined into sssp.cpp(1483,4)
+         LOOP BEGIN at sssp.cpp(484,4) inlined into sssp.cpp(1485,4)
             remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-            LOOP BEGIN at sssp.cpp(355,2) inlined into sssp.cpp(1483,4)
+            LOOP BEGIN at sssp.cpp(355,2) inlined into sssp.cpp(1485,4)
                remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-               LOOP BEGIN at sssp.cpp(331,3) inlined into sssp.cpp(1483,4)
+               LOOP BEGIN at sssp.cpp(331,3) inlined into sssp.cpp(1485,4)
                   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
                LOOP END
             LOOP END
 
-            LOOP BEGIN at sssp.cpp(331,3) inlined into sssp.cpp(1483,4)
+            LOOP BEGIN at sssp.cpp(331,3) inlined into sssp.cpp(1485,4)
                remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
             LOOP END
          LOOP END
       LOOP END
 
-      LOOP BEGIN at sssp.cpp(355,2) inlined into sssp.cpp(1483,4)
+      LOOP BEGIN at sssp.cpp(355,2) inlined into sssp.cpp(1485,4)
          remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-         LOOP BEGIN at sssp.cpp(331,3) inlined into sssp.cpp(1483,4)
+         LOOP BEGIN at sssp.cpp(331,3) inlined into sssp.cpp(1485,4)
             remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
          LOOP END
       LOOP END
 
-      LOOP BEGIN at sssp.cpp(331,3) inlined into sssp.cpp(1483,4)
+      LOOP BEGIN at sssp.cpp(331,3) inlined into sssp.cpp(1485,4)
          remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at sssp.cpp(239,2) inlined into sssp.cpp(1483,4)
+LOOP BEGIN at sssp.cpp(239,2) inlined into sssp.cpp(1485,4)
    remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-   LOOP BEGIN at sssp.cpp(266,3) inlined into sssp.cpp(1483,4)
+   LOOP BEGIN at sssp.cpp(266,3) inlined into sssp.cpp(1485,4)
       remark #15382: vectorization support: call to function _mm512_mask_storeu_epi32(void *, unsigned short, __m512i) cannot be vectorized   [ sssp.cpp(275,4) ]
       remark #15344: loop was not vectorized: vector dependence prevents vectorization
       remark #15346: vector dependence: assumed OUTPUT dependence between h_graph_mask (272:5) and h_graph_mask (276:4)
@@ -510,32 +510,32 @@ LOOP END
 Non-optimizable loops:
 
 
-LOOP BEGIN at sssp.cpp(780,2) inlined into sssp.cpp(1483,4)
+LOOP BEGIN at sssp.cpp(780,2) inlined into sssp.cpp(1485,4)
    remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ sssp.cpp(795,5) ]
 
-   LOOP BEGIN at sssp.cpp(780,2) inlined into sssp.cpp(1483,4)
+   LOOP BEGIN at sssp.cpp(780,2) inlined into sssp.cpp(1485,4)
       remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ sssp.cpp(795,5) ]
 
-      LOOP BEGIN at sssp.cpp(785,3) inlined into sssp.cpp(1483,4)
+      LOOP BEGIN at sssp.cpp(785,3) inlined into sssp.cpp(1485,4)
          remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ sssp.cpp(795,5) ]
 
-         LOOP BEGIN at sssp.cpp(797,23) inlined into sssp.cpp(1483,4)
+         LOOP BEGIN at sssp.cpp(797,23) inlined into sssp.cpp(1485,4)
             remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ sssp.cpp(798,68) ]
          LOOP END
       LOOP END
    LOOP END
 LOOP END
 
-LOOP BEGIN at sssp.cpp(780,2) inlined into sssp.cpp(1483,4)
+LOOP BEGIN at sssp.cpp(780,2) inlined into sssp.cpp(1485,4)
    remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ sssp.cpp(795,5) ]
 
-   LOOP BEGIN at sssp.cpp(780,2) inlined into sssp.cpp(1483,4)
+   LOOP BEGIN at sssp.cpp(780,2) inlined into sssp.cpp(1485,4)
       remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ sssp.cpp(795,5) ]
 
-      LOOP BEGIN at sssp.cpp(785,3) inlined into sssp.cpp(1483,4)
+      LOOP BEGIN at sssp.cpp(785,3) inlined into sssp.cpp(1485,4)
          remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ sssp.cpp(795,5) ]
 
-         LOOP BEGIN at sssp.cpp(797,23) inlined into sssp.cpp(1483,4)
+         LOOP BEGIN at sssp.cpp(797,23) inlined into sssp.cpp(1485,4)
             remark #15529: loop was not vectorized: volatile assignment was not vectorized. Try using non-volatile assignment.   [ sssp.cpp(798,68) ]
          LOOP END
       LOOP END
