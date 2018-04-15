@@ -174,7 +174,7 @@ inline void bfs_kernel_dense(
 	unsigned remainder = size_buffer % NUM_P_INT;
 	unsigned bound_edge_i = size_buffer - remainder;
 	for (unsigned edge_i = 0; edge_i < bound_edge_i; edge_i += NUM_P_INT) {
-		bot_simd_util.record(NUM_P_INT, NUM_P_INT);
+		//bot_simd_util.record(NUM_P_INT, NUM_P_INT);
 		__m512i head_v = _mm512_loadu_si512(heads_buffer + edge_i);
 		__m512i active_flag_v = _mm512_i32gather_epi32(head_v, h_graph_mask, sizeof(int));
 		__mmask16 is_active_m = _mm512_test_epi32_mask(active_flag_v, _mm512_set1_epi32(-1));
@@ -200,7 +200,7 @@ inline void bfs_kernel_dense(
 	}
 
 	if (remainder) {
-		bot_simd_util.record(0, remainder);
+		//bot_simd_util.record(0, remainder);
 		unsigned short in_range_m_t = (unsigned short) 0xFFFF >> (NUM_P_INT - remainder);
 		__mmask16 in_range_m = (__mmask16) in_range_m_t;
 		__m512i head_v = _mm512_mask_loadu_epi32(_mm512_undefined_epi32(), in_range_m, heads_buffer + bound_edge_i);
@@ -820,7 +820,7 @@ void graph_prepare(
 	//unsigned *frontier = (unsigned *) _mm_malloc(sizeof(unsigned) * frontier_size, ALIGNED_BYTES);
 	//frontier[0] = source;
 	//double last_time = omp_get_wtime();
-	//double start_time = omp_get_wtime();
+	double start_time = omp_get_wtime();
 	//unsigned *new_frontier = BFS_sparse(
 	//							frontier,
 	//							graph_vertices,
@@ -930,8 +930,8 @@ void graph_prepare(
 		//printf("frontier_size: %u\n", frontier_size);//test
 	}
 	double end_time = omp_get_wtime();
-	//printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
-	bot_simd_util.print();
+	printf("%d %lf\n", NUM_THREADS, run_time = (end_time - start_time));
+	//bot_simd_util.print();
 	//print_time();//test
 	
 	//Store the result into a file
@@ -1147,7 +1147,8 @@ int main( int argc, char** argv)
 #ifndef ONEDEBUG
 		//sleep(10);
 #endif
-
+	for (NUM_THREADS = 64; NUM_THREADS <= 256; NUM_THREADS *= 2) {
+		for (int k = 0; k < 10; ++k) {
 	graph_prepare(
 			graph_vertices,
 			graph_edges,
@@ -1157,6 +1158,9 @@ int main( int argc, char** argv)
 			tile_offsets,
 			tile_sizes,
 			source);
+		}
+	}
+
 
 	// cleanup memory
 	free( graph_heads);
