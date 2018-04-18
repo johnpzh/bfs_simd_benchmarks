@@ -121,7 +121,7 @@ inline void kernel_pageRank(
 	unsigned remainder = size_buffer % NUM_P_INT;
 	unsigned bound_edge_i = size_buffer - remainder;
 	for (unsigned edge_i = 0; edge_i < bound_edge_i; edge_i += NUM_P_INT) {
-		bot_simd_util.record(NUM_P_INT, NUM_P_INT);
+		//bot_simd_util.record(NUM_P_INT, NUM_P_INT);
 		__m512i n1_v = _mm512_load_epi32(n1_buffer + edge_i);
 		__m512i n2_v = _mm512_load_epi32(n2_buffer + edge_i);
 
@@ -136,19 +136,25 @@ inline void kernel_pageRank(
 	}
 
 	if (remainder > 0) {
-		bot_simd_util.record(0, remainder);
-		__mmask16 in_range_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
-		__m512i n1_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, n1_buffer + bound_edge_i);
-		__m512i n2_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, n2_buffer + bound_edge_i);
+		//bot_simd_util.record(0, remainder);
+		//__mmask16 in_range_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
+		//__m512i n1_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, n1_buffer + bound_edge_i);
+		//__m512i n2_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, n2_buffer + bound_edge_i);
 
-		__m512 rank_v = _mm512_mask_i32gather_ps(_mm512_undefined_ps(), in_range_m, n1_v, rank, sizeof(float));
-		__m512i graph_degrees_vi = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(1), in_range_m, n1_v, graph_degrees, sizeof(int));
-		__m512 graph_degrees_v = _mm512_cvtepi32_ps(graph_degrees_vi);
-		__m512 tmp_sum = _mm512_mask_div_ps(_mm512_set1_ps(0), in_range_m, rank_v, graph_degrees_v);
-		scan_for_gather_add_scatter_conflict_safe_ps(tmp_sum, n2_v);
-		__m512 sum_n2_v = _mm512_mask_i32gather_ps(_mm512_undefined_ps(), in_range_m, n2_v, sum, sizeof(float));
-		tmp_sum = _mm512_mask_add_ps(_mm512_undefined_ps(), in_range_m, tmp_sum, sum_n2_v);
-		_mm512_mask_i32scatter_ps(sum, in_range_m, n2_v, tmp_sum, sizeof(float));
+		//__m512 rank_v = _mm512_mask_i32gather_ps(_mm512_undefined_ps(), in_range_m, n1_v, rank, sizeof(float));
+		//__m512i graph_degrees_vi = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(1), in_range_m, n1_v, graph_degrees, sizeof(int));
+		//__m512 graph_degrees_v = _mm512_cvtepi32_ps(graph_degrees_vi);
+		//__m512 tmp_sum = _mm512_mask_div_ps(_mm512_set1_ps(0), in_range_m, rank_v, graph_degrees_v);
+		//scan_for_gather_add_scatter_conflict_safe_ps(tmp_sum, n2_v);
+		//__m512 sum_n2_v = _mm512_mask_i32gather_ps(_mm512_undefined_ps(), in_range_m, n2_v, sum, sizeof(float));
+		//tmp_sum = _mm512_mask_add_ps(_mm512_undefined_ps(), in_range_m, tmp_sum, sum_n2_v);
+		//_mm512_mask_i32scatter_ps(sum, in_range_m, n2_v, tmp_sum, sizeof(float));
+
+		for (unsigned edge_i = bound_edge_i; edge_i < size_buffer; ++edge_i) {
+			unsigned n1 = n1_buffer[edge_i];
+			unsigned n2 = n2_buffer[edge_i];
+			sum[n2] += rank[n1] / graph_degrees[n1];
+		}
 	}
 }
 
@@ -329,7 +335,7 @@ void page_rank(\
 
 	double end_time = omp_get_wtime();
 	//printf("%u %lf\n", NUM_THREADS, end_time - start_time);
-	bot_simd_util.print();
+	//bot_simd_util.print();
 
 	_mm_free(n1_buffer);
 	_mm_free(n2_buffer);
@@ -362,9 +368,6 @@ inline void scheduler_no_buffer(
 			}
 			unsigned *heads_start = graph_heads + tile_offsets[tile_id];
 			unsigned *tails_start = graph_tails + tile_offsets[tile_id];
-			if (tile_id == 159740) {
-				printf("tile_id: %u\n", tile_id);//test
-			}
 			kernel_pageRank(
 					heads_start,
 					tails_start,
@@ -538,8 +541,8 @@ void page_rank_no_buffer(\
 	}
 
 	double end_time = omp_get_wtime();
-	//printf("%u %lf\n", NUM_THREADS, end_time - start_time);
-	bot_simd_util.print();
+	printf("%u %lf\n", NUM_THREADS, end_time - start_time);
+	//bot_simd_util.print();
 
 	//_mm_free(n1_buffer);
 	//_mm_free(n2_buffer);
@@ -667,17 +670,21 @@ void input(char filename[])
 		sum[i] = 0.0;
 	}
 
-	bot_simd_util.reset();
-	page_rank_no_buffer(\
-			graph_heads, \
-			graph_tails, \
-			graph_degrees, \
-			tile_sizes, \
-			rank, \
-			sum, \
-			tile_offsets, \
-			num_tiles, \
-			side_length);
+	//bot_simd_util.reset();
+	for (NUM_THREADS = 64; NUM_THREADS <= 256; NUM_THREADS *= 2) {
+		for (int k = 0; k < 10; ++k) {
+			page_rank_no_buffer(\
+					graph_heads, \
+					graph_tails, \
+					graph_degrees, \
+					tile_sizes, \
+					rank, \
+					sum, \
+					tile_offsets, \
+					num_tiles, \
+					side_length);
+		}
+	}
 
 	// Free memory
 	_mm_free(graph_heads);
