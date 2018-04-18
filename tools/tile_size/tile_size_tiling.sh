@@ -17,12 +17,12 @@ set -x
 #make untile=1
 #./page_rank $data_file 
 
-## COO tiling
-#cd /sciclone/home2/zpeng01/benchmarks/tools/coo_tiling
-##cd /home/zpeng/benchmarks/tools/coo_tiling
-#make clean
-#make $weighted
-#./page_rank $data_file $min_tile_size $max_tile_size
+# COO tiling
+cd /sciclone/home2/zpeng01/benchmarks/tools/coo_tiling
+#cd /home/zpeng/benchmarks/tools/coo_tiling
+make clean
+make $weighted
+./page_rank $data_file $min_tile_size $max_tile_size
 
 # Column-major
 cd /sciclone/home2/zpeng01/benchmarks/tools/column_major_tile

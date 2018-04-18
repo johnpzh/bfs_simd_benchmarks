@@ -1,6 +1,6 @@
 #!/usr/bin/bash
-if [[ $# -lt 4 ]]; then
-	echo "Usage: ./process.sh <command> <data_file> <min_tile_size> <max_tile_size>"
+if [[ $# -lt 5 ]]; then
+	echo "Usage: ./process.sh <command> <data_file> <min_tile_size> <max_tile_size> <stripe_length> [-w]"
 	exit
 fi
 
@@ -8,6 +8,8 @@ app=$1
 data_file=$2
 min_tile_size=$3
 max_tile_size=$4
+stripe_length=$5
+weighted=$6
 
 set -x
 
@@ -15,7 +17,7 @@ set -x
 output="output_$(date +%Y%m%d-%H%M%S).txt"
 :> $output
 for ((i = min_tile_size; i <= max_tile_size; i *= 2)); do
-	$app ${data_file} ${i} 1024 -w &>> $output
+	$app ${data_file} ${i} $stripe_length $weighted >> $output
 done
 
 # Twt
