@@ -200,31 +200,44 @@ inline void bfs_kernel_dense(
 	}
 
 	if (remainder) {
-		//bot_simd_util.record(0, remainder);
-		unsigned short in_range_m_t = (unsigned short) 0xFFFF >> (NUM_P_INT - remainder);
-		__mmask16 in_range_m = (__mmask16) in_range_m_t;
-		__m512i head_v = _mm512_mask_loadu_epi32(_mm512_undefined_epi32(), in_range_m, heads_buffer + bound_edge_i);
-		__m512i active_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_range_m, head_v, h_graph_mask, sizeof(int));
-		__mmask16 is_active_m = _mm512_test_epi32_mask(active_flag_v, _mm512_set1_epi32(-1));
-		if (!is_active_m) {
-			return;
+		for (unsigned edge_i = bound_edge_i; edge_i < size_buffer; ++edge_i) {
+			unsigned head = heads_buffer[edge_i];
+			if (0 == h_graph_mask[head]) {
+				continue;
+			}
+			unsigned tail = tails_buffer[edge_i];
+			if ((unsigned) -1 == h_graph_parents[tail]) {
+				h_cost[tail] = h_cost[head] + 1;
+				h_updating_graph_mask[tail] = 1;
+				is_updating_active_side[tail/TILE_WIDTH] = 1;
+				h_graph_parents[tail] = head;
+			}
 		}
-		__m512i tail_v = _mm512_mask_loadu_epi32(_mm512_undefined_epi32(), is_active_m, tails_buffer + bound_edge_i);
-		//__m512i visited_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(1), is_active_m, tail_v, h_graph_visited, sizeof(int));
-		//__mmask16 not_visited_m = _mm512_testn_epi32_mask(visited_flag_v, _mm512_set1_epi32(1));
-		__m512i visited_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(1), is_active_m, tail_v, h_graph_parents, sizeof(int));
-		__mmask16 not_visited_m = _mm512_cmpeq_epi32_mask(visited_flag_v, _mm512_set1_epi32(-1));
-		if (!not_visited_m) {
-			return;
-		}
-		__m512i cost_head_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), not_visited_m, head_v, h_cost, sizeof(int));
-		__m512i cost_tail_v = _mm512_mask_add_epi32(_mm512_undefined_epi32(), not_visited_m, cost_head_v, _mm512_set1_epi32(1));
-		_mm512_mask_i32scatter_epi32(h_cost, not_visited_m, tail_v, cost_tail_v, sizeof(int));
-		_mm512_mask_i32scatter_epi32(h_updating_graph_mask, not_visited_m, tail_v, _mm512_set1_epi32(1), sizeof(int));
-		__m512i TILE_WIDTH_v = _mm512_set1_epi32(TILE_WIDTH);
-		__m512i side_id_v = _mm512_div_epi32(tail_v, TILE_WIDTH_v);
-		_mm512_mask_i32scatter_epi32(is_updating_active_side, not_visited_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
-		_mm512_mask_i32scatter_epi32(h_graph_parents, not_visited_m, tail_v, head_v, sizeof(unsigned));
+		////bot_simd_util.record(0, remainder);
+		//unsigned short in_range_m_t = (unsigned short) 0xFFFF >> (NUM_P_INT - remainder);
+		//__mmask16 in_range_m = (__mmask16) in_range_m_t;
+		//__m512i head_v = _mm512_mask_loadu_epi32(_mm512_undefined_epi32(), in_range_m, heads_buffer + bound_edge_i);
+		//__m512i active_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(0), in_range_m, head_v, h_graph_mask, sizeof(int));
+		//__mmask16 is_active_m = _mm512_test_epi32_mask(active_flag_v, _mm512_set1_epi32(-1));
+		//if (!is_active_m) {
+		//	return;
+		//}
+		//__m512i tail_v = _mm512_mask_loadu_epi32(_mm512_undefined_epi32(), is_active_m, tails_buffer + bound_edge_i);
+		////__m512i visited_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(1), is_active_m, tail_v, h_graph_visited, sizeof(int));
+		////__mmask16 not_visited_m = _mm512_testn_epi32_mask(visited_flag_v, _mm512_set1_epi32(1));
+		//__m512i visited_flag_v = _mm512_mask_i32gather_epi32(_mm512_set1_epi32(1), is_active_m, tail_v, h_graph_parents, sizeof(int));
+		//__mmask16 not_visited_m = _mm512_cmpeq_epi32_mask(visited_flag_v, _mm512_set1_epi32(-1));
+		//if (!not_visited_m) {
+		//	return;
+		//}
+		//__m512i cost_head_v = _mm512_mask_i32gather_epi32(_mm512_undefined_epi32(), not_visited_m, head_v, h_cost, sizeof(int));
+		//__m512i cost_tail_v = _mm512_mask_add_epi32(_mm512_undefined_epi32(), not_visited_m, cost_head_v, _mm512_set1_epi32(1));
+		//_mm512_mask_i32scatter_epi32(h_cost, not_visited_m, tail_v, cost_tail_v, sizeof(int));
+		//_mm512_mask_i32scatter_epi32(h_updating_graph_mask, not_visited_m, tail_v, _mm512_set1_epi32(1), sizeof(int));
+		//__m512i TILE_WIDTH_v = _mm512_set1_epi32(TILE_WIDTH);
+		//__m512i side_id_v = _mm512_div_epi32(tail_v, TILE_WIDTH_v);
+		//_mm512_mask_i32scatter_epi32(is_updating_active_side, not_visited_m, side_id_v, _mm512_set1_epi32(1), sizeof(int));
+		//_mm512_mask_i32scatter_epi32(h_graph_parents, not_visited_m, tail_v, head_v, sizeof(unsigned));
 	}
 }
 inline void scheduler_dense(
@@ -934,7 +947,33 @@ void graph_prepare(
 	//bot_simd_util.print();
 	//print_time();//test
 	
-	//Store the result into a file
+//	//Store the result into a file
+//	//test
+//	// store in file
+//
+//	unsigned num_files = 64;
+//	unsigned num_lines = NNODES / num_files;
+//#pragma omp parallel for num_threads(num_files)
+//	for (unsigned tid = 0; tid < num_files; ++tid) {
+//		unsigned offset = tid * num_lines;
+//		string file_prefix = "path/path";
+//		string file_name = file_prefix + to_string(tid) + ".txt";
+//		FILE *fpo = fopen(file_name.c_str(), "w");
+//		if (!fpo) {
+//			fprintf(stderr, "Error: connot open file %s.\n", file_name.c_str());
+//			exit(1);
+//		}
+//		unsigned bound_i;
+//		if (num_files - 1 != tid) {
+//			bound_i = num_lines + offset;
+//		} else {
+//			bound_i = NNODES;
+//		}
+//		for (unsigned index = offset; index < bound_i; ++index) {
+//			fprintf(fpo, "%d) cost:%d\n", index, h_cost[index]);
+//		}
+//		fclose(fpo);
+//	}
 
 	//free(frontier);
 	free( h_graph_mask);
@@ -1160,7 +1199,6 @@ int main( int argc, char** argv)
 			source);
 		}
 	}
-
 
 	// cleanup memory
 	free( graph_heads);

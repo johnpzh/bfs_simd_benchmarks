@@ -137,7 +137,7 @@ inline void kernel_pageRank(\
 	unsigned remainder = size_buffer % NUM_P_INT;
 	unsigned bound_edge_i = size_buffer - remainder;
 	for (unsigned edge_i = 0; edge_i < bound_edge_i; edge_i += NUM_P_INT) {
-		bot_simd_util.record(NUM_P_INT, NUM_P_INT);
+		//bot_simd_util.record(NUM_P_INT, NUM_P_INT);
 		__m512i n1_v = _mm512_load_epi32(n1_buffer + edge_i);
 		__m512i n2_v = _mm512_load_epi32(n2_buffer + edge_i);
 
@@ -176,7 +176,7 @@ inline void kernel_pageRank(\
 	}
 
 	if (remainder > 0) {
-		bot_simd_util.record(0, remainder);
+		//bot_simd_util.record(0, remainder);
 		__mmask16 in_range_m = (__mmask16) ((unsigned short) 0xFFFF >> (NUM_P_INT - remainder));
 		__m512i n1_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, n1_buffer + bound_edge_i);
 		__m512i n2_v = _mm512_mask_load_epi32(_mm512_undefined_epi32(), in_range_m, n2_buffer + bound_edge_i);
@@ -446,10 +446,10 @@ void page_rank(\
 
 	double end_time = omp_get_wtime();
 	double run_time = 0;
-	//printf("%u %lf\n", NUM_THREADS, run_time = end_time - start_time);
+	printf("%u %lf\n", NUM_THREADS, run_time = end_time - start_time);
 	//bot_best_perform.record_best_performance(run_time, NUM_THREADS);
 	// SIMD Utilization
-	bot_simd_util.print();
+	//bot_simd_util.print();
 	_mm_free(n1_buffer);
 	_mm_free(n2_buffer);
 
@@ -590,17 +590,21 @@ void input(char filename[])
 		// Cache miss
 		//bot_miss_rate.measure_start();
 		// SIMD Utilization
-		bot_simd_util.reset();
-		page_rank(
-				graph_heads, 
-				graph_tails, 
-				graph_degrees, 
-				tile_sizes, 
-				rank, 
-				sum, 
-				tile_offsets, 
-				num_tiles, 
-				side_length);
+		//bot_simd_util.reset();
+	for (NUM_THREADS = 64; NUM_THREADS <= 256; NUM_THREADS *= 2) {
+		for (int k = 0; k < 10; ++k) {
+			page_rank(
+					graph_heads, 
+					graph_tails, 
+					graph_degrees, 
+					tile_sizes, 
+					rank, 
+					sum, 
+					tile_offsets, 
+					num_tiles, 
+					side_length);
+		}
+	}
 		// Cache Miss
 		//bot_miss_rate.measure_stop();
 		//bot_miss_rate.print(ROW_STEP);
