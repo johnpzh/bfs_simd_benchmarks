@@ -35,6 +35,7 @@ ranks.txt
 *ranks.txt
 output*.txt
 *output.txt
+*output*txt*
 *distances.txt
 
 # Compiled source #
