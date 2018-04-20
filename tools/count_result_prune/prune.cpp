@@ -12,7 +12,11 @@ void prune(char *filename, unsigned long bin)
 		exit(1);
 	}
 
-	std::string output_name = std::string(filename) + "_pruned";
+	std::string name_str(filename);
+	std::string output_name = name_str.substr(0, name_str.rfind(".")) + "_pruned" + ".txt";
+
+	//printf("output_name: %s\n", output_name.c_str()); exit(1);//test
+
 	FILE *fout = fopen(output_name.c_str(), "w");
 	if (NULL == fout) {
 		fprintf(stderr, "Error: cannot open file %s.\n", output_name.c_str());
