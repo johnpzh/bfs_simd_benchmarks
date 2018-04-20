@@ -573,9 +573,10 @@ void graph_prepare(
 		unsigned *graph_degrees,
 		unsigned *tile_offsets,
 		unsigned *tile_sizes,
-		const unsigned &source)
+		const unsigned &source,
+		int max_hop)
 {
-	int max_hop = 6;
+	//int max_hop = 3;
 	int hop = 0;
 
 	// Set up
@@ -1126,14 +1127,18 @@ void graph_input(
 ///////////////////////////////////////////////////////////////////////////////
 int main( int argc, char** argv) 
 {
+	int max_hop;
+	int max_count;
 	char *input_f;
 	
-	if(argc > 3){
+	if(argc > 5){
 		input_f = argv[1];
 		TILE_WIDTH = strtoul(argv[2], NULL, 0);
 		ROW_STEP = strtoul(argv[3], NULL, 0);
+		max_hop = strtoul(argv[4], NULL, 0);
+		max_count = strtoul(argv[5], NULL, 0);
 	} else {
-		puts("Usage: ./bfs <data> <tile_size> <stripe_length>");
+		puts("Usage: ./bfs <data> <tile_size> <stripe_length> <max_hop> <max_count>");
 		exit(1);
 	}
 
@@ -1159,7 +1164,7 @@ int main( int argc, char** argv)
 
 	bot_access_counter.init(NNODES);
 	NUM_THREADS = 64;
-	for (unsigned source = 0; source < 1; source += NNODES/10000) {
+	for (unsigned source = 0; source < NNODES; source += NNODES/max_count) {
 		//unsigned source = 0;
 		// BFS
 		//T_RATIO = 100;
@@ -1175,7 +1180,8 @@ int main( int argc, char** argv)
 				graph_degrees,
 				tile_offsets,
 				tile_sizes,
-				source);
+				source,
+				max_hop);
 
 	}
 	bot_access_counter.print();
