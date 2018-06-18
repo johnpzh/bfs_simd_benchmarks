@@ -980,8 +980,8 @@ void graph_input(
 	/////////////////////////////////////////////////////////////////////
 	//string prefix = string(input_f) + "_untiled";
 	//string prefix = string(input_f) + "_coo-tiled-" + to_string(TILE_WIDTH);
-	string file_name_pre = string(input_f) + "_reorder";
-	//string file_name_pre = string(input_f);
+	//string file_name_pre = string(input_f) + "_reorder";
+	string file_name_pre = string(input_f);
 	string prefix = file_name_pre + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH);
 	//string prefix = string(input_f) + "_col-2-coo-tiled-" + to_string(TILE_WIDTH);
 	string fname = prefix + "-0";
@@ -1177,7 +1177,7 @@ int main( int argc, char** argv)
 		//sleep(10);
 #endif
 		// Re-initializing
-		for (unsigned k = 0; k < 10; ++k) {
+		for (unsigned k = 0; k < 1; ++k) {
 
 		graph_prepare(
 				graph_vertices,

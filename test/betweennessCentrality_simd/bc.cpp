@@ -82,9 +82,11 @@ void input(
 		unsigned *&tile_sizes_reverse)
 {
 	//printf("data: %s\n", filename);
-	string file_name_pre = string(filename) + "_reorder";
+	string file_name_pre = string(filename);
+	//string file_name_pre = string(filename) + "_reorder";
 	string prefix = file_name_pre + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH);
-	string prefix_reverse = string(filename) + "_reorder" + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH) + "_reverse";
+	string prefix_reverse = string(filename) + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH) + "_reverse";
+	//string prefix_reverse = string(filename) + "_reorder" + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH) + "_reverse";
 	string fname = prefix + "-0";
 	FILE *fin = fopen(fname.c_str(), "r");
 	if (!fin) {

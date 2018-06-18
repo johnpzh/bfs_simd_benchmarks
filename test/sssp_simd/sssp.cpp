@@ -51,7 +51,8 @@ void input_weighted(
 		unsigned *&graph_degrees)
 {
 	//string prefix = string(filename) + "_untiled";
-	string file_name_pre = string(filename) + "_weighted_reorder";
+	string file_name_pre = string(filename) + "_weighted";
+	//string file_name_pre = string(filename) + "_weighted_reorder";
 	string prefix = file_name_pre + "_col-" + to_string(ROW_STEP) + "-coo-tiled-" + to_string(TILE_WIDTH);
 	//string prefix = string(filename) + "_coo-tiled-" + to_string(TILE_WIDTH);
 	string fname = prefix + "-0";
