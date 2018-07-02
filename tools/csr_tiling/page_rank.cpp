@@ -556,6 +556,7 @@ void input_untiled(char filename[]) {
 			printf("time: %lf, got %u 10M edges...\n", now - start, i/10000000);//test
 		}
 	}
+	printf("Just read origin data.\n");
 	unsigned edge_id = 0;
 	for (unsigned i = 0; i < nnodes; ++i) {
 		for (unsigned j = 0; j < n1sv[i].size(); ++j) {
