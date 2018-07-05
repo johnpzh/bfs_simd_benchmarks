@@ -185,6 +185,7 @@ void input(char filename[])
 	for (int cz = 0; cz < 3; ++cz) {
 	for (unsigned i = 6; i < bound_i; ++i) {
 		NUM_THREADS = (unsigned) pow(2, i);
+		bot_best_perform.reset();
 		for (int k = 0; k < 3; ++k) {
 #pragma omp parallel for num_threads(64)
 		for (unsigned i = 0; i < nnodes; i++) {
@@ -208,9 +209,9 @@ void input(char filename[])
 		now = omp_get_wtime();
 		fprintf(time_out, "Thread %u end: %lf\n", NUM_THREADS, now - start);
 		}
+		bot_best_perform.print_average(NUM_THREADS);
 	}
 	}
-	bot_best_perform.print();
 	fclose(time_out);
 
 #ifdef ONEDEBUG
@@ -352,7 +353,7 @@ void page_rank(\
 	double end_time = omp_get_wtime();
 	double rt;
 	printf("%u %lf\n", NUM_THREADS, rt = end_time - start_time);
-	bot_best_perform.record_best_performance(rt, NUM_THREADS);
+	bot_best_perform.record(rt, NUM_THREADS);
 
 }
 void print(float *rank) 
