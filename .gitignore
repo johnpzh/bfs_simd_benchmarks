@@ -26,6 +26,10 @@ path/
 0path/
 vtune/
 report*/
+trash/
+ligra/
+galois/
+running/
 *.txt
 *path.txt
 *result.txt
