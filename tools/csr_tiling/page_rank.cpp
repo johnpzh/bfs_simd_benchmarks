@@ -611,8 +611,10 @@ int main(int argc, char *argv[]) {
 		filename = argv[1];
 		//TILE_WIDTH = strtoul(argv[2], NULL, 0);
 	} else {
-		filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec";
+		//filename = "/home/zpeng/benchmarks/data/pokec/soc-pokec";
 		//TILE_WIDTH = 1024;
+		fprintf(stderr, "Usage: ./page_rank <input_file>\n");
+		exit(EXIT_FAILURE);
 	}
 #ifdef WEIGHTED
 	input_weighted(filename);

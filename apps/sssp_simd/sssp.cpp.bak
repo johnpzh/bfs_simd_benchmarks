@@ -1417,7 +1417,6 @@ int main(int argc, char *argv[])
 		}
 	}
 	// End Process the options
-	setvbuf(stdout, NULL, _IONBF, 0);
 	
 	// Input
 	unsigned *graph_heads;
@@ -1484,7 +1483,7 @@ int main(int argc, char *argv[])
 		//memset(is_updating_active_side, 0, sizeof(int) * SIDE_LENGTH);
 
 		//sleep(10);
-		for (int k = 0; k < 1; ++k) {
+		for (int k = 0; k < 10; ++k) {
 		if (is_weighted_graph) {
 			sssp_weighted(
 				graph_heads, 
