@@ -64,7 +64,7 @@ For more details please refer to the paper
 10.  Then we can run the program.
      1. `cd BENCHMARK/test/bfs_serial`  
 	 2. Compile and link: `make`
-	 3.  Run: `./bfs DATAFOLDER/out.xxx 1024 16 (-w)`
+	 3.  Run: `./bfs DATAFOLDER/out.xxx 1024 16 [-w]`
 	 4.  `# bfs is the benchmark, it could be pagerank or any others.`
 	 5.  `# 1024 is tile width, 16 is stripe length, and they should consist with those which are generated in previous steps`
     
